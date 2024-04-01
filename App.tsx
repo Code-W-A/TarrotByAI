@@ -48,6 +48,9 @@ import * as Font from "expo-font";
 import { NumberProvider } from "./src/context/NumberContext";
 
 import { usePushNotifications } from "./src/hooks/usePushNotifications";
+
+//---ADS---
+
 import mobileAds from "react-native-google-mobile-ads";
 
 mobileAds()

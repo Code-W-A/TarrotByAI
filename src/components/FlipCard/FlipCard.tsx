@@ -23,6 +23,8 @@ import {
 } from "../../utils/firestoreUtils";
 import { authentication } from "../../../firebase";
 
+
+//---ADS---
 import { InterstitialAd, AdEventType, TestIds } from 'react-native-google-mobile-ads';
 
 // Înlocuiți cu ID-ul real al unității de anunțuri pentru producție
@@ -51,7 +53,7 @@ const FlipCard = ({
 
     const [interstitialLoaded, setInterstitialLoaded] = useState(false);
 
-
+//---ADS---
     useEffect(() => {
       // Ascultător pentru evenimentul de încărcare a interstitialului
       const loadListener = interstitialAd.addAdEventListener(AdEventType.LOADED, () => {
@@ -98,6 +100,7 @@ const FlipCard = ({
       // console.log(item.image.finalUri);
       
     if (isFuture && interstitialLoaded) {
+      //---ADS---
           await interstitialAd.show().then(() => {
             navigation.navigate(screenName.FutureReading, {
               item,
@@ -106,6 +109,7 @@ const FlipCard = ({
       } else {
         console.log("here...")
         if(isManualNav){
+          //---ADS---
           await interstitialAd.show().then(async () => {
                   const cardNameNormalized = normalizeString(item.info.ro.nume);
         const categoryNameNormalized = normalizeString(conditieCategorie);

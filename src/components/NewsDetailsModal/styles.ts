@@ -6,10 +6,10 @@ export default StyleSheet.create({
     flex: 1,
   },
   contentContainer: {
-    paddingBottom: 80,
+    paddingBottom: 90,
   },
   image: {
-    height: 300,
+    height: 250,
     width: "100%",
     borderBottomLeftRadius: 50,
     borderBottomRightRadius: 50,

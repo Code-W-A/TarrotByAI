@@ -25,9 +25,12 @@ import { useLanguage } from '../../context/LanguageContext';
 import { handleQueryFirestoreGeneral } from '../../utils/firestoreUtils';
 import { filterArticlesBeforeCurrentTime } from '../../utils/commonUtils';
 
+//---ADS---
 import { InterstitialAd, AdEventType, TestIds } from 'react-native-google-mobile-ads';
 
 // Înlocuiți cu ID-ul real al unității de anunțuri pentru producție
+
+//---ADS---
 const adUnitId = __DEV__ ? TestIds.INTERSTITIAL : 'ca-app-pub-9577714849380446/7080054250';
 const interstitialAd = InterstitialAd.createForAdRequest(adUnitId);
 
@@ -58,7 +61,8 @@ const News = () => {
     }
 
     const documentSnapshots = await getDocs(q);
-    const moreArticles = documentSnapshots.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    let moreArticles = documentSnapshots.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    moreArticles = filterArticlesBeforeCurrentTime(moreArticles);
     setArticles(refresh ? moreArticles : [...articles, ...moreArticles]);
     setLastVisible(documentSnapshots.docs[documentSnapshots.docs.length - 1]);
     setIsLoading(false);
@@ -127,6 +131,7 @@ const News = () => {
   }, [selectedCategory]);
 
   const openModalWithArticle = async (article) => {
+    //---ADS---
     await interstitialAd.show();
     setTimeout(() => {
       setSelectedArticle(article);
@@ -215,6 +220,7 @@ const News = () => {
     }
   };
 
+  //---ADS---
   useEffect(() => {
     // Ascultător pentru evenimentul de încărcare a interstitialului
     const loadListener = interstitialAd.addAdEventListener(AdEventType.LOADED, () => {

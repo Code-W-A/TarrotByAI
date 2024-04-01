@@ -28,18 +28,22 @@ import i18n from "../../../i18n";
 import { useLanguage } from "../../context/LanguageContext";
 import { useApiData } from "../../context/ApiContext";
 import { colors } from "../../utils/colors";
+
   //---ADS---
 import {
   InterstitialAd,
   TestIds,
   AdEventType,
 } from "react-native-google-mobile-ads";
+
 import { usePushNotifications } from "../../hooks/usePushNotifications";
 import { useAuth } from "../../context/AuthContext";
 import { handleQueryRandom, handleQueryToken, handleUploadFirestore } from "../../utils/firestoreUtils";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import RattingDialog from "../../components/RattingDialog/RattingDialog";
 
+
+//---ADS---
 const adUnitId = __DEV__
   ? TestIds.INTERSTITIAL
   : "ca-app-pub-9577714849380446/7080054250";
@@ -174,6 +178,7 @@ if(expoPushToken){
   // Restul logicii și a codului specific aplicației...
 
   const screenHeight = Dimensions.get("window").height;
+
   //---ADS---
   useEffect(() => {
     const loadListener = interstitial.addAdEventListener(

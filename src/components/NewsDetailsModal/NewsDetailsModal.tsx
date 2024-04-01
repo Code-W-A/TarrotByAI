@@ -35,8 +35,8 @@ export const NewsDetailsModal: React.FC<{
   onClose: () => void;
   saveArticle: Function;
 }> = ({ visible, article, articleIndex, onClose, saveArticle }) => {
-  const backgroundColor = useColorScheme() === "dark" ? "#000" : "#fff";
-  const color = useColorScheme() === "dark" ? "#fff" : "#000";
+  const backgroundColor = "#fff";
+  const color =  "#000";
   const contentColor = useColorScheme() === "dark" ? "#bbb" : "#444";
   const readMoreBgColor = useColorScheme() === "dark" ? "#222" : "#ddd";
   const [isSaved, setIsSaved] = useState(false);
@@ -179,7 +179,7 @@ export const NewsDetailsModal: React.FC<{
             }}
             resizeMode={"cover"}
           />
-
+<View style={{height:"auto"}}>
           <Text style={[styles.title, { color }]}>
             {language === "hi"
               ? article?.info?.hu.nume
@@ -187,6 +187,7 @@ export const NewsDetailsModal: React.FC<{
                 ? article?.info?.ru.nume
                 : article?.info[language].nume}
           </Text>
+          </View>
           {/* <Text style={[styles.content, { color: contentColor }]}>
             {article?.info?.ro.content}
           </Text> */}
