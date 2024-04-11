@@ -101,6 +101,9 @@ import MotivationalQuotes from "./src/pages/MotivationalQuotesComponent/Motivati
 import LuckyNumber from "./src/pages/LuckyNumberComponent/LuckyNumberComponent";
 import News from "./src/pages/blog/News";
 import SavedNews from "./src/pages/blog/SavedNews";
+import CeSimte from "./src/pages/doctors/CeSimte";
+import CeGandeste from "./src/pages/doctors/CeGandeste";
+import CarteaTa from "./src/pages/doctors/CarteaTa";
 
 const Stack = createNativeStackNavigator();
 
@@ -203,6 +206,9 @@ const HomeNavigation = (props: NavigationProps) => {
           name={screenName.PersonalReadingDashboard}
           component={PersonalReadingDashboard}
         />
+        <Stack.Screen name={"CeSimte"} component={CeSimte} />
+        <Stack.Screen name={"CeGandeste"} component={CeGandeste} />
+        <Stack.Screen name={"CarteaTa"} component={CarteaTa} />
 
         <Stack.Screen
           name={screenName.historyTarrot}
@@ -223,8 +229,8 @@ const RootNavigation = () => {
   const screen = isGuestUser
     ? screenName.ClinicDashBoard
     : currentUser
-      ? screenName.SignInScreenClinic
-      : screenName.OnboardingScreen;
+    ? screenName.SignInScreenClinic
+    : screenName.OnboardingScreen;
 
   return <HomeNavigation initialRouteName={screen} />;
 };

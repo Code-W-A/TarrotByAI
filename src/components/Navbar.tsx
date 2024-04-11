@@ -83,6 +83,9 @@ const NavBarBottom = () => {
     if (
       currentScreen === "Dashboard2" ||
       currentScreen === "PersonalReadingDashboard" ||
+      currentScreen === "CeSimte" ||
+      currentScreen === "CarteaTa" ||
+      currentScreen === "CeGandeste" ||
       currentScreen === "FutureReadingDashboard"
     ) {
       setSelected(1);
@@ -104,6 +107,18 @@ const NavBarBottom = () => {
         }
         if (currentScreen === "PersonalReadingDashboard") {
           shuffleCartiPersonalizate();
+          updateNumber(1);
+          setSendToHistory([]);
+        } else if (currentScreen === "CeSimte") {
+          shuffleCartiPersonalizate();
+          updateNumber(1);
+          setSendToHistory([]);
+        } else if (currentScreen === "FutureReadingDashboard") {
+          shuffleCartiViitor();
+          updateNumber(1);
+          setSendToHistory([]);
+        } else if (currentScreen === "FutureReadingDashboard") {
+          shuffleCartiViitor();
           updateNumber(1);
           setSendToHistory([]);
         } else if (currentScreen === "FutureReadingDashboard") {
@@ -183,7 +198,7 @@ const NavBarBottom = () => {
           styles.navbar,
           {
             backgroundColor:
-              selected === 1 || selected === 3
+              selected === 1 || selected === 3 || selected === 0
                 ? "rgba(252, 246, 198, 0.8)"
                 : "transparent",
           },

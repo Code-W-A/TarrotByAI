@@ -238,3 +238,29 @@ export const handlePaginateFirestore = (location) => {
   const citiesRef = collection(db, "Users", auth.currentUser.uid, location);
   const q = query(citiesRef, startAt(1000000));
 };
+
+export const updateArticleWithTimestamp = async (articleId, firstUploadDate, firstUploadTime) => {
+  console.log("firstUploadDate...", firstUploadDate)
+  console.log("firstUploadDate...", typeof firstUploadDate)
+  console.log("firstUploadTime...", firstUploadTime)
+  console.log("firstUploadTime...", typeof firstUploadTime)
+  console.log("articleId...", articleId)
+  console.log("articleId...", typeof articleId)
+  // Parsează data și ora într-un obiect Date
+  const dateParts = firstUploadDate.split('-');
+  const timeParts = firstUploadTime.split(':');
+  const date = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1]);
+
+  // // Obține referința documentului
+  const articleRef = doc(db, 'BlogArticole', articleId);
+
+  try {
+    // Actualizează documentul cu un nou câmp care stochează data și ora ca un Timestamp Firebase
+    await updateDoc(articleRef, {
+      firstUploadTimestamp: date // Firebase va converti automat obiectele Date în Timestamp
+    });
+    console.log("Document successfully updated with timestamp!");
+  } catch (error) {
+    console.error("Error updating document: ", error);
+  }
+};

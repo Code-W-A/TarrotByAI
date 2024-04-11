@@ -22,7 +22,7 @@ import { SearchInput } from '../../components/SearchInput/SearchInput';
 import { NewsTags } from '../../components/NewsTags/NewsTags';
 import { db } from '../../../firebase';
 import { useLanguage } from '../../context/LanguageContext';
-import { handleQueryFirestoreGeneral } from '../../utils/firestoreUtils';
+import { handleQueryFirestoreGeneral, updateArticleWithTimestamp } from '../../utils/firestoreUtils';
 import { filterArticlesBeforeCurrentTime } from '../../utils/commonUtils';
 
 //---ADS---
@@ -54,14 +54,18 @@ const News = () => {
     console.log("Start fetch...")
     setIsLoading(true);
     let articlesRef = collection(db, 'BlogArticole');
-    let q = query(articlesRef, orderBy('firstUploadDate', 'desc'), orderBy('firstUploadtime', 'desc'), limit(PAGE_SIZE));
+    let q = query(articlesRef, orderBy('firstUploadTimestamp', 'desc'), limit(PAGE_SIZE));
 
     if (!refresh && lastVisible) {
-      q = query(articlesRef, orderBy('firstUploadDate', 'desc'), orderBy('firstUploadtime', 'desc'), startAfter(lastVisible), limit(PAGE_SIZE));
+      q = query(articlesRef, orderBy('firstUploadTimestamp', 'desc'), startAfter(lastVisible), limit(PAGE_SIZE));
     }
 
     const documentSnapshots = await getDocs(q);
     let moreArticles = documentSnapshots.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    // for (const article of moreArticles) {
+    //   await updateArticleWithTimestamp(article.documentId, article.firstUploadDate, article.firstUploadtime);
+    // }
+    // console.log("more articles...", moreArticles[0].firstUploadDate)
     moreArticles = filterArticlesBeforeCurrentTime(moreArticles);
     setArticles(refresh ? moreArticles : [...articles, ...moreArticles]);
     setLastVisible(documentSnapshots.docs[documentSnapshots.docs.length - 1]);
@@ -75,12 +79,12 @@ const News = () => {
       "categorie",
       selectedCategory
       );
-      console.log("articles data...query...", dataArt);
+      console.log("articles data...query...", dataArt[0]);
       console.log("query....2")
 
 
     let articlesData  = filterArticlesBeforeCurrentTime(dataArt)
-    console.log("Articole...aici...", articlesData)
+    console.log("Articole...aici...", articlesData[0].firstUploadDate)
 
 
     let articles = {};
@@ -106,6 +110,7 @@ const News = () => {
 
       // Returnarea datelor către componenta Next.js
       articles = articlesData
+      console.log("Articole...aici...", articles[0].firstUploadDate)
     } else {
       articles = articlesData
     }

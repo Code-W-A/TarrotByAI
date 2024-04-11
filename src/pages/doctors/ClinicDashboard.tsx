@@ -1,4 +1,10 @@
-import React, { Fragment, useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  Fragment,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   View,
   ScrollView,
@@ -29,7 +35,7 @@ import { useLanguage } from "../../context/LanguageContext";
 import { useApiData } from "../../context/ApiContext";
 import { colors } from "../../utils/colors";
 
-  //---ADS---
+//---ADS---
 import {
   InterstitialAd,
   TestIds,
@@ -38,10 +44,13 @@ import {
 
 import { usePushNotifications } from "../../hooks/usePushNotifications";
 import { useAuth } from "../../context/AuthContext";
-import { handleQueryRandom, handleQueryToken, handleUploadFirestore } from "../../utils/firestoreUtils";
+import {
+  handleQueryRandom,
+  handleQueryToken,
+  handleUploadFirestore,
+} from "../../utils/firestoreUtils";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import RattingDialog from "../../components/RattingDialog/RattingDialog";
-
 
 //---ADS---
 const adUnitId = __DEV__
@@ -63,29 +72,32 @@ const ClinicDashboard = () => {
   const { userData, currentUser, isGuestUser } = useAuth();
   const [visible, setVisible] = useState(false);
 
-  const {expoPushToken} = usePushNotifications()
+  const { expoPushToken } = usePushNotifications();
 
   useEffect(() => {
     const handleUploadToken = async () => {
       if (expoPushToken) {
         console.log("Expo Push Token.........: ", expoPushToken.data);
 
-          const timestamp = Date.now().toString(36);
-          const randomPart = Math.random().toString(36).substring(2, 8);
-          let uniqueId = timestamp + randomPart;
-          let tokenExists = await handleQueryToken("userTokens", expoPushToken.data);
-          // Logica pentru utilizatori autentificați
-          if (!tokenExists) {
-  
-            await handleUploadFirestore({ token: expoPushToken.data, language }, `userTokens/${uniqueId}`);
-          }
-  
+        const timestamp = Date.now().toString(36);
+        const randomPart = Math.random().toString(36).substring(2, 8);
+        let uniqueId = timestamp + randomPart;
+        let tokenExists = await handleQueryToken(
+          "userTokens",
+          expoPushToken.data
+        );
+        // Logica pentru utilizatori autentificați
+        if (!tokenExists) {
+          await handleUploadFirestore(
+            { token: expoPushToken.data, language },
+            `userTokens/${uniqueId}`
+          );
+        }
       }
     };
-if(expoPushToken){
-
-  handleUploadToken(); // Apelarea funcției
-}
+    if (expoPushToken) {
+      handleUploadToken(); // Apelarea funcției
+    }
   }, [expoPushToken, isGuestUser, userData]);
 
   const {
@@ -129,10 +141,21 @@ if(expoPushToken){
       text: i18n.translate("motivationalQuotes"),
       screen: screenName.motivationalQuotes,
     },
+    {
+      text: "Cartea ta",
+      screen: "CarteaTa",
+    },
+    {
+      text: "Ce gandeste",
+      screen: "CeGandeste",
+    },
+    {
+      text: "Ce simte",
+      screen: "CeSimte",
+    },
   ];
 
   useEffect(() => {
-  
     console.log("asdsa");
     console.log(zilnicCitateMotivationale);
     // console.log("asdsa");
@@ -148,9 +171,7 @@ if(expoPushToken){
 
       animateCard(0); // Începe animația pentru primul card
     }
-   
   }, []);
-
 
   const animateCard = (index) => {
     if (index < initialAnimations.length) {
@@ -218,21 +239,24 @@ if(expoPushToken){
   useFocusEffect(
     useCallback(() => {
       const manageVisibility = async () => {
-        const userRating = await AsyncStorage.getItem('userRating');
-        console.log("useRating...", userRating)
-        const entryCount = parseInt(await AsyncStorage.getItem('entryCount') || '0', 10);
-        await AsyncStorage.setItem('entryCount', (entryCount + 1).toString());
-    
+        const userRating = await AsyncStorage.getItem("userRating");
+        console.log("useRating...", userRating);
+        const entryCount = parseInt(
+          (await AsyncStorage.getItem("entryCount")) || "0",
+          10
+        );
+        await AsyncStorage.setItem("entryCount", (entryCount + 1).toString());
+
         // if ((entryCount + 1) % 5 === 0 && userRating === null) {
-        if ((entryCount + 1) % 5 === 0 ) {
-          console.log("true....")
+        if ((entryCount + 1) % 5 === 0) {
+          console.log("true....");
           setVisible(true);
         } else {
-          console.log("false....")
+          console.log("false....");
           setVisible(false);
         }
       };
-    
+
       manageVisibility();
     }, [])
   );
@@ -262,13 +286,15 @@ if(expoPushToken){
             }}
           >
             <GreetingBar />
-            <View
+            <ScrollView
               style={{
-                paddingTop: "23%",
-                display: "flex",
+                paddingTop: "3%",
+              }}
+              contentContainerStyle={{
+                flexGrow: 1,
                 justifyContent: "flex-start",
                 alignItems: "center",
-                minHeight: screenHeight,
+                paddingBottom: "23%",
               }}
             >
               <View style={styles.cardRow}>
@@ -276,13 +302,11 @@ if(expoPushToken){
                   renderCard(card, index, interstitial, loaded)
                 )}
               </View>
-            </View>
+            </ScrollView>
           </ImageBackground>
-          {
-        visible
-        &&
-      <RattingDialog setVisible={setVisible} visible={visible}/>
-      }
+          {visible && (
+            <RattingDialog setVisible={setVisible} visible={visible} />
+          )}
         </LinearGradient>
       </MainContainer>
     </Fragment>

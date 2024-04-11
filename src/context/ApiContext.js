@@ -215,7 +215,7 @@ export const ApiDataProvider = ({ children }) => {
       const shouldUpdateData = async () => {
         const accessCount = await updateAccessCount();
         console.log("accessCount....", accessCount);
-        return accessCount % 15 === 0;
+        return accessCount % 25 === 0;
       };
 
       const shouldRefreshData = await shouldUpdateData();
