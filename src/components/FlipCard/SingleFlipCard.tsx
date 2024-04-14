@@ -103,6 +103,7 @@ const SingleFlipCard = ({
 
   // Funcție pentru a naviga către ecranul PersonalizedReading cu parametrul item
   const navigateToPersonalizedReading = async (isManualNav?) => {
+    console.log("start....");
     try {
       // console.log(item.image.finalUri);
 
@@ -277,9 +278,9 @@ const SingleFlipCard = ({
         useNativeDriver: true,
       }).start(() =>
         setTimeout(() => {
-          if (number === 1 && currentNumber !== 8) {
-            navigateToPersonalizedReading();
-          }
+          // if (number === 1 && currentNumber !== 8) {
+          navigateToPersonalizedReading();
+          // }
         }, 500)
       );
     } else {
