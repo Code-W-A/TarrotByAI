@@ -1,5 +1,10 @@
 export const langObj = {
   en: {
+    ViitorApropiat: "Near Future",
+    EnergiaDinRelație: "Relationship energy",
+    carteaTa: "your card",
+    ceSimte: "What it feels",
+    ceGandeste: "What is he thinking",
     feedbackPrompt: "Tell us what we can improve",
     descriereRate: "Your feedback helps us grow together!",
     rateApp: "Rate Cristina Zurba's App",
@@ -86,6 +91,12 @@ export const langObj = {
     clinicLoginRedirect: "Continue",
   },
   ro: {
+    ViitorApropiat: "Viitor apropiat",
+
+    EnergiaDinRelație: "Energia din relație",
+    carteaTa: "cartea ta",
+    ceSimte: "ce simte",
+    ceGandeste: "ce gândește",
     feedbackPrompt: "Spuneți-ne ce putem îmbunătăți",
     descriereRate: "Feedback-ul tău ne ajută să creștem împreună!",
     rateApp: "Evaluează aplicația Cristina Zurba",
@@ -178,6 +189,12 @@ export const langObj = {
     clinicLoginRedirect: "Continuă",
   },
   es: {
+    ViitorApropiat: "Futuro cercano",
+
+    EnergiaDinRelație: "Energía de la relación",
+    carteaTa: "tu carta",
+    ceSimte: "lo que siente",
+    ceGandeste: "lo que piensa",
     feedbackPrompt: "Dinos qué podemos mejorar",
     descriereRate: "¡Tu opinión nos ayuda a crecer juntos!",
     rateApp: "Califica la aplicación de Cristina Zurba",
@@ -270,6 +287,12 @@ export const langObj = {
     clinicLoginRedirect: "Continuar",
   },
   it: {
+    ViitorApropiat: "Futuro prossimo",
+
+    EnergiaDinRelație: "Energia della relazione",
+    carteaTa: "la tua carta",
+    ceSimte: "cosa sente",
+    ceGandeste: "cosa pensa",
     feedbackPrompt: "Dicci cosa possiamo migliorare",
     descriereRate: "Il tuo feedback ci aiuta a crescere insieme!",
     rateApp: "Valuta l'app di Cristina Zurba",
@@ -359,6 +382,12 @@ export const langObj = {
     clinicLoginRedirect: "Continua",
   },
   pl: {
+    ViitorApropiat: "Bliska przyszłość",
+
+    EnergiaDinRelație: "Energia związku",
+    carteaTa: "twoja karta",
+    ceSimte: "co czuje",
+    ceGandeste: "co myśli",
     feedbackPrompt: "Powiedz nam, co możemy poprawić",
     descriereRate: "Twoja opinia pomaga nam razem rosnąć!",
     rateApp: "Oceń aplikację Cristina Zurba",
@@ -448,6 +477,12 @@ export const langObj = {
     clinicLoginRedirect: "Kontynuuj",
   },
   bg: {
+    ViitorApropiat: "Близко бъдеще",
+    EnergiaDinRelație: "Енергия на връзката",
+
+    carteaTa: "вашата карта",
+    ceSimte: "какво усеща",
+    ceGandeste: "какво мисли",
     feedbackPrompt: "Кажете ни какво можем да подобрим",
     descriereRate: "Вашите отзиви ни помагат да растем заедно!",
     rateApp: "Оценете приложението на Кристина Зурба",
@@ -535,6 +570,13 @@ export const langObj = {
     clinicLoginRedirect: "Продължете",
   },
   cs: {
+    ViitorApropiat: "Blízká budoucnost",
+
+    EnergiaDinRelație: "Energie vztahu",
+
+    carteaTa: "tvá karta",
+    ceSimte: "co cítí",
+    ceGandeste: "co si myslí",
     feedbackPrompt: "Řekněte nám, co můžeme zlepšit",
     descriereRate: "Váš zpětná vazba nám pomáhá růst společně!",
     rateApp: "Ohodnoťte aplikaci Cristina Zurba",
@@ -623,6 +665,13 @@ export const langObj = {
     clinicLoginRedirect: "Pokračovat",
   },
   de: {
+    ViitorApropiat: "Nahe Zukunft",
+
+    EnergiaDinRelație: "Beziehungenergie",
+
+    carteaTa: "deine Karte",
+    ceSimte: "was es fühlt",
+    ceGandeste: "was es denkt",
     feedbackPrompt: "Sagen Sie uns, was wir verbessern können",
     descriereRate: "Ihr Feedback hilft uns, gemeinsam zu wachsen!",
     rateApp: "Bewerten Sie Cristina Zurba's App",
@@ -713,6 +762,13 @@ export const langObj = {
     clinicLoginRedirect: "Fortfahren",
   },
   el: {
+    ViitorApropiat: "Κοντινό μέλλον",
+
+    EnergiaDinRelație: "Ενέργεια της σχέσης",
+
+    carteaTa: "η κάρτα σου",
+    ceSimte: "τι αισθάνεται",
+    ceGandeste: "τι σκέφτεται",
     feedbackPrompt: "Πείτε μας τι μπορούμε να βελτιώσουμε",
     descriereRate: "Η ανατροφοδότησή σας μας βοηθά να μεγαλώσουμε μαζί!",
     rateApp: "Αξιολογήστε την εφαρμογή της Cristina Zurba",
@@ -803,6 +859,13 @@ export const langObj = {
     clinicLoginRedirect: "Συνέχεια",
   },
   fr: {
+    ViitorApropiat: "Futur proche",
+
+    EnergiaDinRelație: "Énergie de la relation",
+
+    carteaTa: "ta carte",
+    ceSimte: "ce qu'il ressent",
+    ceGandeste: "ce qu'il pense",
     feedbackPrompt: "Dites-nous ce que nous pouvons améliorer",
     descriereRate: "Vos retours nous aident à grandir ensemble!",
     rateApp: "Évaluez l'application de Cristina Zurba",
@@ -892,6 +955,12 @@ export const langObj = {
     clinicLoginRedirect: "Continuer",
   },
   hr: {
+    ViitorApropiat: "Bliska budućnost",
+
+    EnergiaDinRelație: "Energija odnosa",
+    carteaTa: "tvoja karta",
+    ceSimte: "što osjeća",
+    ceGandeste: "što misli",
     feedbackPrompt: "Recite nam što možemo poboljšati",
     descriereRate: "Vaše povratne informacije pomažu nam rasti zajedno!",
     rateApp: "Ocijenite aplikaciju Cristina Zurba",
@@ -978,6 +1047,12 @@ export const langObj = {
     clinicLoginRedirect: "Nastavi",
   },
   hi: {
+    ViitorApropiat: "निकट भविष्य",
+
+    EnergiaDinRelație: "रिश्ता ऊर्जा",
+    carteaTa: "तुम्हारा कार्ड",
+    ceSimte: "वह क्या महसूस करता है",
+    ceGandeste: "वह क्या सोच रहा है",
     feedbackPrompt: "हमें बताएं कि हम क्या सुधार सकते हैं",
     descriereRate: "आपकी प्रतिक्रिया हमें साथ में बढ़ने में मदद करती है!",
     rateApp: "क्रिस्टीना ज़ुर्बा के ऐप को रेट करें",
@@ -1065,6 +1140,12 @@ export const langObj = {
     clinicLoginRedirect: "जारी रखें",
   },
   id: {
+    ViitorApropiat: "Masa Depan Dekat",
+
+    EnergiaDinRelație: "Energi Hubungan",
+    carteaTa: "kartu Anda",
+    ceSimte: "apa yang dirasakan",
+    ceGandeste: "apa yang dipikirkan",
     feedbackPrompt: "Beritahu kami apa yang bisa kami tingkatkan",
     descriereRate: "Umpan balik Anda membantu kami tumbuh bersama!",
     rateApp: "Beri Nilai Aplikasi Cristina Zurba",
@@ -1153,6 +1234,11 @@ export const langObj = {
     clinicLoginRedirect: "Lanjutkan",
   },
   sk: {
+    ViitorApropiat: "Blízka budúcnosť",
+    EnergiaDinRelație: "Energetika vzťahu",
+    carteaTa: "tvoja karta",
+    ceSimte: "čo cíti",
+    ceGandeste: "čo si myslí",
     feedbackPrompt: "Povedzte nám, čo môžeme zlepšiť",
     descriereRate: "Váš feedback nám pomáha rásť spoločne!",
     rateApp: "Ohodnoťte aplikáciu Cristina Zurba",

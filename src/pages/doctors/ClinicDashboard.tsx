@@ -142,16 +142,24 @@ const ClinicDashboard = () => {
       screen: screenName.motivationalQuotes,
     },
     {
-      text: "Cartea ta",
+      text: i18n.translate("carteaTa"),
       screen: "CarteaTa",
     },
     {
-      text: "Ce gandeste",
+      text: i18n.translate("ceGandeste"),
       screen: "CeGandeste",
     },
     {
-      text: "Ce simte",
+      text: i18n.translate("ceSimte"),
       screen: "CeSimte",
+    },
+    {
+      text: i18n.translate("EnergiaDinRelație"),
+      screen: "EnergiaDinRelație",
+    },
+    {
+      text: i18n.translate("ViitorApropiat"),
+      screen: "ViitorApropiat",
     },
   ];
 
