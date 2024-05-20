@@ -1,10 +1,11 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useContext } from "react";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
 
 import Constants from "expo-constants";
 
 import { Alert, Linking, Platform } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 
 export interface PushNotificationState {
   expoPushToken?: Notifications.ExpoPushToken;
@@ -16,6 +17,8 @@ export interface PushNotificationState {
 }
 
 export const usePushNotifications = (): PushNotificationState => {
+
+
   Notifications.setNotificationHandler({
     handleNotification: async () => ({
       shouldPlaySound: false,
@@ -33,6 +36,8 @@ export const usePushNotifications = (): PushNotificationState => {
   >();
 
   const [isGranted, setIsGranted] = useState<any>(false)
+
+  const navigation = useNavigation()
 
   const notificationListener = useRef<Notifications.Subscription>();
   const responseListener = useRef<Notifications.Subscription>();
@@ -109,6 +114,14 @@ export const usePushNotifications = (): PushNotificationState => {
     responseListener.current =
       Notifications.addNotificationResponseReceivedListener((response) => {
         console.log(response);
+        const data = response.notification.request.content.data;
+        if (data.type === 'AfirmatiiPozitive') {
+          console.log("got the data afirmatii pozitive....",data);
+          navigation.navigate('EcranAfirmatii', {
+            title: data.nume,
+            body: data.descriere,
+          });
+        }
       });
 
     return () => {

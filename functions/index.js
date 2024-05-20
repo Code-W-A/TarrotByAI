@@ -1,6 +1,5 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
-const fetch = require("node-fetch");
 const {Expo} = require("expo-server-sdk");
 
 // Creează o nouă instanță a Expo SDK
@@ -9,7 +8,8 @@ const expo = new Expo();
 
 admin.initializeApp();
 
-exports.checkAndSendNotifications = functions.pubsub.schedule("every 5 minutes")
+exports.checkAndSendNotifications = functions.pubsub
+    .schedule("every 5 minutes")
     .timeZone("Europe/Bucharest")
     .onRun(async (context) => {
       const now = new Date();
@@ -52,44 +52,48 @@ exports.checkAndSendNotifications = functions.pubsub.schedule("every 5 minutes")
       for (let i = 0; i < tokens.length; i += BATCH_SIZE) {
         const batch = tokens.slice(i, i + BATCH_SIZE);
 
-        const messages = batch.map((token) => {
+        const messages = batch.map((user) => {
+          const {token, language, isIos} = user;
           // Determină limbajul în funcție de condițiile specificate
-          let languageKey;
-          if (token.language === "hi") {
-            languageKey = "hu";
-          } else if (token.language === "id") {
-            languageKey = "ru";
+          if (isIos === undefined || isIos === false) {
+            let languageKey;
+            if (language === "hi") {
+              languageKey = "hu";
+            } else if (language === "id") {
+              languageKey = "ru";
+            } else {
+              languageKey = language;
+            }
+            console.log("language key from userusers...", languageKey);
+            console.log("art info with lang...", article.info[languageKey]);
+            return {
+              to: token,
+              sound: "default",
+              title: article.info[languageKey].nume,
+              body: article.info[languageKey].descriere,
+            };
           } else {
-            languageKey = token.language;
+            console.log("isIos present..don't add to messages for android..");
           }
-          console.log("language key from userTokens...", languageKey);
-          console.log("articole info with lang...", article.info[languageKey]);
-          return {
-            to: token.token,
-            sound: "default",
-            title: article.info[languageKey].nume,
-            body: article.info[languageKey].descriere,
-          };
         });
         // Trimite un batch de notificări
         try {
-          const response = await fetch("https://exp.host/--/api/v2/push/send", {
-            method: "POST",
-            headers: {
-              "Accept": "application/json",
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(messages),
-          });
+          const chunks = expo.chunkPushNotifications(messages);
+          const tickets = [];
 
-          const responseData = await response.json();
-          console.log("Success pentru batch:", responseData);
+          for (const chunk of chunks) {
+            try {
+              const ticketChunk = await expo.sendPushNotificationsAsync(chunk);
+              tickets.push(...ticketChunk);
+            } catch (error) {
+              console.error(`Eroare la trimiterea notificărilor: ${error}`);
+            }
+          }
         } catch (error) {
           console.error("Eroare:", error);
         }
       }
     });
-
 exports.checkAndSendNotificationsIos = functions.pubsub
     .schedule("every 5 minutes")
     .timeZone("Europe/Bucharest")
@@ -173,60 +177,73 @@ exports.checkAndSendNotificationsIos = functions.pubsub
       }
     });
 
-
-exports.sendRandomNotification = functions.pubsub.schedule("every 120 minutes")
+exports.sendRandomNotification = functions.pubsub
+    .schedule("every 120 minutes")
     .timeZone("Europe/Bucharest")
     .onRun(async (context) => {
+      // Obține toate notificările din Firestore
       const loc = "RegularNotifications";
       const nS = await admin.firestore().collection(loc).get();
       const notifications = [];
       nS.forEach((doc) => notifications.push(doc.data()));
+      const randomIndex = Math.floor(Math.random() * notifications.length);
+      const selectedNotification = notifications[randomIndex];
 
       if (notifications.length === 0) {
         console.log("Nici o notificare disponibilă în baza de date.");
         return;
       }
 
-      // Selectează o notificare aleatorie
-      const randomIndex = Math.floor(Math.random() * notifications.length);
-      const selectedNotification = notifications[randomIndex];
-
-      // Obține toate tokenurile de utilizator
+      // Obține doar tokenurile de utilizator pentru iOS
       const tS = await admin.firestore().collection("userTokens").get();
-      const tokens = [];
-      tS.forEach((doc) => tokens.push(doc.data()));
+      const users = [];
+      tS.forEach((doc) => users.push(doc.data()));
 
-      // Imparte tokenurile în batch-uri dacă este necesar
-      const BATCH_SIZE = 100;
-      for (let i = 0; i < tokens.length; i += BATCH_SIZE) {
-        const batch = tokens.slice(i, i + BATCH_SIZE);
+      if (users.length === 0) {
+        console.log("Niciun token de notificare disponibil.");
+        return false;
+      }
 
-        const messages = batch.map((token) => ({
-          to: token.token,
-          sound: "default",
-          title: selectedNotification.info[token.language].nume,
-          body: selectedNotification.info[token.language].descriere,
-        }));
+      const messages = [];
+      users.forEach((user) => {
+        const {token, language, isIos} = user;
+        if (selectedNotification && (isIos === undefined || isIos === false)) {
+          const nume = selectedNotification.info[language].nume;
+          const descriere = selectedNotification.info[language].descriere;
+          if (Expo.isExpoPushToken(token)) {
+            messages.push({
+              to: token,
+              sound: "default",
+              title: nume,
+              body: descriere,
+              data: {nume, descriere},
+            });
+          } else {
+            console.error(`Token ${token} is not a valid Expo push token`);
+          }
+        }
+      });
 
-        // Trimite un batch de notificări
+      if (messages.length === 0) {
+        console.log("Niciun mesaj valid pentru a trimite notificări.");
+        return false;
+      }
+
+      // Trimite notificările în batch-uri
+      const chunks = expo.chunkPushNotifications(messages);
+      const tickets = [];
+
+      for (const chunk of chunks) {
         try {
-          const response = await fetch("https://exp.host/--/api/v2/push/send", {
-            method: "POST",
-            headers: {
-              "Accept": "application/json",
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(messages),
-          });
-
-          const responseData = await response.json();
-          console.log("Notificări trimise cu succes:", responseData);
+          const ticketChunk = await expo.sendPushNotificationsAsync(chunk);
+          tickets.push(...ticketChunk);
         } catch (error) {
-          console.error("Eroare la trimiterea notificărilor:", error);
+          console.error(`Eroare la trimiterea notificărilor: ${error}`);
         }
       }
-    });
 
+      console.log(`Notificări trimise cu succes. total: ${tickets.length}`);
+    });
 exports.sendRegularNotificationsIos = functions.pubsub
     .schedule("every 120 minutes")
     .timeZone("Europe/Bucharest")
@@ -294,58 +311,83 @@ exports.sendRegularNotificationsIos = functions.pubsub
       console.log(`Notificări trimise cu succes. total: ${tickets.length}`);
     });
 
-exports.sendRandomAfirmatii = functions.pubsub.schedule("every 120 minutes")
+
+exports.sendRandomAfirmatii = functions.pubsub
+    .schedule("every 120 minutes")
     .timeZone("Europe/Bucharest")
     .onRun(async (context) => {
+      // Obține toate notificările din Firestore
       const loc = "AfirmatiiPozitive";
       const nS = await admin.firestore().collection(loc).get();
       const notifications = [];
       nS.forEach((doc) => notifications.push(doc.data()));
+      const randomIndex = Math.floor(Math.random() * notifications.length);
+      const selectedNotification = notifications[randomIndex];
 
       if (notifications.length === 0) {
         console.log("Nici o notificare disponibilă în baza de date.");
         return;
       }
 
-      // Selectează o notificare aleatorie
-      const randomIndex = Math.floor(Math.random() * notifications.length);
-      const selectedNotification = notifications[randomIndex];
-
-      // Obține toate tokenurile de utilizator
+      // Obține doar tokenurile de utilizator pentru iOS
       const tS = await admin.firestore().collection("userTokens").get();
-      const tokens = [];
-      tS.forEach((doc) => tokens.push(doc.data()));
+      const users = [];
+      tS.forEach((doc) => users.push(doc.data()));
 
-      // Imparte tokenurile în batch-uri dacă este necesar
-      const BATCH_SIZE = 5;
-      for (let i = 0; i < tokens.length; i += BATCH_SIZE) {
-        const batch = tokens.slice(i, i + BATCH_SIZE);
+      if (users.length === 0) {
+        console.log("Niciun token de notificare disponibil.");
+        return false;
+      }
 
-        const messages = batch.map((token) => ({
-          to: token.token,
-          sound: "default",
-          title: selectedNotification.info[token.language].nume,
-          body: selectedNotification.info[token.language].descriere,
-        }));
+      const messages = [];
+      users.forEach((user) => {
+        const {token, language, isIos} = user;
+        if (selectedNotification && (isIos === undefined || isIos === false)) {
+          if (
+            selectedNotification.info[language] === undefined ||
+            selectedNotification.info[language].nume === undefined ||
+            selectedNotification.info[language].descriere === undefined
+          ) {
+            console.log("selectN has undefined", selectedNotification.info);
+          } else {
+            if (Expo.isExpoPushToken(token)) {
+              const nume = selectedNotification.info[language].nume;
+              const descriere = selectedNotification.info[language].descriere;
+              messages.push({
+                to: token,
+                sound: "default",
+                title: nume,
+                body: descriere,
+                data: {nume, descriere, type: "AfirmatiiPozitive"},
+              });
+            } else {
+              console.error(`Token ${token} is not a valid Expo push token`);
+            }
+          }
+        }
+      });
 
-        // Trimite un batch de notificări
+      if (messages.length === 0) {
+        console.log("Niciun mesaj valid pentru a trimite notificări.");
+        return false;
+      }
+
+      // Trimite notificările în batch-uri
+      const chunks = expo.chunkPushNotifications(messages);
+      const tickets = [];
+
+      for (const chunk of chunks) {
         try {
-          const response = await fetch("https://exp.host/--/api/v2/push/send", {
-            method: "POST",
-            headers: {
-              "Accept": "application/json",
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(messages),
-          });
-
-          const responseData = await response.json();
-          console.log("Notificări trimise cu succes:", responseData);
+          const ticketChunk = await expo.sendPushNotificationsAsync(chunk);
+          tickets.push(...ticketChunk);
         } catch (error) {
-          console.error("Eroare la trimiterea notificărilor:", error);
+          console.error(`Eroare la trimiterea notificărilor: ${error}`);
         }
       }
+
+      console.log(`Notificări trimise cu succes. total: ${tickets.length}`);
     });
+
 
 exports.sendRegularAfirmatiiIos = functions.pubsub
     .schedule("every 120 minutes")
@@ -379,16 +421,26 @@ exports.sendRegularAfirmatiiIos = functions.pubsub
       users.forEach((user) => {
         const {token, language, isIos} = user;
         if (selectedNotification && isIos) {
-          if (Expo.isExpoPushToken(token)) {
-            messages.push({
-              to: token,
-              sound: "default",
-              title: selectedNotification.info[language].nume,
-              body: selectedNotification.info[language].descriere,
-              data: {withSome: "data"},
-            });
+          if (
+            selectedNotification.info[language] === undefined ||
+            selectedNotification.info[language].nume === undefined ||
+            selectedNotification.info[language].descriere === undefined
+          ) {
+            console.log("selectN has undefined", selectedNotification.info);
           } else {
-            console.error(`Token ${token} is not a valid Expo push token`);
+            if (Expo.isExpoPushToken(token)) {
+              const nume = selectedNotification.info[language].nume;
+              const descriere = selectedNotification.info[language].descriere;
+              messages.push({
+                to: token,
+                sound: "default",
+                title: nume,
+                body: descriere,
+                data: {nume, descriere, type: "AfirmatiiPozitive"},
+              });
+            } else {
+              console.error(`Token ${token} is not a valid Expo push token`);
+            }
           }
         }
       });

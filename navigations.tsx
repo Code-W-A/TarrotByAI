@@ -106,6 +106,7 @@ import CeGandeste from "./src/pages/doctors/CeGandeste";
 import CarteaTa from "./src/pages/doctors/CarteaTa";
 import EnergiaDinRelatie from "./src/pages/doctors/EnergiaDinRelatie";
 import ViitorulApropiat from "./src/pages/doctors/ViitorulApropiat";
+import EcranAfirmatii from "./src/pages/EcranAfirmatii/EcranAfirmatii";
 
 const Stack = createNativeStackNavigator();
 
@@ -217,6 +218,7 @@ const HomeNavigation = (props: NavigationProps) => {
         />
 
         <Stack.Screen name={"ViitorApropiat"} component={ViitorulApropiat} />
+        <Stack.Screen name={"EcranAfirmatii"} component={EcranAfirmatii} />
 
         <Stack.Screen
           name={screenName.historyTarrot}

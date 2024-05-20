@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, status } from "react";
+import React, { useEffect, useRef, useState, status, createContext } from "react";
 import RootNavigation from "./navigations";
 import { screenName } from "./src/utils/screenName";
 import { MenuProvider } from "react-native-popup-menu";
@@ -49,6 +49,7 @@ import { NumberProvider } from "./src/context/NumberContext";
 
 import { usePushNotifications } from "./src/hooks/usePushNotifications";
 
+
 //---ADS---
 
 import mobileAds from "react-native-google-mobile-ads";
@@ -62,6 +63,8 @@ mobileAds()
   .catch((err) => {
     console.log("Initialization of adds ERROR!", err);
   });
+
+
 
 // AppOpenAd.createForAdRequest(TestIds.APP_OPEN);
 
@@ -197,6 +200,7 @@ const App = () => {
             <NavigationProvider>
               <NavBarVisibilityProvider>
                 <AuthProvider>
+        
                   <NavigationContainer>
                     <StatusBar style="light" />
                     <Provider store={store}>
@@ -205,6 +209,7 @@ const App = () => {
                       </MenuProvider>
                     </Provider>
                   </NavigationContainer>
+            
                 </AuthProvider>
               </NavBarVisibilityProvider>
             </NavigationProvider>

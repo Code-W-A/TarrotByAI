@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
     fontSize: 40,
   },
   h3: {
-    fontSize: 28,
+    fontSize: 32,
   },
   h4: {
     fontSize: 21,
@@ -179,10 +179,20 @@ export const H2fontBoldPrimary = styled(Text)`
   ${fontBold};
   ${primary2};
 `;
+export const H3fontBoldPrimary = styled(Text)`
+  ${h3};
+  ${fontBold};
+  ${primary2};
+`;
 export const H6fontBoldPrimary = styled(Text)`
   ${h3};
   ${fontBold};
   ${primary2};
+`;
+export const H6fontMediumPrimary = styled(Text)`
+${h6};
+${fontMedium};
+${primary2};
 `;
 export const H6fontRegularBlue = styled(Text)`
   ${h6};

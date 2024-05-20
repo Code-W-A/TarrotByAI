@@ -161,6 +161,10 @@ const ClinicDashboard = () => {
       text: i18n.translate("ViitorApropiat"),
       screen: "ViitorApropiat",
     },
+    {
+      text: "Afirmatii pozitive",
+      screen: "EcranAfirmatii",
+    },
   ];
 
   useEffect(() => {
