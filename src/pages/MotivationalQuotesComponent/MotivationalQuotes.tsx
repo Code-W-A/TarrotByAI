@@ -129,8 +129,8 @@ const MotivationalQuotes = () => {
                       {language === "hi"
                         ? zilnicCitateMotivationale.info.hu.descriere
                         : language === "id"
-                          ? zilnicCitateMotivationale.info.ru.descriere
-                          : zilnicCitateMotivationale.info[language].descriere}
+                        ? zilnicCitateMotivationale.info.ru.descriere
+                        : zilnicCitateMotivationale.info[language].descriere}
                     </H7fontMediumPrimary>
                   ) : null}
                 </ScrollView>

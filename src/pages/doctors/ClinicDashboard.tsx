@@ -162,8 +162,8 @@ const ClinicDashboard = () => {
       screen: "ViitorApropiat",
     },
     {
-      text: "Afirmatii pozitive",
-      screen: "EcranAfirmatii",
+      text: i18n.translate("AfirmatiiPozitive"),
+      screen: "AfirmatiiPozitive",
     },
   ];
 
@@ -309,6 +309,9 @@ const ClinicDashboard = () => {
                 paddingBottom: "23%",
               }}
             >
+              {/* <View style={styles.cardRow}>
+                <Text>{expoPushToken?.data}</Text>
+              </View> */}
               <View style={styles.cardRow}>
                 {cardData.map((card, index) =>
                   renderCard(card, index, interstitial, loaded)

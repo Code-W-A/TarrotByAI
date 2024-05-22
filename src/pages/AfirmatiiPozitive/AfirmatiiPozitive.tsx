@@ -37,13 +37,7 @@ import { collection, getCountFromServer } from "firebase/firestore";
 import { db } from "../../../firebase";
 import { RouteProp, useRoute } from "@react-navigation/native";
 
-interface RouteParams {
-  title: string;
-  body: string;
-}
-type EcranAfirmatiiRouteProp = RouteProp<{ params: RouteParams }, 'params'>;
-
-const EcranAfirmatii = () => {
+const AfirmatiiPozitive = () => {
   const {
     zilnicNumereNorocoase,
     zilnicCuloriNorocoase,
@@ -54,8 +48,7 @@ const EcranAfirmatii = () => {
     oreNorocoase,
   } = useApiData();
   const { language, changeLanguage } = useLanguage();
-  const route = useRoute<EcranAfirmatiiRouteProp>(); // Folosește tipul definit
-  const { title, body } = route.params; // Extrage parametrii
+
   const onPressHandler = () => {
     console.log("Pressed");
   };
@@ -63,12 +56,11 @@ const EcranAfirmatii = () => {
   const { setIsNavBarVisible } = useNavBarVisibility();
   const [luck, setLuck] = React.useState(null);
 
-  const [zilnicCitateMotivationale, setZilnicCitateMotivationale] =
-    React.useState({});
+  const [afirmatiiPozitive, setAfirmatiiPozitive] = React.useState({});
 
   const getRandomDocumentFirestore = async () => {
     // Presupunem că deja ai definit `collection` și `db`
-    const coll = collection(db, "CitateMotivationale");
+    const coll = collection(db, "AfirmatiiPozitive");
     const snapshot = await getCountFromServer(coll);
     const count = snapshot.data().count;
     console.log("count: ", count);
@@ -76,8 +68,8 @@ const EcranAfirmatii = () => {
     const randomIndex = Math.floor(Math.random() * count) + 1;
 
     console.log(randomIndex);
-    const obj = await handleQueryRandom("CitateMotivationale", randomIndex);
-    setZilnicCitateMotivationale(obj);
+    const obj = await handleQueryRandom("AfirmatiiPozitive", randomIndex);
+    setAfirmatiiPozitive(obj);
   };
 
   React.useEffect(() => {
@@ -89,59 +81,79 @@ const EcranAfirmatii = () => {
     return () => setIsNavBarVisible(true); // Restabilește vizibilitatea la ieșirea din componentă
   }, []);
 
-    // Array cu sursele imaginilor
-    const images = [
-      require("../../../assets/afirmatiipoze/var1.png"),
-      require("../../../assets/afirmatiipoze/var2.png"),
-      require("../../../assets/afirmatiipoze/var3.png"),
-      require("../../../assets/afirmatiipoze/var4.png"),
-      require("../../../assets/afirmatiipoze/var5.png"),
-      require("../../../assets/afirmatiipoze/var6.png"),
-      require("../../../assets/afirmatiipoze/var7.png"),
-      require("../../../assets/afirmatiipoze/var8.png"),
-      require("../../../assets/afirmatiipoze/var9.png"),
-      require("../../../assets/afirmatiipoze/var10.png"),
-    ];
-  
+  // Array cu sursele imaginilor
+  const images = [
+    require("../../../assets/afirmatiipoze/var1.png"),
+    require("../../../assets/afirmatiipoze/var2.png"),
+    require("../../../assets/afirmatiipoze/var3.png"),
+    require("../../../assets/afirmatiipoze/var4.png"),
+    require("../../../assets/afirmatiipoze/var5.png"),
+    require("../../../assets/afirmatiipoze/var6.png"),
+    require("../../../assets/afirmatiipoze/var7.png"),
+    require("../../../assets/afirmatiipoze/var8.png"),
+    require("../../../assets/afirmatiipoze/var9.png"),
+    require("../../../assets/afirmatiipoze/var10.png"),
+  ];
+
   // Alege o imagine aleatorie din array
   const randomImage = images[Math.floor(Math.random() * images.length)];
 
   return (
     <View style={{ flex: 1 }}>
       <MainContainer style={{ flex: 1 }}>
-     
-      <ImageBackground
+        <ImageBackground
           source={randomImage}
           resizeMode="cover"
           style={styles.imageBackground}
         >
-            <View style={styles.overlay}>
-              <GreetingBar isGoBack={true} />
-              <View style={styles.secondImageContainer}>
-                <Image
-                  source={require("../../../assets/headerIcon.png")}
-                  style={styles.secondImage}
-                  resizeMode="contain"
-                />
-              </View>
-              <H3fontBoldPrimary
-                style={{ alignSelf: "center", textAlign: "center", color: "white" }}
-              >
-                 {title}
-              </H3fontBoldPrimary>
-
-              <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingBottom:"30%" }}>
-                <ScrollView contentContainerStyle={styles.scrollViewContainer}>
-                  {body ? (
-                    <H6fontMediumPrimary style={{ textAlign: "center", color: "white" }}>
-                      {body}
-                    </H6fontMediumPrimary>
-                  ) : null}
-                </ScrollView>
-              </View>
+          <View style={styles.overlay}>
+            <GreetingBar isGoBack={true} />
+            <View style={styles.secondImageContainer}>
+              <Image
+                source={require("../../../assets/headerIcon.png")}
+                style={styles.secondImage}
+                resizeMode="contain"
+              />
             </View>
-          </ImageBackground>
-   
+            {afirmatiiPozitive?.info ? (
+              <H3fontBoldPrimary
+                style={{
+                  alignSelf: "center",
+                  textAlign: "center",
+                  color: "white",
+                }}
+              >
+                {language === "hi"
+                  ? afirmatiiPozitive?.info.hu.nume
+                  : language === "id"
+                  ? afirmatiiPozitive?.info.ru.nume
+                  : afirmatiiPozitive?.info[language].nume}
+              </H3fontBoldPrimary>
+            ) : null}
+            <View
+              style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+                paddingBottom: "30%",
+              }}
+            >
+              <ScrollView contentContainerStyle={styles.scrollViewContainer}>
+                {afirmatiiPozitive?.info ? (
+                  <H6fontMediumPrimary
+                    style={{ textAlign: "center", color: "white" }}
+                  >
+                    {language === "hi"
+                      ? afirmatiiPozitive?.info.hu.descriere
+                      : language === "id"
+                      ? afirmatiiPozitive?.info.ru.descriere
+                      : afirmatiiPozitive?.info[language].descriere}
+                  </H6fontMediumPrimary>
+                ) : null}
+              </ScrollView>
+            </View>
+          </View>
+        </ImageBackground>
       </MainContainer>
     </View>
   );
@@ -201,4 +213,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default EcranAfirmatii;
+export default AfirmatiiPozitive;

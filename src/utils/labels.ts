@@ -1,5 +1,6 @@
 export const langObj = {
   en: {
+    AfirmatiiPozitive: "Positive Affirmations",
     ViitorApropiat: "Near Future",
     EnergiaDinRelație: "Relationship energy",
     carteaTa: "your card",
@@ -91,6 +92,7 @@ export const langObj = {
     clinicLoginRedirect: "Continue",
   },
   ro: {
+    AfirmatiiPozitive: "Afirmații Pozitive",
     ViitorApropiat: "Viitor apropiat",
 
     EnergiaDinRelație: "Energia din relație",
@@ -189,6 +191,7 @@ export const langObj = {
     clinicLoginRedirect: "Continuă",
   },
   es: {
+    AfirmatiiPozitive: "Afirmaciones Positivas",
     ViitorApropiat: "Futuro cercano",
 
     EnergiaDinRelație: "Energía de la relación",
@@ -287,6 +290,7 @@ export const langObj = {
     clinicLoginRedirect: "Continuar",
   },
   it: {
+    AfirmatiiPozitive: "Affermazioni Positive",
     ViitorApropiat: "Futuro prossimo",
 
     EnergiaDinRelație: "Energia della relazione",
@@ -382,6 +386,7 @@ export const langObj = {
     clinicLoginRedirect: "Continua",
   },
   pl: {
+    AfirmatiiPozitive: "Pozytywne Twierdzenia",
     ViitorApropiat: "Bliska przyszłość",
 
     EnergiaDinRelație: "Energia związku",
@@ -477,6 +482,7 @@ export const langObj = {
     clinicLoginRedirect: "Kontynuuj",
   },
   bg: {
+    AfirmatiiPozitive: "Положителни Твърдения",
     ViitorApropiat: "Близко бъдеще",
     EnergiaDinRelație: "Енергия на връзката",
 
@@ -570,6 +576,7 @@ export const langObj = {
     clinicLoginRedirect: "Продължете",
   },
   cs: {
+    AfirmatiiPozitive: "Pozitivní Tvrzení",
     ViitorApropiat: "Blízká budoucnost",
 
     EnergiaDinRelație: "Energie vztahu",
@@ -665,6 +672,7 @@ export const langObj = {
     clinicLoginRedirect: "Pokračovat",
   },
   de: {
+    AfirmatiiPozitive: "Θετικές Δηλώσεις",
     ViitorApropiat: "Nahe Zukunft",
 
     EnergiaDinRelație: "Beziehungenergie",
@@ -762,6 +770,7 @@ export const langObj = {
     clinicLoginRedirect: "Fortfahren",
   },
   el: {
+    AfirmatiiPozitive: "Θετικές Δηλώσεις",
     ViitorApropiat: "Κοντινό μέλλον",
 
     EnergiaDinRelație: "Ενέργεια της σχέσης",
@@ -859,6 +868,7 @@ export const langObj = {
     clinicLoginRedirect: "Συνέχεια",
   },
   fr: {
+    AfirmatiiPozitive: "Affirmations Positives",
     ViitorApropiat: "Futur proche",
 
     EnergiaDinRelație: "Énergie de la relation",
@@ -955,6 +965,7 @@ export const langObj = {
     clinicLoginRedirect: "Continuer",
   },
   hr: {
+    AfirmatiiPozitive: "Pozitivne Izjave",
     ViitorApropiat: "Bliska budućnost",
 
     EnergiaDinRelație: "Energija odnosa",
@@ -1047,6 +1058,7 @@ export const langObj = {
     clinicLoginRedirect: "Nastavi",
   },
   hi: {
+    AfirmatiiPozitive: "सकारात्मक कथन",
     ViitorApropiat: "निकट भविष्य",
 
     EnergiaDinRelație: "रिश्ता ऊर्जा",
@@ -1140,6 +1152,7 @@ export const langObj = {
     clinicLoginRedirect: "जारी रखें",
   },
   id: {
+    AfirmatiiPozitive: "Pernyataan Positif",
     ViitorApropiat: "Masa Depan Dekat",
 
     EnergiaDinRelație: "Energi Hubungan",
@@ -1234,6 +1247,7 @@ export const langObj = {
     clinicLoginRedirect: "Lanjutkan",
   },
   sk: {
+    AfirmatiiPozitive: "Pozitívne Tvrdenia",
     ViitorApropiat: "Blízka budúcnosť",
     EnergiaDinRelație: "Energetika vzťahu",
     carteaTa: "Tvoja karta",

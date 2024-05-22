@@ -5,7 +5,8 @@ import * as Notifications from "expo-notifications";
 import Constants from "expo-constants";
 
 import { Alert, Linking, Platform } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { RouteProp, useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 export interface PushNotificationState {
   expoPushToken?: Notifications.ExpoPushToken;
@@ -15,6 +16,18 @@ export interface PushNotificationState {
   isGranted?:Boolean;
   openNotificationSettings?:any
 }
+
+type RootStackParamList = {
+  EcranAfirmatii: { title: string; body: string };
+  // Adaugă aici alte rute dacă ai nevoie
+};
+
+// Tip pentru navigare
+type EcranAfirmatiiNavigationProp = NativeStackNavigationProp<RootStackParamList, 'EcranAfirmatii'>;
+
+// Tip pentru ruta
+type EcranAfirmatiiRouteProp = RouteProp<RootStackParamList, 'EcranAfirmatii'>;
+
 
 export const usePushNotifications = (): PushNotificationState => {
 
@@ -111,18 +124,28 @@ export const usePushNotifications = (): PushNotificationState => {
         setNotification(notification);
       });
 
-    responseListener.current =
-      Notifications.addNotificationResponseReceivedListener((response) => {
-        console.log(response);
-        const data = response.notification.request.content.data;
+      responseListener.current = Notifications.addNotificationResponseReceivedListener((response) => {
+        const data = response.notification.request.content.data as { type: string; nume: string; descriere: string };
         if (data.type === 'AfirmatiiPozitive') {
-          console.log("got the data afirmatii pozitive....",data);
           navigation.navigate('EcranAfirmatii', {
             title: data.nume,
             body: data.descriere,
           });
         }
       });
+
+          // Check if the app was opened from a notification
+    Notifications.getLastNotificationResponseAsync().then(response => {
+      if (response) {
+        const data = response.notification.request.content.data as { type: string; nume: string; descriere: string };
+        if (data.type === 'AfirmatiiPozitive') {
+          navigation.navigate('EcranAfirmatii', {
+            title: data.nume,
+            body: data.descriere,
+          });
+        }
+      }
+    });
 
     return () => {
       Notifications.removeNotificationSubscription(
