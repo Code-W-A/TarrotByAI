@@ -1,4 +1,5 @@
 export const screenName = {
+  astralProfileScreen: "astralProfileScreen",
   motivationalQuotes: "motivationalQuotes",
   luckyHour: "luckyHour",
   luckyNumber: "LuckyNumber",

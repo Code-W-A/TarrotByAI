@@ -229,6 +229,10 @@ const HomeNavigation = (props: NavigationProps) => {
           name={screenName.historyTarrot}
           component={HistoryTarrot}
         />
+        <Stack.Screen
+          name={screenName.astralProfileScreen}
+          component={HistoryTarrot}
+        />
         {/* <Stack.Screen name={screenName.VoiceCall} component={VoiceCall} /> */}
         {/* <Stack.Screen name={screenName.VideoCall} component={VideoCall} /> */}
       </Stack.Navigator>
@@ -241,11 +245,12 @@ const HomeNavigation = (props: NavigationProps) => {
 
 const RootNavigation = () => {
   const { currentUser, isGuestUser } = useAuth();
-  const screen = isGuestUser
-    ? screenName.ClinicDashBoard
-    : currentUser
-    ? screenName.SignInScreenClinic
-    : screenName.OnboardingScreen;
+  // const screen = isGuestUser
+  //   ? screenName.ClinicDashBoard
+  //   : currentUser
+  //   ? screenName.SignInScreenClinic
+  //   : screenName.OnboardingScreen;
+  const screen = screenName.astralProfileScreen;
 
   return <HomeNavigation initialRouteName={screen} />;
 };
