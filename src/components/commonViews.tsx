@@ -7,7 +7,7 @@ import {
   ImageBackground,
   Platform,
 } from "react-native";
-import styled from "styled-components";
+
 import { colors } from "../utils/colors";
 
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
