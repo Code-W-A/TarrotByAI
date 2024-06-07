@@ -1,0 +1,192 @@
+{
+    "_id": "6516d4aba94cfd0bc56f070e",
+    "name": "variation-27-lang-es",
+    "data": {
+      "musicName": "Crumpled Letters",
+      "musicUrl": "https://elai-media.s3.eu-west-2.amazonaws.com/music/mixkit-crumpled-letters-1170.mp3?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAW6FMUIGA6NPIQQ5B%2F20231205%2Feu-west-2%2Fs3%2Faws4_request&X-Amz-Date=20231205T204240Z&X-Amz-Expires=604800&X-Amz-Signature=2b2f2e71730d2e5128b1f0f3e0d0bba9b8514fa4ae5da10b864a4a0d11ab1ecd&X-Amz-SignedHeaders=host&response-cache-control=public%2C%20max-age%3D31536000%2C%20immutable",
+      "musicVolume": 0.04,
+      "format": "1_1",
+      "musicShift": 0,
+      "resolution": "FullHD",
+      "priority": 3,
+      "renderStartedAt": "2023-09-29T21:42:20.255Z",
+      "waitingTime": 0,
+      "subtitlesUrl": null
+    },
+    "slides": [
+      {
+        "id": 1,
+        "avatar": {
+          "id": "cristina",
+          "name": "Cristina",
+          "gender": "female",
+          "canvas": "https://d3u63mhbhkevz8.cloudfront.net/custom/christina/christina.png"
+        },
+        "speech": "¡Estás muy seguro de ti mismo! Estás en un buen momento de tu vida donde te sientes cómodo contigo mismo y con todo lo que te rodea. Prefieres lugares con mucha naturaleza o sitios caros donde poder darte un capricho, comer algo bueno, pero estás en una época en la que tu aspecto físico también es importante para ti. Tienes un proyecto en marcha o tal vez incluso te estás preparando para ser madre o esposa. Muestras amor, bondad y gentileza. Quieres establecerte en tu casa, formar tu familia, o si ya tienes estas cosas, eres dueño de todas ellas. Si eres hombre, estás bajo la buena influencia de una mujer así en tu vida. Todavía veo un período en el que eres muy creativo y puedes dar a luz a hermosos proyectos que te traerán estabilidad financiera, pero también un período en el que puedes dar a luz a un hijo o cuidar de un niño, si ya eres padre. .",
+        "language": "Spanish",
+        "voice": "rehVMocqgFIcwyRvsVgP:eleven_multilingual_v2",
+        "voiceType": "text",
+        "voiceProvider": "elevenlabs",
+        "animation": "fade_in",
+        "canvas": {
+          "version": "5.3.0",
+          "objects": [
+            {
+              "type": "image",
+              "version": "5.3.0",
+              "originX": "left",
+              "originY": "top",
+              "left": 0,
+              "top": 0,
+              "width": 2560,
+              "height": 1440,
+              "fill": "rgb(0,0,0)",
+              "stroke": null,
+              "strokeWidth": 0,
+              "strokeDashArray": null,
+              "strokeLineCap": "butt",
+              "strokeDashOffset": 0,
+              "strokeLineJoin": "miter",
+              "strokeUniform": false,
+              "strokeMiterLimit": 4,
+              "scaleX": 0.25,
+              "scaleY": 0.25,
+              "angle": 0,
+              "flipX": false,
+              "flipY": false,
+              "opacity": 1,
+              "shadow": null,
+              "visible": true,
+              "backgroundColor": "",
+              "fillRule": "nonzero",
+              "paintFirst": "fill",
+              "globalCompositeOperation": "source-over",
+              "skewX": 0,
+              "skewY": 0,
+              "cropX": 0,
+              "cropY": 0,
+              "id": 1205361136110,
+              "animation": {
+                "type": null,
+                "startTime": 0,
+                "exitType": null
+              },
+              "src": "https://d3u63mhbhkevz8.cloudfront.net/production/uploads/6509c0f1861a7b24c025c825/pexels-felix-mittermeier-956981_wrc25q.jpg?Expires=1702252800&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9kM3U2M21oYmhrZXZ6OC5jbG91ZGZyb250Lm5ldC9wcm9kdWN0aW9uL3VwbG9hZHMvNjUwOWMwZjE4NjFhN2IyNGMwMjVjODI1L3BleGVscy1mZWxpeC1taXR0ZXJtZWllci05NTY5ODFfd3JjMjVxLmpwZyIsIkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTcwMjI1MjgwMH19fV19&Signature=YEkktB%7ELXkF8xlhrpgO0LDFgQ-pDXfE7W6ZYAHqdmWt3MEhKGqPTuCLSQc34Nb7nD5jtVmSktxAaFrpE--kc-uhkrkiVQMdQVr3ko-20fm-j2j1sExd97WGRLdCTEtWEl5M6dx%7E-c99OGdqK5hHvVqX23Gvp9pc8gcnB9LFSo31mrx4WjFw5o7nrfTiq8baOZYEYKwyypYUUWE2Q%7EOv56%7EyFG07SXYhajHxAC3KwJTUe9xPa4Uku6b5YhSudBj6JMs0DVxo6ipAE8jofEfnbS5BkwiMHSd-z3bEZG5JbPOsJwoI6cpUI-aw8ufVMGRPklE6R2NR-ac05L6B0OKrZRA__&Key-Pair-Id=K1Y7U91AR6T7E5",
+              "crossOrigin": "anonymous",
+              "filters": [],
+              "bg": true,
+              "selectable": false,
+              "_exists": true
+            },
+            {
+              "type": "avatar",
+              "version": "5.3.0",
+              "originX": "left",
+              "originY": "top",
+              "left": 171.19612152,
+              "top": 95.59442362,
+              "width": 0,
+              "height": 0,
+              "fill": "#4868FF",
+              "stroke": null,
+              "strokeWidth": 0,
+              "strokeDashArray": null,
+              "strokeLineCap": "butt",
+              "strokeDashOffset": 0,
+              "strokeLineJoin": "miter",
+              "strokeUniform": false,
+              "strokeMiterLimit": 4,
+              "scaleX": 0.24520803,
+              "scaleY": 0.24520803,
+              "angle": 0,
+              "flipX": false,
+              "flipY": false,
+              "opacity": 1,
+              "shadow": null,
+              "visible": true,
+              "backgroundColor": "",
+              "fillRule": "nonzero",
+              "paintFirst": "fill",
+              "globalCompositeOperation": "source-over",
+              "skewX": 0,
+              "skewY": 0,
+              "cropX": 0,
+              "cropY": 0,
+              "src": "https://d3u63mhbhkevz8.cloudfront.net/custom/christina/christina.png",
+              "crossOrigin": null,
+              "filters": [],
+              "avatarType": "transparent",
+              "animation": {
+                "type": null,
+                "startTime": 0
+              },
+              "_exists": true
+            }
+          ],
+          "background": "#ffffff"
+        },
+        "duration": 59.010612,
+        "approxDuration": 53.75,
+        "status": "ready",
+        "audioUrl": "https://d3u63mhbhkevz8.cloudfront.net/production/videos/6516d4aba94cfd0bc56f070e/1/speech.mp3?Expires=1702252800&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9kM3U2M21oYmhrZXZ6OC5jbG91ZGZyb250Lm5ldC9wcm9kdWN0aW9uL3ZpZGVvcy82NTE2ZDRhYmE5NGNmZDBiYzU2ZjA3MGUvMS9zcGVlY2gubXAzIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzAyMjUyODAwfX19XX0_&Signature=TpIz5nq1qQKBCFJ5OhNOAIVanMFOkJxIIKBNgoWOkGaPZZN7TxSTVJGonplaFGapOkj5OsBi8RtqfLTkKpSeKzwnL39jSrCVuJIyF2dmiizt4SrSunui31P1mEFaAG%7EFYNAqI%7EEkdBNYxv%7E6dzLWNOSj3fMGwGXi2SXhbM8WYpp2jIAvhZz7ktscSee2RmjcsXMruv9V-uaJiPsC1MM6DYtff2C9cC-zPqJrYKMGadyqOjqCOa05xgLsIND6vqJdaSDCXZsZMcTYmzMxBGqJHp8z8vnCWDR%7E8MnRm3%7E%7E2V4ZprMZwUP7QxSOZ-yGK%7EOBQiNz905TgJn6GzZ6dLvueg__&Key-Pair-Id=K1Y7U91AR6T7E5"
+      }
+    ],
+    "tags": [
+      "api"
+    ],
+    "deleted": false,
+    "status": "ready",
+    "verified": false,
+    "public": false,
+    "parentFolderDeleted": false,
+    "version": 7,
+    "userId": "6509c0f1861a7b24c025c825",
+    "accountId": "6509c0f1861a7b24c025c826",
+    "createdAt": "2023-09-29T13:44:11.809Z",
+    "updatedAt": "2023-11-10T02:59:02.501Z",
+    "__v": 5,
+    "moderation": {
+      "containsCustomVoices": false,
+      "ifNeedTranslation": false,
+      "text": "¡Estás muy seguro de ti mismo! Estás en un buen momento de tu vida donde te sientes cómodo contigo mismo y con todo lo que te rodea. Prefieres lugares con mucha naturaleza o sitios caros donde poder darte un capricho, comer algo bueno, pero estás en una época en la que tu aspecto físico también es importante para ti. Tienes un proyecto en marcha o tal vez incluso te estás preparando para ser madre o esposa. Muestras amor, bondad y gentileza. Quieres establecerte en tu casa, formar tu familia, o si ya tienes estas cosas, eres dueño de todas ellas. Si eres hombre, estás bajo la buena influencia de una mujer así en tu vida. Todavía veo un período en el que eres muy creativo y puedes dar a luz a hermosos proyectos que te traerán estabilidad financiera, pero también un período en el que puedes dar a luz a un hijo o cuidar de un niño, si ya eres padre. .. ",
+      "data": {
+        "profanity": null,
+        "toxicity": {
+          "label": "NEUTRAL",
+          "score": 0.980396943,
+          "label_scores": {
+            "TOXICITY": 0.019603057,
+            "PROFANITY": 0.017162729,
+            "INSULT": 0.013288911,
+            "THREAT": 0.005971058,
+            "DISCRIMINATION": 0.0028673338,
+            "SEVERE_TOXICITY": 0.0010967255,
+            "NEUTRAL": 0.980396943
+          }
+        },
+        "propriety": {
+          "label": "FLIRTATION",
+          "score": 0.6560607,
+          "label_scores": {
+            "FLIRTATION": 0.6560607,
+            "SEXUALLY_EXPLICIT": 0.010085096,
+            "NEUTRAL": 0.3439393
+          }
+        },
+        "nsfw": {
+          "label": "NEUTRAL",
+          "score": 0.984761,
+          "label_scores": {
+            "NEUTRAL": 0.984761,
+            "UNSAFE": 0.00866,
+            "SENSITIVE": 0.006303
+          }
+        },
+        "flagged": false
+      }
+    },
+    "duration": 59.010612,
+    "thumbnail": "https://apis.elai.io/public/video/6516d4aba94cfd0bc56f070e.jpg?s=2d3f9686af463fed1749f4707e2df67c6be7606e7ab6fa8e9072a641258d5ec1",
+    "url": "https://apis.elai.io/public/video/6516d4aba94cfd0bc56f070e.mp4?s=2d3f9686af463fed1749f4707e2df67c6be7606e7ab6fa8e9072a641258d5ec1",
+    "comments": []
+  }
