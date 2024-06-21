@@ -1,0 +1,394 @@
+{
+    "date": "23-12-2023",
+    "id": 8,
+    "info": {
+      "bg": {
+        "nume": "какво си мисли"
+      },
+      "cs": {
+        "nume": "co si myslí"
+      },
+      "de": {
+        "nume": "was denkt er?"
+      },
+      "el": {
+        "nume": "τι σκέφτεται"
+      },
+      "en": {
+        "nume": "what is he thinking"
+      },
+      "es": {
+        "nume": "¿Qué está pensando?"
+      },
+      "fr": {
+        "nume": "à quoi pense-t-il"
+      },
+      "hr": {
+        "nume": "što on misli"
+      },
+      "hu": {
+        "nume": "वह क्या सोच रहा है"
+      },
+      "it": {
+        "nume": "cosa sta pensando"
+      },
+      "pl": {
+        "nume": "co on myśli"
+      },
+      "ro": {
+        "nume": "Ce gândește"
+      },
+      "ru": {
+        "nume": "apa yang dia pikirkan"
+      },
+      "sk": {
+        "nume": "čo si myslí"
+      }
+    },
+    "time": "19:19"
+  },
+  {
+    "date": "23-12-2023",
+    "id": 1,
+    "info": {
+      "bg": {
+        "nume": "Обща енергия"
+      },
+      "cs": {
+        "nume": "Obecná energie"
+      },
+      "de": {
+        "nume": "Allgemeine Energie"
+      },
+      "el": {
+        "nume": "Γενική ενέργεια"
+      },
+      "en": {
+        "nume": "General energy"
+      },
+      "es": {
+        "nume": "energía general"
+      },
+      "fr": {
+        "nume": "Énergie générale"
+      },
+      "hr": {
+        "nume": "Opća energija"
+      },
+      "hu": {
+        "nume": "सामान्य ऊर्जा"
+      },
+      "it": {
+        "nume": "Energia generale"
+      },
+      "pl": {
+        "nume": "Ogólna energia"
+      },
+      "ro": {
+        "nume": "Energia generală"
+      },
+      "ru": {
+        "nume": "Energi umum"
+      },
+      "sk": {
+        "nume": "Všeobecná energia"
+      }
+    },
+    "time": "19:18"
+  },
+  {
+    "date": "23-12-2023",
+    "id": 5,
+    "info": {
+      "bg": {
+        "nume": "В главата ти"
+      },
+      "cs": {
+        "nume": "Ve tvé mysli"
+      },
+      "de": {
+        "nume": "In Deiner Vorstellung"
+      },
+      "el": {
+        "nume": "Στο μυαλό σου"
+      },
+      "en": {
+        "nume": "In your mind"
+      },
+      "es": {
+        "nume": "En tu mente"
+      },
+      "fr": {
+        "nume": "Dans ta tête"
+      },
+      "hr": {
+        "nume": "U tvojim mislima"
+      },
+      "hu": {
+        "nume": "आपके दिमाग मे"
+      },
+      "it": {
+        "nume": "Nella tua mente"
+      },
+      "pl": {
+        "nume": "W Twojej głowie"
+      },
+      "ro": {
+        "nume": "În mintea ta"
+      },
+      "ru": {
+        "nume": "Di dalam pikiranmu"
+      },
+      "sk": {
+        "nume": "V tvojej mysli"
+      }
+    },
+    "time": "19:19"
+  },
+  {
+    "date": "23-12-2023",
+    "id": 7,
+    "info": {
+      "bg": {
+        "nume": "какво е чувството"
+      },
+      "cs": {
+        "nume": "jaký je to pocit?"
+      },
+      "de": {
+        "nume": "Wie fühlt es sich an?"
+      },
+      "el": {
+        "nume": "Πώς είναι η αίσθηση;"
+      },
+      "en": {
+        "nume": "What does it feel like?"
+      },
+      "es": {
+        "nume": "¿Cómo se siente?"
+      },
+      "fr": {
+        "nume": "Qu'est-ce que ça fait ?"
+      },
+      "hr": {
+        "nume": "Kakav je osjećaj?"
+      },
+      "hu": {
+        "nume": "यह किसके जैसा महसूस होता है?"
+      },
+      "it": {
+        "nume": "Cosa si prova?"
+      },
+      "pl": {
+        "nume": "Jakie to uczucie?"
+      },
+      "ro": {
+        "nume": "Ce simte"
+      },
+      "ru": {
+        "nume": "Seperti apa rasanya?"
+      },
+      "sk": {
+        "nume": "Aký je to pocit?"
+      }
+    },
+    "time": "17:38"
+  },
+  {
+    "date": "23-12-2023",
+    "id": 2,
+    "info": {
+      "bg": {
+        "nume": "Енергия от връзката"
+      },
+      "cs": {
+        "nume": "Energie ze vztahu"
+      },
+      "de": {
+        "nume": "Energie aus der Beziehung"
+      },
+      "el": {
+        "nume": "Ενέργεια από τη σχέση"
+      },
+      "en": {
+        "nume": "Energy from the relationship"
+      },
+      "es": {
+        "nume": "Energía de la relación"
+      },
+      "fr": {
+        "nume": "L'énergie de la relation"
+      },
+      "hr": {
+        "nume": "Energija iz odnosa"
+      },
+      "hu": {
+        "nume": "रिश्ते से ऊर्जा"
+      },
+      "it": {
+        "nume": "Energia dalla relazione"
+      },
+      "pl": {
+        "nume": "Energia ze związku"
+      },
+      "ro": {
+        "nume": "Energia din relație"
+      },
+      "ru": {
+        "nume": "Energi dari hubungan"
+      },
+      "sk": {
+        "nume": "Energia zo vzťahu"
+      }
+    },
+    "time": "19:18"
+  },
+  {
+    "date": "23-12-2023",
+    "id": 4,
+    "info": {
+      "bg": {
+        "nume": "В сърцето ти"
+      },
+      "cs": {
+        "nume": "V tvém srdci"
+      },
+      "de": {
+        "nume": "In deinem Herzen"
+      },
+      "el": {
+        "nume": "Στην καρδιά σου"
+      },
+      "en": {
+        "nume": "In your heart"
+      },
+      "es": {
+        "nume": "En tu corazón"
+      },
+      "fr": {
+        "nume": "Dans ton coeur"
+      },
+      "hr": {
+        "nume": "U tvome srcu"
+      },
+      "hu": {
+        "nume": "आपके दिल में"
+      },
+      "it": {
+        "nume": "Nel tuo cuore"
+      },
+      "pl": {
+        "nume": "W Twoim sercu"
+      },
+      "ro": {
+        "nume": "În inima ta"
+      },
+      "ru": {
+        "nume": "Dalam hatimu"
+      },
+      "sk": {
+        "nume": "V tvojom srdci"
+      }
+    },
+    "time": "19:18"
+  },
+  {
+    "date": "23-12-2023",
+    "id": 6,
+    "info": {
+      "bg": {
+        "nume": "В екстериора"
+      },
+      "cs": {
+        "nume": "V exteriéru"
+      },
+      "de": {
+        "nume": "Im Außenbereich"
+      },
+      "el": {
+        "nume": "Στο εξωτερικό"
+      },
+      "en": {
+        "nume": "On the outside"
+      },
+      "es": {
+        "nume": "En el exterior"
+      },
+      "fr": {
+        "nume": "En extérieur"
+      },
+      "hr": {
+        "nume": "U eksterijeru"
+      },
+      "hu": {
+        "nume": "बाहरी में"
+      },
+      "it": {
+        "nume": "All'esterno"
+      },
+      "pl": {
+        "nume": "Na zewnątrz"
+      },
+      "ro": {
+        "nume": "În exterior"
+      },
+      "ru": {
+        "nume": "Di eksterior"
+      },
+      "sk": {
+        "nume": "V exteriéri"
+      }
+    },
+    "time": "19:19"
+  }
+  {
+    "date": "23-12-2023",
+    "id": 3,
+    "info": {
+      "bg": {
+        "nume": "В основата на вашите прояви"
+      },
+      "cs": {
+        "nume": "Na základně vašich projevů"
+      },
+      "de": {
+        "nume": "An der Basis deiner Manifestationen"
+      },
+      "el": {
+        "nume": "Στη βάση των εκδηλώσεών σου"
+      },
+      "en": {
+        "nume": "At the base of your manifestations"
+      },
+      "es": {
+        "nume": "En la base de tus manifestaciones"
+      },
+      "fr": {
+        "nume": "A la base de vos manifestations"
+      },
+      "hr": {
+        "nume": "U osnovi vaših manifestacija"
+      },
+      "hu": {
+        "nume": "आपकी अभिव्यक्तियों के आधार पर"
+      },
+      "it": {
+        "nume": "Alla base delle tue manifestazioni"
+      },
+      "pl": {
+        "nume": "U podstawy twoich przejawów"
+      },
+      "ro": {
+        "nume": "La baza manifestărilor tale"
+      },
+      "ru": {
+        "nume": "Di dasar manifestasi Anda"
+      },
+      "sk": {
+        "nume": "Na základe vašich prejavov"
+      }
+    },
+    "time": "19:18"
+  },
+
+
