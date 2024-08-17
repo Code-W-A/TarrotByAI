@@ -400,7 +400,7 @@ const SignInScreenClinic: React.FC<Props> = ({
                       </TouchableOpacity>
                     </View>
                   </View>
-                  <View>
+                  {/* <View>
                     <View style={styles.socialMediaContent}>
                       <H7fontBoldPrimary>Social Media</H7fontBoldPrimary>
                     </View>
@@ -442,7 +442,7 @@ const SignInScreenClinic: React.FC<Props> = ({
                         />
                       </TouchableOpacity>
                     </View>
-                  </View>
+                  </View> */}
                 </View>
               </View>
               {/* </View> */}

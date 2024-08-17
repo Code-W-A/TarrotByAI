@@ -1,7 +1,13 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import i18n from "i18n-js";
+
 import React, { useEffect, useState } from "react";
-import { Dimensions, SafeAreaView, StyleSheet, View } from "react-native";
+import {
+  ActivityIndicator,
+  Dimensions,
+  SafeAreaView,
+  StyleSheet,
+  View,
+} from "react-native";
 import {
   Divider,
   ProgressBar,
@@ -34,7 +40,9 @@ import AstrogramaSvg from "../../../components/Astral/components/AstrogramaSvg";
 import {
   ConvertToImageFormat,
   fetchAspectTable,
+  fetchAstroData,
   fetchNatalWheelChart,
+  fetchPlanetaryPositions,
   parseSVG,
 } from "../../../utils/AstralUtils/fetchNatalWheelChart";
 import AstrogramaImage from "../../../components/Astral/components/AstrogramaImage";
@@ -46,6 +54,13 @@ import TestSvg from "../../../../assets/base64.svg";
 import WebView from "react-native-webview";
 import localGif from "../../../../assets/constelatii.gif";
 import { Image } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import MyTopBar from "../../../components/Astral/components/TopBar";
+import AspectTable from "../../../components/Astral/components/AspectTable";
+import i18n from "../../../../i18n";
+import { useLanguage } from "../../../context/LanguageContext";
+import { handleToTranslate } from "../../../utils/AstralUtils/fetchGPTData";
+import LoadingOverlay from "../../../components/Astral/components/zodiac/LoadingOverlay";
 
 // const LuckyNumber = ({ number }) => {
 //   return (
@@ -56,6 +71,23 @@ import { Image } from "react-native";
 //     </View>
 //   );
 // };
+
+export const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const zodiacSigns = {
+  Aries: { color: "blue", top: "20%", right: "79%" },
+  Taurus: { color: "orange", top: "39.5%", right: "88.9%" },
+  Gemini: { color: "green", top: "61.5%", right: "87.4%" },
+  Cancer: { color: "blue", top: "80.3%", right: "73.9%" },
+  Leo: { color: "orange", top: "89.8%", right: "52%" },
+  Virgo: { color: "green", top: "87.5%", right: "30%" },
+  Libra: { color: "blue", top: "74%", right: "11%" },
+  Scorpio: { color: "orange", top: "54.5%", right: "1.8%" },
+  Sagittarius: { color: "green", top: "32.4%", right: "4.2%" },
+  Capricorn: { color: "blue", top: "16%", right: "16.2%" },
+  Aquarius: { color: "orange", top: "6%", right: "36.5%" },
+  Pisces: { color: "green", top: "7.5%", right: "60%" },
+};
 
 const { width } = Dimensions.get("window");
 
@@ -185,6 +217,15 @@ function AstrogramaNatala({ navigation }) {
   const [aspectsData, setAspectsData] = useState(null);
   const [wheelImage, setWheelImage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [planetaryData, setPlanetaryData] = useState(null);
+  const [houseCusps, setHouseCusps] = useState(null);
+  const [generalSignReport, setGeneralSignReport] = useState(null);
+  const [generalHouseReport, setGeneralHouseReport] = useState(null);
+  const [moonPhase, setMoonPhase] = useState(null);
+  const [ascendantReport, setAscendantReport] = useState(null);
+  const [selectedTab, setSelectedTab] = useState("natal");
+  const [userD, setUserD] = useState({});
+  const { language, changeLanguage } = useLanguage();
 
   const isValidBase64 = (base64) => {
     const regex = /^[A-Za-z0-9+/]+={0,2}$/;
@@ -192,24 +233,179 @@ function AstrogramaNatala({ navigation }) {
   };
 
   const handleNatalChart = async () => {
+    setIsLoading(true);
+
     try {
-      setIsLoading(true);
-      const data = await fetchNatalWheelChart();
-      // const dataAspects = await fetchAspectTable();
-      const svgElements = parseSVG(data.data.svg); // Presupunem că `parseSVG` este o funcție care parsează SVG-ul într-un format utilizabil
-      setSvgData(svgElements);
-      // setAspectsData(dataAspects.data);
+      const userDataJson = await AsyncStorage.getItem("userData");
+      const userData = userDataJson ? JSON.parse(userDataJson) : null;
+      console.log("user lang...", userData.actualLanguageAstrograma);
 
-      // Funcția care curăță string-ul Base64 de prefixul specific
-      const removePrefix = (base64) =>
-        base64.replace("data:image/svg+xml;base64,", "");
+      if (!userData) {
+        console.log(
+          "Nu există date de utilizator disponibile în AsyncStorage."
+        );
+        setIsLoading(false);
+        return;
+      }
+      console.log("data....here", language);
+      console.log("data....here", userData.actualLanguageAstrograma);
+      if (language != userData.actualLanguageAstrograma) {
+        console.log("data....no", language);
+        userData.actualLanguageAstrograma === language;
 
-      // Elimină prefixul și apoi decodifică
-      const base64Image = removePrefix(data.data.base64_image);
-      const iconData = base64.decode(base64Image);
-      setWheelImage(iconData);
-    } catch (err) {
-      console.log("eroare la handle natal chart...", err);
+        const generalCategory = await handleToTranslate(
+          userData.generalCategory,
+          language,
+          userData.actualLanguageAstrograma
+        );
+        userData.generalCategory = generalCategory;
+        await delay(2000); // delay de 1 secundă
+
+        const dragosteCategory = await handleToTranslate(
+          userData.dragosteCategory,
+          language,
+          userData.actualLanguageAstrograma
+        );
+        userData.dragosteCategory = dragosteCategory;
+        await delay(2000); // delay de 1 secundă
+
+        const familieCategory = await handleToTranslate(
+          userData.familieCategory,
+          language,
+          userData.actualLanguageAstrograma
+        );
+        userData.familieCategory = familieCategory;
+        await delay(2000); // delay de 1 secundă
+
+        const baniCategory = await handleToTranslate(
+          userData.baniCategory,
+          language,
+          userData.actualLanguageAstrograma
+        );
+        userData.baniCategory = baniCategory;
+        await delay(2000); // delay de 1 secundă
+
+        const muncaStudiiCategory = await handleToTranslate(
+          userData.muncaStudiiCategory,
+          language,
+          userData.actualLanguageAstrograma
+        );
+        userData.muncaStudiiCategory = muncaStudiiCategory;
+        await delay(2000); // delay de 1 secundă
+
+        const prieteniCategory = await handleToTranslate(
+          userData.prieteniCategory,
+          language,
+          userData.actualLanguageAstrograma
+        );
+        userData.prieteniCategory = prieteniCategory;
+        await delay(2000); // delay de 1 secundă
+
+        const sanatateCategory = await handleToTranslate(
+          userData.sanatateCategory,
+          language,
+          userData.actualLanguageAstrograma
+        );
+        userData.sanatateCategory = sanatateCategory;
+        await delay(2000); // delay de 1 secundă
+
+        const spiritualitateCategory = await handleToTranslate(
+          userData.spiritualitateCategory,
+          language,
+          userData.actualLanguageAstrograma
+        );
+        userData.spiritualitateCategory = spiritualitateCategory;
+        await delay(2000); // delay de 1 secundă
+
+        await AsyncStorage.setItem("userData", JSON.stringify(userData));
+      }
+
+      setUserD(userData);
+      // const {
+      //   full_name,
+      //   day,
+      //   month,
+      //   year,
+      //   hour,
+      //   min,
+      //   sec,
+      //   gender,
+      //   place,
+      //   lat,
+      //   lon,
+      //   tzone,
+      // } = userData;
+
+      // const urls = {
+      //   natalWheelChart:
+      //     "https://astroapi-4.divineapi.com/western-api/v1/natal-wheel-chart",
+      //   aspectTable:
+      //     "https://astroapi-4.divineapi.com/western-api/v2/aspect-table",
+      //   planetaryPositions:
+      //     "https://astroapi-4.divineapi.com/western-api/v1/planetary-positions",
+      //   houseCusps:
+      //     "https://astroapi-4.divineapi.com/western-api/v1/house-cusps",
+      //   moonPhases:
+      //     "https://astroapi-4.divineapi.com/western-api/v1/moon-phases",
+      //   ascendantReport:
+      //     "https://astroapi-4.divineapi.com/western-api/v1/ascendant-report",
+      // };
+
+      // const results = await Promise.all(
+      //   Object.keys(urls).map((key) =>
+      //     fetchAstroData(
+      //       urls[key],
+      //       full_name,
+      //       day,
+      //       month,
+      //       year,
+      //       hour,
+      //       min,
+      //       sec,
+      //       gender,
+      //       place,
+      //       lat,
+      //       lon,
+      //       tzone
+      //     )
+      //   )
+      // );
+
+      // const [
+      //   natalData,
+      //   aspectsData,
+      //   planetaryData,
+      //   cuspsData,
+      //   moonPhaseData,
+      //   ascendantData,
+      // ] = results;
+
+      if (userData.natalData && userData.natalData.data) {
+        const svgElements = parseSVG(userData.natalData.data.svg);
+        setSvgData(svgElements);
+        const base64Image = userData.natalData.data.base64_image.replace(
+          "data:image/svg+xml;base64,",
+          ""
+        );
+        setWheelImage(base64.decode(base64Image));
+      }
+
+      setAspectsData(userData.aspectsData ? userData.aspectsData.data : null);
+      setPlanetaryData(
+        userData.planetaryData ? userData.planetaryData.data : null
+      );
+      setHouseCusps(userData.cuspsData ? userData.cuspsData.data : null);
+      setMoonPhase(userData.moonPhaseData ? userData.moonPhaseData.data : null);
+      setAscendantReport(
+        userData.ascendantData ? userData.ascendantData.data : null
+      );
+      console.log("test...", userData.cuspsData.data);
+      setIsLoading(false);
+    } catch (error) {
+      console.error(
+        "Eroare la preluarea și procesarea astrogramei natale:",
+        error
+      );
     } finally {
       setIsLoading(false);
     }
@@ -254,9 +450,22 @@ function AstrogramaNatala({ navigation }) {
             preserveAspectRatio="xMidYMid meet"
           />
         )}
+        {/* {Object.entries(zodiacSigns).map(([sign, { color, top, right }]) => (
+          <View style={[styles.iconContainer, { top, right }]}>
+            <MaterialCommunityIcons
+              name={`zodiac-${sign.toLowerCase()}`}
+              size={17}
+              color={color}
+            />
+          </View>
+        ))} */}
       </View>
     </View>
   );
+
+  if (isLoading) {
+    return <LoadingOverlay />;
+  }
 
   return (
     <>
@@ -279,86 +488,189 @@ function AstrogramaNatala({ navigation }) {
           }}
         >
           <SpaceSky />
-          {isLoading ? (
-            <View style={styles.container}>
-              <Image source={localGif} style={styles.image} />
-              <H8fontRegularWhite style={styles.text}>
-                Vă analizăm informațiile pentru a vă crea astrograma natală...
-              </H8fontRegularWhite>
-            </View>
-          ) : (
+          <MyTopBar onChangeTab={setSelectedTab} />
+          {selectedTab === "natal" ? (
             <ScrollViewFadeFirst element={Header} height={400}>
               <ShowFromTop>
                 <View style={[styles.defaultContainer]}>
+                  <Divider style={{ marginTop: "5%" }} />
                   <View style={styles.horoscopeTodayContainer}>
                     <H6fontBoldWhite style={styles.textTitles}>
-                      Interpretare astrograma
+                      {userD.full_name}
+                    </H6fontBoldWhite>
+                  </View>
+                  <View style={styles.horoscopeTodayContainer}>
+                    <H6fontBoldWhite
+                      style={[styles.textDescription, { marginTop: 0 }]}
+                    >
+                      {userD.day} - {userD.month} - {userD.year}
+                    </H6fontBoldWhite>
+                  </View>
+                  <View style={styles.horoscopeTodayContainer}>
+                    <H6fontBoldWhite
+                      style={[styles.textDescription, { marginTop: 0 }]}
+                    >
+                      {userD.selectedTime}
+                    </H6fontBoldWhite>
+                  </View>
+                  <View style={styles.horoscopeTodayContainer}>
+                    <H6fontBoldWhite
+                      style={[
+                        styles.textDescription,
+                        { marginTop: 0, maxWidth: "80%" },
+                      ]}
+                    >
+                      {userD.place}
+                    </H6fontBoldWhite>
+                  </View>
+                  <View style={styles.horoscopeTodayContainer}>
+                    <H6fontBoldWhite
+                      style={[styles.textDescription, { marginTop: 0 }]}
+                    >
+                      {userD.gender}
                     </H6fontBoldWhite>
                   </View>
                   {/* Interpretează următoarea diagramă natală: Născut pe 10 martie 1994, la 14:05, în București, România. Soarele în Pești, Luna în Capricorn, Mercur în Vărsător, Venus în Berbec, și Marte în Pești. Ascendentul este în Scorpion. Soarele formează o conjuncție cu Venus, Luna este în opoziție cu Marte, iar Mercur formează un trigon cu Saturn. */}
-                  <View
-                    style={[
-                      styles.horoscopeTodayContainer,
-                      { marginBottom: "10%" },
-                    ]}
-                  >
-                    <H9fontMediumLightBlack style={styles.textDescription}>
-                      Această diagramă natală sugerează o personalitate complexă
-                      și profundă, cu multe influențe diverse care se
-                      intersectează pentru a forma un caracter unic. Iată cum
-                      fiecare element contribuie la întreaga structură a
-                      personalității: Soarele în Pești conferă o natură
-                      empatică, sensibilă și intuitivă. Persoanele născute sub
-                      semnul Peștilor sunt adesea creativi și visători, având o
-                      conexiune puternică cu lumea emoțională și spirituală.
-                      Luna în Capricorn aduce un contrast față de Soarele în
-                      Pești, indicând o latură responsabilă, practică și
-                      ambițioasă. Capricornul este un semn de pământ, orientat
-                      spre realizări și stabilitate, ceea ce poate tempera
-                      tendințele mai evazive ale Peștilor. Mercur în Vărsător
-                      sugerează o minte agilă, inovativă și originală.
-                      Persoanele cu Mercur în Vărsător se gândesc adesea în
-                      afara cutiei, aducând idei noi și perspective unice în
-                      conversații. Venus în Berbec indică o abordare directă și
-                      energică în relații. Aceasta poziție sugerează pasiune și
-                      spontaneitate în iubire, dar și o tendință de a fi uneori
-                      impulsiv în afecțiuni. Marte în Pești arată că energia și
-                      acțiunea sunt canalizate prin emoții. Persoanele cu Marte
-                      în Pești pot prefera să acționeze în moduri mai subtile
-                      sau indirecte, fiind adesea motivate de sentimentul de
-                      compasiune sau de nevoia de a ajuta. Ascendentul în
-                      Scorpion aduce intensitate, magnetism și o puternică
-                      voință. Scorpionul este asociat cu transformarea și cu
-                      profunzimile psihice, conferind o capacitate remarcabilă
-                      de a se regenera și de a se reinventa. Aspectele: Soarele
-                      în conjuncție cu Venus amplifică calitățile venusiene
-                      (dragoste, frumusețe, armonie) în manifestarea
-                      personalității, aducând un accent pe relații și pe
-                      valorile estetice. Luna în opoziție cu Marte poate crea
-                      tensiuni interioare între nevoile emoționale și modul de
-                      acțiune, uneori ducând la conflicte între dorința de
-                      securitate emoțională și impulsurile instinctive. Mercur
-                      în trigon cu Saturn conferă o minte structurată, capabilă
-                      de concentrare profundă și de înțelegere a detaliilor
-                      complexe. Acest aspect favorizează gândirea strategică și
-                      capacitatea de planificare pe termen lung. În concluzie,
-                      această diagramă natală descrie o persoană cu un amestec
-                      de sensibilitate și practicitate, creativitate și
-                      structură, indicând o persoană capabilă să navigheze și să
-                      integreze diversele sale laturi într-un mod efectiv și
-                      original.
-                    </H9fontMediumLightBlack>
-                  </View>
+                  {/* Interpretează următoarea diagramă natală si sa fie pe categorii General, Personalitate, Dragoste, Cariera, Bani:  */}
                   {/* {aspectsData && (
         <AstrologyAspectsView aspectsData={aspectsData} />
       )} */}
-                  <Divider style={{ marginTop: "5%" }} />
                 </View>
                 {/* <ChatComponent /> */}
 
                 <View style={{ paddingVertical: 10 }} />
               </ShowFromTop>
             </ScrollViewFadeFirst>
+          ) : selectedTab === "interpretation" ? (
+            <ScrollViewFadeFirst height={10}>
+              <ShowFromTop>
+                <View style={[styles.defaultContainer]}>
+                  <View style={styles.horoscopeTodayContainer}>
+                    <H6fontBoldWhite style={styles.textTitles}>
+                      {isLoading ? (
+                        <ActivityIndicator />
+                      ) : (
+                        i18n.translate("InterpretareAstrograma")
+                      )}
+                    </H6fontBoldWhite>
+                  </View>
+                  <Divider style={{ marginTop: "5%" }} />
+                  {/* Interpretează următoarea diagramă natală: Născut pe 10 martie 1994, la 14:05, în București, România. Soarele în Pești, Luna în Capricorn, Mercur în Vărsător, Venus în Berbec, și Marte în Pești. Ascendentul este în Scorpion. Soarele formează o conjuncție cu Venus, Luna este în opoziție cu Marte, iar Mercur formează un trigon cu Saturn. */}
+                  <View
+                    style={[
+                      styles.horoscopeTodayContainer,
+                      {
+                        marginBottom: "10%",
+                        flexDirection: "column",
+                        justifyContent: "flex-start",
+                        alignItems: "flex-start",
+                      },
+                    ]}
+                  >
+                    <H6fontBoldWhite
+                      style={[styles.textTitles, { marginTop: "7%" }]}
+                    >
+                      {i18n.translate("General")}
+                    </H6fontBoldWhite>
+
+                    <H9fontMediumLightBlack style={styles.textDescription}>
+                      {userD.generalCategory}
+                    </H9fontMediumLightBlack>
+                    <H6fontBoldWhite
+                      style={[styles.textTitles, { marginTop: "7%" }]}
+                    >
+                      {i18n.translate("Dragoste")}
+                    </H6fontBoldWhite>
+
+                    <H9fontMediumLightBlack style={styles.textDescription}>
+                      {userD.dragosteCategory}
+                    </H9fontMediumLightBlack>
+                    <H6fontBoldWhite
+                      style={[styles.textTitles, { marginTop: "7%" }]}
+                    >
+                      {i18n.translate("Familie")}
+                    </H6fontBoldWhite>
+
+                    <H9fontMediumLightBlack style={styles.textDescription}>
+                      {userD.familieCategory}
+                    </H9fontMediumLightBlack>
+                    {/* <H6fontBoldWhite
+                      style={[styles.textTitles, { marginTop: "7%" }]}
+                    >
+                      Cariera
+                    </H6fontBoldWhite>
+
+                    <H9fontMediumLightBlack style={styles.textDescription}>
+                      {userD.carieraCategory}
+                    </H9fontMediumLightBlack> */}
+
+                    <H6fontBoldWhite
+                      style={[styles.textTitles, { marginTop: "7%" }]}
+                    >
+                      {i18n.translate("Bani")}
+                    </H6fontBoldWhite>
+
+                    <H9fontMediumLightBlack style={styles.textDescription}>
+                      {userD.baniCategory}
+                    </H9fontMediumLightBlack>
+
+                    <H6fontBoldWhite
+                      style={[styles.textTitles, { marginTop: "7%" }]}
+                    >
+                      {i18n.translate("MuncaSiStudii")}
+                    </H6fontBoldWhite>
+
+                    <H9fontMediumLightBlack style={styles.textDescription}>
+                      {userD.muncaStudiiCategory}
+                    </H9fontMediumLightBlack>
+
+                    <H6fontBoldWhite
+                      style={[styles.textTitles, { marginTop: "7%" }]}
+                    >
+                      {i18n.translate("Prieteni")}
+                    </H6fontBoldWhite>
+
+                    <H9fontMediumLightBlack style={styles.textDescription}>
+                      {userD.prieteniCategory}
+                    </H9fontMediumLightBlack>
+
+                    <H6fontBoldWhite
+                      style={[styles.textTitles, { marginTop: "7%" }]}
+                    >
+                      {i18n.translate("Sanatate")}
+                    </H6fontBoldWhite>
+
+                    <H9fontMediumLightBlack style={styles.textDescription}>
+                      {userD.sanatateCategory}
+                    </H9fontMediumLightBlack>
+
+                    <H6fontBoldWhite
+                      style={[styles.textTitles, { marginTop: "7%" }]}
+                    >
+                      {i18n.translate("Spiritualitate")}
+                    </H6fontBoldWhite>
+
+                    <H9fontMediumLightBlack style={styles.textDescription}>
+                      {userD.spiritualitateCategory}
+                    </H9fontMediumLightBlack>
+                  </View>
+                  {/* {aspectsData && (
+      <AstrologyAspectsView aspectsData={aspectsData} />
+    )} */}
+                </View>
+                {/* <ChatComponent /> */}
+
+                <View style={{ paddingVertical: 10 }} />
+              </ShowFromTop>
+            </ScrollViewFadeFirst>
+          ) : (
+            <ShowFromTop>
+              <AspectTable
+                houseCusps={houseCusps}
+                planetaryData={planetaryData}
+                aspects={aspectsData}
+              />
+            </ShowFromTop>
           )}
         </LinearGradient>
       </MainContainer>
@@ -391,7 +703,7 @@ const styles = StyleSheet.create({
   defaultContainer: {
     marginLeft: 20,
     marginTop: 20,
-    paddingBottom: "5%",
+    paddingBottom: "15%",
   },
   textTitles: {
     fontSize: 18,
@@ -401,6 +713,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#F0F0F0",
     marginTop: "5%",
+    marginLeft: "3%",
   },
   horoscopeTodayContainer: {
     flexDirection: "row",
@@ -450,6 +763,17 @@ const styles = StyleSheet.create({
     width: 200,
     height: 200,
     resizeMode: "contain", // Asigură-te că GIF-ul se încadrează în dimensiunile specificate
+  },
+  iconContainer: {
+    position: "absolute", // Poziționează iconița absolut peste imagine
+    top: "89.7%",
+    right: "52%",
+    width: "auto",
+    height: "auto",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "white", // Îndepărtează fundalul pentru a lăsa imaginea vizibilă
+    borderRadius: 50,
   },
 });
 

@@ -11,6 +11,15 @@ export const styles = StyleSheet.create({
 
     // alte proprietăți de stilizare pot fi adăugate aici
   },
+  cardRowLong: {
+    flexDirection: "row", // Așează elementele orizontal
+    justifyContent: "center", // Aliniază elementele în centru pe orizontală
+    alignItems: "center", // Aliniază elementele în centru pe verticală
+    flexWrap: "wrap", // Permite elementelor să treacă pe rândul următor dacă nu există suficient spațiu
+    margin: 10, // Adaugă un spațiu în jurul rândului de carduri
+
+    // alte proprietăți de stilizare pot fi adăugate aici
+  },
   clinicIdButtonStyle: {
     height: 25,
     width: 100,

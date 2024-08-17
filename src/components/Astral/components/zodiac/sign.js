@@ -5,7 +5,7 @@ import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { Caption, Subheading, TouchableRipple } from "react-native-paper";
 
 import { Zodiac } from "../../../../svgs";
-import PlatformUtils from "../../utils/platform";
+import PlatformUtils from "../../../../utils/platform";
 
 const signs = {
   Aquarius: Zodiac.Aquarius,
@@ -53,7 +53,6 @@ function Sign({
   return (
     <TouchableOpacity
       onPress={() => onPress(sign)}
-
       style={[{ alignItems: "center", justifyContent: "center" }, style]}
     >
       <>
@@ -73,12 +72,12 @@ function Sign({
         >
           <ParsedSign width={signHeight} height={signWidth} />
         </View>
-        {showTitle && (
+        {/* {showTitle && (
           <Subheading style={styleTitle}>{title ?? i18n.t(sign)}</Subheading>
-        )}
-        {subtitle && <Caption style={styleSubtitle}>{subtitle}</Caption>}
+        )} */}
+        {/* {subtitle && <Caption style={styleSubtitle}>{subtitle}</Caption>} */}
       </>
-    </TouchableRipple>
+    </TouchableOpacity>
   );
 }
 

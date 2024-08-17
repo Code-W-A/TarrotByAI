@@ -780,3 +780,115 @@ export const NewsCategory = [
   "Previziuni lunare",
   "Previziuni anuale",
 ];
+
+export const general = `
+Interpreteaza in General(predispozitii si aspecte practice din viata nativului) astrograma conform urmatorelor date: 
+General: 
+Ascendent, planeta care guverneaza  ascendentul,casa in care se afla si aspectele pe care planeta care guverneaza ascendentul le face cu celelalte puncte sau planete din harta.  Guvernatorul zodiei in care se afla planeta guvernatoare a ascendetului. 
+Planetele sau punctele astrologice prezente pe prima casa astrologica. 
+Pozitia nodurilor lunare conform pozitiei pe casele astrologice dar si conform zodiilor in care se afla. Guvernatorii nodurilor lunare: casa in care se afla, zodia in care se afla si aspectele pe care aceste planete le fac cu alte planete sau puncte din harta inclusiv cu nodurile lunare. 
+Pozitia Soarelui in casa  si zodia in care se afla, dar si aspectele pe care le face cu restul planetelor si punctelor din harta. 
+Pozitia Lunii  in casa si zodia in care se afla, dar si aspectele pe care le face cu restul planetelor si punctelor din harta. 
+`;
+export const dragoste = `
+Interpreteaza in Dragoste (predispozitii si aspecte practice din viata nativului)  astrograma conform urmatorelor date: 
+Dragoste: 
+Casa a 5 a, zodia in care se afla, planete sau puncte  existente in aceasta casa si aspectele pe care le fac cu restul planetelor sau punctelor din harta. Guvernatorul casei 5: zodie, casa, aspectele pe care le face cu restul planetelor sau punctelor din harta.
+
+Casa a 7 a, zodia in care se afla, planete sau puncte  existente in aceasta casa si aspectele pe care le fac cu restul planetelor sau punctelor din harta. Guvernatorul casei 7: zodie, casa, aspectele pe care le face cu restul planetelor sau punctelor din harta.
+Pozitia planetei Venus in casa si zodia in care se afla, dar si aspectele pe care le face cu restul planetelor si punctelor din harta. 
+
+
+`;
+export const familie = `
+Interpreteaza in Familie (predispozitii si aspecte practice din viata nativului) astrograma conform urmatorelor date: 
+Familie: 
+Casa a 4 a, zodia in care se afla, planete sau puncte  existente in aceasta casa si aspectele pe care le fac cu restul planetelor sau punctelor din harta. Guvernatorul casei 4: zodie, casa, aspectele pe care le face cu restul planetelor sau punctelor din harta.
+
+Casa a 3 a, zodia in care se afla, planete sau puncte  existente in aceasta casa si aspectele pe care le fac cu restul planetelor sau punctelor din harta. Guvernatorul casei 3: zodie, casa, aspectele pe care le face cu restul planetelor sau punctelor din harta.
+
+Pozitia Lunii in casa si zodia in care se afla, dar si aspectele pe care le face cu restul planetelor si punctelor din harta. 
+
+
+
+`;
+
+export const bani = `
+Interpreteaza in Bani (predispozitii si aspecte practice din viata nativului)  astrograma conform urmatorelor date: 
+Bani: 
+Casa a 2 a, zodia in care se afla, planete sau puncte  existente in aceasta casa si aspectele pe care le fac cu restul planetelor sau punctelor din harta. Guvernatorul casei 2: zodie, casa, aspectele pe care le face cu restul planetelor sau punctelor din harta.
+
+Casa a 8 a, zodia in care se afla, planete sau puncte  existente in aceasta casa si aspectele pe care le fac cu restul planetelor sau punctelor din harta. Guvernatorul casei 8: zodie, casa, aspectele pe care le face cu restul planetelor sau punctelor din harta.
+
+Pozitia planetei Venus   in casa si zodia in care se afla, dar si aspectele pe care le face cu restul planetelor si punctelor din harta. 
+Pozitia planetei Marte  in casa si zodia in care se afla, dar si aspectele pe care le face cu restul planetelor si punctelor din harta. 
+Pozitia planetei Pluto  in casa si zodia in care se afla, dar si aspectele pe care le face cu restul planetelor si punctelor din harta. 
+
+`;
+
+export const muncaStudii = `
+Interpreteaza in Munca si studii (predispozitii si aspecte practice din viata nativului)  astrograma conform urmatorelor date: 
+
+Munca si studii: 
+
+Casa a 3 a, zodia in care se afla, planete sau puncte  existente in aceasta casa si aspectele pe care le fac cu restul planetelor sau punctelor din harta. Guvernatorul casei 3: zodie, casa, aspectele pe care le face cu restul planetelor sau punctelor din harta.
+
+Casa a 9 a, zodia in care se afla, planete sau puncte  existente in aceasta casa si aspectele pe care le fac cu restul planetelor sau punctelor din harta. Guvernatorul casei 9: zodie, casa, aspectele pe care le face cu restul planetelor sau punctelor din harta.
+
+
+Pozitia planetei Mercur   in casa si zodia in care se afla, dar si aspectele pe care le face cu restul planetelor si punctelor din harta. 
+Pozitia planetei Jupiter  in casa si zodia in care se afla, dar si aspectele pe care le face cu restul planetelor si punctelor din harta. 
+
+Casa a 6 a, zodia in care se afla, planete sau puncte  existente in aceasta casa si aspectele pe care le fac cu restul planetelor sau punctelor din harta. Guvernatorul casei 6: zodie, casa, aspectele pe care le face cu restul planetelor sau punctelor din harta.
+
+Casa a 10 a, zodia in care se afla, planete sau puncte  existente in aceasta casa si aspectele pe care le fac cu restul planetelor sau punctelor din harta. Guvernatorul casei 10: zodie, casa,aspectele pe care le face cu restul planetelor sau punctelor din harta.
+
+ Pozitia planetei Saturn   in casa si zodia in care se afla, dar si aspectele pe care le face cu restul planetelor si punctelor din harta. 
+
+
+`;
+
+export const prieteni = `
+Interpreteaza in Prieteni (predispozitii si aspecte practice din viata nativului) astrograma conform urmatorelor date: 
+Prieteni: 
+
+Casa a 11 a, zodia in care se afla, planete sau puncte  existente in aceasta casa si aspectele pe care le fac cu restul planetelor sau punctelor din harta. Guvernatorul casei 11: zodie, casa, aspectele pe care le face cu restul planetelor sau punctelor din harta.
+
+Pozitia planetei Uranus  in casa  si zodia in care se afla, dar si aspectele pe care le face cu restul planetelor si punctelor din harta. 
+
+
+`;
+
+export const sanatate = `
+Interpreteaza in Sanatate (predispozitii si aspecte practice din viata nativului)  astrograma conform urmatorelor date: 
+Sanatate: 
+
+Casa a 6 a, zodia in care se afla, planete sau puncte  existente in aceasta casa si aspectele pe care le fac cu restul planetelor sau punctelor din harta. Guvernatorul casei 6: zodie, casa, aspectele pe care le face cu restul planetelor sau punctelor din harta.
+
+Casa a 12 a, zodia in care se afla, planete sau puncte  existente in aceasta casa si aspectele pe care le fac cu restul planetelor sau punctelor din harta. Guvernatorul casei 12: zodie, casa,aspectele pe care le face cu restul planetelor sau punctelor din harta.
+
+ Pozitia planetei Mercur  in casa  si zodia in care se afla, dar si aspectele pe care le face cu restul planetelor si punctelor din harta.  
+Pozitia planetei Neptun   in casa si zodia in care se afla, dar si aspectele pe care le face cu restul planetelor si punctelor din harta. 
+
+
+`;
+
+export const spiritualitate = `
+Interpreteaza in Spiritualitate (predispozitii si aspecte practice din viata nativului)  astrograma conform urmatorelor date: 
+Spiritualitate: 
+Casa a 8 a, zodia in care se afla, planete sau puncte  existente in aceasta casa si aspectele pe care le fac cu restul planetelor sau punctelor din harta. Guvernatorul casei 8: zodie, casa, aspectele pe care le face cu restul planetelor sau punctelor din harta.
+
+Pozitia planetei Pluto  in casa si zodia in care se afla, dar si aspectele pe care le face cu restul planetelor si punctelor din harta. 
+
+Casa a 9 a, zodia in care se afla, planete sau puncte  existente in aceasta casa si aspectele pe care le fac cu restul planetelor sau punctelor din harta. Guvernatorul casei 9: zodie, casa, aspectele pe care le face cu restul planetelor sau punctelor din harta.
+
+Pozitia planetei Jupiter  in casa si zodia in care se afla, dar si aspectele pe care le face cu restul planetelor si punctelor din harta. 
+
+Casa a 12 a, zodia in care se afla, planete sau puncte  existente in aceasta casa si aspectele pe care le fac cu restul planetelor sau punctelor din harta. Guvernatorul casei 12: zodie, casa,aspectele pe care le face cu restul planetelor sau punctelor din harta.
+
+
+Pozitia planetei Neptun  in casa si zodia in care se afla, dar si aspectele pe care le face cu restul planetelor si punctelor din harta. 
+
+`;
+
+// ---------

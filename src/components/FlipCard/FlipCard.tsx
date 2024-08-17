@@ -24,11 +24,17 @@ import {
 import { authentication } from "../../../firebase";
 
 //---ADS---
-// import { InterstitialAd, AdEventType, TestIds } from 'react-native-google-mobile-ads';
+import {
+  InterstitialAd,
+  AdEventType,
+  TestIds,
+} from "react-native-google-mobile-ads";
 
 // Înlocuiți cu ID-ul real al unității de anunțuri pentru producție
-// const adUnitId = __DEV__ ? TestIds.INTERSTITIAL : 'ca-app-pub-9577714849380446/7080054250';
-// const interstitialAd = InterstitialAd.createForAdRequest(adUnitId);
+const adUnitId = __DEV__
+  ? TestIds.INTERSTITIAL
+  : "ca-app-pub-9577714849380446/7080054250";
+const interstitialAd = InterstitialAd.createForAdRequest(adUnitId);
 
 const FlipCard = ({
   item,
@@ -52,48 +58,48 @@ const FlipCard = ({
   const [interstitialLoaded, setInterstitialLoaded] = useState(false);
 
   //---ADS---
-  // useEffect(() => {
-  //   // Ascultător pentru evenimentul de încărcare a interstitialului
-  //   const loadListener = interstitialAd.addAdEventListener(
-  //     AdEventType.LOADED,
-  //     () => {
-  //       setInterstitialLoaded(true);
-  //     }
-  //   );
+  useEffect(() => {
+    // Ascultător pentru evenimentul de încărcare a interstitialului
+    const loadListener = interstitialAd.addAdEventListener(
+      AdEventType.LOADED,
+      () => {
+        setInterstitialLoaded(true);
+      }
+    );
 
-  //   // Ascultător pentru evenimentul de închidere a interstitialului
-  //   const closeListener = interstitialAd.addAdEventListener(
-  //     AdEventType.CLOSED,
-  //     () => {
-  //       // Navigația se face după închiderea interstitialului
-  //       // if (isFuture) {
-  //       //   navigation.navigate(screenName.FutureReading, {
-  //       //     item,
-  //       //   });
-  //       // }
-  //       // Reîncărcați interstitialul pentru utilizări ulterioare
-  //       setInterstitialLoaded(false);
-  //       interstitialAd.load();
-  //     }
-  //   );
+    // Ascultător pentru evenimentul de închidere a interstitialului
+    const closeListener = interstitialAd.addAdEventListener(
+      AdEventType.CLOSED,
+      () => {
+        // Navigația se face după închiderea interstitialului
+        // if (isFuture) {
+        //   navigation.navigate(screenName.FutureReading, {
+        //     item,
+        //   });
+        // }
+        // Reîncărcați interstitialul pentru utilizări ulterioare
+        setInterstitialLoaded(false);
+        interstitialAd.load();
+      }
+    );
 
-  //   const errorListener = interstitialAd.addAdEventListener(
-  //     AdEventType.ERROR,
-  //     (error) => {
-  //       console.error(error);
-  //     }
-  //   );
+    const errorListener = interstitialAd.addAdEventListener(
+      AdEventType.ERROR,
+      (error) => {
+        console.error(error);
+      }
+    );
 
-  //   // Încărcați interstitialul
-  //   interstitialAd.load();
+    // Încărcați interstitialul
+    interstitialAd.load();
 
-  //   return () => {
-  //     // Curățare la demontare
-  //     loadListener();
-  //     closeListener();
-  //     errorListener();
-  //   };
-  // }, []);
+    return () => {
+      // Curățare la demontare
+      loadListener();
+      closeListener();
+      errorListener();
+    };
+  }, []);
 
   // Funcție pentru a naviga către ecranul PersonalizedReading cu parametrul item
   const navigateToPersonalizedReading = async (isManualNav?) => {
@@ -102,63 +108,63 @@ const FlipCard = ({
 
       if (isFuture && interstitialLoaded) {
         //---ADS---
-        // await interstitialAd.show().then(() => {
-        //   navigation.navigate(screenName.FutureReading, {
-        //     item,
-        //   });
-        // });
+        await interstitialAd.show().then(() => {
+          navigation.navigate(screenName.FutureReading, {
+            item,
+          });
+        });
       } else {
         console.log("here...");
         if (isManualNav) {
           //---ADS---
-          // await interstitialAd.show().then(async () => {
-          //   const cardNameNormalized = normalizeString(item.info.ro.nume);
-          //   const categoryNameNormalized = normalizeString(conditieCategorie);
-          //   const filteredVariante = await handleQueryFirestoreVarianteCarti(
-          //     "VarianteCarti",
-          //     cardNameNormalized,
-          //     categoryNameNormalized
-          //   );
-          //   // Verificare dacă există elemente în array-ul filtrat
-          //   if (filteredVariante.length > 0) {
-          //     // Selectare aleatorie a unui element
-          //     const randomIndex = Math.floor(
-          //       Math.random() * filteredVariante.length
-          //     );
-          //     const selectedCard = filteredVariante[randomIndex];
-          //     // ---- START HISTORY ----
-          //     if (currentNumber !== 0) {
-          //       console.log("sendToHistory...currentnr < 8", sendToHistory);
-          //       let arr = [...sendToHistory];
-          //       arr.push(selectedCard);
-          //       setSendToHistory([...arr]);
-          //     } else if (currentNumber === 0) {
-          //       console.log("sendToHistory...currentnr === 8", sendToHistory);
-          //       let arr = [...sendToHistory];
-          //       arr.push(selectedCard);
-          //       const auth = authentication;
-          //       if (auth.currentUser) {
-          //         console.log("Is user...saving personal reading...");
-          //         const userLocation = `Users/${
-          //           auth.currentUser ? auth.currentUser.uid : ""
-          //         }/PersonalReading`;
-          //         if (arr.length > 0) {
-          //           handleUploadFirestoreSubcollection(arr, userLocation);
-          //         }
-          //       }
-          //       updateNumber(8);
-          //       setSendToHistory([]);
-          //     }
-          //     // Navigație cu cartea selectată
-          //     navigation.navigate("PersonalizedReading", {
-          //       item: selectedCard,
-          //     });
-          //   } else {
-          //     console.log(
-          //       "Nicio carte nu a fost găsită pentru criteriile specificate."
-          //     );
-          //   }
-          // });
+          await interstitialAd.show().then(async () => {
+            const cardNameNormalized = normalizeString(item.info.ro.nume);
+            const categoryNameNormalized = normalizeString(conditieCategorie);
+            const filteredVariante = await handleQueryFirestoreVarianteCarti(
+              "VarianteCarti",
+              cardNameNormalized,
+              categoryNameNormalized
+            );
+            // Verificare dacă există elemente în array-ul filtrat
+            if (filteredVariante.length > 0) {
+              // Selectare aleatorie a unui element
+              const randomIndex = Math.floor(
+                Math.random() * filteredVariante.length
+              );
+              const selectedCard = filteredVariante[randomIndex];
+              // ---- START HISTORY ----
+              if (currentNumber !== 0) {
+                console.log("sendToHistory...currentnr < 8", sendToHistory);
+                let arr = [...sendToHistory];
+                arr.push(selectedCard);
+                setSendToHistory([...arr]);
+              } else if (currentNumber === 0) {
+                console.log("sendToHistory...currentnr === 8", sendToHistory);
+                let arr = [...sendToHistory];
+                arr.push(selectedCard);
+                const auth = authentication;
+                if (auth.currentUser) {
+                  console.log("Is user...saving personal reading...");
+                  const userLocation = `Users/${
+                    auth.currentUser ? auth.currentUser.uid : ""
+                  }/PersonalReading`;
+                  if (arr.length > 0) {
+                    handleUploadFirestoreSubcollection(arr, userLocation);
+                  }
+                }
+                updateNumber(8);
+                setSendToHistory([]);
+              }
+              // Navigație cu cartea selectată
+              navigation.navigate("PersonalizedReading", {
+                item: selectedCard,
+              });
+            } else {
+              console.log(
+                "Nicio carte nu a fost găsită pentru criteriile specificate."
+              );
+            }
+          });
         } else {
           const cardNameNormalized = normalizeString(item.info.ro.nume);
           const categoryNameNormalized = normalizeString(conditieCategorie);

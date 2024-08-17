@@ -10,11 +10,11 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 export interface PushNotificationState {
   expoPushToken?: Notifications.ExpoPushToken;
-  setExpoPushToken?:any;
+  setExpoPushToken?: any;
   notification?: Notifications.Notification;
-  registerForPushNotificationsAsync?:any;
-  isGranted?:Boolean;
-  openNotificationSettings?:any
+  registerForPushNotificationsAsync?: any;
+  isGranted?: Boolean;
+  openNotificationSettings?: any;
 }
 
 type RootStackParamList = {
@@ -23,15 +23,15 @@ type RootStackParamList = {
 };
 
 // Tip pentru navigare
-type EcranAfirmatiiNavigationProp = NativeStackNavigationProp<RootStackParamList, 'EcranAfirmatii'>;
+type EcranAfirmatiiNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  "EcranAfirmatii"
+>;
 
 // Tip pentru ruta
-type EcranAfirmatiiRouteProp = RouteProp<RootStackParamList, 'EcranAfirmatii'>;
-
+type EcranAfirmatiiRouteProp = RouteProp<RootStackParamList, "EcranAfirmatii">;
 
 export const usePushNotifications = (): PushNotificationState => {
-
-
   Notifications.setNotificationHandler({
     handleNotification: async () => ({
       shouldPlaySound: false,
@@ -48,25 +48,25 @@ export const usePushNotifications = (): PushNotificationState => {
     Notifications.Notification | undefined
   >();
 
-  const [isGranted, setIsGranted] = useState<any>(false)
+  const [isGranted, setIsGranted] = useState<any>(false);
 
-  const navigation = useNavigation()
+  const navigation = useNavigation();
 
   const notificationListener = useRef<Notifications.Subscription>();
   const responseListener = useRef<Notifications.Subscription>();
 
   const openNotificationSettings = () => {
-    if (Platform.OS === 'ios') {
+    if (Platform.OS === "ios") {
       // Pentru iOS, deschide setările aplicației
-      Linking.openURL('app-settings:');
+      Linking.openURL("app-settings:");
     } else {
       // Pentru Android, deschide setările aplicației folosind openSettings()
       // Această metodă este disponibilă în versiunile mai noi de React Native
-      Linking.openSettings().catch((err) => console.error('An error occurred', err));
+      Linking.openSettings().catch((err) =>
+        console.error("An error occurred", err)
+      );
     }
   };
-
-  
 
   async function registerForPushNotificationsAsync() {
     let token;
@@ -74,30 +74,34 @@ export const usePushNotifications = (): PushNotificationState => {
       const { status: existingStatus } =
         await Notifications.getPermissionsAsync();
       let finalStatus = existingStatus;
-      console.log("status...", finalStatus)
+      console.log("status...", finalStatus);
 
       if (existingStatus !== "granted") {
         const { status } = await Notifications.requestPermissionsAsync();
         finalStatus = status;
       }
       if (finalStatus !== "granted") {
-        Alert.alert('Notifications are stopped', 'Do you want to activate notifications?', [
-          {
-            text: 'No',
-            onPress: () => console.log('Cancel Pressed'),
-            style: 'cancel',
-          },
-          {text: 'Activate', onPress: () => openNotificationSettings()},
-        ]);
-        setIsGranted(false)
+        Alert.alert(
+          "Notifications are stopped",
+          "Do you want to activate notifications?",
+          [
+            {
+              text: "No",
+              onPress: () => console.log("Cancel Pressed"),
+              style: "cancel",
+            },
+            { text: "Activate", onPress: () => openNotificationSettings() },
+          ]
+        );
+        setIsGranted(false);
         return;
       }
-      setIsGranted(finalStatus == "granted")
-      console.log("before token...")
+      setIsGranted(finalStatus == "granted");
+      console.log("before token...");
       token = await Notifications.getExpoPushTokenAsync({
         projectId: Constants.expoConfig?.extra?.eas.projectId,
       });
-      console.log("after token...", token)
+      console.log("after token...", token);
     } else {
       alert("Must be using a physical device for Push notifications");
     }
@@ -124,25 +128,40 @@ export const usePushNotifications = (): PushNotificationState => {
         setNotification(notification);
       });
 
-      responseListener.current = Notifications.addNotificationResponseReceivedListener((response) => {
-        const data = response.notification.request.content.data as { type: string; nume: string; descriere: string };
-        if (data.type === 'AfirmatiiPozitive') {
-          navigation.navigate('EcranAfirmatii', {
+    responseListener.current =
+      Notifications.addNotificationResponseReceivedListener((response) => {
+        const data = response.notification.request.content.data as {
+          type: string;
+          nume: string;
+          descriere: string;
+        };
+        if (data.type === "AfirmatiiPozitive") {
+          navigation.navigate("EcranAfirmatii", {
             title: data.nume,
             body: data.descriere,
           });
         }
+        if (data.type === "NotificariHoroscop") {
+          navigation.navigate("Learn");
+        }
       });
 
-          // Check if the app was opened from a notification
-    Notifications.getLastNotificationResponseAsync().then(response => {
+    // Check if the app was opened from a notification
+    Notifications.getLastNotificationResponseAsync().then((response) => {
       if (response) {
-        const data = response.notification.request.content.data as { type: string; nume: string; descriere: string };
-        if (data.type === 'AfirmatiiPozitive') {
-          navigation.navigate('EcranAfirmatii', {
+        const data = response.notification.request.content.data as {
+          type: string;
+          nume: string;
+          descriere: string;
+        };
+        if (data.type === "AfirmatiiPozitive") {
+          navigation.navigate("EcranAfirmatii", {
             title: data.nume,
             body: data.descriere,
           });
+        }
+        if (data.type === "NotificariHoroscop") {
+          navigation.navigate("Learn");
         }
       }
     });
@@ -162,6 +181,6 @@ export const usePushNotifications = (): PushNotificationState => {
     notification,
     registerForPushNotificationsAsync,
     isGranted,
-    openNotificationSettings
+    openNotificationSettings,
   };
 };

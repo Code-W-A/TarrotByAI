@@ -36,11 +36,11 @@ import { useApiData } from "../../context/ApiContext";
 import { colors } from "../../utils/colors";
 
 //---ADS---
-// import {
-//   InterstitialAd,
-//   TestIds,
-//   AdEventType,
-// } from "react-native-google-mobile-ads";
+import {
+  InterstitialAd,
+  TestIds,
+  AdEventType,
+} from "react-native-google-mobile-ads";
 
 import { usePushNotifications } from "../../hooks/usePushNotifications";
 import { useAuth } from "../../context/AuthContext";
@@ -51,18 +51,20 @@ import {
 } from "../../utils/firestoreUtils";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import RattingDialog from "../../components/RattingDialog/RattingDialog";
+import LongCard from "../../components/MenuCard/LongCard";
+import AutoScrollingFlatList from "../../components/MenuCard/AutoScrollingFlatList";
 
 //---ADS---
-// const adUnitId = __DEV__
-//   ? TestIds.INTERSTITIAL
-//   : "ca-app-pub-9577714849380446/7080054250";
+const adUnitId = __DEV__
+  ? TestIds.INTERSTITIAL
+  : "ca-app-pub-9577714849380446/7080054250";
 // const adUnitId = "ca-app-pub-9577714849380446/7080054250";
 
-// const interstitial = InterstitialAd.createForAdRequest(adUnitId, {
-//   keywords: ["spiritualitate", "bunăstare"],
-// });
+const interstitial = InterstitialAd.createForAdRequest(adUnitId, {
+  keywords: ["spiritualitate", "bunăstare"],
+});
 
-const interstitial = "";
+// const interstitial = "";
 
 const ClinicDashboard = () => {
   const [loaded, setLoaded] = useState(false);
@@ -116,7 +118,7 @@ const ClinicDashboard = () => {
     zilnicCitateMotivationale,
   } = useApiData();
 
-  const cardData = [
+  const cardDataFrist = [
     {
       text: i18n.translate("personalReading"),
       screen: screenName.PersonalReadingDashboard,
@@ -141,6 +143,8 @@ const ClinicDashboard = () => {
       text: i18n.translate("motivationalQuotes"),
       screen: screenName.motivationalQuotes,
     },
+  ];
+  const cardDataSecond = [
     {
       text: i18n.translate("carteaTa"),
       screen: "CarteaTa",
@@ -213,65 +217,65 @@ const ClinicDashboard = () => {
   const screenHeight = Dimensions.get("window").height;
 
   //---ADS---
-  // useEffect(() => {
-  //   const loadListener = interstitial.addAdEventListener(
-  //     AdEventType.LOADED,
-  //     () => {
-  //       setLoaded(true);
-  //     }
-  //   );
-  //   const closeListener = interstitial.addAdEventListener(
-  //     AdEventType.CLOSED,
-  //     () => {
-  //       setLoaded(false);
-  //       interstitial.load(); // Reîncarcă reclama pentru o utilizare ulterioară
-  //     }
-  //   );
-  //   const errorListener = interstitial.addAdEventListener(
-  //     AdEventType.ERROR,
-  //     (error) => {
-  //       console.error(error);
-  //     }
-  //   );
+  useEffect(() => {
+    const loadListener = interstitial.addAdEventListener(
+      AdEventType.LOADED,
+      () => {
+        setLoaded(true);
+      }
+    );
+    const closeListener = interstitial.addAdEventListener(
+      AdEventType.CLOSED,
+      () => {
+        setLoaded(false);
+        interstitial.load(); // Reîncarcă reclama pentru o utilizare ulterioară
+      }
+    );
+    const errorListener = interstitial.addAdEventListener(
+      AdEventType.ERROR,
+      (error) => {
+        console.error(error);
+      }
+    );
 
-  //   interstitial.load(); // Începe încărcarea anunțului
+    interstitial.load(); // Începe încărcarea anunțului
 
-  //   return () => {
-  //     loadListener();
-  //     closeListener();
-  //     errorListener();
-  //   };
-  // }, []);
+    return () => {
+      loadListener();
+      closeListener();
+      errorListener();
+    };
+  }, []);
 
-  // // No advert ready to show yet
+  // No advert ready to show yet
   // if (!loaded) {
   //   return null;
   // }
 
-  useFocusEffect(
-    useCallback(() => {
-      const manageVisibility = async () => {
-        const userRating = await AsyncStorage.getItem("userRating");
-        console.log("useRating...", userRating);
-        const entryCount = parseInt(
-          (await AsyncStorage.getItem("entryCount")) || "0",
-          10
-        );
-        await AsyncStorage.setItem("entryCount", (entryCount + 1).toString());
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     const manageVisibility = async () => {
+  //       const userRating = await AsyncStorage.getItem("userRating");
+  //       console.log("useRating...", userRating);
+  //       const entryCount = parseInt(
+  //         (await AsyncStorage.getItem("entryCount")) || "0",
+  //         10
+  //       );
+  //       await AsyncStorage.setItem("entryCount", (entryCount + 1).toString());
 
-        // if ((entryCount + 1) % 5 === 0 && userRating === null) {
-        if ((entryCount + 1) % 5 === 0) {
-          console.log("true....");
-          setVisible(true);
-        } else {
-          console.log("false....");
-          setVisible(false);
-        }
-      };
+  //       // if ((entryCount + 1) % 5 === 0 && userRating === null) {
+  //       if ((entryCount + 1) % 5 === 0) {
+  //         console.log("true....");
+  //         setVisible(true);
+  //       } else {
+  //         console.log("false....");
+  //         setVisible(false);
+  //       }
+  //     };
 
-      manageVisibility();
-    }, [])
-  );
+  //     manageVisibility();
+  //   }, [])
+  // );
 
   return (
     <Fragment>
@@ -299,9 +303,11 @@ const ClinicDashboard = () => {
           >
             <GreetingBar />
             <ScrollView
-              style={{
-                paddingTop: "3%",
-              }}
+              style={
+                {
+                  // paddingTop: "3%",
+                }
+              }
               contentContainerStyle={{
                 flexGrow: 1,
                 justifyContent: "flex-start",
@@ -312,8 +318,18 @@ const ClinicDashboard = () => {
               {/* <View style={styles.cardRow}>
                 <Text>{expoPushToken?.data}</Text>
               </View> */}
+              <AutoScrollingFlatList
+                interstitial={interstitial}
+                interstitialAdLoaded={loaded}
+              />
               <View style={styles.cardRow}>
-                {cardData.map((card, index) =>
+                {cardDataFrist.map((card, index) =>
+                  renderCard(card, index, interstitial, loaded)
+                )}
+              </View>
+
+              <View style={styles.cardRow}>
+                {cardDataSecond.map((card, index) =>
                   renderCard(card, index, interstitial, loaded)
                 )}
               </View>

@@ -5,3 +5,7 @@ export const normalizeString = (str) => {
     .toLowerCase()
     .trim();
 };
+
+export const capitalizeFirstLetter = (string) => {
+  return string.charAt(0) + string.slice(1).toLowerCase();
+};

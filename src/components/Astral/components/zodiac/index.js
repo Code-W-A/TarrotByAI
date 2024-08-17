@@ -1,3 +1,3 @@
-import Sign from './sign';
+import Sign from "./sign";
 
 export { Sign };

@@ -503,6 +503,11 @@ export const H8fontBoldPrimary = styled(Text)`
   ${fontBold};
   ${primary2};
 `;
+export const H8fontBoldWhite = styled(Text)`
+  ${h8};
+  ${fontBold};
+  ${white};
+`;
 export const H8fontMediumPrimary = styled(Text)`
   ${h8};
   ${fontMedium};

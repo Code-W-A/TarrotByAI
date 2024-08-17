@@ -111,6 +111,7 @@ import AfirmatiiPozitive from "./src/pages/AfirmatiiPozitive/AfirmatiiPozitive";
 import NameScreen from "./src/pages/astral/initials/name.screen";
 import LearnScreen from "./src/pages/astral/initials/learn.screen";
 import AstrogramaNatala from "./src/pages/astral/initials/AstrogramaNatala";
+import HoroscopZilnic from "./src/pages/astral/initials/HoroscopZilnic";
 // import BirthDateScreen from "./src/pages/astral/initials/birth-date.screen";
 // import RelationshipScreen from "./src/pages/astral/initials/relationship.screen";
 // import SexScreen from "./src/pages/astral/initials/sex.screen";
@@ -254,6 +255,11 @@ const HomeNavigation = (props: NavigationProps) => {
           component={AstrogramaNatala}
           options={{ headerShown: false }}
         />
+        <Stack.Screen
+          name="Horoscop"
+          component={HoroscopZilnic}
+          options={{ headerShown: false }}
+        />
         {/* <Stack.Screen
           name="BirthDate"
           component={BirthDateScreen}
@@ -292,12 +298,12 @@ const HomeNavigation = (props: NavigationProps) => {
 
 const RootNavigation = () => {
   const { currentUser, isGuestUser } = useAuth();
-  // const screen = isGuestUser
-  //   ? screenName.ClinicDashBoard
-  //   : currentUser
-  //   ? screenName.SignInScreenClinic
-  //   : screenName.OnboardingScreen;
-  const screen = screenName.astralProfileScreen;
+  const screen = isGuestUser
+    ? screenName.ClinicDashBoard
+    : currentUser
+    ? screenName.SignInScreenClinic
+    : screenName.OnboardingScreen;
+  // const screen = screenName.astralProfileScreen;
 
   return <HomeNavigation initialRouteName={screen} />;
 };

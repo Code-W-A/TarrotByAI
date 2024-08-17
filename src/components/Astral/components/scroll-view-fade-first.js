@@ -12,7 +12,7 @@ function ScrollViewFadeFirst({ children, element, height, style }) {
     const controlledOffset = offsetY < 0 ? 0 : offsetY;
     const smallerHeight = controlledOffset ? height * 0.7 : height;
     const calcOpacity =
-      (((smallerHeight - (controlledOffset + 180)) * smallerHeight) / 100) *
+      (((smallerHeight - (controlledOffset + 150)) * smallerHeight) / 100) *
       0.01;
 
     setOpacity(calcOpacity < 0.03 ? 0 : calcOpacity);

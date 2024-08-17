@@ -2,19 +2,28 @@ import { StyleSheet, View } from "react-native";
 import { colors } from "../../../utils/colors";
 import { useState } from "react";
 import { Button, SegmentedButtons, Text } from "react-native-paper";
+import i18n from "../../../../i18n";
 
-const GenderSelector = () => {
-  const [gender, setGender] = useState("male");
-
+const GenderSelector = ({ setGender, gender }) => {
   const genderOptions = [
-    { value: "male", label: "Masculin", icon: "gender-male" },
-    { value: "female", label: "Feminin", icon: "gender-female" },
-    { value: "other", label: "Altul", icon: "gender-male-female" },
+    { value: "male", label: i18n.translate("Masculin"), icon: "gender-male" },
+    {
+      value: "female",
+      label: i18n.translate("Feminin"),
+      icon: "gender-female",
+    },
+    {
+      value: "other",
+      label: i18n.translate("Altul"),
+      icon: "gender-male-female",
+    },
   ];
 
   return (
     <View style={styles.genderContainer}>
-      <Text style={styles.genderLabel}>Selectează Genul:</Text>
+      <Text style={styles.genderLabel}>
+        {i18n.translate("SelecteazaGenul")}:
+      </Text>
       <SegmentedButtons
         value={gender}
         onValueChange={(newValue) => setGender(newValue)}
@@ -26,8 +35,8 @@ const GenderSelector = () => {
         style={styles.segmentedButtons}
         theme={{
           colors: {
-            primary: "#E6E2B8", // Folosește o culoare din gradient pentru selectare
-            onSurface: "#283140", // O culoare închisă pentru text
+            primary: "white", // Folosește o culoare din gradient pentru selectare
+            onSurface: "white", // O culoare închisă pentru text
           },
         }}
       />
@@ -38,7 +47,7 @@ const styles = StyleSheet.create({
   genderContainer: {
     marginTop: 20,
     padding: 10,
-    backgroundColor: "rgba(255, 255, 255, 0.1)", // Container foarte transparent
+    backgroundColor: colors.primary3, // Container foarte transparent
     borderRadius: 10,
     shadowOpacity: 0, // Poți reduce sau elimina umbra pentru mai multă transparență
     elevation: 0, // Elimină elevația pentru Android
