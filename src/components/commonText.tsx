@@ -13,6 +13,7 @@ const styles = StyleSheet.create({
   white: {
     color: colors.white,
   },
+  yellowGlow: { color: colors.gradientLogin2 },
   purple: {
     color: colors.gradientLogin2,
   },
@@ -77,7 +78,7 @@ const styles = StyleSheet.create({
     fontSize: 32,
   },
   h4: {
-    fontSize: 21,
+    fontSize: 24,
   },
   h5: {
     fontSize: 20,
@@ -163,6 +164,7 @@ const {
   red,
   placeholderTextColor,
   white,
+  yellowGlow,
   purple,
   gray,
   darkRed,
@@ -270,6 +272,16 @@ export const H6fontBoldWhite = styled(Text)`
   ${h6};
   ${fontRegular};
   ${white};
+`;
+export const H6fontBoldYellow = styled(Text)`
+  ${h6};
+  ${fontRegular};
+  ${yellowGlow};
+`;
+export const H4fontBoldYellow = styled(Text)`
+  ${h4};
+  ${fontRegular};
+  ${yellowGlow};
 `;
 export const H6fontBoldPurple = styled(Text)`
   ${h6};

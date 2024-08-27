@@ -64,8 +64,7 @@ export default function MapInputPatientDash({
         language: "en",
         // types: "(cities)",
       }}
-      nearbyPlacesAPI="GooglePlacesSearch"
-      debounce={300}
+      debounce={800}
       styles={{
         textInput: {
           height: 55,

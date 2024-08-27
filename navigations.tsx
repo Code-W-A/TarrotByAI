@@ -112,6 +112,9 @@ import NameScreen from "./src/pages/astral/initials/name.screen";
 import LearnScreen from "./src/pages/astral/initials/learn.screen";
 import AstrogramaNatala from "./src/pages/astral/initials/AstrogramaNatala";
 import HoroscopZilnic from "./src/pages/astral/initials/HoroscopZilnic";
+import NewPersonScreen from "./src/pages/astral/initials/new.person.screen";
+import PersonsScreen from "./src/pages/astral/initials/persons.screen";
+import SinastrieRelatie from "./src/pages/astral/initials/SinastrieRelatie";
 // import BirthDateScreen from "./src/pages/astral/initials/birth-date.screen";
 // import RelationshipScreen from "./src/pages/astral/initials/relationship.screen";
 // import SexScreen from "./src/pages/astral/initials/sex.screen";
@@ -258,6 +261,21 @@ const HomeNavigation = (props: NavigationProps) => {
         <Stack.Screen
           name="Horoscop"
           component={HoroscopZilnic}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="NewPerson"
+          component={NewPersonScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Persons"
+          component={PersonsScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Sinastrie"
+          component={SinastrieRelatie}
           options={{ headerShown: false }}
         />
         {/* <Stack.Screen

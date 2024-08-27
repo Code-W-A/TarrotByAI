@@ -1,5 +1,9 @@
 export const langObj = {
   en: {
+    sinastriePartener: "Synastry",
+    sinasAdaugare: "Add person",
+    sinasUpdate: "Update information",
+
     hAstazi: "Today",
     hNumbers: "Lucky numbers",
     hPredictions: "Predictions",
@@ -177,6 +181,10 @@ export const langObj = {
     clinicLoginRedirect: "Continue",
   },
   ro: {
+    sinastriePartener: "Sinastrie",
+    sinasAdaugare: "Adauga persoana",
+    sinasUpdate: "Actualizeaza informatii",
+
     hAstazi: "Astăzi",
     hNumbers: "Numere norocoase",
     hPredictions: "Predicții",

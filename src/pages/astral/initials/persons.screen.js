@@ -42,11 +42,20 @@ import {
 } from "react-native-google-mobile-ads";
 import { useNavigationState } from "../../../context/NavigationContext";
 import InLove from "../../../svgs/InLove";
-import Palmistry from "../../../svgs/Palmistry";
-import SolarSystem from "../../../svgs/SolarSystem";
-import Married from "../../../svgs/Married";
-import Male from "../../../svgs/Male";
-import Dices from "../../../svgs/Dices";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import Aquarius from "../../../svgs/Aquarius";
+import Aries from "../../../svgs/zodiac/Aries";
+import Cancer from "../../../svgs/zodiac/Cancer";
+import Capricorn from "../../../svgs/zodiac/Capricorn";
+import Gemini from "../../../svgs/zodiac/Gemini";
+import Libra from "../../../svgs/zodiac/Libra";
+import Pisces from "../../../svgs/zodiac/Pisces";
+import Sagittarius from "../../../svgs/zodiac/Sagittarius";
+import Scorpio from "../../../svgs/zodiac/Scorpio";
+import Taurus from "../../../svgs/zodiac/Taurus";
+import Virgo from "../../../svgs/zodiac/Virgo";
+import ZodiacComponent from "../../../components/Astral/components/ZodiacComponent";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const SubHeading = () => {
   const { colors } = useTheme();
@@ -55,12 +64,6 @@ const SubHeading = () => {
       <H6fontBoldPurple style={{ textAlign: "center" }}>
         {i18n.translate("digitalAstrology")}
       </H6fontBoldPurple>
-      <View style={{ height: 10 }} />
-      <H9fontMediumWhite style={{ textAlign: "center" }}>
-        {i18n.translate(
-          "exploreTheNatalChartAnalyzeRelationshipsThroughSynastryAndDiscoverDailyHoroscopeForecasts"
-        )}
-      </H9fontMediumWhite>
     </View>
   );
 };
@@ -80,9 +83,12 @@ const interstitial = InterstitialAd.createForAdRequest(adUnitId, {
   keywords: ["spiritualitate", "bunăstare"],
 });
 
-function LearnScreen({ navigation }) {
+function PersonsScreen({ navigation }) {
   const { setCurrentScreen } = useNavigationState();
+
   const [loaded, setLoaded] = useState(false);
+  const [userD, setUserD] = useState({});
+  const route = useNavigation();
 
   //---ADS---
   useEffect(() => {
@@ -113,6 +119,24 @@ function LearnScreen({ navigation }) {
       closeListener();
       errorListener();
     };
+  }, []);
+
+  useEffect(() => {
+    const checkUserData = async () => {
+      try {
+        const userData = await AsyncStorage.getItem("userData");
+        const parsedData = JSON.parse(userData);
+        console.log("parsedData....", parsedData.zodiacSign);
+        setUserD(parsedData);
+        // console.log("Retrieved user data:", userData);
+        // if (userData) {
+        //   navigation.navigate("Learn");
+        // }
+      } catch (error) {
+        console.error("Error checking user data:", error);
+      }
+    };
+    checkUserData();
   }, []);
 
   const handleViewLesson = async (lesson) => {
@@ -158,89 +182,33 @@ function LearnScreen({ navigation }) {
             <ShadowHeadline>{""}</ShadowHeadline>
           </View>
         </View>
-        <ScrollViewFadeFirst element={<SubHeading />} height={140}>
+        <ScrollViewFadeFirst element={<SubHeading />} height={70}>
+          <View style={{ height: 20 }} />
           <Surface
             style={[
-              styles.surfaceRight,
-              { backgroundColor: "transparent", marginTop: 10 },
+              styles.surfaceLeft,
+              { backgroundColor: "transparent", height: 140 },
             ]}
-          >
-            <View style={[StyleSheet.absoluteFill, { top: -25, opacity: 0.8 }]}>
-              <Constellation
-                color={colors.gradientLogin2 + "3D"}
-                dotColor={colors.gradientLogin2}
-                width={250}
-                height={300}
-              />
-            </View>
-            <LinearGradient
-              colors={["transparent", "#4c4c4c" + "E6", "#4c4c4c" + "E6"]}
-              start={[0, 0]}
-              end={[1, 0]}
-              style={styles.gradientRight}
-            >
-              <View style={{ flex: 0.8 }} />
-              <View style={{ flex: 1 }}>
-                <H7fontBoldWhite>
-                  {i18n.translate("natalAstrogram")}
-                </H7fontBoldWhite>
-                <H9fontMediumWhite
-                  theme={{ colors: { text: colors.gradientLogin2 } }}
-                >
-                  {i18n.translate("exploreTheAstralProfile")}
-                </H9fontMediumWhite>
-                <H9fontMediumWhite
-                  theme={{ colors: { text: "#FFFFFF" } }}
-                  style={{ marginTop: -3 }}
-                >
-                  {i18n.translate("withTheNatalAstrogram")}
-                </H9fontMediumWhite>
-                <View style={{ heigt: 200, justifyContent: "flex-start" }}>
-                  <Button
-                    mode="contained"
-                    // icon="lock-outline"
-                    style={{ borderRadius: 25, marginTop: 5 }}
-                    theme={{
-                      colors: {
-                        primary: colors.gradientLogin1,
-                        text: "#FFFFFF",
-                      },
-                    }}
-                    labelStyle={{ fontSize: 12, letterSpacing: 0 }}
-                    onPress={() => handleViewLesson("AstrogramaNatala")}
-                  >
-                    {i18n.translate("seeTheAstrogram")}
-                  </Button>
-                </View>
-              </View>
-            </LinearGradient>
-          </Surface>
-          <View style={{ height: 20 }} />
-          {/* <Surface
-            style={[styles.surfaceLeft, { backgroundColor: "transparent" }]}
           >
             <View
               style={[StyleSheet.absoluteFill, { right: 150, opacity: 0.4 }]}
             >
-              <ConstellationSimple
-                color={colors.gradientLogin2 + "3D"}
-                dotColor={colors.gradientLogin3}
-                width={200}
-                height={150}
-              />
+              {userD?.zodiacSign && <ZodiacComponent userD={userD} />}
             </View>
             <LinearGradient
-              colors={["#81411a", "#81411aE6", "#81411a3D", "transparent"]}
+              colors={["#4c4c4c" + "E6", "#4c4c4c" + "E6", "transparent"]}
               start={[0, 0]}
               end={[1, 0]}
               style={styles.gradientLeft}
             >
               <View style={{ flex: 1 }}>
-                <H7fontBoldWhite>{"Sinastrie "}</H7fontBoldWhite>
+                {/* <H7fontBoldWhite>{"Sinastrie "}</H7fontBoldWhite> */}
                 <H9fontMediumWhite>
-                  {i18n.translate("analyzeCoupleCompatibilityThroughSynastry")}
+                  {i18n.translate(
+                    "updateYourInformationToReceiveTheMostAccurateAnalyses"
+                  )}
                 </H9fontMediumWhite>
-                <View style={{ flex: 1, justifyContent: "flex-end" }}>
+                <View style={{ flex: 1, justifyContent: "flex-start" }}>
                   <Button
                     mode="contained"
                     // icon="lock-outline"
@@ -252,63 +220,23 @@ function LearnScreen({ navigation }) {
                       },
                     }}
                     labelStyle={{ fontSize: 12, letterSpacing: 0 }}
-                    onPress={() => handleViewLesson("AstrogramaNatala")}
+                    onPress={() =>
+                      navigation.navigate("Name", { editMode: true })
+                    }
                   >
-                    {i18n.translate("analyzeSynastry")}
+                    {i18n.translate("update")}
                   </Button>
                 </View>
               </View>
               <View style={{ flex: 0.6 }} />
             </LinearGradient>
           </Surface>
-          <View style={{ height: 20 }} /> */}
-          <Surface
-            style={[styles.surfaceRight, { backgroundColor: "transparent" }]}
-          >
-            <View style={[StyleSheet.absoluteFill, { top: -25, opacity: 0.3 }]}>
-              <Leo color={colors.white} width={200} height={200} />
-            </View>
-            <LinearGradient
-              colors={["transparent", "#13366f" + "E6", "#13366f" + "E6"]}
-              start={[0, 0]}
-              end={[1, 0]}
-              style={styles.gradientRight}
-            >
-              <View style={{ flex: 0.8 }} />
-              <View style={{ flex: 1 }}>
-                <H7fontBoldWhite>
-                  {i18n.translate("dailyHoroscope")}
-                </H7fontBoldWhite>
-                <H9fontMediumWhite>
-                  {i18n.translate("personalizedHoroscope")}
-                </H9fontMediumWhite>
-                <View style={{ flex: 1, justifyContent: "flex-end" }}>
-                  <Button
-                    mode="contained"
-                    // icon="lock-outline"
-                    style={{ borderRadius: 25, marginTop: 5 }}
-                    theme={{
-                      colors: {
-                        primary: colors.gradientLogin1,
-                        text: "#FFFFFF",
-                      },
-                    }}
-                    labelStyle={{ fontSize: 12, letterSpacing: 0 }}
-                    onPress={() => handleViewLesson("Horoscop")}
-                  >
-                    {i18n.translate("seeTheHoroscope")}
-                  </Button>
-                </View>
-              </View>
-            </LinearGradient>
-          </Surface>
           <View style={{ height: 20 }} />
-
           <Surface
             style={[styles.surfaceRight, { backgroundColor: "transparent" }]}
           >
             <View style={[StyleSheet.absoluteFill, { top: -25, opacity: 0.3 }]}>
-              <Dices color={colors.white} width={160} height={160} />
+              <InLove color={colors.white} width={160} height={160} />
             </View>
             <LinearGradient
               colors={["transparent", "#81411a3D", "#81411aE6", "#81411a"]}
@@ -336,64 +264,18 @@ function LearnScreen({ navigation }) {
                       },
                     }}
                     labelStyle={{ fontSize: 12, letterSpacing: 0 }}
-                    onPress={() => handleViewLesson("Sinastrie")}
+                    onPress={() =>
+                      navigation.navigate("NewPerson", {
+                        editMode: userD?.p2?.full_name ? true : false,
+                      })
+                    }
                   >
-                    {i18n.translate("clinicLoginRedirect")}
+                    {userD?.p2?.full_name
+                      ? i18n.translate("update")
+                      : i18n.translate("clinicLoginRedirect")}
                   </Button>
                 </View>
               </View>
-            </LinearGradient>
-          </Surface>
-          <View style={{ height: 20 }} />
-
-          <Surface
-            style={[
-              styles.surfaceLeft,
-              { backgroundColor: "transparent", height: 140 },
-            ]}
-          >
-            <View
-              style={[StyleSheet.absoluteFill, { right: 150, opacity: 0.4 }]}
-            >
-              <ConstellationSimple
-                color={colors.gradientLogin2 + "3D"}
-                dotColor={colors.gradientLogin3}
-                width={200}
-                height={150}
-              />
-            </View>
-            <LinearGradient
-              colors={["#4c4c4c" + "E6", "#4c4c4c" + "E6", "transparent"]}
-              start={[0, 0]}
-              end={[1, 0]}
-              style={styles.gradientLeft}
-            >
-              <View style={{ flex: 1 }}>
-                {/* <H7fontBoldWhite>{"Sinastrie "}</H7fontBoldWhite> */}
-                <H9fontMediumWhite>
-                  {i18n.translate(
-                    "updateYourInformationToReceiveTheMostAccurateAnalyses"
-                  )}
-                </H9fontMediumWhite>
-                <View style={{ flex: 1, justifyContent: "flex-start" }}>
-                  <Button
-                    mode="contained"
-                    // icon="lock-outline"
-                    style={{ borderRadius: 25, marginTop: 5 }}
-                    theme={{
-                      colors: {
-                        primary: colors.gradientLogin1,
-                        text: "#FFFFFF",
-                      },
-                    }}
-                    labelStyle={{ fontSize: 12, letterSpacing: 0 }}
-                    onPress={() => handleViewLesson("Persons")}
-                  >
-                    {i18n.translate("update")}
-                  </Button>
-                </View>
-              </View>
-              <View style={{ flex: 0.6 }} />
             </LinearGradient>
           </Surface>
           <View style={{ height: 20 }} />
@@ -451,4 +333,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LearnScreen;
+export default PersonsScreen;
