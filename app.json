@@ -3,7 +3,7 @@
     "name": "Cristina Zurba",
     "slug": "TarotByAi",
     "platforms": ["ios", "android", "web"],
-    "version": "1.4.8",
+    "version": "1.4.9",
     "orientation": "portrait",
     "plugins": ["expo-build-properties"],
     "android": {
@@ -14,7 +14,7 @@
       "config": {},
       "softwareKeyboardLayoutMode": "pan",
       "package": "com.cristina.zurba.tarot",
-      "versionCode": 64,
+      "versionCode": 65,
       "permissions": ["android.permission.RECORD_AUDIO"]
     },
     "web": {

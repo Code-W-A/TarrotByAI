@@ -16,12 +16,27 @@ import {
 } from "../../../utils/commonUtils";
 import i18n from "../../../../i18n";
 
-const AspectTableSinastrie = ({ houseCusps, planetaryData, aspects }) => {
+const AspectTableSinastrie = ({
+  houseCusps,
+  planetaryData,
+  aspects,
+  userD,
+}) => {
   return (
     <ScrollView
       style={styles.container}
       contentContainerStyle={{ paddingBottom: "30%", paddingTop: "5%" }}
     >
+      <View
+        style={{
+          justifyContent: "center",
+          alignItems: "center",
+          width: "100%",
+          marginTop: "0%",
+        }}
+      >
+        <H6fontBoldPurple> {userD?.full_name}</H6fontBoldPurple>
+      </View>
       <ScrollView
         contentContainerStyle={{
           width: 380,
@@ -32,13 +47,13 @@ const AspectTableSinastrie = ({ houseCusps, planetaryData, aspects }) => {
       >
         <View style={styles.tableHeader}>
           <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
-            {i18n.translate("House")} p1
+            {i18n.translate("House")}
           </H7fontBoldWhite>
           <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
-            {i18n.translate("Sign")} p1
+            {i18n.translate("Sign")}
           </H7fontBoldWhite>
           <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
-            {i18n.translate("Degree")} p1
+            {i18n.translate("Degree")}
           </H7fontBoldWhite>
         </View>
         {houseCusps?.housesP1.houses &&
@@ -61,6 +76,16 @@ const AspectTableSinastrie = ({ houseCusps, planetaryData, aspects }) => {
             </View>
           ))}
       </ScrollView>
+      <View
+        style={{
+          justifyContent: "center",
+          alignItems: "center",
+          width: "100%",
+          marginTop: "5%",
+        }}
+      >
+        <H6fontBoldPurple> {userD?.p2?.full_name}</H6fontBoldPurple>
+      </View>
       <ScrollView
         contentContainerStyle={{
           width: 380,
@@ -71,13 +96,13 @@ const AspectTableSinastrie = ({ houseCusps, planetaryData, aspects }) => {
       >
         <View style={styles.tableHeader}>
           <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
-            {i18n.translate("House")} p2
+            {i18n.translate("House")}
           </H7fontBoldWhite>
           <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
-            {i18n.translate("Sign")} p2
+            {i18n.translate("Sign")}
           </H7fontBoldWhite>
           <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
-            {i18n.translate("Degree")} p2
+            {i18n.translate("Degree")}
           </H7fontBoldWhite>
         </View>
         {houseCusps?.housesP2.houses &&
@@ -111,6 +136,19 @@ const AspectTableSinastrie = ({ houseCusps, planetaryData, aspects }) => {
       >
         <H6fontBoldPurple> {i18n.translate("Natal")}</H6fontBoldPurple>
       </View>
+      <View
+        style={{
+          justifyContent: "center",
+          alignItems: "center",
+          width: "100%",
+          marginTop: "0%",
+        }}
+      >
+        <H6fontBoldPurple style={{ fontSize: 20 }}>
+          {" "}
+          {userD?.full_name}
+        </H6fontBoldPurple>
+      </View>
       <ScrollView
         contentContainerStyle={{
           width: 720,
@@ -121,19 +159,19 @@ const AspectTableSinastrie = ({ houseCusps, planetaryData, aspects }) => {
       >
         <View style={[styles.tableHeader]}>
           <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
-            {i18n.translate("Planet")} p1
+            {i18n.translate("Planet")}
           </H7fontBoldWhite>
           <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
-            {i18n.translate("Sign")} p1
+            {i18n.translate("Sign")}
           </H7fontBoldWhite>
           <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
-            {i18n.translate("Degree")} p1
+            {i18n.translate("Degree")}
           </H7fontBoldWhite>
           <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
-            {i18n.translate("House")} p1
+            {i18n.translate("House")}
           </H7fontBoldWhite>
           <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
-            {i18n.translate("Speed")} p1
+            {i18n.translate("Speed")}
           </H7fontBoldWhite>
         </View>
         {planetaryData &&
@@ -171,7 +209,10 @@ const AspectTableSinastrie = ({ houseCusps, planetaryData, aspects }) => {
           marginTop: "10%",
         }}
       >
-        <H6fontBoldPurple> {i18n.translate("Natal")}</H6fontBoldPurple>
+        <H6fontBoldPurple style={{ fontSize: 20 }}>
+          {" "}
+          {userD?.p2?.full_name}
+        </H6fontBoldPurple>
       </View>
       <ScrollView
         contentContainerStyle={{
@@ -183,19 +224,19 @@ const AspectTableSinastrie = ({ houseCusps, planetaryData, aspects }) => {
       >
         <View style={[styles.tableHeader]}>
           <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
-            {i18n.translate("Planet")} p2
+            {i18n.translate("Planet")}
           </H7fontBoldWhite>
           <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
-            {i18n.translate("Sign")} p2
+            {i18n.translate("Sign")}
           </H7fontBoldWhite>
           <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
-            {i18n.translate("Degree")} p2
+            {i18n.translate("Degree")}
           </H7fontBoldWhite>
           <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
-            {i18n.translate("House")} p2
+            {i18n.translate("House")}
           </H7fontBoldWhite>
           <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
-            {i18n.translate("Speed")} p2
+            {i18n.translate("Speed")}
           </H7fontBoldWhite>
         </View>
         {planetaryData &&
@@ -235,6 +276,19 @@ const AspectTableSinastrie = ({ houseCusps, planetaryData, aspects }) => {
       >
         <H6fontBoldPurple>Aspects</H6fontBoldPurple>
       </View>
+      <View
+        style={{
+          justifyContent: "center",
+          alignItems: "center",
+          width: "100%",
+          marginTop: "0%",
+        }}
+      >
+        <H6fontBoldPurple style={{ fontSize: 20 }}>
+          {" "}
+          {userD?.full_name}
+        </H6fontBoldPurple>
+      </View>
       <ScrollView
         contentContainerStyle={{
           width: 550,
@@ -245,16 +299,16 @@ const AspectTableSinastrie = ({ houseCusps, planetaryData, aspects }) => {
       >
         <View style={[styles.tableHeader, { marginTop: "6%" }]}>
           <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
-            {i18n.translate("Planet")} p1
+            {i18n.translate("Planet")}
           </H7fontBoldWhite>
           <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
-            Aspect p1
+            Aspect
           </H7fontBoldWhite>
           <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
-            {i18n.translate("Planet")} p1
+            {i18n.translate("Planet")}
           </H7fontBoldWhite>
           <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
-            {i18n.translate("Orb")} p1
+            {i18n.translate("Orb")}
           </H7fontBoldWhite>
         </View>
         {aspects &&
@@ -290,7 +344,10 @@ const AspectTableSinastrie = ({ houseCusps, planetaryData, aspects }) => {
           marginTop: "10%",
         }}
       >
-        <H6fontBoldPurple>Aspects</H6fontBoldPurple>
+        <H6fontBoldPurple style={{ fontSize: 20 }}>
+          {" "}
+          {userD?.p2?.full_name}
+        </H6fontBoldPurple>
       </View>
       <ScrollView
         contentContainerStyle={{
@@ -302,16 +359,16 @@ const AspectTableSinastrie = ({ houseCusps, planetaryData, aspects }) => {
       >
         <View style={[styles.tableHeader, { marginTop: "6%" }]}>
           <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
-            {i18n.translate("Planet")} p2
+            {i18n.translate("Planet")}
           </H7fontBoldWhite>
           <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
-            Aspect p2
+            Aspect
           </H7fontBoldWhite>
           <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
-            {i18n.translate("Planet")} p2
+            {i18n.translate("Planet")}
           </H7fontBoldWhite>
           <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
-            {i18n.translate("Orb")} p2
+            {i18n.translate("Orb")}
           </H7fontBoldWhite>
         </View>
         {aspects &&

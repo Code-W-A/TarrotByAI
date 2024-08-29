@@ -293,7 +293,10 @@ function NewPersonScreen({ navigation, route }) {
       userData.synastry.spiritualCompatibility = spiritualCompatibility;
       userData.synastry.financialCompatibility = financialCompatibility;
 
-      console.log("astrologyData....data....", userData.synastry.aspect);
+      console.log(
+        "astrologyData....data....",
+        userData.synastry.natalWheelChart
+      );
 
       // const { houses, planets, aspectsD } = prepareAstroData(userData);
 

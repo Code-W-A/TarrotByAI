@@ -47,6 +47,7 @@ import SolarSystem from "../../../svgs/SolarSystem";
 import Married from "../../../svgs/Married";
 import Male from "../../../svgs/Male";
 import Dices from "../../../svgs/Dices";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const SubHeading = () => {
   const { colors } = useTheme();
@@ -83,6 +84,7 @@ const interstitial = InterstitialAd.createForAdRequest(adUnitId, {
 function LearnScreen({ navigation }) {
   const { setCurrentScreen } = useNavigationState();
   const [loaded, setLoaded] = useState(false);
+  const [userD, setUserD] = useState({});
 
   //---ADS---
   useEffect(() => {
@@ -114,6 +116,12 @@ function LearnScreen({ navigation }) {
       errorListener();
     };
   }, []);
+
+  useEffect(() => {
+    const userDataJson = await AsyncStorage.getItem("userData");
+    const userData = userDataJson ? JSON.parse(userDataJson) : null;
+    setUserD(userData);
+  },[])
 
   const handleViewLesson = async (lesson) => {
     if (loaded) {
@@ -321,9 +329,9 @@ function LearnScreen({ navigation }) {
                 <H7fontBoldWhite>
                   {i18n.translate("sinastriePartener")}
                 </H7fontBoldWhite>
-                <H9fontMediumWhite>
+                {/* <H9fontMediumWhite>
                   {i18n.translate("sinasAdaugare")}
-                </H9fontMediumWhite>
+                </H9fontMediumWhite> */}
                 <View style={{ flex: 1, justifyContent: "flex-end" }}>
                   <Button
                     mode="contained"
@@ -336,7 +344,7 @@ function LearnScreen({ navigation }) {
                       },
                     }}
                     labelStyle={{ fontSize: 12, letterSpacing: 0 }}
-                    onPress={() => handleViewLesson("Sinastrie")}
+                    onPress={() => handleViewLesson(userData.p2.full_name ? "Sinastrie" : "Persons")}
                   >
                     {i18n.translate("clinicLoginRedirect")}
                   </Button>

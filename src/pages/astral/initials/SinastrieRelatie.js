@@ -5,6 +5,7 @@ import {
   ActivityIndicator,
   Dimensions,
   SafeAreaView,
+  ScrollView,
   StyleSheet,
   View,
 } from "react-native";
@@ -69,6 +70,7 @@ import { handleToTranslate } from "../../../utils/AstralUtils/fetchGPTData";
 import LoadingOverlay from "../../../components/Astral/components/zodiac/LoadingOverlay";
 import AspectTableSinastrie from "../../../components/Astral/components/AspectTableSinastrie";
 import HorizontalTabSelector from "../../../components/Astral/components/HorizontalTabSelector";
+import SvgComponent from "../../../components/Astral/components/SvgComponent";
 
 // const LuckyNumber = ({ number }) => {
 //   return (
@@ -563,59 +565,18 @@ function SinastrieRelatie({ navigation }) {
       </body>
     </html>
   `;
-  const Header = (
+
+  const Header1 = (
     <View>
       <View style={[styles.headerContainer]}></View>
-      {/* <Divider /> */}
-      {/* {svgData && <AstrogramaSvg svgXml={svgData} />} */}
-      {/* <AstrogramaImage svgImage={wheelImage} /> */}
-      {/* <SvgUri width="200" height="200" svgXmlData={testSvg} /> */}
-      {/* <TestSvg width={300} height={300} /> */}
-      {/* {wheelImage && (
-        <WebView
-          originWhitelist={["*"]}
-          source={{ html: wheelImage }}
-          style={{ width: 400, height: 400 }}
+
+      {wheelImage && (
+        <SvgComponent
+          svgBase64={wheelImage.base64ImageP2}
+          width="480"
+          height="480"
         />
-      )} */}
-      <View style={{ width: "100%", height: "100%", overflow: "hidden" }}>
-        {wheelImage && (
-          <SvgXml
-            xml={wheelImage.base64ImageP1}
-            width="100%"
-            height="100%"
-            preserveAspectRatio="xMidYMid meet"
-          />
-        )}
-        {/* {Object.entries(zodiacSigns).map(([sign, { color, top, right }]) => (
-          <View style={[styles.iconContainer, { top, right }]}>
-            <MaterialCommunityIcons
-              name={`zodiac-${sign.toLowerCase()}`}
-              size={17}
-              color={color}
-            />
-          </View>
-        ))} */}
-      </View>
-      <View style={{ width: "100%", height: "100%", overflow: "hidden" }}>
-        {wheelImage && (
-          <SvgXml
-            xml={wheelImage.base64ImageP2}
-            width="100%"
-            height="100%"
-            preserveAspectRatio="xMidYMid meet"
-          />
-        )}
-        {/* {Object.entries(zodiacSigns).map(([sign, { color, top, right }]) => (
-          <View style={[styles.iconContainer, { top, right }]}>
-            <MaterialCommunityIcons
-              name={`zodiac-${sign.toLowerCase()}`}
-              size={17}
-              color={color}
-            />
-          </View>
-        ))} */}
-      </View>
+      )}
     </View>
   );
 
@@ -648,57 +609,109 @@ function SinastrieRelatie({ navigation }) {
           <SpaceSky />
           <MyTopBar onChangeTab={setSelectedTab} />
           {selectedTab === "natal" ? (
-            <ScrollViewFadeFirst element={Header} height={400}>
-              <ShowFromTop>
-                <View style={[styles.defaultContainer]}>
-                  <Divider style={{ marginTop: "5%" }} />
-                  <View style={styles.horoscopeTodayContainer}>
-                    <H6fontBoldWhite style={styles.textTitles}>
-                      {userD.full_name}
-                    </H6fontBoldWhite>
+            <ScrollView>
+              <View style={[styles.defaultContainer]}>
+                <View>
+                  {wheelImage && (
+                    <SvgComponent
+                      svgBase64={wheelImage.base64ImageP1}
+                      width="430"
+                      height="430"
+                    />
+                  )}
+                </View>
+                <Divider style={{ marginTop: "0%" }} />
+                <View style={{ flex: 1, flexDirection: "row" }}>
+                  <View style={{ flexDirection: "column", width: "55%" }}>
+                    <View style={styles.horoscopeTodayContainer}>
+                      <H6fontBoldWhite style={styles.textTitles}>
+                        {userD?.full_name}
+                      </H6fontBoldWhite>
+                    </View>
+                    <View style={styles.horoscopeTodayContainer}>
+                      <H6fontBoldWhite
+                        style={[styles.textDescription, { marginTop: 0 }]}
+                      >
+                        {userD?.day} - {userD?.month} - {userD?.year}
+                      </H6fontBoldWhite>
+                    </View>
+                    <View style={styles.horoscopeTodayContainer}>
+                      <H6fontBoldWhite
+                        style={[styles.textDescription, { marginTop: 0 }]}
+                      >
+                        {userD?.selectedTime}
+                      </H6fontBoldWhite>
+                    </View>
+                    <View style={styles.horoscopeTodayContainer}>
+                      <H6fontBoldWhite
+                        style={[
+                          styles.textDescription,
+                          { marginTop: 0, maxWidth: "80%" },
+                        ]}
+                      >
+                        {userD?.place}
+                      </H6fontBoldWhite>
+                    </View>
+                    <View style={styles.horoscopeTodayContainer}>
+                      <H6fontBoldWhite
+                        style={[styles.textDescription, { marginTop: 0 }]}
+                      >
+                        {userD?.gender}
+                      </H6fontBoldWhite>
+                    </View>
                   </View>
-                  <View style={styles.horoscopeTodayContainer}>
-                    <H6fontBoldWhite
-                      style={[styles.textDescription, { marginTop: 0 }]}
-                    >
-                      {userD.day} - {userD.month} - {userD.year}
-                    </H6fontBoldWhite>
+                  <View style={{ flexDirection: "column", width: "55%" }}>
+                    <View style={styles.horoscopeTodayContainer}>
+                      <H6fontBoldWhite style={styles.textTitles}>
+                        {userD?.p2?.full_name}
+                      </H6fontBoldWhite>
+                    </View>
+                    <View style={styles.horoscopeTodayContainer}>
+                      <H6fontBoldWhite
+                        style={[styles.textDescription, { marginTop: 0 }]}
+                      >
+                        {userD?.p2?.day} - {userD?.p2?.month} -{" "}
+                        {userD?.p2?.year}
+                      </H6fontBoldWhite>
+                    </View>
+                    <View style={styles.horoscopeTodayContainer}>
+                      <H6fontBoldWhite
+                        style={[styles.textDescription, { marginTop: 0 }]}
+                      >
+                        {userD?.p2?.selectedTime}
+                      </H6fontBoldWhite>
+                    </View>
+                    <View style={styles.horoscopeTodayContainer}>
+                      <H6fontBoldWhite
+                        style={[
+                          styles.textDescription,
+                          { marginTop: 0, maxWidth: "80%" },
+                        ]}
+                      >
+                        {userD?.p2?.place}
+                      </H6fontBoldWhite>
+                    </View>
+                    <View style={styles.horoscopeTodayContainer}>
+                      <H6fontBoldWhite
+                        style={[styles.textDescription, { marginTop: 0 }]}
+                      >
+                        {userD?.p2?.gender}
+                      </H6fontBoldWhite>
+                    </View>
                   </View>
-                  <View style={styles.horoscopeTodayContainer}>
-                    <H6fontBoldWhite
-                      style={[styles.textDescription, { marginTop: 0 }]}
-                    >
-                      {userD.selectedTime}
-                    </H6fontBoldWhite>
-                  </View>
-                  <View style={styles.horoscopeTodayContainer}>
-                    <H6fontBoldWhite
-                      style={[
-                        styles.textDescription,
-                        { marginTop: 0, maxWidth: "80%" },
-                      ]}
-                    >
-                      {userD.place}
-                    </H6fontBoldWhite>
-                  </View>
-                  <View style={styles.horoscopeTodayContainer}>
-                    <H6fontBoldWhite
-                      style={[styles.textDescription, { marginTop: 0 }]}
-                    >
-                      {userD.gender}
-                    </H6fontBoldWhite>
-                  </View>
-                  {/* Interpretează următoarea diagramă natală: Născut pe 10 martie 1994, la 14:05, în București, România. Soarele în Pești, Luna în Capricorn, Mercur în Vărsător, Venus în Berbec, și Marte în Pești. Ascendentul este în Scorpion. Soarele formează o conjuncție cu Venus, Luna este în opoziție cu Marte, iar Mercur formează un trigon cu Saturn. */}
-                  {/* Interpretează următoarea diagramă natală si sa fie pe categorii General, Personalitate, Dragoste, Cariera, Bani:  */}
-                  {/* {aspectsData && (
+                </View>
+
+                {/* Interpretează următoarea diagramă natală: Născut pe 10 martie 1994, la 14:05, în București, România. Soarele în Pești, Luna în Capricorn, Mercur în Vărsător, Venus în Berbec, și Marte în Pești. Ascendentul este în Scorpion. Soarele formează o conjuncție cu Venus, Luna este în opoziție cu Marte, iar Mercur formează un trigon cu Saturn. */}
+                {/* Interpretează următoarea diagramă natală si sa fie pe categorii General, Personalitate, Dragoste, Cariera, Bani:  */}
+                {/* {aspectsData && (
         <AstrologyAspectsView aspectsData={aspectsData} />
       )} */}
-                </View>
-                {/* <ChatComponent /> */}
+              </View>
 
-                <View style={{ paddingVertical: 10 }} />
-              </ShowFromTop>
-            </ScrollViewFadeFirst>
+              {/* <ChatComponent /> */}
+
+              {/* <View style={{ paddingVertical: 10 }} /> */}
+            </ScrollView>
           ) : selectedTab === "interpretation" ? (
             <ScrollViewFadeFirst height={10}>
               <ShowFromTop>
@@ -755,6 +768,7 @@ function SinastrieRelatie({ navigation }) {
                 houseCusps={houseCusps}
                 planetaryData={planetaryData}
                 aspects={aspectsData}
+                userD={userD}
               />
             </ShowFromTop>
           )}
@@ -792,11 +806,11 @@ const styles = StyleSheet.create({
     paddingBottom: "15%",
   },
   textTitles: {
-    fontSize: 18,
+    fontSize: 15,
     fontWeight: "bold",
   },
   textDescription: {
-    fontSize: 14,
+    fontSize: 12,
     color: "#F0F0F0",
     marginTop: "5%",
     marginLeft: "3%",

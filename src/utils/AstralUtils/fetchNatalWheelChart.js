@@ -1,5 +1,83 @@
 import base64 from "react-native-base64";
 import { atob } from "react-native-quick-base64";
+import { SvgUri, SvgXml } from "react-native-svg";
+// Funcția care redimensionează SVG-ul
+// Funcția care redimensionează SVG-ul
+export function scaleSVG(svgString, targetWidth, targetHeight) {
+  const parser = new DOMParser();
+  const xmlDoc = parser.parseFromString(svgString, "text/xml");
+
+  // Obține dimensiunile originale
+  const originalWidth = parseFloat(
+    xmlDoc.documentElement.getAttribute("width")
+  );
+  const originalHeight = parseFloat(
+    xmlDoc.documentElement.getAttribute("height")
+  );
+
+  // Calculează factorul de scalare
+  const scaleX = targetWidth / originalWidth;
+  const scaleY = targetHeight / originalHeight;
+
+  // Scalare elemente SVG
+  const scaleAttribute = (value, scale) => parseFloat(value) * scale;
+
+  // Scalare cercuri
+  const circles = xmlDoc.getElementsByTagName("circle");
+  Array.from(circles).forEach((circle) => {
+    circle.setAttribute(
+      "cx",
+      scaleAttribute(circle.getAttribute("cx"), scaleX)
+    );
+    circle.setAttribute(
+      "cy",
+      scaleAttribute(circle.getAttribute("cy"), scaleY)
+    );
+    circle.setAttribute(
+      "r",
+      scaleAttribute(circle.getAttribute("r"), (scaleX + scaleY) / 2)
+    );
+  });
+
+  // Scalare linii
+  const lines = xmlDoc.getElementsByTagName("line");
+  Array.from(lines).forEach((line) => {
+    line.setAttribute("x1", scaleAttribute(line.getAttribute("x1"), scaleX));
+    line.setAttribute("y1", scaleAttribute(line.getAttribute("y1"), scaleY));
+    line.setAttribute("x2", scaleAttribute(line.getAttribute("x2"), scaleX));
+    line.setAttribute("y2", scaleAttribute(line.getAttribute("y2"), scaleY));
+  });
+
+  // Scalare texte
+  const texts = xmlDoc.getElementsByTagName("text");
+  Array.from(texts).forEach((text) => {
+    text.setAttribute("x", scaleAttribute(text.getAttribute("x"), scaleX));
+    text.setAttribute("y", scaleAttribute(text.getAttribute("y"), scaleY));
+    text.setAttribute(
+      "font-size",
+      scaleAttribute(text.getAttribute("font-size"), (scaleX + scaleY) / 2)
+    );
+  });
+
+  // Updatează dimensiunile SVG
+  xmlDoc.documentElement.setAttribute("width", targetWidth);
+  xmlDoc.documentElement.setAttribute("height", targetHeight);
+
+  // Returnează SVG-ul scalat ca string
+  const serializer = new XMLSerializer();
+  return serializer.serializeToString(xmlDoc);
+}
+
+export function resizeBase64SVG(base64String, targetWidth, targetHeight) {
+  // Decodifică base64 în string SVG
+  let svgString = base64.decode(base64String);
+
+  // Redimensionează SVG-ul
+  svgString = scaleSVG(svgString, targetWidth, targetHeight);
+
+  // Recodifică SVG-ul în base64
+  return base64.encode(svgString);
+}
 
 export async function fetchAstroData(
   endpointUrl,
