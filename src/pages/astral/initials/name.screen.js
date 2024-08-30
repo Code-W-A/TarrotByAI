@@ -624,7 +624,7 @@ function NameScreen({ navigation, route }) {
                     mode="outlined"
                     onPress={() => setShowTimePicker(true)}
                     style={styles.timeButton}
-                    color="#6200ee"
+                    color="white"
                     theme={{
                       colors: {
                         primary: colors.white,

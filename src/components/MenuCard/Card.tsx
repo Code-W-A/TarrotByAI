@@ -10,7 +10,11 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { colors } from "../../utils/colors";
 import { useNavigationState } from "../../context/NavigationContext";
-import { H7fontBoldPrimary, H8fontBoldPrimary } from "../commonText";
+import {
+  H7fontBoldPrimary,
+  H8fontBoldPrimary,
+  H8fontBoldYellow,
+} from "../commonText";
 
 // Adaugă 'text', 'screen', și 'image' ca props-uri ale componentei Card
 const Card = ({ text, screen, image, interstitialAdLoaded, interstitial }) => {
@@ -42,9 +46,17 @@ const Card = ({ text, screen, image, interstitialAdLoaded, interstitial }) => {
             source={image} // Utilizează prop-ul 'image' pentru a seta sursa
             style={styles.buttonStyle}
           >
-            <H8fontBoldPrimary style={styles.textStyle}>
-              {text}
-            </H8fontBoldPrimary>
+            <View
+              style={{
+                width: "70%",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <H8fontBoldYellow style={styles.textStyle}>
+                {text}
+              </H8fontBoldYellow>
+            </View>
           </ImageBackground>
         </View>
         {/* Se poate adăuga conținutul pentru partea din spate a cardului aici, dacă este necesar */}
@@ -84,11 +96,14 @@ const styles = StyleSheet.create({
   },
   textStyle: {
     textAlign: "center",
-    flexShrink: 0, // Previne strângerea textului
     width: "70%", // Ajustează lățimea după necesități
     paddingHorizontal: 5,
     color: colors.gradientLogin2,
+    overflow: "hidden", // Ascunde textul care depășește lățimea
+    textOverflow: "ellipsis", // Adaugă "..." la finalul textului dacă e prea lung (doar pentru web)
+    flexShrink: 1, // Permite textului să se micșoreze pentru a încăpea în container
   },
+
   // Alte stiluri necesare
 });
 

@@ -254,8 +254,7 @@ const NavBarBottom = () => {
                 // Existing code to render icons for other navigation options
                 <Ionicons
                   name={
-                    "ios-" +
-                    (index === 0 ? "star" : index === 1 ? "bookmark" : "person")
+                    index === 0 ? "star" : index === 1 ? "bookmark" : "person"
                   }
                   size={selected === index ? 34 : 24}
                   color={

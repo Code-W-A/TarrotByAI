@@ -357,7 +357,10 @@ export const KeyboardAwareScrollViewStyled = (props) => (
 export const MainContainer = ({ secondary, children, style }) => (
   <SafeAreaView
     style={[
-      { backgroundColor: secondary ? "desired-color" : "default-color" },
+      {
+        backgroundColor: secondary ? "desired-color" : "default-color",
+        flex: 1,
+      },
       style,
     ]}
   >

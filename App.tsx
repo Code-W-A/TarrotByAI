@@ -56,17 +56,17 @@ import { usePushNotifications } from "./src/hooks/usePushNotifications";
 
 //---ADS---
 
-import mobileAds from "react-native-google-mobile-ads";
+// import mobileAds from "react-native-google-mobile-ads";
 
-mobileAds()
-  .initialize()
-  .then((adapterStatuses) => {
-    console.log("Initialization of adds complete!");
-    // Initialization complete!
-  })
-  .catch((err) => {
-    console.log("Initialization of adds ERROR!", err);
-  });
+// mobileAds()
+//   .initialize()
+//   .then((adapterStatuses) => {
+//     console.log("Initialization of adds complete!");
+//     // Initialization complete!
+//   })
+//   .catch((err) => {
+//     console.log("Initialization of adds ERROR!", err);
+//   });
 
 // AppOpenAd.createForAdRequest(TestIds.APP_OPEN);
 

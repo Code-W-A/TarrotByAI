@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
+  Platform,
   SafeAreaView,
   StyleSheet,
   View,
@@ -26,6 +27,9 @@ import {
   H18fontMediumBlack,
   H6fontBoldPrimary,
   H6fontBoldWhite,
+  H6fontBoldYellow,
+  H7fontBoldWhite,
+  H8fontBoldWhite,
   H8fontRegularWhite,
   H9fontMediumLightBlack,
 } from "../../../components/commonText";
@@ -495,40 +499,40 @@ function AstrogramaNatala({ navigation }) {
                 <View style={[styles.defaultContainer]}>
                   <Divider style={{ marginTop: "5%" }} />
                   <View style={styles.horoscopeTodayContainer}>
-                    <H6fontBoldWhite style={styles.textTitles}>
+                    <H7fontBoldWhite style={styles.textTitles}>
                       {userD.full_name}
-                    </H6fontBoldWhite>
+                    </H7fontBoldWhite>
                   </View>
                   <View style={styles.horoscopeTodayContainer}>
-                    <H6fontBoldWhite
+                    <H8fontBoldWhite
                       style={[styles.textDescription, { marginTop: 0 }]}
                     >
                       {userD.day} - {userD.month} - {userD.year}
-                    </H6fontBoldWhite>
+                    </H8fontBoldWhite>
                   </View>
                   <View style={styles.horoscopeTodayContainer}>
-                    <H6fontBoldWhite
+                    <H8fontBoldWhite
                       style={[styles.textDescription, { marginTop: 0 }]}
                     >
                       {userD.selectedTime}
-                    </H6fontBoldWhite>
+                    </H8fontBoldWhite>
                   </View>
                   <View style={styles.horoscopeTodayContainer}>
-                    <H6fontBoldWhite
+                    <H8fontBoldWhite
                       style={[
                         styles.textDescription,
                         { marginTop: 0, maxWidth: "80%" },
                       ]}
                     >
                       {userD.place}
-                    </H6fontBoldWhite>
+                    </H8fontBoldWhite>
                   </View>
                   <View style={styles.horoscopeTodayContainer}>
-                    <H6fontBoldWhite
+                    <H8fontBoldWhite
                       style={[styles.textDescription, { marginTop: 0 }]}
                     >
                       {userD.gender}
-                    </H6fontBoldWhite>
+                    </H8fontBoldWhite>
                   </View>
                   {/* Interpretează următoarea diagramă natală: Născut pe 10 martie 1994, la 14:05, în București, România. Soarele în Pești, Luna în Capricorn, Mercur în Vărsător, Venus în Berbec, și Marte în Pești. Ascendentul este în Scorpion. Soarele formează o conjuncție cu Venus, Luna este în opoziție cu Marte, iar Mercur formează un trigon cu Saturn. */}
                   {/* Interpretează următoarea diagramă natală si sa fie pe categorii General, Personalitate, Dragoste, Cariera, Bani:  */}
@@ -567,88 +571,88 @@ function AstrogramaNatala({ navigation }) {
                       },
                     ]}
                   >
-                    <H6fontBoldWhite
+                    <H6fontBoldYellow
                       style={[styles.textTitles, { marginTop: "7%" }]}
                     >
                       {i18n.translate("General")}
-                    </H6fontBoldWhite>
+                    </H6fontBoldYellow>
 
                     <H9fontMediumLightBlack style={styles.textDescription}>
                       {userD.generalCategory}
                     </H9fontMediumLightBlack>
-                    <H6fontBoldWhite
+                    <H6fontBoldYellow
                       style={[styles.textTitles, { marginTop: "7%" }]}
                     >
                       {i18n.translate("Dragoste")}
-                    </H6fontBoldWhite>
+                    </H6fontBoldYellow>
 
                     <H9fontMediumLightBlack style={styles.textDescription}>
                       {userD.dragosteCategory}
                     </H9fontMediumLightBlack>
-                    <H6fontBoldWhite
+                    <H6fontBoldYellow
                       style={[styles.textTitles, { marginTop: "7%" }]}
                     >
                       {i18n.translate("Familie")}
-                    </H6fontBoldWhite>
+                    </H6fontBoldYellow>
 
                     <H9fontMediumLightBlack style={styles.textDescription}>
                       {userD.familieCategory}
                     </H9fontMediumLightBlack>
-                    {/* <H6fontBoldWhite
+                    {/* <H6fontBoldYellow
                       style={[styles.textTitles, { marginTop: "7%" }]}
                     >
                       Cariera
-                    </H6fontBoldWhite>
+                    </H6fontBoldYellow>
 
                     <H9fontMediumLightBlack style={styles.textDescription}>
                       {userD.carieraCategory}
                     </H9fontMediumLightBlack> */}
 
-                    <H6fontBoldWhite
+                    <H6fontBoldYellow
                       style={[styles.textTitles, { marginTop: "7%" }]}
                     >
                       {i18n.translate("Bani")}
-                    </H6fontBoldWhite>
+                    </H6fontBoldYellow>
 
                     <H9fontMediumLightBlack style={styles.textDescription}>
                       {userD.baniCategory}
                     </H9fontMediumLightBlack>
 
-                    <H6fontBoldWhite
+                    <H6fontBoldYellow
                       style={[styles.textTitles, { marginTop: "7%" }]}
                     >
                       {i18n.translate("MuncaSiStudii")}
-                    </H6fontBoldWhite>
+                    </H6fontBoldYellow>
 
                     <H9fontMediumLightBlack style={styles.textDescription}>
                       {userD.muncaStudiiCategory}
                     </H9fontMediumLightBlack>
 
-                    <H6fontBoldWhite
+                    <H6fontBoldYellow
                       style={[styles.textTitles, { marginTop: "7%" }]}
                     >
                       {i18n.translate("Prieteni")}
-                    </H6fontBoldWhite>
+                    </H6fontBoldYellow>
 
                     <H9fontMediumLightBlack style={styles.textDescription}>
                       {userD.prieteniCategory}
                     </H9fontMediumLightBlack>
 
-                    <H6fontBoldWhite
+                    <H6fontBoldYellow
                       style={[styles.textTitles, { marginTop: "7%" }]}
                     >
                       {i18n.translate("Sanatate")}
-                    </H6fontBoldWhite>
+                    </H6fontBoldYellow>
 
                     <H9fontMediumLightBlack style={styles.textDescription}>
                       {userD.sanatateCategory}
                     </H9fontMediumLightBlack>
 
-                    <H6fontBoldWhite
+                    <H6fontBoldYellow
                       style={[styles.textTitles, { marginTop: "7%" }]}
                     >
                       {i18n.translate("Spiritualitate")}
-                    </H6fontBoldWhite>
+                    </H6fontBoldYellow>
 
                     <H9fontMediumLightBlack style={styles.textDescription}>
                       {userD.spiritualitateCategory}

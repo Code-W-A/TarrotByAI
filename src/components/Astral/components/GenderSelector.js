@@ -1,8 +1,8 @@
-import { StyleSheet, View } from "react-native";
+import React, { useState } from "react";
+import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
 import { colors } from "../../../utils/colors";
-import { useState } from "react";
-import { Button, SegmentedButtons, Text } from "react-native-paper";
 import i18n from "../../../../i18n";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 const GenderSelector = ({ setGender, gender }) => {
   const genderOptions = [
@@ -24,45 +24,76 @@ const GenderSelector = ({ setGender, gender }) => {
       <Text style={styles.genderLabel}>
         {i18n.translate("SelecteazaGenul")}:
       </Text>
-      <SegmentedButtons
-        value={gender}
-        onValueChange={(newValue) => setGender(newValue)}
-        buttons={genderOptions.map((option) => ({
-          value: option.value,
-          label: option.label,
-          icon: option.icon,
-        }))}
-        style={styles.segmentedButtons}
-        theme={{
-          colors: {
-            primary: "white", // Folosește o culoare din gradient pentru selectare
-            onSurface: "white", // O culoare închisă pentru text
-          },
-        }}
-      />
+      <View style={styles.buttonContainer}>
+        {genderOptions.map((option) => (
+          <TouchableOpacity
+            key={option.value}
+            style={[
+              styles.button,
+              gender === option.value && styles.activeButton,
+            ]}
+            onPress={() => setGender(option.value)}
+          >
+            <MaterialCommunityIcons
+              name={option.icon}
+              size={24}
+              color={gender === option.value ? colors.primary3 : "white"}
+              style={styles.icon}
+            />
+            <Text
+              style={[
+                styles.buttonText,
+                gender === option.value && styles.activeButtonText,
+              ]}
+            >
+              {option.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
     </View>
   );
 };
+
 const styles = StyleSheet.create({
   genderContainer: {
     marginTop: 20,
     padding: 10,
-    backgroundColor: colors.primary3, // Container foarte transparent
+    backgroundColor: colors.primary3,
     borderRadius: 10,
-    shadowOpacity: 0, // Poți reduce sau elimina umbra pentru mai multă transparență
-    elevation: 0, // Elimină elevația pentru Android
   },
   genderLabel: {
     fontSize: 16,
     marginBottom: 10,
     fontWeight: "bold",
-    color: "#FFF", // Text alb pentru a se distinge pe un fundal posibil întunecat
+    color: "#FFF",
   },
-  segmentedButtons: {
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  button: {
+    flex: 1,
+    alignItems: "center",
+    paddingVertical: 10,
+    marginHorizontal: 5,
     borderRadius: 20,
-    backgroundColor: "transparent", // Fundal complet transparent pentru butoane
-    borderColor: "rgba(255, 255, 255, 0.5)", // Contur subtil pentru butoane
     borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.5)",
+    backgroundColor: "transparent",
+  },
+  activeButton: {
+    backgroundColor: "white",
+  },
+  buttonText: {
+    fontSize: 14,
+    color: "white",
+  },
+  activeButtonText: {
+    color: colors.primary3,
+  },
+  icon: {
+    marginBottom: 5,
   },
 });
 

@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
     color: colors.primary3,
   },
   yellow: {
-    color: colors.yellow,
+    color: colors.gradientLogin2,
   },
   lightBlue: {
     color: colors.facebook,
@@ -138,6 +138,9 @@ export const H2fontBoldPrimary = ({ children }) => (
 );
 export const H6fontBoldPrimary = ({ children }) => (
   <Text style={[styles.h3, styles.fontBold, styles.primary2]}>{children}</Text>
+);
+export const H6fontBoldYellow = ({ children }) => (
+  <Text style={[styles.h3, styles.fontBold, styles.yellow]}>{children}</Text>
 );
 export const H6fontRegularBlue = ({ children }) => (
   <Text style={[styles.h6, styles.fontRegular, styles.lightBlue]}>
@@ -360,6 +363,9 @@ export const H8fontMediumWhite = ({ children }) => (
 );
 export const H8fontBoldPrimary = ({ children }) => (
   <Text style={[styles.h8, styles.fontBold, styles.primary2]}>{children}</Text>
+);
+export const H8fontBoldYellow = ({ children }) => (
+  <Text style={[styles.h8, styles.fontBold, styles.yellow]}>{children}</Text>
 );
 export const H8fontMediumPrimary = ({ children }) => (
   <Text style={[styles.h8, styles.fontMedium, styles.primary2]}>

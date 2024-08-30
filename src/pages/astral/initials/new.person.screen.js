@@ -158,7 +158,6 @@ function NewPersonScreen({ navigation, route }) {
       const formattedDate = currentDate.toISOString().split("T")[0];
 
       const pOneData = {
-        // datele pentru primul utilizator
         full_name: parsedData.full_name,
         day: parsedData.day,
         month: parsedData.month,
@@ -576,7 +575,7 @@ function NewPersonScreen({ navigation, route }) {
                     mode="outlined"
                     onPress={() => setShowTimePicker(true)}
                     style={styles.timeButton}
-                    color="#6200ee"
+                    color="white"
                     theme={{
                       colors: {
                         primary: colors.white,

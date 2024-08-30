@@ -51,6 +51,7 @@ export const DatePicker: React.FC<DatePickerProps> = (props) => {
         display={Platform.OS == "android" ? "default" : "spinner"}
         onCancel={onCancel}
         onConfirm={onConfirm}
+        isDarkModeEnabled={true} // Try enabling dark mode especially for Android
       />
     </View>
   );
@@ -90,6 +91,7 @@ export const TimePicker: React.FC<TimePickerProps> = (props) => {
         onCancel={onCancel}
         locale="en_GB"
         onConfirm={onConfirm}
+        isDarkModeEnabled={true} // Try enabling dark mode especially for Android
       />
     </View>
   );
