@@ -181,7 +181,7 @@ export const gTranslateFetch = async (text, target) => {
   try {
     const response = await fetch(url, options);
     const result = await response.json();
-    console.log("result...", result);
+    // console.log("result...", result);
     return result.response;
   } catch (error) {
     console.error("error on gTranslateFetch...", error);

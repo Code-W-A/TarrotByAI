@@ -24,9 +24,11 @@ import {
   H10fontRegularWhite,
   H6fontBoldPurple,
   H6fontBoldWhite,
+  H6fontBoldYellow,
   H7fontBoldWhite,
   H8fontBoldPrimary,
   H8fontBoldWhite,
+  H8fontBoldYellow,
   H8fontMediumWhite,
   H9fontMediumBlack,
   H9fontMediumBlue,
@@ -36,11 +38,11 @@ import {
 import i18n from "../../../../i18n";
 
 //---ADS---
-// import {
-//   InterstitialAd,
-//   TestIds,
-//   AdEventType,
-// } from "react-native-google-mobile-ads";
+import {
+  InterstitialAd,
+  TestIds,
+  AdEventType,
+} from "react-native-google-mobile-ads";
 import { useNavigationState } from "../../../context/NavigationContext";
 import InLove from "../../../svgs/InLove";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
@@ -61,10 +63,16 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const SubHeading = () => {
   const { colors } = useTheme();
   return (
-    <View style={{ marginHorizontal: 20 }}>
-      <H8fontBoldWhite style={{ textAlign: "center" }}>
+    <View
+      style={{
+        marginHorizontal: 20,
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <H6fontBoldYellow style={{ textAlign: "center" }}>
         {i18n.translate("digitalAstrology")}
-      </H8fontBoldWhite>
+      </H6fontBoldYellow>
     </View>
   );
 };
@@ -75,14 +83,14 @@ const SubHeading = () => {
  * @constructor
  */
 //----ADS----
-// const adUnitId = __DEV__
-//   ? TestIds.INTERSTITIAL
-//   : "ca-app-pub-9577714849380446/7080054250";
-// // const adUnitId = "ca-app-pub-9577714849380446/7080054250";
+const adUnitId = __DEV__
+  ? TestIds.INTERSTITIAL
+  : "ca-app-pub-9577714849380446/7080054250";
+// const adUnitId = "ca-app-pub-9577714849380446/7080054250";
 
-// const interstitial = InterstitialAd.createForAdRequest(adUnitId, {
-//   keywords: ["spiritualitate", "bunăstare"],
-// });
+const interstitial = InterstitialAd.createForAdRequest(adUnitId, {
+  keywords: ["spiritualitate", "bunăstare"],
+});
 
 function PersonsScreen({ navigation }) {
   const { setCurrentScreen } = useNavigationState();
@@ -92,35 +100,35 @@ function PersonsScreen({ navigation }) {
   const route = useNavigation();
 
   //---ADS---
-  // useEffect(() => {
-  //   const loadListener = interstitial.addAdEventListener(
-  //     AdEventType.LOADED,
-  //     () => {
-  //       setLoaded(true);
-  //     }
-  //   );
-  //   const closeListener = interstitial.addAdEventListener(
-  //     AdEventType.CLOSED,
-  //     () => {
-  //       setLoaded(false);
-  //       interstitial.load(); // Reîncarcă reclama pentru o utilizare ulterioară
-  //     }
-  //   );
-  //   const errorListener = interstitial.addAdEventListener(
-  //     AdEventType.ERROR,
-  //     (error) => {
-  //       console.error(error);
-  //     }
-  //   );
+  useEffect(() => {
+    const loadListener = interstitial.addAdEventListener(
+      AdEventType.LOADED,
+      () => {
+        setLoaded(true);
+      }
+    );
+    const closeListener = interstitial.addAdEventListener(
+      AdEventType.CLOSED,
+      () => {
+        setLoaded(false);
+        interstitial.load(); // Reîncarcă reclama pentru o utilizare ulterioară
+      }
+    );
+    const errorListener = interstitial.addAdEventListener(
+      AdEventType.ERROR,
+      (error) => {
+        console.error(error);
+      }
+    );
 
-  //   interstitial.load(); // Începe încărcarea anunțului
+    interstitial.load(); // Începe încărcarea anunțului
 
-  //   return () => {
-  //     loadListener();
-  //     closeListener();
-  //     errorListener();
-  //   };
-  // }, []);
+    return () => {
+      loadListener();
+      closeListener();
+      errorListener();
+    };
+  }, []);
 
   useEffect(() => {
     const checkUserData = async () => {

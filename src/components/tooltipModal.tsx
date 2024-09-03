@@ -1,17 +1,10 @@
-import React from 'react';
-import { Tooltip, Text, lightColors } from '@rneui/themed';
-import { View, StyleSheet, Dimensions, ScrollView } from 'react-native';
+import React from "react";
+
+import { View, StyleSheet, Dimensions, ScrollView, Text } from "react-native";
 // import Modal from 'modal-react-native-web';
 
-const { height } = Dimensions.get('window');
+const { height } = Dimensions.get("window");
 
 export const ControlledTooltip: React.FC<any> = (props) => {
-  
-  return (
-    <Tooltip
-    
-  
-      {...props}
-    />
-  );
+  return <Text></Text>;
 };

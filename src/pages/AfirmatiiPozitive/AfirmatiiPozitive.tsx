@@ -8,6 +8,7 @@ import {
   StatusBar,
   ImageBackground,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { MainContainer } from "../../components/commonViews";
@@ -18,6 +19,7 @@ import {
   H15fontMediumWhite,
   H2fontBoldPrimary,
   H3fontBoldPrimary,
+  H3fontBoldWhite,
   H6fontBoldPrimary,
   H6fontMediumPrimary,
   H6fontMediumWhite,
@@ -56,7 +58,7 @@ const AfirmatiiPozitive = () => {
   const { setIsNavBarVisible } = useNavBarVisibility();
   const [luck, setLuck] = React.useState(null);
 
-  const [afirmatiiPozitive, setAfirmatiiPozitive] = React.useState({});
+  const [afirmatiiPozitive, setAfirmatiiPozitive] = React.useState(null);
 
   const getRandomDocumentFirestore = async () => {
     // Presupunem că deja ai definit `collection` și `db`
@@ -76,10 +78,10 @@ const AfirmatiiPozitive = () => {
     getRandomDocumentFirestore();
   }, []);
 
-  React.useEffect(() => {
-    setIsNavBarVisible(false);
-    return () => setIsNavBarVisible(true); // Restabilește vizibilitatea la ieșirea din componentă
-  }, []);
+  // React.useEffect(() => {
+  //   setIsNavBarVisible(false);
+  //   return () => setIsNavBarVisible(true); // Restabilește vizibilitatea la ieșirea din componentă
+  // }, []);
 
   // Array cu sursele imaginilor
   const images = [
@@ -98,6 +100,26 @@ const AfirmatiiPozitive = () => {
   // Alege o imagine aleatorie din array
   const randomImage = images[Math.floor(Math.random() * images.length)];
 
+  React.useEffect(() => {
+    getRandomDocumentFirestore();
+  }, []);
+
+  if (!afirmatiiPozitive) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
+
+  if (!afirmatiiPozitive.info) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
+  console.log("test....", afirmatiiPozitive.info);
   return (
     <View style={{ flex: 1 }}>
       <MainContainer style={{ flex: 1 }}>
@@ -116,19 +138,26 @@ const AfirmatiiPozitive = () => {
               />
             </View>
             {afirmatiiPozitive?.info ? (
-              <H3fontBoldPrimary
+              <View
                 style={{
-                  alignSelf: "center",
-                  textAlign: "center",
-                  color: "white",
+                  justifyContent: "center",
+                  alignItems: "center",
                 }}
               >
-                {language === "hi"
-                  ? afirmatiiPozitive?.info.hu.nume
-                  : language === "id"
-                  ? afirmatiiPozitive?.info.ru.nume
-                  : afirmatiiPozitive?.info[language].nume}
-              </H3fontBoldPrimary>
+                <H3fontBoldWhite
+                  style={{
+                    alignSelf: "center",
+                    textAlign: "center",
+                    color: "white",
+                  }}
+                >
+                  {language === "hi"
+                    ? afirmatiiPozitive?.info.hu.nume
+                    : language === "id"
+                    ? afirmatiiPozitive?.info.ru.nume
+                    : afirmatiiPozitive?.info[language].nume}
+                </H3fontBoldWhite>
+              </View>
             ) : null}
             <View
               style={{
@@ -140,15 +169,23 @@ const AfirmatiiPozitive = () => {
             >
               <ScrollView contentContainerStyle={styles.scrollViewContainer}>
                 {afirmatiiPozitive?.info ? (
-                  <H6fontMediumPrimary
-                    style={{ textAlign: "center", color: "white" }}
+                  <View
+                    style={{
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
                   >
-                    {language === "hi"
-                      ? afirmatiiPozitive?.info.hu.descriere
-                      : language === "id"
-                      ? afirmatiiPozitive?.info.ru.descriere
-                      : afirmatiiPozitive?.info[language].descriere}
-                  </H6fontMediumPrimary>
+                    <H6fontMediumWhite
+                      style={{ textAlign: "center", color: "white" }}
+                    >
+                      {language === "hi"
+                        ? afirmatiiPozitive?.info.hu.descriere
+                        : language === "id"
+                        ? afirmatiiPozitive?.info.ru.descriere
+                        : afirmatiiPozitive?.info[language].descriere}
+                      {afirmatiiPozitive?.info.ru.descriere}
+                    </H6fontMediumWhite>
+                  </View>
                 ) : null}
               </ScrollView>
             </View>
@@ -160,11 +197,17 @@ const AfirmatiiPozitive = () => {
 };
 
 const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   scrollViewContainer: {
     justifyContent: "center",
     alignItems: "center",
     padding: 10,
     flexGrow: 1,
+    textAlign: "center",
   },
   imageBackground: {
     flex: 1,

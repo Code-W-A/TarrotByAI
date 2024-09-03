@@ -5,7 +5,13 @@
     "platforms": ["ios", "android", "web"],
     "version": "1.5.0",
     "orientation": "portrait",
-    "plugins": ["expo-build-properties"],
+    "plugins": [
+      "expo-build-properties",
+      "expo-asset",
+      "expo-font",
+      "expo-localization",
+      "expo-tracking-transparency"
+    ],
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png"
@@ -14,7 +20,7 @@
       "config": {},
       "softwareKeyboardLayoutMode": "pan",
       "package": "com.cristina.zurba.tarot",
-      "versionCode": 66,
+      "versionCode": 68,
       "permissions": ["android.permission.RECORD_AUDIO"]
     },
     "web": {

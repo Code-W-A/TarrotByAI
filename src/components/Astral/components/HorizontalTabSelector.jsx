@@ -7,20 +7,21 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from "react-native";
-import { H4fontBoldYellow } from "../../commonText";
+import { H4fontBoldPrimary, H4fontBoldYellow } from "../../commonText";
 import { colors } from "../../../utils/colors";
+import i18n from "../../../../i18n";
 
 const HorizontalTabSelector = ({ isLoading, activeTab, setActiveTab }) => {
   const tabs = [
     "Harmony",
     "Conflict",
     "Contrast",
-
-    "Physical Compatibility",
-    "Emotional Compatibility",
-    "Sexual Compatibility",
-    "Spiritual Compatibility",
-    "Financial Compatibility",
+    "Intense_Aspect",
+    "Physical_Compatibility",
+    "Emotional_Compatibility",
+    "Sexual_Compatibility",
+    "Spiritual_Compatibility",
+    "Financial_Compatibility",
   ]; // Lista actualizată de tab-uri
 
   return (
@@ -39,15 +40,27 @@ const HorizontalTabSelector = ({ isLoading, activeTab, setActiveTab }) => {
             ]}
             onPress={() => setActiveTab(tab)}
           >
-            <H4fontBoldYellow
-              style={[
-                styles.textTitles,
-                activeTab === tab ? styles.activeText : null,
-                // { marginTop: "7%", fontSize: 15, fontWeight: "bold" },
-              ]}
-            >
-              {tab}
-            </H4fontBoldYellow>
+            {activeTab === tab ? (
+              <H4fontBoldPrimary
+                style={[
+                  styles.textTitles,
+                  activeTab === tab ? styles.activeText : null,
+                  // { marginTop: "7%", fontSize: 15, fontWeight: "bold" },
+                ]}
+              >
+                {i18n.translate(tab)}
+              </H4fontBoldPrimary>
+            ) : (
+              <H4fontBoldYellow
+                style={[
+                  styles.textTitles,
+                  activeTab === tab ? styles.activeText : null,
+                  // { marginTop: "7%", fontSize: 15, fontWeight: "bold" },
+                ]}
+              >
+                {i18n.translate(tab)}
+              </H4fontBoldYellow>
+            )}
           </TouchableOpacity>
         ))}
       </ScrollView>

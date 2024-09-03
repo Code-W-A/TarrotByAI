@@ -1,6 +1,6 @@
 import { LinearGradient } from "expo-linear-gradient";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Platform, SafeAreaView, StyleSheet, View } from "react-native";
 import {
   Button,
@@ -36,11 +36,11 @@ import {
 import i18n from "../../../../i18n";
 
 //---ADS---
-// import {
-//   InterstitialAd,
-//   TestIds,
-//   AdEventType,
-// } from "react-native-google-mobile-ads";
+import {
+  InterstitialAd,
+  TestIds,
+  AdEventType,
+} from "react-native-google-mobile-ads";
 import { useNavigationState } from "../../../context/NavigationContext";
 import InLove from "../../../svgs/InLove";
 import Palmistry from "../../../svgs/Palmistry";
@@ -49,6 +49,7 @@ import Married from "../../../svgs/Married";
 import Male from "../../../svgs/Male";
 import Dices from "../../../svgs/Dices";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect } from "@react-navigation/native";
 
 const SubHeading = () => {
   const { colors } = useTheme();
@@ -78,14 +79,14 @@ const SubHeading = () => {
  * @constructor
  */
 //----ADS----
-// const adUnitId = __DEV__
-//   ? TestIds.INTERSTITIAL
-//   : "ca-app-pub-9577714849380446/7080054250";
-// // const adUnitId = "ca-app-pub-9577714849380446/7080054250";
+const adUnitId = __DEV__
+  ? TestIds.INTERSTITIAL
+  : "ca-app-pub-9577714849380446/7080054250";
+// const adUnitId = "ca-app-pub-9577714849380446/7080054250";
 
-// const interstitial = InterstitialAd.createForAdRequest(adUnitId, {
-//   keywords: ["spiritualitate", "bunăstare"],
-// });
+const interstitial = InterstitialAd.createForAdRequest(adUnitId, {
+  keywords: ["spiritualitate", "bunăstare"],
+});
 
 function LearnScreen({ navigation }) {
   const { setCurrentScreen } = useNavigationState();
@@ -93,47 +94,67 @@ function LearnScreen({ navigation }) {
   const [userD, setUserD] = useState({});
 
   //---ADS---
-  // useEffect(() => {
-  //   const loadListener = interstitial.addAdEventListener(
-  //     AdEventType.LOADED,
-  //     () => {
-  //       setLoaded(true);
-  //     }
-  //   );
-  //   const closeListener = interstitial.addAdEventListener(
-  //     AdEventType.CLOSED,
-  //     () => {
-  //       setLoaded(false);
-  //       interstitial.load(); // Reîncarcă reclama pentru o utilizare ulterioară
-  //     }
-  //   );
-  //   const errorListener = interstitial.addAdEventListener(
-  //     AdEventType.ERROR,
-  //     (error) => {
-  //       console.error(error);
-  //     }
-  //   );
-
-  //   interstitial.load(); // Începe încărcarea anunțului
-
-  //   return () => {
-  //     loadListener();
-  //     closeListener();
-  //     errorListener();
-  //   };
-  // }, []);
-
   useEffect(() => {
-    const fetchUserData = async () => {
-      const userDataJson = await AsyncStorage.getItem("userData");
-      const userData = userDataJson ? JSON.parse(userDataJson) : null;
-      setUserD(userData);
-    };
+    const loadListener = interstitial.addAdEventListener(
+      AdEventType.LOADED,
+      () => {
+        setLoaded(true);
+      }
+    );
+    const closeListener = interstitial.addAdEventListener(
+      AdEventType.CLOSED,
+      () => {
+        setLoaded(false);
+        interstitial.load(); // Reîncarcă reclama pentru o utilizare ulterioară
+      }
+    );
+    const errorListener = interstitial.addAdEventListener(
+      AdEventType.ERROR,
+      (error) => {
+        console.error(error);
+      }
+    );
 
-    fetchUserData();
+    interstitial.load(); // Începe încărcarea anunțului
+
+    return () => {
+      loadListener();
+      closeListener();
+      errorListener();
+    };
   }, []);
 
+  useFocusEffect(
+    useCallback(() => {
+      const fetchUserData = async () => {
+        const userDataJson = await AsyncStorage.getItem("userData");
+        const userData = userDataJson ? JSON.parse(userDataJson) : null;
+        if (!userData.actualLanguage) {
+          userData.actualLanguage = "en";
+          await AsyncStorage.setItem("userData", JSON.stringify(userData));
+        }
+        if (!userData.actualLanguageAstrograma) {
+          userData.actualLanguageAstrograma = "en";
+          await AsyncStorage.setItem("userData", JSON.stringify(userData));
+        }
+        if (!userData.actualLanguageSinastrie) {
+          userData.actualLanguageSinastrie = "en";
+          await AsyncStorage.setItem("userData", JSON.stringify(userData));
+        }
+        setUserD(userData);
+      };
+
+      fetchUserData();
+
+      // Funcția de curățare opțională
+      return () => {
+        // Cod pentru curățare, dacă este necesar
+      };
+    }, []) // Dependențele sunt opționale și pot fi omise dacă datele trebuie reîncărcate la fiecare focalizare
+  );
+
   const handleViewLesson = async (lesson) => {
+    console.log("lesson....", lesson);
     if (loaded) {
       try {
         // await interstitial.show();
@@ -225,7 +246,13 @@ function LearnScreen({ navigation }) {
                       },
                     }}
                     labelStyle={{ fontSize: 12, letterSpacing: 0 }}
-                    onPress={() => handleViewLesson("AstrogramaNatala")}
+                    onPress={() =>
+                      handleViewLesson(
+                        !userD?.generalCategory.length > 20
+                          ? "Name"
+                          : "AstrogramaNatala"
+                      )
+                    }
                   >
                     {i18n.translate("seeTheAstrogram")}
                   </Button>
@@ -312,7 +339,13 @@ function LearnScreen({ navigation }) {
                       },
                     }}
                     labelStyle={{ fontSize: 12, letterSpacing: 0 }}
-                    onPress={() => handleViewLesson("Horoscop")}
+                    onPress={() =>
+                      handleViewLesson(
+                        !userD?.generalCategory.length > 20
+                          ? "Name"
+                          : "Horoscop"
+                      )
+                    }
                   >
                     {i18n.translate("seeTheHoroscope")}
                   </Button>

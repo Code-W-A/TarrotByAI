@@ -1,6 +1,10 @@
 import React from "react";
 import { View, Text, StyleSheet, Dimensions } from "react-native";
-import { H6fontBoldPrimary, H6fontRegularBlack } from "../commonText";
+import {
+  H6fontBoldPrimary,
+  H6fontBoldYellow,
+  H6fontRegularBlack,
+} from "../commonText";
 import { colors } from "../../utils/colors";
 
 const CardLayoutViitor = ({ shuffledCartiViitor, title, children }) => {
@@ -41,11 +45,11 @@ const CardLayoutViitor = ({ shuffledCartiViitor, title, children }) => {
           hasRows ? styles.titleTop : styles.titleCenter,
         ]}
       >
-        <H6fontBoldPrimary
+        <H6fontBoldYellow
           style={{ color: shuffledCartiViitor.length > 0 && "white" }}
         >
           {title}
-        </H6fontBoldPrimary>
+        </H6fontBoldYellow>
       </View>
       {rows.map((row, rowIndex) => (
         <View

@@ -7,7 +7,11 @@ import {
   Dimensions,
 } from "react-native";
 import { colors } from "../../../utils/colors";
-import { H8fontBoldWhite, H8fontMediumPrimary } from "../../commonText";
+import {
+  H8fontBoldWhite,
+  H8fontMediumPrimary,
+  H9fontMediumWhite,
+} from "../../commonText";
 import SpaceSky from "./space-sky";
 import i18n from "../../../../i18n"; // Import i18n to handle translations
 
@@ -35,7 +39,9 @@ const MyTopBarHoroscope = ({ onChangeTab }) => {
             onChangeTab(tab.key);
           }}
         >
-          <H8fontBoldWhite style={styles.tabText}>{tab.label}</H8fontBoldWhite>
+          <H9fontMediumWhite style={styles.tabText}>
+            {tab.label}
+          </H9fontMediumWhite>
         </TouchableOpacity>
       ))}
     </View>

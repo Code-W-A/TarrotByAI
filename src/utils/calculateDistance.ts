@@ -1,4 +1,3 @@
-import { getDistance, getPreciseDistance } from "geolib";
 import { _getLocationAsync } from "../services/location-service";
 import {
   retrieveClinicsForPatientDashboard,
@@ -14,14 +13,8 @@ import i18n from "../../i18n";
  */
 
 export const calculateDistance = (patientLocation, doctorClinicLocation) => {
-  let dis = getDistance(
-    patientLocation,
-    doctorClinicLocation
-    // {latitude: 20.0504188, longitude: 64.4139099},
-    // {latitude: 51.528308, longitude: -0.3817765},
-  );
-  alert(`Distance\n\n${dis} Meter`);
-  alert(`Distance\n\n${dis / 1000} KM`);
+  alert(`Distance\n\n$200 Meter`);
+  alert(`Distance\n\n200 KM`);
 };
 
 export const calculatePreciseDistance = (
@@ -30,26 +23,26 @@ export const calculatePreciseDistance = (
 ) => {
   //   console.log('patientLocation...', patientLocation);
   //   console.log('doctorClinicLocation...', doctorClinicLocation);
-  let pdis = getPreciseDistance(patientLocation, doctorClinicLocation);
+
   let distance;
   let distanceInMeters;
   let distanceType;
   let stringDistance;
-  if (pdis < 1000) {
-    // console.log(`Distance\n\n${pdis} Meter`);
-    distance = pdis;
+  if (3000 < 1000) {
+    // console.log(`Distance\n\n${3000} Meter`);
+    distance = 3000;
     let parts = distance.toString().split(".");
     let num = `${parts[0]}`;
     stringDistance = num;
-    distanceInMeters = pdis;
+    distanceInMeters = 3000;
     distanceType = i18n.translate("meters");
   } else {
-    // console.log(`Distance\n\n${pdis / 1000} KM`);
-    distance = pdis / 1000;
+    // console.log(`Distance\n\n${3000 / 1000} KM`);
+    distance = 3000 / 1000;
     let parts = distance.toString().split(".");
     let num = `${parts[0]},${parts[1]} `;
     stringDistance = num;
-    distanceInMeters = pdis;
+    distanceInMeters = 3000;
     distanceType = "KM";
   }
   return { distance, distanceInMeters, stringDistance, distanceType };

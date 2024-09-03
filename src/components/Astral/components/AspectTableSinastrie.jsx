@@ -4,8 +4,9 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { colors } from "../../../utils/colors";
 import {
   H6fontBoldPrimary,
-  H6fontBoldPurple,
+  H6fontBoldYellow,
   H7fontBoldWhite,
+  H8fontBoldWhite,
   H8fontMediumWhite,
   H9fontMediumWhite,
 } from "../../commonText";
@@ -35,7 +36,7 @@ const AspectTableSinastrie = ({
           marginTop: "0%",
         }}
       >
-        <H6fontBoldPurple> {userD?.full_name}</H6fontBoldPurple>
+        <H6fontBoldYellow> {userD?.full_name}</H6fontBoldYellow>
       </View>
       <ScrollView
         contentContainerStyle={{
@@ -59,20 +60,20 @@ const AspectTableSinastrie = ({
         {houseCusps?.housesP1.houses &&
           houseCusps.housesP1.houses.map((aspect, index) => (
             <View key={index} style={styles.tableRow}>
-              <H8fontMediumWhite style={[styles.rowText, styles.columnLarge]}>
+              <H8fontBoldWhite style={[styles.rowText, styles.columnLarge]}>
                 {aspect?.house}
-              </H8fontMediumWhite>
-              <View style={[styles.rowText, styles.columnLarge]}>
+              </H8fontBoldWhite>
+              <View style={[styles.columnLarge, { flexDirection: "row" }]}>
                 <MaterialCommunityIcons
                   name={`zodiac-${aspect?.sign.toLowerCase()}`}
                   size={24}
                   color={colors.gradientLogin3}
                 />
-                <H8fontMediumWhite>{aspect?.sign}</H8fontMediumWhite>
+                <H8fontBoldWhite>{aspect?.sign}</H8fontBoldWhite>
               </View>
-              <H8fontMediumWhite style={[styles.rowText, styles.columnLarge]}>
+              <H8fontBoldWhite style={[styles.rowText, styles.columnLarge]}>
                 {decimalToSexagesimal(aspect?.full_degree)}
-              </H8fontMediumWhite>
+              </H8fontBoldWhite>
             </View>
           ))}
       </ScrollView>
@@ -84,7 +85,7 @@ const AspectTableSinastrie = ({
           marginTop: "5%",
         }}
       >
-        <H6fontBoldPurple> {userD?.p2?.full_name}</H6fontBoldPurple>
+        <H6fontBoldYellow> {userD?.p2?.full_name}</H6fontBoldYellow>
       </View>
       <ScrollView
         contentContainerStyle={{
@@ -108,20 +109,20 @@ const AspectTableSinastrie = ({
         {houseCusps?.housesP2.houses &&
           houseCusps.housesP2.houses.map((aspect, index) => (
             <View key={index} style={styles.tableRow}>
-              <H8fontMediumWhite style={[styles.rowText, styles.columnLarge]}>
+              <H8fontBoldWhite style={[styles.rowText, styles.columnLarge]}>
                 {aspect?.house}
-              </H8fontMediumWhite>
-              <View style={[styles.rowText, styles.columnLarge]}>
+              </H8fontBoldWhite>
+              <View style={[styles.columnLarge, { flexDirection: "row" }]}>
                 <MaterialCommunityIcons
                   name={`zodiac-${aspect?.sign.toLowerCase()}`}
                   size={24}
                   color={colors.gradientLogin3}
                 />
-                <H8fontMediumWhite>{aspect?.sign}</H8fontMediumWhite>
+                <H8fontBoldWhite>{aspect?.sign}</H8fontBoldWhite>
               </View>
-              <H8fontMediumWhite style={[styles.rowText, styles.columnLarge]}>
+              <H8fontBoldWhite style={[styles.rowText, styles.columnLarge]}>
                 {decimalToSexagesimal(aspect?.full_degree)}
-              </H8fontMediumWhite>
+              </H8fontBoldWhite>
             </View>
           ))}
       </ScrollView>
@@ -134,7 +135,7 @@ const AspectTableSinastrie = ({
           marginTop: "10%",
         }}
       >
-        <H6fontBoldPurple> {i18n.translate("Natal")}</H6fontBoldPurple>
+        <H6fontBoldYellow> {i18n.translate("Natal")}</H6fontBoldYellow>
       </View>
       <View
         style={{
@@ -144,10 +145,10 @@ const AspectTableSinastrie = ({
           marginTop: "0%",
         }}
       >
-        <H6fontBoldPurple style={{ fontSize: 20 }}>
+        <H6fontBoldYellow style={{ fontSize: 20 }}>
           {" "}
           {userD?.full_name}
-        </H6fontBoldPurple>
+        </H6fontBoldYellow>
       </View>
       <ScrollView
         contentContainerStyle={{
@@ -177,26 +178,26 @@ const AspectTableSinastrie = ({
         {planetaryData &&
           planetaryData.planetaryP1.map((aspect, index) => (
             <View key={index} style={[styles.tableRow]}>
-              <H8fontMediumWhite style={[styles.rowText, styles.columnLarge]}>
+              <H8fontBoldWhite style={[styles.rowText, styles.columnLarge]}>
                 {aspect?.name}
-              </H8fontMediumWhite>
-              <View style={[styles.rowText, styles.columnLarge]}>
+              </H8fontBoldWhite>
+              <View style={[styles.columnLarge, { flexDirection: "row" }]}>
                 <MaterialCommunityIcons
                   name={`zodiac-${aspect?.sign.toLowerCase()}`}
                   size={24}
                   color={colors.gradientLogin3}
                 />
-                <H8fontMediumWhite>{aspect?.sign}</H8fontMediumWhite>
+                <H8fontBoldWhite>{aspect?.sign}</H8fontBoldWhite>
               </View>
-              <H8fontMediumWhite style={[styles.rowText, styles.columnLarge]}>
+              <H8fontBoldWhite style={[styles.rowText, styles.columnLarge]}>
                 {decimalToSexagesimal(aspect?.full_degree)}
-              </H8fontMediumWhite>
-              <H8fontMediumWhite style={[styles.rowText, styles.columnLarge]}>
+              </H8fontBoldWhite>
+              <H8fontBoldWhite style={[styles.rowText, styles.columnLarge]}>
                 {aspect?.house}
-              </H8fontMediumWhite>
-              <H8fontMediumWhite style={[styles.rowText, styles.columnLarge]}>
+              </H8fontBoldWhite>
+              <H8fontBoldWhite style={[styles.rowText, styles.columnLarge]}>
                 {convertSpeedToSexagesimal(aspect?.speed)}
-              </H8fontMediumWhite>
+              </H8fontBoldWhite>
             </View>
           ))}
       </ScrollView>
@@ -209,10 +210,10 @@ const AspectTableSinastrie = ({
           marginTop: "10%",
         }}
       >
-        <H6fontBoldPurple style={{ fontSize: 20 }}>
+        <H6fontBoldYellow style={{ fontSize: 20 }}>
           {" "}
           {userD?.p2?.full_name}
-        </H6fontBoldPurple>
+        </H6fontBoldYellow>
       </View>
       <ScrollView
         contentContainerStyle={{
@@ -242,26 +243,26 @@ const AspectTableSinastrie = ({
         {planetaryData &&
           planetaryData.planetaryP2.map((aspect, index) => (
             <View key={index} style={[styles.tableRow]}>
-              <H8fontMediumWhite style={[styles.rowText, styles.columnLarge]}>
+              <H8fontBoldWhite style={[styles.rowText, styles.columnLarge]}>
                 {aspect?.name}
-              </H8fontMediumWhite>
-              <View style={[styles.rowText, styles.columnLarge]}>
+              </H8fontBoldWhite>
+              <View style={[styles.columnLarge, { flexDirection: "row" }]}>
                 <MaterialCommunityIcons
                   name={`zodiac-${aspect?.sign.toLowerCase()}`}
                   size={24}
                   color={colors.gradientLogin3}
                 />
-                <H8fontMediumWhite>{aspect?.sign}</H8fontMediumWhite>
+                <H8fontBoldWhite>{aspect?.sign}</H8fontBoldWhite>
               </View>
-              <H8fontMediumWhite style={[styles.rowText, styles.columnLarge]}>
+              <H8fontBoldWhite style={[styles.rowText, styles.columnLarge]}>
                 {decimalToSexagesimal(aspect?.full_degree)}
-              </H8fontMediumWhite>
-              <H8fontMediumWhite style={[styles.rowText, styles.columnLarge]}>
+              </H8fontBoldWhite>
+              <H8fontBoldWhite style={[styles.rowText, styles.columnLarge]}>
                 {aspect?.house}
-              </H8fontMediumWhite>
-              <H8fontMediumWhite style={[styles.rowText, styles.columnLarge]}>
+              </H8fontBoldWhite>
+              <H8fontBoldWhite style={[styles.rowText, styles.columnLarge]}>
                 {convertSpeedToSexagesimal(aspect?.speed)}
-              </H8fontMediumWhite>
+              </H8fontBoldWhite>
             </View>
           ))}
       </ScrollView>
@@ -274,7 +275,7 @@ const AspectTableSinastrie = ({
           marginTop: "10%",
         }}
       >
-        <H6fontBoldPurple>Aspects</H6fontBoldPurple>
+        <H6fontBoldYellow>Aspects</H6fontBoldYellow>
       </View>
       <View
         style={{
@@ -284,10 +285,10 @@ const AspectTableSinastrie = ({
           marginTop: "0%",
         }}
       >
-        <H6fontBoldPurple style={{ fontSize: 20 }}>
+        <H6fontBoldYellow style={{ fontSize: 20 }}>
           {" "}
           {userD?.full_name}
-        </H6fontBoldPurple>
+        </H6fontBoldYellow>
       </View>
       <ScrollView
         contentContainerStyle={{
@@ -314,24 +315,24 @@ const AspectTableSinastrie = ({
         {aspects &&
           aspects.aspectsP1.map((aspect, index) => (
             <View key={index} style={styles.tableRow}>
-              <H8fontMediumWhite style={[styles.rowText, styles.columnLarge]}>
+              <H8fontBoldWhite style={[styles.rowText, styles.columnLarge]}>
                 {aspect?.planetOne}
-              </H8fontMediumWhite>
+              </H8fontBoldWhite>
 
-              <View style={[styles.rowText, styles.columnLarge]}>
-                <H8fontMediumWhite>{aspect?.aspect}</H8fontMediumWhite>
+              <View style={[styles.columnLarge, { flexDirection: "row" }]}>
+                <H8fontBoldWhite>{aspect?.aspect}</H8fontBoldWhite>
                 <Text style={styles.degreeLabel}>
                   {getAspectAngle(aspect?.aspect)}°
                 </Text>
               </View>
 
-              <H8fontMediumWhite style={[styles.rowText, styles.columnLarge]}>
+              <H8fontBoldWhite style={[styles.rowText, styles.columnLarge]}>
                 {aspect?.planetTwo}
-              </H8fontMediumWhite>
+              </H8fontBoldWhite>
 
-              <H8fontMediumWhite style={[styles.rowText, styles.columnLarge]}>
+              <H8fontBoldWhite style={[styles.rowText, styles.columnLarge]}>
                 {aspect?.orb}
-              </H8fontMediumWhite>
+              </H8fontBoldWhite>
             </View>
           ))}
       </ScrollView>
@@ -344,10 +345,10 @@ const AspectTableSinastrie = ({
           marginTop: "10%",
         }}
       >
-        <H6fontBoldPurple style={{ fontSize: 20 }}>
+        <H6fontBoldYellow style={{ fontSize: 20 }}>
           {" "}
           {userD?.p2?.full_name}
-        </H6fontBoldPurple>
+        </H6fontBoldYellow>
       </View>
       <ScrollView
         contentContainerStyle={{
@@ -374,24 +375,24 @@ const AspectTableSinastrie = ({
         {aspects &&
           aspects.aspectsP2.map((aspect, index) => (
             <View key={index} style={styles.tableRow}>
-              <H8fontMediumWhite style={[styles.rowText, styles.columnLarge]}>
+              <H8fontBoldWhite style={[styles.columnLarge]}>
                 {aspect?.planetOne}
-              </H8fontMediumWhite>
+              </H8fontBoldWhite>
 
-              <View style={[styles.rowText, styles.columnLarge]}>
-                <H8fontMediumWhite>{aspect?.aspect}</H8fontMediumWhite>
+              <View style={[styles.columnLarge, { flexDirection: "row" }]}>
+                <H8fontBoldWhite>{aspect?.aspect}</H8fontBoldWhite>
                 <Text style={styles.degreeLabel}>
                   {getAspectAngle(aspect?.aspect)}°
                 </Text>
               </View>
 
-              <H8fontMediumWhite style={[styles.rowText, styles.columnLarge]}>
+              <H8fontBoldWhite style={[styles.columnLarge]}>
                 {aspect?.planetTwo}
-              </H8fontMediumWhite>
+              </H8fontBoldWhite>
 
-              <H8fontMediumWhite style={[styles.rowText, styles.columnLarge]}>
+              <H8fontBoldWhite style={[styles.columnLarge]}>
                 {aspect?.orb}
-              </H8fontMediumWhite>
+              </H8fontBoldWhite>
             </View>
           ))}
       </ScrollView>
@@ -410,47 +411,56 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2,
     borderColor: "#fff",
     paddingBottom: 4,
+    justifyContent: "space-around",
   },
   headerText: {
     color: "#fff",
     fontWeight: "bold",
     fontSize: 16,
+    textAlign: "center", // Ensure text is centered
+    flex: 1, // Make sure this matches the flex in rowText if using flex sizing
+    paddingHorizontal: 5,
   },
   tableRow: {
     flexDirection: "row",
     paddingVertical: 10,
     borderBottomWidth: 1,
     borderColor: "#fff",
+    justifyContent: "space-around",
   },
   rowText: {
     color: "#fff",
-    fontSize: 15,
-
-    flexDirection: "row",
+    fontWeight: "bold",
+    fontSize: 16,
+    textAlign: "center", // Ensure text is centered
+    flex: 1, // Make sure this matches the flex in rowText if using flex sizing
+    paddingHorizontal: 5,
   },
   columnLarge: {
-    flex: 1,
-    paddingHorizontal: 5,
-    marginHorizontal: 10,
+    marginHorizontal: 10, // Adjust or remove if it causes misalignment
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center", // Ensure text is centered
   },
   iconWithText: {
     flexDirection: "row",
     alignItems: "center",
     height: "auto",
-    width: "20%",
-  },
-  columnSmall: {
-    flex: 1,
-    paddingHorizontal: 5,
-    textAlign: "right",
+    justifyContent: "center",
   },
   degreeLabel: {
     position: "relative",
-    bottom: -5, // Ajustează dacă este necesar
-    left: 2, // Ajustează pentru a plasa textul exact unde dorești
-    fontSize: 8, // Alege o dimensiune adecvată pentru textul gradului
-    color: "white", // Schimbă culoarea dacă este necesar
+    bottom: -1,
+    left: 2,
+    fontSize: 8,
+    color: "white",
     fontWeight: "bold",
+  },
+  sectionTitle: {
+    justifyContent: "center",
+    alignItems: "center",
+    width: "100%",
+    marginTop: "10%",
   },
 });
 

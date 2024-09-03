@@ -28,7 +28,7 @@ import {
   TextAppointments,
   CommonButtonNext,
 } from "./commonViews";
-import { H7fontBoldWhite } from "./commonText";
+import { H7fontBoldWhite, H8fontBoldWhite } from "./commonText";
 
 type ButtonProps = {
   disabled?: boolean;
@@ -122,11 +122,11 @@ export const Button: React.FC<ButtonProps> = ({
         funCallback();
       }}
     >
-      <H7fontBoldWhite
+      <H8fontBoldWhite
         style={[{ color: txtColor ? txtColor : colors.primary3 }, txtStyle]}
       >
         {label}
-      </H7fontBoldWhite>
+      </H8fontBoldWhite>
     </CommonButton>
   );
 };

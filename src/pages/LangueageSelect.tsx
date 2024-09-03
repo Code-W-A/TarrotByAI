@@ -13,9 +13,12 @@ import {
   H15fontMediumBlack,
   H2fontBoldPrimary,
   H6fontBoldPrimary,
+  H6fontMediumWhite,
   H6fontRegularWhite,
   H7fontBoldPrimary,
+  H8fontBoldYellow,
   H8fontMediumPrimary,
+  H8fontMediumWhite,
 } from "../components/commonText";
 import { useNavigation } from "@react-navigation/native";
 import { screenName } from "../utils/screenName";
@@ -156,9 +159,9 @@ const LanguageSelectScreen = () => {
           style={styles.continueButton}
           onPress={() => navigation.navigate(screenName.SignInScreenClinic)}
         >
-          <H6fontRegularWhite style={styles.continueButtonText}>
+          <H6fontMediumWhite style={styles.continueButtonText}>
             {i18n.translate("clinicLoginRedirect")}
-          </H6fontRegularWhite>
+          </H6fontMediumWhite>
         </TouchableOpacity>
       </LinearGradient>
     </View>
@@ -170,7 +173,7 @@ const LanguageButton = ({ language, flagSource, onSelect, isSelected }) => (
     style={[styles.button, isSelected ? styles.selectedButton : null]}
     onPress={onSelect}
   >
-    <H6fontBoldPrimary style={styles.buttonText}>{language}</H6fontBoldPrimary>
+    <H8fontMediumWhite style={styles.buttonText}>{language}</H8fontMediumWhite>
     <Image style={styles.image} source={flagSource} />
   </TouchableOpacity>
 );

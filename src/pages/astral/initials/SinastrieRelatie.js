@@ -59,7 +59,7 @@ import { SvgUri, SvgXml } from "react-native-svg";
 import { btoa, atob } from "react-native-quick-base64";
 import base64 from "react-native-base64";
 import TestSvg from "../../../../assets/base64.svg";
-import WebView from "react-native-webview";
+
 import localGif from "../../../../assets/constelatii.gif";
 import { Image } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -82,6 +82,32 @@ import SvgComponent from "../../../components/Astral/components/SvgComponent";
 //     </View>
 //   );
 // };
+
+export async function translateAndUpdate(
+  userD,
+  path,
+  language,
+  actualLanguage
+) {
+  console.log("userD....data....", userD);
+  let element = path.reduce((obj, key) => (obj || {})[key], userD);
+  if (element && element.description) {
+    const translatedDescription = await handleToTranslate(
+      element.description,
+      language,
+      actualLanguage
+    );
+    element.description = translatedDescription;
+  }
+  if (element && element.title) {
+    const translatedTitle = await handleToTranslate(
+      element.title,
+      language,
+      actualLanguage
+    );
+    element.title = translatedTitle;
+  }
+}
 
 export const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -263,15 +289,17 @@ function SinastrieRelatie({ navigation }) {
         return userD?.synastry?.conflictingAspectReading?.data;
       case "Contrast":
         return userD?.synastry?.contrastingAspectReading?.data;
-      case "Physical Compatibility":
+      case "Intense_Aspect":
+        return userD?.synastry?.intenseCompatibility?.data;
+      case "Physical_Compatibility":
         return userD?.synastry?.physicalCompatibility?.data;
-      case "Emotional Compatibility":
+      case "Emotional_Compatibility":
         return userD?.synastry?.emotionalCompatibility?.data;
-      case "Sexual Compatibility":
+      case "Sexual_Compatibility":
         return userD?.synastry?.sexualCompatibility?.data;
-      case "Spiritual Compatibility":
+      case "Spiritual_Compatibility":
         return userD?.synastry?.spiritualCompatibility?.data;
-      case "Financial Compatibility":
+      case "Financial_Compatibility":
         return userD?.synastry?.financialCompatibility?.data;
       default:
         return []; // sau returnează un set de date implicit dacă este necesar
@@ -279,8 +307,6 @@ function SinastrieRelatie({ navigation }) {
   };
 
   const handleNatalChart = async () => {
-    setIsLoading(true);
-
     try {
       const userDataJson = await AsyncStorage.getItem("userData");
       const userData = userDataJson ? JSON.parse(userDataJson) : null;
@@ -294,137 +320,80 @@ function SinastrieRelatie({ navigation }) {
         return;
       }
       console.log("data....here", language);
-      console.log("data....here", userData.actualLanguageAstrograma);
-      // if (language != userData.actualLanguageAstrograma) {
-      //   console.log("data....no", language);
-      //   userData.actualLanguageAstrograma === language;
+      if (userData && userData.synastry) {
+        console.log(
+          "Cheile din userData.synastry:",
+          Object.keys(userData.synastry)
+        );
+      } else {
+        console.log(
+          "userData.synastry nu este disponibil sau userData nu este definit."
+        );
+      }
 
-      //   const generalCategory = await handleToTranslate(
-      //     userData.generalCategory,
-      //     language,
-      //     userData.actualLanguageAstrograma
-      //   );
-      //   userData.generalCategory = generalCategory;
-      //   await delay(2000); // delay de 1 secundă
+      // TRADUCERE DACA ESTE NECESARA
+      if (language !== userData.actualLanguageSinastrie) {
+        console.log(
+          "userData.actualLanguageSinastrie...",
+          userData.actualLanguageSinastrie
+        );
+        setIsLoading(true);
+        const paths = [
+          "harmoniousAspectReading",
+          "conflictingAspectReading",
+          "contrastingAspectReading",
+          "intenseCompatibility",
+          "physicalCompatibility",
+          "emotionalCompatibility",
+          "sexualCompatibility",
+          "spiritualCompatibility",
+          "financialCompatibility",
+        ];
 
-      //   const dragosteCategory = await handleToTranslate(
-      //     userData.dragosteCategory,
-      //     language,
-      //     userData.actualLanguageAstrograma
-      //   );
-      //   userData.dragosteCategory = dragosteCategory;
-      //   await delay(2000); // delay de 1 secundă
+        const translationPromises = [];
 
-      //   const familieCategory = await handleToTranslate(
-      //     userData.familieCategory,
-      //     language,
-      //     userData.actualLanguageAstrograma
-      //   );
-      //   userData.familieCategory = familieCategory;
-      //   await delay(2000); // delay de 1 secundă
+        paths.forEach((path) => {
+          const category = userData?.synastry?.[path]?.data;
+          if (category && Array.isArray(category)) {
+            category.forEach((item) => {
+              if (item.reading && Array.isArray(item.reading)) {
+                item.reading.forEach((reading) => {
+                  if (reading.description) {
+                    const promiseDesc = handleToTranslate(
+                      reading.description,
+                      language,
+                      userData.actualLanguage
+                    ).then((translated) => {
+                      reading.description = translated;
+                    });
+                    translationPromises.push(promiseDesc);
+                  }
+                  if (reading.title) {
+                    const promiseTitle = handleToTranslate(
+                      reading.title,
+                      language,
+                      userData.actualLanguage
+                    ).then((translated) => {
+                      reading.title = translated;
+                    });
+                    translationPromises.push(promiseTitle);
+                  }
+                });
+              }
+            });
+          }
+        });
 
-      //   const baniCategory = await handleToTranslate(
-      //     userData.baniCategory,
-      //     language,
-      //     userData.actualLanguageAstrograma
-      //   );
-      //   userData.baniCategory = baniCategory;
-      //   await delay(2000); // delay de 1 secundă
+        // Așteaptă ca toate promisiunile de traducere să se finalizeze
+        await Promise.all(translationPromises);
 
-      //   const muncaStudiiCategory = await handleToTranslate(
-      //     userData.muncaStudiiCategory,
-      //     language,
-      //     userData.actualLanguageAstrograma
-      //   );
-      //   userData.muncaStudiiCategory = muncaStudiiCategory;
-      //   await delay(2000); // delay de 1 secundă
-
-      //   const prieteniCategory = await handleToTranslate(
-      //     userData.prieteniCategory,
-      //     language,
-      //     userData.actualLanguageAstrograma
-      //   );
-      //   userData.prieteniCategory = prieteniCategory;
-      //   await delay(2000); // delay de 1 secundă
-
-      //   const sanatateCategory = await handleToTranslate(
-      //     userData.sanatateCategory,
-      //     language,
-      //     userData.actualLanguageAstrograma
-      //   );
-      //   userData.sanatateCategory = sanatateCategory;
-      //   await delay(2000); // delay de 1 secundă
-
-      //   const spiritualitateCategory = await handleToTranslate(
-      //     userData.spiritualitateCategory,
-      //     language,
-      //     userData.actualLanguageAstrograma
-      //   );
-      //   userData.spiritualitateCategory = spiritualitateCategory;
-      //   await delay(2000); // delay de 1 secundă
-
-      //   await AsyncStorage.setItem("userData", JSON.stringify(userData));
-      // }
-
+        userData.actualLanguageSinastrie = language;
+      }
+      console.log(
+        "userData.actualLanguageSinastrie...",
+        userData.actualLanguageSinastrie
+      );
       setUserD(userData);
-      // const {
-      //   full_name,
-      //   day,
-      //   month,
-      //   year,
-      //   hour,
-      //   min,
-      //   sec,
-      //   gender,
-      //   place,
-      //   lat,
-      //   lon,
-      //   tzone,
-      // } = userData;
-
-      // const urls = {
-      //   natalWheelChart:
-      //     "https://astroapi-4.divineapi.com/western-api/v1/natal-wheel-chart",
-      //   aspectTable:
-      //     "https://astroapi-4.divineapi.com/western-api/v2/aspect-table",
-      //   planetaryPositions:
-      //     "https://astroapi-4.divineapi.com/western-api/v1/planetary-positions",
-      //   houseCusps:
-      //     "https://astroapi-4.divineapi.com/western-api/v1/house-cusps",
-      //   moonPhases:
-      //     "https://astroapi-4.divineapi.com/western-api/v1/moon-phases",
-      //   ascendantReport:
-      //     "https://astroapi-4.divineapi.com/western-api/v1/ascendant-report",
-      // };
-
-      // const results = await Promise.all(
-      //   Object.keys(urls).map((key) =>
-      //     fetchAstroData(
-      //       urls[key],
-      //       full_name,
-      //       day,
-      //       month,
-      //       year,
-      //       hour,
-      //       min,
-      //       sec,
-      //       gender,
-      //       place,
-      //       lat,
-      //       lon,
-      //       tzone
-      //     )
-      //   )
-      // );
-
-      // const [
-      //   natalData,
-      //   aspectsData,
-      //   planetaryData,
-      //   cuspsData,
-      //   moonPhaseData,
-      //   ascendantData,
-      // ] = results;
 
       console.log(
         "wheel chart....sinastrie....",
@@ -482,64 +451,8 @@ function SinastrieRelatie({ navigation }) {
       setHouseCusps(
         userData.synastry.houseCusps ? { housesP1, housesP2 } : null
       );
-
-      // // Set harmonious aspects data
-      setHarmoniousAspectReading(
-        userData.synastry.harmoniousAspectReading
-          ? userData.synastry.harmoniousAspectReading.data
-          : null
-      );
-
-      // // Set conflicting aspects data
-      setConflictingAspectReading(
-        userData.synastry.conflictingAspectReading
-          ? userData.synastry.conflictingAspectReading.data
-          : null
-      );
-
-      // // Set contrasting aspects data
-      setContrastingAspectReading(
-        userData.synastry.contrastingAspectReading
-          ? userData.synastry.contrastingAspectReading.data
-          : null
-      );
-
-      // // Set physical compatibility data
-      setPhysicalCompatibility(
-        userData.synastry.physicalCompatibility
-          ? userData.synastry.physicalCompatibility.data
-          : null
-      );
-
-      // // Set emotional compatibility data
-      setEmotionalCompatibility(
-        userData.synastry.emotionalCompatibility
-          ? userData.synastry.emotionalCompatibility.data
-          : null
-      );
-
-      // // Set sexual compatibility data
-      setSexualCompatibility(
-        userData.synastry.sexualCompatibility
-          ? userData.synastry.sexualCompatibility.data
-          : null
-      );
-
-      // // Set spiritual compatibility data
-      setSpiritualCompatibility(
-        userData.synastry.spiritualCompatibility
-          ? userData.synastry.spiritualCompatibility.data
-          : null
-      );
-
-      // // Set financial compatibility data
-      setFinancialCompatibility(
-        userData.synastry.financialCompatibility
-          ? userData.synastry.financialCompatibility.data
-          : null
-      );
-
-      console.log("test...", userData.synastry.cuspsData.data);
+      console.log("userData...", userData.sanatateCategory);
+      await AsyncStorage.setItem("userData", JSON.stringify(userData));
       setIsLoading(false);
     } catch (error) {
       console.error(
@@ -625,79 +538,79 @@ function SinastrieRelatie({ navigation }) {
                 <View style={{ flex: 1, flexDirection: "row" }}>
                   <View style={{ flexDirection: "column", width: "55%" }}>
                     <View style={styles.horoscopeTodayContainer}>
-                      <H6fontBoldWhite style={styles.textTitles}>
+                      <H7fontBoldWhite style={styles.textTitles}>
                         {userD?.full_name}
-                      </H6fontBoldWhite>
+                      </H7fontBoldWhite>
                     </View>
                     <View style={styles.horoscopeTodayContainer}>
-                      <H6fontBoldWhite
+                      <H8fontMediumWhite
                         style={[styles.textDescription, { marginTop: 0 }]}
                       >
                         {userD?.day} - {userD?.month} - {userD?.year}
-                      </H6fontBoldWhite>
+                      </H8fontMediumWhite>
                     </View>
                     <View style={styles.horoscopeTodayContainer}>
-                      <H6fontBoldWhite
+                      <H8fontMediumWhite
                         style={[styles.textDescription, { marginTop: 0 }]}
                       >
                         {userD?.selectedTime}
-                      </H6fontBoldWhite>
+                      </H8fontMediumWhite>
                     </View>
                     <View style={styles.horoscopeTodayContainer}>
-                      <H6fontBoldWhite
+                      <H8fontMediumWhite
                         style={[
                           styles.textDescription,
                           { marginTop: 0, maxWidth: "80%" },
                         ]}
                       >
                         {userD?.place}
-                      </H6fontBoldWhite>
+                      </H8fontMediumWhite>
                     </View>
                     <View style={styles.horoscopeTodayContainer}>
-                      <H6fontBoldWhite
+                      <H8fontMediumWhite
                         style={[styles.textDescription, { marginTop: 0 }]}
                       >
                         {userD?.gender}
-                      </H6fontBoldWhite>
+                      </H8fontMediumWhite>
                     </View>
                   </View>
                   <View style={{ flexDirection: "column", width: "55%" }}>
                     <View style={styles.horoscopeTodayContainer}>
-                      <H6fontBoldWhite style={styles.textTitles}>
+                      <H8fontMediumWhite style={styles.textTitles}>
                         {userD?.p2?.full_name}
-                      </H6fontBoldWhite>
+                      </H8fontMediumWhite>
                     </View>
                     <View style={styles.horoscopeTodayContainer}>
-                      <H6fontBoldWhite
+                      <H8fontMediumWhite
                         style={[styles.textDescription, { marginTop: 0 }]}
                       >
                         {userD?.p2?.day} - {userD?.p2?.month} -{" "}
                         {userD?.p2?.year}
-                      </H6fontBoldWhite>
+                      </H8fontMediumWhite>
                     </View>
                     <View style={styles.horoscopeTodayContainer}>
-                      <H6fontBoldWhite
+                      <H8fontMediumWhite
                         style={[styles.textDescription, { marginTop: 0 }]}
                       >
                         {userD?.p2?.selectedTime}
-                      </H6fontBoldWhite>
+                      </H8fontMediumWhite>
                     </View>
                     <View style={styles.horoscopeTodayContainer}>
-                      <H6fontBoldWhite
+                      <H8fontMediumWhite
                         style={[
                           styles.textDescription,
                           { marginTop: 0, maxWidth: "80%" },
                         ]}
                       >
                         {userD?.p2?.place}
-                      </H6fontBoldWhite>
+                      </H8fontMediumWhite>
                     </View>
                     <View style={styles.horoscopeTodayContainer}>
-                      <H6fontBoldWhite
+                      <H8fontMediumWhite
                         style={[styles.textDescription, { marginTop: 0 }]}
                       >
                         {userD?.p2?.gender}
-                      </H6fontBoldWhite>
+                      </H8fontMediumWhite>
                     </View>
                   </View>
                 </View>
@@ -738,12 +651,10 @@ function SinastrieRelatie({ navigation }) {
                     {activeData.map((aspect, index) => (
                       <View key={index}>
                         {aspect.reading.map((read, readIndex) => (
-                          <View key={readIndex}>
-                            <H9fontMediumWhite
-                              style={[styles.textTitles, { marginTop: "7%" }]}
-                            >
+                          <View key={readIndex} style={{ marginTop: 20 }}>
+                            <H7fontBoldWhite style={[styles.textTitles]}>
                               {read?.title}
-                            </H9fontMediumWhite>
+                            </H7fontBoldWhite>
                             <H9fontMediumLightBlack
                               style={styles.textDescription}
                             >

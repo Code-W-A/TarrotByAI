@@ -1,6 +1,10 @@
 import React from "react";
 import { View, Text, StyleSheet, Dimensions } from "react-native";
-import { H6fontBoldPrimary, H6fontRegularBlack } from "../commonText";
+import {
+  H6fontBoldPrimary,
+  H6fontBoldYellow,
+  H6fontRegularBlack,
+} from "../commonText";
 import { colors } from "../../utils/colors";
 
 const CardLayout = ({ shuffledCartiPersonalizate, title, children }) => {
@@ -24,11 +28,11 @@ const CardLayout = ({ shuffledCartiPersonalizate, title, children }) => {
 
   return (
     <View style={styles.container}>
-      <H6fontBoldPrimary
+      <H6fontBoldYellow
         style={{ color: shuffledCartiPersonalizate.length > 0 && "white" }}
       >
         {title}
-      </H6fontBoldPrimary>
+      </H6fontBoldYellow>
       {rows.map((row, rowIndex) => (
         <View key={rowIndex} style={styles.cardRow}>
           {row.map((card, cardIndex) => (

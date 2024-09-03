@@ -177,12 +177,14 @@ function NewPersonScreen({ navigation, route }) {
         tzone: parsedData.tzone,
         actualLanguage: parsedData.actualLanguage,
         actualLanguageAstrograma: parsedData.actualLanguage,
+        actualLanguageSinastrie: "en",
         zodiacSign: parsedData.zodiacSign,
         zodiacSignFristUpperCase: parsedData.zodiacSignFristUpperCase,
         dataHoroscop: parsedData.dataHoroscop,
       };
 
       const userData = {
+        ...parsedData,
         ...pOneData,
         p2: {
           // datele pentru al doilea utilizator
@@ -203,8 +205,8 @@ function NewPersonScreen({ navigation, route }) {
           lat: lat,
           lon: long,
           tzone: timezoneOffset,
-          actualLanguage: "aba",
-          actualLanguageAstrograma: "aba",
+          actualLanguage: "en",
+          actualLanguageAstrograma: "en",
           zodiacSign,
           zodiacSignFristUpperCase,
           dataHoroscop: formattedDate,
@@ -228,6 +230,8 @@ function NewPersonScreen({ navigation, route }) {
           "https://astroapi-4.divineapi.com/western-api/v1/synastry/conflicting-aspect-reading",
         contrastingAspectReading:
           "https://astroapi-4.divineapi.com/western-api/v1/synastry/contrasting-aspect-reading",
+        intenseCompatibility:
+          "https://astroapi-4.divineapi.com/western-api/v1/synastry/intense-aspect-reading",
         physicalCompatibility:
           "https://astroapi-4.divineapi.com/western-api/v1/synastry/physical-compatibility",
         emotionalCompatibility:
@@ -269,6 +273,7 @@ function NewPersonScreen({ navigation, route }) {
         harmoniousAspectReading,
         conflictingAspectReading,
         contrastingAspectReading,
+        intenseCompatibility,
         physicalCompatibility,
         emotionalCompatibility,
         sexualCompatibility,
@@ -286,16 +291,14 @@ function NewPersonScreen({ navigation, route }) {
       userData.synastry.harmoniousAspectReading = harmoniousAspectReading;
       userData.synastry.conflictingAspectReading = conflictingAspectReading;
       userData.synastry.contrastingAspectReading = contrastingAspectReading;
+      userData.synastry.intenseCompatibility = intenseCompatibility;
       userData.synastry.physicalCompatibility = physicalCompatibility;
       userData.synastry.emotionalCompatibility = emotionalCompatibility;
       userData.synastry.sexualCompatibility = sexualCompatibility;
       userData.synastry.spiritualCompatibility = spiritualCompatibility;
       userData.synastry.financialCompatibility = financialCompatibility;
 
-      console.log(
-        "astrologyData....data....",
-        userData.synastry.natalWheelChart
-      );
+      console.log("astrologyData....data....", userData.full_name);
 
       // const { houses, planets, aspectsD } = prepareAstroData(userData);
 

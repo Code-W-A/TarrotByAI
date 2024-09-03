@@ -19,10 +19,7 @@ import { Route } from "@react-navigation/native";
 import { labels } from "../utils/labels";
 import { screenName } from "../utils/screenName";
 import { LinearGradient } from "expo-linear-gradient";
-import {
-  FirebaseRecaptchaVerifierModal,
-  FirebaseRecaptchaBanner,
-} from "expo-firebase-recaptcha";
+
 import {
   FormErrorMessage,
   H10fontRegularWhite,
@@ -83,7 +80,7 @@ import {
 import { authentication, db } from "../../firebase";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useDispatch } from "react-redux";
+
 import {
   getCalendarTimes,
   getClinicAppointments,
@@ -149,33 +146,12 @@ const SignInScreenClinic: React.FC<Props> = ({
   } = useForm();
 
   const auth = authentication;
-  const dispatch = useDispatch();
 
   const storeData = async (value) => {
     try {
       await AsyncStorage.setItem("userType", value);
     } catch (e) {
       // saving error
-    }
-  };
-
-  const handleSocialMediaLogin = async (socialMedia) => {
-    console.log(`Login with ${socialMedia}`);
-
-    try {
-      switch (socialMedia) {
-        case "Google":
-          // handleGoogleAuth();
-          break;
-
-        case "Facebook":
-          break;
-
-        default:
-          throw new Error(`Unsupported platform: ${socialMedia}`);
-      }
-    } catch (error) {
-      console.error(error);
     }
   };
 
@@ -254,105 +230,112 @@ const SignInScreenClinic: React.FC<Props> = ({
   return (
     <TouchableWithoutFeedback onPress={() => console.log("ass")}>
       <Fragment>
-        <MainContainer>
-          <CustomLoader isLoading={isLoading} />
-          <LinearGradient
-            colors={[
-              colors.gradientLogin1,
-              colors.gradientLogin2,
-              colors.gradientLogin2,
-            ]} // Înlocuiește cu culorile gradientului tău
-            style={styles.gradient}
+        <CustomLoader isLoading={isLoading} />
+        <LinearGradient
+          colors={[
+            colors.gradientLogin1,
+            colors.gradientLogin2,
+            colors.gradientLogin2,
+          ]} // Înlocuiește cu culorile gradientului tău
+          style={styles.gradient}
+        >
+          <KeyboardAvoidingView
+            style={{ flex: 1, justifyContent: "center" }}
+            keyboardVerticalOffset={65}
           >
-            <KeyboardAvoidingView
-              style={{ flex: 1, justifyContent: "center" }}
-              keyboardVerticalOffset={65}
-            >
-              <View style={styles.subContainer}>
-                <View
-                  style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    position: "relative",
-                    bottom: "8%",
-                  }}
-                >
-                  <Image
-                    source={require("../../assets/headerIcon.png")}
-                    style={{ width: 300, height: 100, marginBottom: "5%" }}
-                    resizeMode="contain" // Aceasta va asigura că întreaga imagine se va încadra în spațiul disponibil, păstrând proporțiile.
+            <View style={styles.subContainer}>
+              <View
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  position: "relative",
+                  bottom: "8%",
+                }}
+              >
+                <Image
+                  source={require("../../assets/headerIcon.png")}
+                  style={{ width: 300, height: 100, marginBottom: "5%" }}
+                  resizeMode="contain" // Aceasta va asigura că întreaga imagine se va încadra în spațiul disponibil, păstrând proporțiile.
+                />
+                <H6fontBoldWhite style={{ top: "5%" }}>
+                  {i18n.translate("login")}
+                </H6fontBoldWhite>
+              </View>
+
+              <View>
+                <View>
+                  <Controller
+                    name={formKeys.email}
+                    control={control}
+                    render={({ field: { onChange, value } }) => (
+                      <InputFields
+                        errorMessage={errors[
+                          formKeys.email
+                        ]?.message.toString()}
+                        value={value}
+                        onChangeText={onChange}
+                        placeholder={i18n.translate("email")}
+                        image={"email"}
+                        setIsWhite1={setIsWhite1}
+                      />
+                    )}
+                    rules={{
+                      required: requiredValidation(i18n.translate("email")),
+                      validate: emailValidation,
+                    }}
                   />
-                  <H6fontBoldWhite>{i18n.translate("login")}</H6fontBoldWhite>
+
+                  <Controller
+                    name={formKeys.password}
+                    control={control}
+                    render={({ field: { onChange, value } }) => (
+                      <InputFields
+                        isPassword={true}
+                        value={value}
+                        isSecure={true}
+                        onChangeText={onChange}
+                        placeholder={i18n.translate("password")}
+                        errorMessage={errors[
+                          formKeys.password
+                        ]?.message.toString()}
+                        image={"lock-outline"}
+                        setIsWhite2={setIsWhite2}
+                      />
+                    )}
+                    rules={{
+                      required: requiredValidation(i18n.translate("password")),
+                      minLength: minLengthValidation(
+                        validationSchema.password.minLength
+                      ),
+                    }}
+                  />
                 </View>
 
-                <View>
-                  <View>
-                    <Controller
-                      name={formKeys.email}
-                      control={control}
-                      render={({ field: { onChange, value } }) => (
-                        <InputFields
-                          errorMessage={errors[
-                            formKeys.email
-                          ]?.message.toString()}
-                          value={value}
-                          onChangeText={onChange}
-                          placeholder={i18n.translate("email")}
-                          image={"email"}
-                          setIsWhite1={setIsWhite1}
-                        />
-                      )}
-                      rules={{
-                        required: requiredValidation(i18n.translate("email")),
-                        validate: emailValidation,
-                      }}
-                    />
+                <RowView style={[mt10, alignSelfRight]}>
+                  {loginType === "email" && (
+                    <TouchableOpacity
+                      onPress={() =>
+                        navigation.navigate(
+                          screenName.ForgotPasswordClinic as any
+                        )
+                      }
+                    >
+                      <H7fontBoldPrimary>
+                        {i18n.translate("forgotPassword")}
+                      </H7fontBoldPrimary>
+                    </TouchableOpacity>
+                  )}
+                </RowView>
+                <View
+                  style={{
+                    width: "100%",
 
-                    <Controller
-                      name={formKeys.password}
-                      control={control}
-                      render={({ field: { onChange, value } }) => (
-                        <InputFields
-                          isPassword={true}
-                          value={value}
-                          isSecure={true}
-                          onChangeText={onChange}
-                          placeholder={i18n.translate("password")}
-                          errorMessage={errors[
-                            formKeys.password
-                          ]?.message.toString()}
-                          image={"lock-outline"}
-                          setIsWhite2={setIsWhite2}
-                        />
-                      )}
-                      rules={{
-                        required: requiredValidation(
-                          i18n.translate("password")
-                        ),
-                        minLength: minLengthValidation(
-                          validationSchema.password.minLength
-                        ),
-                      }}
-                    />
-                  </View>
-
-                  <RowView style={[mt10, alignSelfRight]}>
-                    {loginType === "email" && (
-                      <TouchableOpacity
-                        onPress={() =>
-                          navigation.navigate(
-                            screenName.ForgotPasswordClinic as any
-                          )
-                        }
-                      >
-                        <H7fontBoldPrimary>
-                          {i18n.translate("forgotPassword")}
-                        </H7fontBoldPrimary>
-                      </TouchableOpacity>
-                    )}
-                  </RowView>
-
+                    height: "32%",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
                   <Button
                     disabled={false}
                     funCallback={handleLoginAsGuest}
@@ -362,7 +345,7 @@ const SignInScreenClinic: React.FC<Props> = ({
                     label={i18n.translate("loginNowNoAccount")}
                     borderColor={colors.white}
                     success={true}
-                    style={{ height: "15%" }}
+                    style={{ height: "42%", marginTop: "5%" }}
                     txtStyle={{ fontSize: 20 }}
                   />
 
@@ -371,91 +354,48 @@ const SignInScreenClinic: React.FC<Props> = ({
                     funCallback={handleSubmit(onsubmit)}
                     borderWidth={2}
                     bgColor={colors.primary3}
+                    style={{ marginTop: "5%" }}
                     label={i18n.translate("loginNow")}
                     borderColor={colors.primary3}
                     success={true}
                     txtColor={colors.white}
                   />
-
-                  <View>
-                    <View style={styles.infoTextViewStyle}>
-                      <H7fontBoldPrimary>
-                        {i18n.translate("dntHaveAccount")}{" "}
+                </View>
+                <View>
+                  <View style={styles.infoTextViewStyle}>
+                    <H7fontBoldPrimary>
+                      {i18n.translate("dntHaveAccount")}{" "}
+                    </H7fontBoldPrimary>
+                    <TouchableOpacity
+                      onPress={() =>
+                        navigation.navigate(
+                          screenName.SignUpScreenClinic as any,
+                          { item: loginType }
+                        )
+                      }
+                    >
+                      <H7fontBoldPrimary
+                        style={{
+                          textDecorationLine: "underline",
+                        }}
+                      >
+                        {i18n.translate("signUp")}
                       </H7fontBoldPrimary>
-                      <TouchableOpacity
-                        onPress={() =>
-                          navigation.navigate(
-                            screenName.SignUpScreenClinic as any,
-                            { item: loginType }
-                          )
-                        }
-                      >
-                        <H7fontBoldPrimary
-                          style={{
-                            textDecorationLine: "underline",
-                          }}
-                        >
-                          {i18n.translate("signUp")}
-                        </H7fontBoldPrimary>
-                      </TouchableOpacity>
-                    </View>
+                    </TouchableOpacity>
                   </View>
-                  {/* <View>
-                    <View style={styles.socialMediaContent}>
-                      <H7fontBoldPrimary>Social Media</H7fontBoldPrimary>
-                    </View>
-                    <View style={styles.socialMediaImagesContainer}>
-                      <TouchableOpacity
-                        style={styles.button}
-                        onPress={() => handleSocialMediaLogin("Twitter")}
-                      >
-                        <Image
-                          source={require("../../assets/XTwiter.png")}
-                          style={styles.image}
-                        />
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={styles.button}
-                        onPress={() => handleSocialMediaLogin("Yahoo")}
-                      >
-                        <Image
-                          source={require("../../assets/yahoo.png")}
-                          style={styles.image}
-                        />
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={styles.button}
-                        onPress={() => handleSocialMediaLogin("Google")}
-                      >
-                        <Image
-                          source={require("../../assets/google.png")}
-                          style={styles.image}
-                        />
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={styles.button}
-                        onPress={() => handleSocialMediaLogin("Facebook")}
-                      >
-                        <Image
-                          source={require("../../assets/facebook.png")}
-                          style={styles.image}
-                        />
-                      </TouchableOpacity>
-                    </View>
-                  </View> */}
                 </View>
               </View>
-              {/* </View> */}
-            </KeyboardAvoidingView>
-            <SnackBar
-              showSnackBar={showSnackback}
-              setShowSnackback={setShowSnackback}
-              message={message}
-              bottom={2}
-              screen={screenName.SignInScreenClinic}
-            />
-          </LinearGradient>
-        </MainContainer>
+            </View>
+            {/* </View> */}
+          </KeyboardAvoidingView>
+          <SnackBar
+            showSnackBar={showSnackback}
+            setShowSnackback={setShowSnackback}
+            message={message}
+            bottom={2}
+            screen={screenName.SignInScreenClinic}
+          />
+        </LinearGradient>
       </Fragment>
     </TouchableWithoutFeedback>
   );
@@ -463,25 +403,6 @@ const SignInScreenClinic: React.FC<Props> = ({
 export default SignInScreenClinic;
 
 const styles = StyleSheet.create({
-  socialMediaImagesContainer: {
-    flexDirection: "row", // Așează imaginile pe orizontală
-    justifyContent: "space-between", // Distribuie spațiul uniform între imagini
-    alignItems: "center", // Centrează imaginile vertical
-    paddingHorizontal: 10, // Adaugă padding pe orizontală
-    marginTop: "2%",
-  },
-  button: {
-    padding: 1, // Spatiu în jurul imaginilor pentru un efect mai vizual și pentru a facilita apăsarea
-    borderRadius: 30, // Rotunjirea butonului
-    backgroundColor: "#FFFFFF", // Fundal alb pentru a face butonul să iasă în evidență
-  },
-  image: {
-    width: 50,
-    height: 50,
-    borderRadius: 25, // Jumătate din lățime/înălțime pentru a face imaginea rotundă
-    resizeMode: "cover",
-  },
-
   subContainer: {
     flex: 1,
     paddingHorizontal: 20,

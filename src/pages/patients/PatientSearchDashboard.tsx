@@ -11,7 +11,6 @@ import { GeneralProps } from "../../interfaces/generalProps";
 import { Route, useFocusEffect } from "@react-navigation/native";
 import { NavBar, NavBarPatient } from "../../common/commonComponents";
 import { labels, langObj } from "../../utils/labels";
-import Fuse from "fuse.js";
 
 import { RowView } from "../../components/commonViews";
 import {
@@ -49,14 +48,14 @@ import { ActivityIndicator, ProgressBar, Text } from "react-native-paper";
 import ClinicDetailsCard from "../../components/ClinicComponents";
 import SearchResultPatient from "./SearchResultPatient";
 import * as Location from "expo-location";
-import * as Permissions from "expo-permissions";
+
 import { _getLocationAsync } from "../../services/location-service";
 import { calculatePreciseDistance } from "../../utils/calculateDistance";
 import {
   getPatientAppointments,
   getPatientClinicsDoctorsAround,
 } from "../../actions/patientActions";
-import { AirbnbRating } from "react-native-ratings";
+
 import StarRating from "react-native-star-rating-widget";
 import { colors } from "../../utils/colors";
 import { getDownloadURL, ref } from "firebase/storage";
@@ -344,20 +343,20 @@ const PatientSearchDashboard: React.FC<Props> = ({
           return itemData.indexOf(textData) > -1;
         });
 
-        const clinicsSearchDataMap = clinicsAroundPatient.filter(
-          function (item) {
-            let textToCheck;
+        const clinicsSearchDataMap = clinicsAroundPatient.filter(function (
+          item
+        ) {
+          let textToCheck;
 
-            textToCheck = `${item.clinicInfoData.clinicname}`;
+          textToCheck = `${item.clinicInfoData.clinicname}`;
 
-            const itemData = textToCheck
-              ? textToCheck.toUpperCase()
-              : "".toUpperCase();
-            const textData = doctorsClinics.toUpperCase();
+          const itemData = textToCheck
+            ? textToCheck.toUpperCase()
+            : "".toUpperCase();
+          const textData = doctorsClinics.toUpperCase();
 
-            return itemData.indexOf(textData) > -1;
-          }
-        );
+          return itemData.indexOf(textData) > -1;
+        });
 
         setSearching(true);
         setSearchList(newData);

@@ -80,10 +80,10 @@ const styles = StyleSheet.create({
     fontSize: 28,
   },
   h7: {
-    fontSize: 16,
+    fontSize: 20,
   },
   h8: {
-    fontSize: 14,
+    fontSize: 16,
   },
   h9: {
     fontSize: 12,
@@ -303,6 +303,12 @@ export const H7fontMediumPrimary = ({ children }) => (
   <Text style={[styles.h7, styles.fontMedium, styles.primary2]}>
     {children}
   </Text>
+);
+export const H4fontBoldPrimary = ({ children }) => (
+  <Text style={[styles.h4, styles.fontBold, styles.primary2]}>{children}</Text>
+);
+export const H4fontBoldYellow = ({ children }) => (
+  <Text style={[styles.h4, styles.fontBold, styles.yellow]}>{children}</Text>
 );
 export const H3fontBoldPrimary = ({ children }) => (
   <Text style={[styles.h3, styles.fontBold, styles.primary2]}>{children}</Text>

@@ -14,7 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { FontAwesome } from "@expo/vector-icons";
 import { colors } from "../../utils/colors";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import WebView from "react-native-webview";
+import { WebView } from "react-native-webview";
 import { Video } from "expo-av";
 import { getYoutubeEmbedUrl } from "../../utils/youtubeLinkUtils";
 import { useLanguage } from "../../context/LanguageContext";
@@ -36,7 +36,7 @@ export const NewsDetailsModal: React.FC<{
   saveArticle: Function;
 }> = ({ visible, article, articleIndex, onClose, saveArticle }) => {
   const backgroundColor = "#fff";
-  const color =  "#000";
+  const color = "#000";
   const contentColor = useColorScheme() === "dark" ? "#bbb" : "#444";
   const readMoreBgColor = useColorScheme() === "dark" ? "#222" : "#ddd";
   const [isSaved, setIsSaved] = useState(false);
@@ -86,8 +86,8 @@ export const NewsDetailsModal: React.FC<{
         language === "hi"
           ? article?.info?.hu.content
           : language === "id"
-            ? article?.info?.ru.content
-            : article?.info[language].content
+          ? article?.info?.ru.content
+          : article?.info[language].content
       }
    
 
@@ -179,14 +179,14 @@ export const NewsDetailsModal: React.FC<{
             }}
             resizeMode={"cover"}
           />
-<View style={{height:"auto"}}>
-          <Text style={[styles.title, { color }]}>
-            {language === "hi"
-              ? article?.info?.hu.nume
-              : language === "id"
+          <View style={{ height: "auto" }}>
+            <Text style={[styles.title, { color }]}>
+              {language === "hi"
+                ? article?.info?.hu.nume
+                : language === "id"
                 ? article?.info?.ru.nume
                 : article?.info[language].nume}
-          </Text>
+            </Text>
           </View>
           {/* <Text style={[styles.content, { color: contentColor }]}>
             {article?.info?.ro.content}

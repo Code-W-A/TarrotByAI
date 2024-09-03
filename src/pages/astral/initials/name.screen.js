@@ -171,8 +171,8 @@ function NameScreen({ navigation, route }) {
         lat: lat, // placeholder, should be replaced with actual latitude
         lon: long, // placeholder, should be replaced with actual longitude
         tzone: timezoneOffset, // placeholder, should be replaced with actual timezone
-        actualLanguage: "aba",
-        actualLanguageAstrograma: "aba",
+        actualLanguage: "en",
+        actualLanguageAstrograma: "en",
         zodiacSign,
         zodiacSignFristUpperCase,
         dataHoroscop: formattedDate,
@@ -348,6 +348,14 @@ function NameScreen({ navigation, route }) {
       const spiritualitateCategory = await fetchChatResponse(userInput);
       userData.spiritualitateCategory = spiritualitateCategory;
 
+      console.log(
+        "user date tot be set async storage...astrograma",
+        userData.spiritualitateCategory
+      );
+      console.log(
+        "user date tot be set async storage...horoscop",
+        userData.horoscopeResultsDaily
+      );
       await AsyncStorage.setItem("userData", JSON.stringify(userData));
       navigation.navigate("Learn");
       setIsLoading(false);

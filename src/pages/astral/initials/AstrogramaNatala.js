@@ -55,7 +55,7 @@ import { SvgUri, SvgXml } from "react-native-svg";
 import { btoa, atob } from "react-native-quick-base64";
 import base64 from "react-native-base64";
 import TestSvg from "../../../../assets/base64.svg";
-import WebView from "react-native-webview";
+
 import localGif from "../../../../assets/constelatii.gif";
 import { Image } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -237,8 +237,6 @@ function AstrogramaNatala({ navigation }) {
   };
 
   const handleNatalChart = async () => {
-    setIsLoading(true);
-
     try {
       const userDataJson = await AsyncStorage.getItem("userData");
       const userData = userDataJson ? JSON.parse(userDataJson) : null;
@@ -254,8 +252,13 @@ function AstrogramaNatala({ navigation }) {
       console.log("data....here", language);
       console.log("data....here", userData.actualLanguageAstrograma);
       if (language != userData.actualLanguageAstrograma) {
-        console.log("data....no", language);
-        userData.actualLanguageAstrograma === language;
+        setIsLoading(true);
+        console.log("language is not in userData....", language);
+        console.log(
+          "language is not in userData....",
+          userData.actualLanguageAstrograma
+        );
+        userData.actualLanguageAstrograma = language;
 
         const generalCategory = await handleToTranslate(
           userData.generalCategory,
@@ -320,6 +323,19 @@ function AstrogramaNatala({ navigation }) {
         );
         userData.spiritualitateCategory = spiritualitateCategory;
         await delay(2000); // delay de 1 secundă
+
+        // console.log(
+        //   "after translate user data....",
+        //   userData.spiritualitateCategory
+        // );
+        // console.log(
+        //   "after translate user data....",
+        //   userData.horoscopeResultsDaily
+        // );
+        console.log(
+          "after translate user data....",
+          userData.actualLanguageAstrograma
+        );
 
         await AsyncStorage.setItem("userData", JSON.stringify(userData));
       }

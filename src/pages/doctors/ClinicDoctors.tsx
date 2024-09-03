@@ -49,7 +49,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { ActivityIndicator, Searchbar } from "react-native-paper";
 import { labels } from "../../utils/labels";
 import { getClinicDoctors } from "../../actions/clinicActions";
-import { TouchableHighlight } from "react-native-gesture-handler";
+
 import { deleteDoctorFromClinic } from "../../utils/deleteFirebaseData";
 import i18n from "../../../i18n";
 

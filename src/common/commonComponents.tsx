@@ -16,12 +16,6 @@ import { colors } from "../utils/colors";
 import Modal from "react-native-modal";
 
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import {
-  Menu,
-  MenuOptions,
-  MenuOption,
-  MenuTrigger,
-} from "react-native-popup-menu";
 
 import { screenName } from "../utils/screenName";
 

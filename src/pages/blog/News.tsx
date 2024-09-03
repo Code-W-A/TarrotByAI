@@ -38,19 +38,19 @@ import {
 import { filterArticlesBeforeCurrentTime } from "../../utils/commonUtils";
 
 //---ADS---
-// import {
-//   InterstitialAd,
-//   AdEventType,
-//   TestIds,
-// } from "react-native-google-mobile-ads";
+import {
+  InterstitialAd,
+  AdEventType,
+  TestIds,
+} from "react-native-google-mobile-ads";
 
 // Înlocuiți cu ID-ul real al unității de anunțuri pentru producție
 
 //---ADS---
-// const adUnitId = __DEV__
-//   ? TestIds.INTERSTITIAL
-//   : "ca-app-pub-9577714849380446/7080054250";
-// const interstitialAd = InterstitialAd.createForAdRequest(adUnitId);
+const adUnitId = __DEV__
+  ? TestIds.INTERSTITIAL
+  : "ca-app-pub-9577714849380446/7080054250";
+const interstitialAd = InterstitialAd.createForAdRequest(adUnitId);
 
 const PAGE_SIZE = 5; // Definește câte articole să fie încărcate odată
 
@@ -164,7 +164,7 @@ const News = () => {
 
   const openModalWithArticle = async (article) => {
     //---ADS---
-    // await interstitialAd.show();
+    await interstitialAd.show();
     setTimeout(() => {
       setSelectedArticle(article);
       setModalVisible(true);
@@ -253,48 +253,48 @@ const News = () => {
   };
 
   //---ADS---
-  // useEffect(() => {
-  //   // Ascultător pentru evenimentul de încărcare a interstitialului
-  //   const loadListener = interstitialAd.addAdEventListener(
-  //     AdEventType.LOADED,
-  //     () => {
-  //       setInterstitialLoaded(true);
-  //     }
-  //   );
+  useEffect(() => {
+    // Ascultător pentru evenimentul de încărcare a interstitialului
+    const loadListener = interstitialAd.addAdEventListener(
+      AdEventType.LOADED,
+      () => {
+        setInterstitialLoaded(true);
+      }
+    );
 
-  //   // Ascultător pentru evenimentul de închidere a interstitialului
-  //   const closeListener = interstitialAd.addAdEventListener(
-  //     AdEventType.CLOSED,
-  //     () => {
-  //       // Navigația se face după închiderea interstitialului
-  //       // if (isFuture) {
-  //       //   navigation.navigate(screenName.FutureReading, {
-  //       //     item,
-  //       //   });
-  //       // }
-  //       // Reîncărcați interstitialul pentru utilizări ulterioare
-  //       setInterstitialLoaded(false);
-  //       interstitialAd.load();
-  //     }
-  //   );
+    // Ascultător pentru evenimentul de închidere a interstitialului
+    const closeListener = interstitialAd.addAdEventListener(
+      AdEventType.CLOSED,
+      () => {
+        // Navigația se face după închiderea interstitialului
+        // if (isFuture) {
+        //   navigation.navigate(screenName.FutureReading, {
+        //     item,
+        //   });
+        // }
+        // Reîncărcați interstitialul pentru utilizări ulterioare
+        setInterstitialLoaded(false);
+        interstitialAd.load();
+      }
+    );
 
-  //   const errorListener = interstitialAd.addAdEventListener(
-  //     AdEventType.ERROR,
-  //     (error) => {
-  //       console.error(error);
-  //     }
-  //   );
+    const errorListener = interstitialAd.addAdEventListener(
+      AdEventType.ERROR,
+      (error) => {
+        console.error(error);
+      }
+    );
 
-  //   // Încărcați interstitialul
-  //   interstitialAd.load();
+    // Încărcați interstitialul
+    interstitialAd.load();
 
-  //   return () => {
-  //     // Curățare la demontare
-  //     loadListener();
-  //     closeListener();
-  //     errorListener();
-  //   };
-  // }, []);
+    return () => {
+      // Curățare la demontare
+      loadListener();
+      closeListener();
+      errorListener();
+    };
+  }, []);
 
   const renderArticle = ({ item }) => (
     <NewsCard post={item} onPress={() => openModalWithArticle(item)} />

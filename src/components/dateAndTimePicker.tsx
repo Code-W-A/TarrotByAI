@@ -69,7 +69,9 @@ export const TimePicker: React.FC<TimePickerProps> = (props) => {
     props.selectedTime(newTime);
   };
   const onCancel = () => {
-    props.selectedTime(props.time);
+    // Ensure the time is converted to a string format
+    const timeAsString = moment(props.time).format("HH:mm");
+    props.selectedTime(timeAsString);
   };
 
   return (

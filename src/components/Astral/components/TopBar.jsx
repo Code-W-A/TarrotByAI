@@ -2,7 +2,12 @@
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { colors } from "../../../utils/colors";
-import { H8fontBoldWhite, H8fontMediumPrimary } from "../../commonText";
+import {
+  H7fontBoldWhite,
+  H8fontBoldWhite,
+  H8fontMediumPrimary,
+  H9fontMediumWhite,
+} from "../../commonText";
 import SpaceSky from "./space-sky";
 
 const MyTopBar = ({ onChangeTab }) => {
@@ -18,7 +23,9 @@ const MyTopBar = ({ onChangeTab }) => {
           onChangeTab("natal");
         }}
       >
-        <H8fontBoldWhite style={styles.tabText}>Natal Chart</H8fontBoldWhite>
+        <H9fontMediumWhite style={styles.tabText}>
+          Natal Chart
+        </H9fontMediumWhite>
       </TouchableOpacity>
       <TouchableOpacity
         style={[styles.tab, activeTab === "table" && styles.activeTab]}
@@ -27,7 +34,9 @@ const MyTopBar = ({ onChangeTab }) => {
           onChangeTab("table");
         }}
       >
-        <H8fontBoldWhite style={styles.tabText}>Aspect Table</H8fontBoldWhite>
+        <H9fontMediumWhite style={styles.tabText}>
+          Aspect Table
+        </H9fontMediumWhite>
       </TouchableOpacity>
       <TouchableOpacity
         style={[styles.tab, activeTab === "interpretation" && styles.activeTab]}
@@ -36,7 +45,9 @@ const MyTopBar = ({ onChangeTab }) => {
           onChangeTab("interpretation");
         }}
       >
-        <H8fontBoldWhite style={styles.tabText}>Interpretation</H8fontBoldWhite>
+        <H9fontMediumWhite style={styles.tabText}>
+          Interpretation
+        </H9fontMediumWhite>
       </TouchableOpacity>
     </View>
   );

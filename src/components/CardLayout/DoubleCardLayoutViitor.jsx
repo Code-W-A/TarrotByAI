@@ -1,6 +1,6 @@
 import React from "react";
 import { View, StyleSheet, Dimensions } from "react-native";
-import { H6fontBoldPrimary } from "../commonText";
+import { H6fontBoldPrimary, H6fontBoldYellow } from "../commonText";
 import { colors } from "../../utils/colors";
 
 const DoubleCardLayoutViitor = ({ shuffledCartiViitor, title, children }) => {
@@ -9,13 +9,13 @@ const DoubleCardLayoutViitor = ({ shuffledCartiViitor, title, children }) => {
   return (
     <View style={styles.container}>
       <View style={styles.titleContainer}>
-        <H6fontBoldPrimary
+        <H6fontBoldYellow
           style={{
             color: shuffledCartiViitor.length > 0 ? "white" : colors.primary3,
           }}
         >
           {title}
-        </H6fontBoldPrimary>
+        </H6fontBoldYellow>
       </View>
       <View style={styles.cardContainer}>
         {childArray.slice(0, 2).map((child, index) => (
@@ -46,6 +46,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: Dimensions.get("window").width,
     paddingHorizontal: 10,
+    height: "80%",
   },
   card: {
     width: Dimensions.get("window").width * 0.4, // Ajustează acest procentaj pentru a seta lățimea cardului

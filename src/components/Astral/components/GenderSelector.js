@@ -58,13 +58,14 @@ const GenderSelector = ({ setGender, gender }) => {
 const styles = StyleSheet.create({
   genderContainer: {
     marginTop: 20,
-    padding: 10,
+    padding: 5,
     backgroundColor: colors.primary3,
     borderRadius: 10,
+    height: 100,
   },
   genderLabel: {
     fontSize: 16,
-    marginBottom: 10,
+    marginBottom: 0,
     fontWeight: "bold",
     color: "#FFF",
   },
@@ -75,12 +76,13 @@ const styles = StyleSheet.create({
   button: {
     flex: 1,
     alignItems: "center",
-    paddingVertical: 10,
+    paddingVertical: 0,
     marginHorizontal: 5,
     borderRadius: 20,
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.5)",
     backgroundColor: "transparent",
+    height: "auto",
   },
   activeButton: {
     backgroundColor: "white",

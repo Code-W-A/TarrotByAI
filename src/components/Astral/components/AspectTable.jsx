@@ -150,7 +150,7 @@ const AspectTable = ({ houseCusps, planetaryData, aspects }) => {
               <H8fontBoldWhite style={[styles.rowText, styles.columnLarge]}>
                 {aspect?.planetOne}
               </H8fontBoldWhite>
-              <View style={[styles.rowText, styles.columnLarge]}>
+              <View style={[styles.columnLarge, { flexDirection: "row" }]}>
                 <H8fontBoldWhite>{aspect?.aspect}</H8fontBoldWhite>
                 <Text style={styles.degreeLabel}>
                   {getAspectAngle(aspect?.aspect)}°
@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
   },
   degreeLabel: {
     position: "relative",
-    bottom: -5,
+    bottom: 0,
     left: 2,
     fontSize: 8,
     color: "white",

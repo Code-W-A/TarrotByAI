@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import RootNavigation from "./navigations";
 import { screenName } from "./src/utils/screenName";
-import { MenuProvider } from "react-native-popup-menu";
+// import { MenuProvider } from "react-native-popup-menu";
 import { Provider } from "react-redux";
 import { Platform, View, ImageBackground, TextComponent } from "react-native";
 import {
@@ -56,17 +56,17 @@ import { usePushNotifications } from "./src/hooks/usePushNotifications";
 
 //---ADS---
 
-// import mobileAds from "react-native-google-mobile-ads";
+import mobileAds from "react-native-google-mobile-ads";
 
-// mobileAds()
-//   .initialize()
-//   .then((adapterStatuses) => {
-//     console.log("Initialization of adds complete!");
-//     // Initialization complete!
-//   })
-//   .catch((err) => {
-//     console.log("Initialization of adds ERROR!", err);
-//   });
+mobileAds()
+  .initialize()
+  .then((adapterStatuses) => {
+    console.log("Initialization of adds complete!");
+    // Initialization complete!
+  })
+  .catch((err) => {
+    console.log("Initialization of adds ERROR!", err);
+  });
 
 // AppOpenAd.createForAdRequest(TestIds.APP_OPEN);
 
@@ -194,9 +194,9 @@ const App = () => {
                   <NavigationContainer>
                     <StatusBar style="light" />
                     <Provider store={store}>
-                      <MenuProvider>
-                        <RootNavigation />
-                      </MenuProvider>
+                      {/* <MenuProvider> */}
+                      <RootNavigation />
+                      {/* </MenuProvider> */}
                     </Provider>
                   </NavigationContainer>
                 </AuthProvider>

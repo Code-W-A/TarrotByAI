@@ -14,13 +14,13 @@ import { EvilIcons } from "@expo/vector-icons";
 // import colors from "../../config/colors";
 import { colors } from "../../utils/colors";
 // import { adapty } from "react-native-adapty";
-import Purchases, { PurchasesOffering } from "react-native-purchases";
-import useRevenueCat from "../../hooks/useRevenueCat";
+// import Purchases, { PurchasesOffering } from "react-native-purchases";
+// import useRevenueCat from "../../hooks/useRevenueCat";
 import { Alert } from "react-native";
 import i18n from "../../../i18n";
 
 const PaywallScreen = ({ navigation }) => {
-  const { currentOffering, customerInfo, isProMember } = useRevenueCat();
+  // const { currentOffering, customerInfo, isProMember } = useRevenueCat();
   // console.log("currentOffering...on paywall", currentOffering?.monthly);
   // const [paywall, setPaywall] = useState(null);
 
@@ -39,57 +39,57 @@ const PaywallScreen = ({ navigation }) => {
   //   }
   // };
 
-  const handleMonthlyPurchase = async () => {
-    try {
-      if (!currentOffering?.monthly) return;
+  // const handleMonthlyPurchase = async () => {
+  //   try {
+  //     if (!currentOffering?.monthly) return;
 
-      const purchaserInfo = await Purchases.purchasePackage(
-        currentOffering.monthly
-      );
+  //     const purchaserInfo = await Purchases.purchasePackage(
+  //       currentOffering.monthly
+  //     );
 
-      console.log(
-        "YOU BOUGHT THE MONTHLY SUB",
-        purchaserInfo.customerInfo.entitlements.active
-      );
+  //     console.log(
+  //       "YOU BOUGHT THE MONTHLY SUB",
+  //       purchaserInfo.customerInfo.entitlements.active
+  //     );
 
-      if (purchaserInfo.customerInfo.entitlements.active.pro) {
-        navigation.goBack();
-      }
-    } catch (error) {
-      console.log("error handleMonthlyPurchase...", error);
-    }
-  };
+  //     if (purchaserInfo.customerInfo.entitlements.active.pro) {
+  //       navigation.goBack();
+  //     }
+  //   } catch (error) {
+  //     console.log("error handleMonthlyPurchase...", error);
+  //   }
+  // };
 
-  const handleYearlyPurchase = async () => {
-    try {
-      if (!currentOffering?.annual) return;
+  // const handleYearlyPurchase = async () => {
+  //   try {
+  //     if (!currentOffering?.annual) return;
 
-      const purchaserInfo = await Purchases.purchasePackage(
-        currentOffering.annual
-      );
+  //     const purchaserInfo = await Purchases.purchasePackage(
+  //       currentOffering.annual
+  //     );
 
-      console.log(
-        "YOU BOUGHT THE ANNUAL SUB",
-        purchaserInfo.customerInfo.entitlements.active
-      );
+  //     console.log(
+  //       "YOU BOUGHT THE ANNUAL SUB",
+  //       purchaserInfo.customerInfo.entitlements.active
+  //     );
 
-      if (purchaserInfo.customerInfo.entitlements.active.pro) {
-        navigation.goBack();
-      }
-    } catch (error) {
-      console.log("error handleAnnualPurchase...", error);
-    }
-  };
+  //     if (purchaserInfo.customerInfo.entitlements.active.pro) {
+  //       navigation.goBack();
+  //     }
+  //   } catch (error) {
+  //     console.log("error handleAnnualPurchase...", error);
+  //   }
+  // };
 
   useEffect(() => {}, []);
 
-  if (!currentOffering) {
-    return (
-      <View style={[styles.activityContainer, styles.activityHorizontal]}>
-        <ActivityIndicator size="large" />
-      </View>
-    );
-  }
+  // if (!currentOffering) {
+  //   return (
+  //     <View style={[styles.activityContainer, styles.activityHorizontal]}>
+  //       <ActivityIndicator size="large" />
+  //     </View>
+  //   );
+  // }
 
   return (
     <View style={styles.container}>
@@ -156,14 +156,14 @@ const PaywallScreen = ({ navigation }) => {
           <Pressable
             style={styles.buttonPrimary}
             // onPress={() => purchaseProduct(paywall?.products[0])}
-            onPress={handleYearlyPurchase}
+            // onPress={handleYearlyPurchase}
             // onPress={() => console.log("ASda")}
           >
             <Text
               style={{ fontSize: 20, color: "#5A5A5A", fontWeight: "bold" }}
             >
               {/* {paywall?.products[0].localizedPrice}/year */}
-              {currentOffering?.annual?.product.priceString} /
+              {/* {currentOffering?.annual?.product.priceString} / */}
               {i18n.translate("styleConnectUpgradeMessage10")}
               {/* 20/year */}
             </Text>
@@ -188,14 +188,14 @@ const PaywallScreen = ({ navigation }) => {
           <Pressable
             style={styles.buttonPrimary}
             // onPress={() => purchaseProduct(paywall?.products[1])}
-            onPress={handleMonthlyPurchase}
+            // onPress={handleMonthlyPurchase}
             // onPress={() => console.log("ASda")}
           >
             <Text
               style={{ fontSize: 20, color: "#5A5A5A", fontWeight: "bold" }}
             >
               {/* {paywall?.products[1].localizedPrice}/month */}
-              {currentOffering?.monthly?.product.priceString} /
+              {/* {currentOffering?.monthly?.product.priceString} / */}
               {i18n.translate("styleConnectUpgradeMessage11")}
               {/* 20 /month */}
             </Text>
