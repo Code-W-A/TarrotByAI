@@ -176,14 +176,16 @@ const AfirmatiiPozitive = () => {
                     }}
                   >
                     <H6fontMediumWhite
-                      style={{ textAlign: "center", color: "white" }}
+                      style={{
+                        textAlign: "center",
+                        color: "white",
+                      }}
                     >
                       {language === "hi"
                         ? afirmatiiPozitive?.info.hu.descriere
                         : language === "id"
                         ? afirmatiiPozitive?.info.ru.descriere
                         : afirmatiiPozitive?.info[language].descriere}
-                      {afirmatiiPozitive?.info.ru.descriere}
                     </H6fontMediumWhite>
                   </View>
                 ) : null}
