@@ -19,7 +19,11 @@ import {
 } from "react-native";
 import { Provider as PaperProvider } from "react-native-paper";
 import { useSelector, useDispatch } from "react-redux";
-import { useFocusEffect, useRoute } from "@react-navigation/native";
+import {
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from "@react-navigation/native";
 
 import NavBarBottom from "../../components/Navbar";
 import FlipCard from "../../components/FlipCard/FlipCard";
@@ -73,7 +77,7 @@ const ClinicDashboard = () => {
   const { language, changeLanguage } = useLanguage();
   const { userData, currentUser, isGuestUser } = useAuth();
   const [visible, setVisible] = useState(false);
-
+  const navigation = useNavigation();
   const { expoPushToken } = usePushNotifications();
 
   useEffect(() => {
@@ -101,7 +105,14 @@ const ClinicDashboard = () => {
       handleUploadToken(); // Apelarea funcției
     }
   }, [expoPushToken, isGuestUser, userData]);
+  // useEffect(() => {
+  //   const screen =
+  //     userData.actualLanguage && userData.actualLanguageAstrograma
+  //       ? screenName.ClinicDashBoard
+  //       : screenName.languageSelectScreen;
 
+  //   navigation.navigate(screen);
+  // }, []);
   const {
     oreNorocoase,
     numereNorocoase,

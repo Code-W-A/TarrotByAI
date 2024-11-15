@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useCallback, useEffect, useState } from "react";
 import { StyleSheet, View, Platform, Image, Dimensions } from "react-native";
 import { Button, Headline, Menu, Provider, Text } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -80,7 +80,7 @@ function NameScreen({ navigation, route }) {
   const inputRef = React.useRef(null);
 
   useEffect(() => {
-    console.log("selectedTime.......", selectedTime);
+    // console.log("selectedTime.......", selectedTime);
   }, []);
 
   useEffect(() => {
@@ -92,13 +92,41 @@ function NameScreen({ navigation, route }) {
   }, [route.params]);
 
   useFocusEffect(
-    React.useCallback(() => {
+    useCallback(() => {
       if (!route.params?.editMode) {
         const checkUserData = async () => {
           try {
+            // Verificăm dacă aplicația a fost accesată prima dată
+            const isFirstLaunch = await AsyncStorage.getItem("isFirstLaunch");
+
+            // Dacă este prima lansare, setăm flag-ul și continuăm fără redirecționare
+            if (isFirstLaunch === null) {
+              await AsyncStorage.setItem("isFirstLaunch", "false");
+              console.log("First launch, not redirecting to Learn.");
+              return; // Ieșim din funcție fără redirecționare
+            }
+
+            // Verificăm datele utilizatorului pentru redirecționare
             const userData = await AsyncStorage.getItem("userData");
-            // console.log("Retrieved user data:", userData);
-            if (userData) {
+            const parsedData = JSON.parse(userData);
+            console.log("Retrieved user data:", parsedData.actualLanguage);
+            console.log(
+              "Retrieved user data:",
+              parsedData.actualLanguageAstrograma
+            );
+            console.log(
+              "Retrieved user data:",
+              parsedData.actualLanguageSinastrie
+            );
+            console.log("Retrieved user data:", parsedData.full_name);
+
+            if (
+              parsedData &&
+              parsedData?.actualLanguage &&
+              parsedData?.actualLanguageAstrograma &&
+              parsedData?.actualLanguageSinastrie &&
+              parsedData?.full_name
+            ) {
               navigation.navigate("Learn");
             }
           } catch (error) {
@@ -107,7 +135,7 @@ function NameScreen({ navigation, route }) {
         };
         checkUserData();
       }
-    }, [navigation, isEditMode])
+    }, [navigation, route.params?.editMode])
   );
 
   const loadUserData = async () => {
@@ -171,13 +199,14 @@ function NameScreen({ navigation, route }) {
         lat: lat, // placeholder, should be replaced with actual latitude
         lon: long, // placeholder, should be replaced with actual longitude
         tzone: timezoneOffset, // placeholder, should be replaced with actual timezone
-        actualLanguage: "en",
-        actualLanguageAstrograma: "en",
+        actualLanguage: "naan",
+        actualLanguageAstrograma: "naan",
+        actualLanguageSinastrie: "naan",
         zodiacSign,
         zodiacSignFristUpperCase,
         dataHoroscop: formattedDate,
       };
-      console.log("user....", userData);
+      // console.log("user....", userData);
       const urls = {
         natalWheelChart:
           "https://astroapi-4.divineapi.com/western-api/v1/natal-wheel-chart",
@@ -308,10 +337,10 @@ function NameScreen({ navigation, route }) {
       // setIsLoading(false);
       let userInput;
       userInput = formatAstrologyReport(astrologyData, "General");
-      console.log("userInput....", userInput);
+      // console.log("userInput....", userInput);
       const generalCategory = await fetchChatResponse(userInput);
       userData.generalCategory = generalCategory;
-      console.log("userInput....2", userData.generalCategory);
+      // console.log("userInput....2", userData.generalCategory);
 
       setLoadingMessage(i18n.translate("creatingAstroChart"));
       userInput = formatAstrologyReport(astrologyData, "Dragoste");
@@ -348,14 +377,14 @@ function NameScreen({ navigation, route }) {
       const spiritualitateCategory = await fetchChatResponse(userInput);
       userData.spiritualitateCategory = spiritualitateCategory;
 
-      console.log(
-        "user date tot be set async storage...astrograma",
-        userData.spiritualitateCategory
-      );
-      console.log(
-        "user date tot be set async storage...horoscop",
-        userData.horoscopeResultsDaily
-      );
+      // console.log(
+      //   "user date tot be set async storage...astrograma",
+      //   userData.generalCategory
+      // );
+      // console.log(
+      //   "user date tot be set async storage...horoscop",
+      //   userData.horoscopeResultsDaily
+      // );
       await AsyncStorage.setItem("userData", JSON.stringify(userData));
       navigation.navigate("Learn");
       setIsLoading(false);

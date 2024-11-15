@@ -130,15 +130,15 @@ function LearnScreen({ navigation }) {
         const userDataJson = await AsyncStorage.getItem("userData");
         const userData = userDataJson ? JSON.parse(userDataJson) : null;
         if (!userData.actualLanguage) {
-          userData.actualLanguage = "en";
+          userData.actualLanguage = "naan";
           await AsyncStorage.setItem("userData", JSON.stringify(userData));
         }
         if (!userData.actualLanguageAstrograma) {
-          userData.actualLanguageAstrograma = "en";
+          userData.actualLanguageAstrograma = "naan";
           await AsyncStorage.setItem("userData", JSON.stringify(userData));
         }
         if (!userData.actualLanguageSinastrie) {
-          userData.actualLanguageSinastrie = "en";
+          userData.actualLanguageSinastrie = "naan";
           await AsyncStorage.setItem("userData", JSON.stringify(userData));
         }
         setUserD(userData);
@@ -248,9 +248,10 @@ function LearnScreen({ navigation }) {
                     labelStyle={{ fontSize: 12, letterSpacing: 0 }}
                     onPress={() =>
                       handleViewLesson(
-                        !userD?.generalCategory.length > 20
-                          ? "Name"
-                          : "AstrogramaNatala"
+                        // userD?.generalCategory &&
+                        userD.generalCategory.length > 20
+                          ? "AstrogramaNatala"
+                          : "Name"
                       )
                     }
                   >

@@ -24,6 +24,7 @@ import { useNavigation } from "@react-navigation/native";
 import { screenName } from "../utils/screenName";
 import { handleLanguagei18n } from "../utils/handleLanguageGeneral";
 import i18n from "../../i18n";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const LanguageSelectScreen = () => {
   const [selectedLanguage, setSelectedLanguage] = useState(null);

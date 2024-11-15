@@ -1,4 +1,4 @@
-import React, { Component, useState } from "react";
+import React, { Component, useEffect, useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { screenName } from "./src/utils/screenName";
@@ -115,6 +115,7 @@ import HoroscopZilnic from "./src/pages/astral/initials/HoroscopZilnic";
 import NewPersonScreen from "./src/pages/astral/initials/new.person.screen";
 import PersonsScreen from "./src/pages/astral/initials/persons.screen";
 import SinastrieRelatie from "./src/pages/astral/initials/SinastrieRelatie";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 // import BirthDateScreen from "./src/pages/astral/initials/birth-date.screen";
 // import RelationshipScreen from "./src/pages/astral/initials/relationship.screen";
 // import SexScreen from "./src/pages/astral/initials/sex.screen";
@@ -316,14 +317,41 @@ const HomeNavigation = (props: NavigationProps) => {
 
 const RootNavigation = () => {
   const { currentUser, isGuestUser } = useAuth();
-  const screen = isGuestUser
-    ? screenName.ClinicDashBoard
-    : currentUser
-    ? screenName.SignInScreenClinic
-    : screenName.OnboardingScreen;
-  // const screen = screenName.astralProfileScreen;
+  const [initialScreen, setInitialScreen] = useState(null);
 
-  return <HomeNavigation initialRouteName={screen} />;
+  useEffect(() => {
+    const initializeScreen = async () => {
+      let screen = isGuestUser
+        ? screenName.ClinicDashBoard
+        : currentUser
+        ? screenName.SignInScreenClinic
+        : screenName.OnboardingScreen;
+
+      try {
+        const userDataJson = await AsyncStorage.getItem("userData");
+        const userData = JSON.parse(userDataJson);
+
+        if (userData) {
+          screen = screenName.ClinicDashBoard;
+        } else {
+          screen = screenName.languageSelectScreen;
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+
+      setInitialScreen(screen);
+    };
+
+    initializeScreen();
+  }, [currentUser, isGuestUser]);
+
+  // Afișăm un ecran de încărcare temporar dacă `initialScreen` este null
+  if (!initialScreen) {
+    return null; // Sau poți afișa un component de încărcare, ex: <LoadingScreen />
+  }
+
+  return <HomeNavigation initialRouteName={initialScreen} />;
 };
 
 const styles = StyleSheet.create({

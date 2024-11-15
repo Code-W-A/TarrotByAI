@@ -9,6 +9,8 @@ import {
   KeyboardAvoidingView,
   Text,
 } from "react-native";
+import Icon from "react-native-vector-icons/FontAwesome";
+
 import { Button, SocialMediaLogin } from "../components/commonButton";
 import { GeneralProps } from "../interfaces/generalProps";
 import { Route, useRoute } from "@react-navigation/native";
@@ -57,17 +59,20 @@ import { InputFields } from "../components/commonInputFields";
 import { authentication, db, storage } from "../../firebase";
 import { ref, uploadBytes, uploadBytesResumable } from "firebase/storage";
 import { setDoc, doc } from "firebase/firestore";
-import { createUserWithEmailAndPassword, signOut } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  signOut,
+  GoogleAuthProvider,
+  signInWithPopup,
+  getAuth,
+  signInWithCredential,
+} from "firebase/auth";
 import { MaterialIcons } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { handleSignOut } from "../utils/handleSignOut";
 import i18n, { languageCode } from "../../i18n";
-import {
-  ICountry,
-  PhoneInput,
-  getCountryByCca2,
-} from "react-native-international-phone-number";
+
 import CustomLoader from "../components/customLoader";
 import { TouchableWithoutFeedback } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -76,10 +81,14 @@ import { Checkbox, Snackbar } from "react-native-paper";
 import SnackBar from "../components/SnackBar";
 import { handleFirebaseAuthError } from "../utils/authUtils";
 import { useAuth } from "../context/AuthContext";
+import * as WebBrowser from "expo-web-browser";
+import * as Google from "expo-auth-session/providers/google";
 
 interface Props extends GeneralProps {
   route: Route<string, object | undefined>;
 }
+
+WebBrowser.maybeCompleteAuthSession();
 
 const SignUpScreenClinic: React.FC<Props> = ({ navigation }): JSX.Element => {
   const formKeys = {
@@ -149,6 +158,34 @@ const SignUpScreenClinic: React.FC<Props> = ({ navigation }): JSX.Element => {
       });
 
     setIsLoading(false);
+  };
+
+  const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
+    clientId:
+      "76318868979-voa1k6mh1bii2ej4qjja8uohq0ehcio4.apps.googleusercontent.com",
+  });
+
+  const handleGoogleSignIn = async () => {
+    const auth = getAuth();
+
+    if (response?.type === "success") {
+      const { id_token } = response.params;
+
+      const credential = GoogleAuthProvider.credential(id_token);
+      try {
+        const userCredential = await signInWithCredential(auth, credential);
+        const user = userCredential.user;
+
+        // Salvează datele utilizatorului în Firestore, dacă este necesar
+        console.log("Autentificare reușită:", user);
+        navigation.navigate("Home");
+      } catch (error) {
+        console.error("Eroare la autentificare:", error.message);
+        Alert.alert("Eroare", "Autentificarea a eșuat.");
+      }
+    } else {
+      Alert.alert("Eroare", "Autentificarea cu Google a fost anulată.");
+    }
   };
 
   return (
@@ -369,6 +406,14 @@ const SignUpScreenClinic: React.FC<Props> = ({ navigation }): JSX.Element => {
                   />
                 )}
 
+                <TouchableOpacity
+                  style={styles.googleButton}
+                  onPress={() => promptAsync()}
+                  disabled={!request}
+                >
+                  <Icon name="google" size={24} color="white" />
+                </TouchableOpacity>
+
                 <View>
                   <View style={styles.infoTextViewStyle}>
                     <H7fontMediumPrimary>
@@ -413,6 +458,23 @@ const SignUpScreenClinic: React.FC<Props> = ({ navigation }): JSX.Element => {
 export default SignUpScreenClinic;
 
 const styles = StyleSheet.create({
+  googleButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#4285F4", // Albastru Google
+    paddingVertical: 12, // Padding mai mare pentru un aspect robust
+    paddingHorizontal: 20,
+    borderRadius: 4, // Colțuri ușor rotunjite
+    marginTop: 15,
+    width: "80%", // Lățime pentru a ocupa o porțiune semnificativă a ecranului
+    justifyContent: "center", // Centrarea iconului și a textului
+  },
+  googleButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold", // Font bold pentru vizibilitate
+    marginLeft: 10, // Spațiere între icon și text
+  },
   gradient: {
     flex: 1,
     width: "100%",

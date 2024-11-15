@@ -2,15 +2,20 @@
   "expo": {
     "name": "Cristina Zurba",
     "slug": "TarotByAi",
-    "platforms": ["ios", "android", "web"],
-    "version": "1.5.1",
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
+    "version": "1.5.4",
     "orientation": "portrait",
     "plugins": [
       "expo-build-properties",
       "expo-asset",
       "expo-font",
       "expo-localization",
-      "expo-tracking-transparency"
+      "expo-tracking-transparency",
+      "expo-secure-store"
     ],
     "android": {
       "adaptiveIcon": {
@@ -20,8 +25,10 @@
       "config": {},
       "softwareKeyboardLayoutMode": "pan",
       "package": "com.cristina.zurba.tarot",
-      "versionCode": 69,
-      "permissions": ["android.permission.RECORD_AUDIO"]
+      "versionCode": 72,
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "config": {
@@ -35,7 +42,9 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.cristina.zurba.tarot"
