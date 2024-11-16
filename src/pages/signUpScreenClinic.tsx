@@ -58,7 +58,7 @@ import { InputFields } from "../components/commonInputFields";
 
 import { authentication, db, storage } from "../../firebase";
 import { ref, uploadBytes, uploadBytesResumable } from "firebase/storage";
-import { setDoc, doc } from "firebase/firestore";
+import { setDoc, doc, getDoc } from "firebase/firestore";
 import {
   createUserWithEmailAndPassword,
   signOut,
@@ -83,6 +83,7 @@ import { handleFirebaseAuthError } from "../utils/authUtils";
 import { useAuth } from "../context/AuthContext";
 import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
+import { makeRedirectUri } from "expo-auth-session";
 
 interface Props extends GeneralProps {
   route: Route<string, object | undefined>;
@@ -162,31 +163,69 @@ const SignUpScreenClinic: React.FC<Props> = ({ navigation }): JSX.Element => {
 
   const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
     clientId:
-      "76318868979-voa1k6mh1bii2ej4qjja8uohq0ehcio4.apps.googleusercontent.com",
+      "76318868979-fg83s3bgc4a685n46lul2a2u6lrooahh.apps.googleusercontent.com",
+    redirectUri: makeRedirectUri({
+      scheme: "com.cristina.zurba.tarot",
+      useProxy: true, // Folosește proxy-ul Expo pentru teste locale
+    }),
   });
 
   const handleGoogleSignIn = async () => {
-    const auth = getAuth();
-
+    console.log("Start....");
     if (response?.type === "success") {
       const { id_token } = response.params;
 
-      const credential = GoogleAuthProvider.credential(id_token);
       try {
-        const userCredential = await signInWithCredential(auth, credential);
+        // Creează credentialele Firebase din token-ul Google
+        const credential = GoogleAuthProvider.credential(id_token);
+        const userCredential = await signInWithCredential(
+          authentication,
+          credential
+        );
         const user = userCredential.user;
 
-        // Salvează datele utilizatorului în Firestore, dacă este necesar
-        console.log("Autentificare reușită:", user);
-        navigation.navigate("Home");
+        // Verificare și stocare date utilizator
+        const collectionId = "Users";
+        const documentId = user.uid;
+        const value = {
+          owner_uid: user.uid,
+          first_name: user.displayName || "Utilizator",
+          last_name: "",
+          email: user.email || "Email necunoscut",
+          photoURL: user.photoURL || "",
+        };
+
+        console.log("Start....", value);
+
+        const userRef = doc(db, collectionId, documentId);
+        const docSnapshot = await getDoc(userRef);
+
+        if (!docSnapshot.exists()) {
+          await setDoc(userRef, value);
+          console.log("Utilizator nou creat:", value);
+        } else {
+          console.log("Utilizator deja existent:", docSnapshot.data());
+        }
+
+        // Navighează către altă pagină
+        navigation.navigate(screenName.ClinicDashBoard);
       } catch (error) {
         console.error("Eroare la autentificare:", error.message);
-        Alert.alert("Eroare", "Autentificarea a eșuat.");
+        Alert.alert(
+          "Eroare",
+          "Autentificarea a eșuat. Vă rugăm să încercați din nou."
+        );
       }
     } else {
       Alert.alert("Eroare", "Autentificarea cu Google a fost anulată.");
     }
   };
+
+  useEffect(() => {
+    if (response) {
+      handleGoogleSignIn();
+    }
+  }, [response]);
 
   return (
     <TouchableWithoutFeedback onPress={() => console.log("ass")}>
@@ -408,7 +447,7 @@ const SignUpScreenClinic: React.FC<Props> = ({ navigation }): JSX.Element => {
 
                 <TouchableOpacity
                   style={styles.googleButton}
-                  onPress={() => promptAsync()}
+                  onPress={() => promptAsync()} // Acțiunea butonului rămâne aceeași
                   disabled={!request}
                 >
                   <Icon name="google" size={24} color="white" />

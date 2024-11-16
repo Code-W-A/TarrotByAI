@@ -75,9 +75,13 @@ import {
   onAuthStateChanged,
   getAuth,
   PhoneAuthProvider,
+  GoogleAuthProvider,
   signInWithCredential,
 } from "firebase/auth";
 import { authentication, db } from "../../firebase";
+import * as WebBrowser from "expo-web-browser";
+import * as Google from "expo-auth-session/providers/google";
+import { makeRedirectUri } from "expo-auth-session";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -112,6 +116,8 @@ import {
 import { useAuth } from "../context/AuthContext";
 import { handleFirebaseAuthError } from "../utils/authUtils";
 import SnackBar from "../components/SnackBar";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import Icon from "react-native-vector-icons/FontAwesome";
 
 interface Props extends GeneralProps {
   route: Route<string, object | undefined>;
@@ -226,6 +232,72 @@ const SignInScreenClinic: React.FC<Props> = ({
 
     return unsubscribe;
   }, []);
+
+  const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
+    clientId:
+      "76318868979-fg83s3bgc4a685n46lul2a2u6lrooahh.apps.googleusercontent.com",
+    redirectUri: makeRedirectUri({
+      scheme: "com.cristina.zurba.tarot",
+      useProxy: true, // Folosește proxy-ul Expo pentru teste locale
+    }),
+  });
+
+  const handleGoogleSignIn = async () => {
+    console.log("Start....nou");
+    if (response?.type === "success") {
+      const { id_token } = response.params;
+
+      try {
+        // Creează credentialele Firebase din token-ul Google
+        const credential = GoogleAuthProvider.credential(id_token);
+        const userCredential = await signInWithCredential(
+          authentication,
+          credential
+        );
+        const user = userCredential.user;
+
+        // Verificare și stocare date utilizator
+        const collectionId = "Users";
+        const documentId = user.uid;
+        const value = {
+          owner_uid: user.uid,
+          first_name: user.displayName || "Utilizator",
+          last_name: "",
+          email: user.email || "Email necunoscut",
+          photoURL: user.photoURL || "",
+        };
+
+        console.log("Start....nou", value);
+
+        const userRef = doc(db, collectionId, documentId);
+        const docSnapshot = await getDoc(userRef);
+
+        if (!docSnapshot.exists()) {
+          await setDoc(userRef, value);
+          console.log("Utilizator nou creat:", value);
+        } else {
+          console.log("Utilizator deja existent:", docSnapshot.data());
+        }
+
+        // Navighează către altă pagină
+        navigation.navigate(screenName.ClinicDashBoard);
+      } catch (error) {
+        console.error("Eroare la autentificare:", error.message);
+        Alert.alert(
+          "Eroare",
+          "Autentificarea a eșuat. Vă rugăm să încercați din nou."
+        );
+      }
+    } else {
+      Alert.alert("Eroare", "Autentificarea cu Google a fost anulată.");
+    }
+  };
+
+  useEffect(() => {
+    if (response) {
+      handleGoogleSignIn();
+    }
+  }, [response]);
 
   return (
     <TouchableWithoutFeedback onPress={() => console.log("ass")}>
@@ -361,6 +433,14 @@ const SignInScreenClinic: React.FC<Props> = ({
                     txtColor={colors.white}
                   />
                 </View>
+
+                <TouchableOpacity
+                  style={styles.googleButton}
+                  onPress={() => promptAsync()} // Acțiunea butonului rămâne aceeași
+                  disabled={!request}
+                >
+                  <Icon name="google" size={24} color="white" />
+                </TouchableOpacity>
                 <View>
                   <View style={styles.infoTextViewStyle}>
                     <H7fontBoldPrimary>
@@ -403,6 +483,23 @@ const SignInScreenClinic: React.FC<Props> = ({
 export default SignInScreenClinic;
 
 const styles = StyleSheet.create({
+  googleButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#4285F4", // Albastru Google
+    paddingVertical: 12, // Padding mai mare pentru un aspect robust
+    paddingHorizontal: 20,
+    borderRadius: 4, // Colțuri ușor rotunjite
+    marginTop: 15,
+    width: "80%", // Lățime pentru a ocupa o porțiune semnificativă a ecranului
+    justifyContent: "center", // Centrarea iconului și a textului
+  },
+  googleButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold", // Font bold pentru vizibilitate
+    marginLeft: 10, // Spațiere între icon și text
+  },
   subContainer: {
     flex: 1,
     paddingHorizontal: 20,

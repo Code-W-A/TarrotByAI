@@ -273,11 +273,12 @@ function PersonsScreen({ navigation }) {
                       },
                     }}
                     labelStyle={{ fontSize: 12, letterSpacing: 0 }}
-                    onPress={() =>
-                      navigation.navigate("NewPerson", {
-                        editMode: userD?.p2?.full_name ? true : false,
-                      })
-                    }
+                    onPress={() => navigation.navigate("PersonsList")}
+                    // onPress={() =>
+                    //   navigation.navigate("NewPerson", {
+                    //     editMode: userD?.p2?.full_name ? true : false,
+                    //   })
+                    // }
                   >
                     {userD?.p2?.full_name
                       ? i18n.translate("update")

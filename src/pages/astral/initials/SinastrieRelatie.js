@@ -276,6 +276,81 @@ function SinastrieRelatie({ navigation }) {
   const [userD, setUserD] = useState({});
   const { language, changeLanguage } = useLanguage();
 
+  //ACHIZITIONARE SINASTRIE
+
+  const [isPaid, setIsPaid] = useState(false); // Starea de plată
+  const [partialContent, setPartialContent] = useState(
+    "Aceasta este o secțiune limitată din interpretarea sinastriei tale. Pentru a accesa interpretarea completă, finalizează achiziția."
+  );
+  const [fullContent, setFullContent] = useState(""); // Conținut complet după plată
+  const translateSinastryCategories = async (userData, selectedLanguage) => {
+    const categories = [
+      "harmoniousAspectReading",
+      "conflictingAspectReading",
+      "contrastingAspectReading",
+      "intenseCompatibility",
+      "physicalCompatibility",
+      "emotionalCompatibility",
+      "sexualCompatibility",
+      "spiritualCompatibility",
+      "financialCompatibility",
+    ];
+
+    const translationPromises = categories.map(async (category) => {
+      const categoryData = userData?.synastry?.[category]?.data;
+      if (categoryData && Array.isArray(categoryData)) {
+        await Promise.all(
+          categoryData.map(async (item) => {
+            if (item.reading) {
+              await Promise.all(
+                item.reading.map(async (reading) => {
+                  if (reading.description) {
+                    reading.description = await handleToTranslate(
+                      reading.description,
+                      selectedLanguage,
+                      userData.actualLanguageSinastrie
+                    );
+                  }
+                  if (reading.title) {
+                    reading.title = await handleToTranslate(
+                      reading.title,
+                      selectedLanguage,
+                      userData.actualLanguageSinastrie
+                    );
+                  }
+                })
+              );
+            }
+          })
+        );
+      }
+    });
+
+    await Promise.all(translationPromises);
+  };
+
+  const handlePurchase = async () => {
+    const updatedUserData = { ...userD, actualLanguageSinastrie: language };
+
+    await AsyncStorage.setItem("userData", JSON.stringify(updatedUserData));
+
+    Alert.alert(
+      "Proces de plată",
+      `Interpretarea completă va fi generată în limba ${language}.`,
+      [
+        {
+          text: "OK",
+          onPress: async () => {
+            await translateSinastryCategories(updatedUserData, language);
+            setIsPaid(true);
+          },
+        },
+      ]
+    );
+  };
+
+  //ACHIZITIONARE SINASTRIE
+
   const isValidBase64 = (base64) => {
     const regex = /^[A-Za-z0-9+/]+={0,2}$/;
     return regex.test(base64);
@@ -648,22 +723,83 @@ function SinastrieRelatie({ navigation }) {
                       },
                     ]}
                   >
-                    {activeData.map((aspect, index) => (
-                      <View key={index}>
-                        {aspect.reading.map((read, readIndex) => (
-                          <View key={readIndex} style={{ marginTop: 20 }}>
-                            <H7fontBoldWhite style={[styles.textTitles]}>
-                              {read?.title}
-                            </H7fontBoldWhite>
-                            <H9fontMediumLightBlack
-                              style={styles.textDescription}
-                            >
-                              {read?.description}
-                            </H9fontMediumLightBlack>
-                          </View>
-                        ))}
-                      </View>
-                    ))}
+                    <View style={styles.languageSelector}>
+                      <Text style={styles.label}>Selectează limba:</Text>
+                      <Picker
+                        selectedValue={language}
+                        onValueChange={(value) => changeLanguage(value)}
+                        style={styles.picker}
+                      >
+                        <Picker.Item label="Engleză" value="en" />
+                        <Picker.Item label="Română" value="ro" />
+                        <Picker.Item label="Germană" value="de" />
+                        <Picker.Item label="Spaniolă" value="es" />
+                        {/* Adaugă alte limbi */}
+                      </Picker>
+                    </View>
+
+                    <View>
+                      {isPaid ? (
+                        <>
+                          {/* Afișează toate elementele din activeData dacă este achiziționat */}
+                          {activeData.map((aspect, index) => (
+                            <View key={index}>
+                              {aspect.reading.map((read, readIndex) => (
+                                <View key={readIndex} style={{ marginTop: 20 }}>
+                                  <H7fontBoldWhite style={[styles.textTitles]}>
+                                    {read?.title}
+                                  </H7fontBoldWhite>
+                                  <H9fontMediumLightBlack
+                                    style={styles.textDescription}
+                                  >
+                                    {read?.description}
+                                  </H9fontMediumLightBlack>
+                                </View>
+                              ))}
+                            </View>
+                          ))}
+                          {/* Buton de descărcare PDF */}
+                          <TouchableOpacity
+                            style={styles.downloadButton}
+                            onPress={handleDownloadPDF}
+                          >
+                            <Text style={styles.downloadButtonText}>
+                              Descarcă PDF
+                            </Text>
+                          </TouchableOpacity>
+                        </>
+                      ) : (
+                        <>
+                          {/* Afișează doar primul element din activeData dacă nu este achiziționat */}
+                          {activeData.length > 0 &&
+                            activeData[0]?.reading?.length > 0 && (
+                              <View>
+                                <H7fontBoldWhite style={[styles.textTitles]}>
+                                  {activeData[0].reading[0]?.title}
+                                </H7fontBoldWhite>
+                                <H9fontMediumLightBlack
+                                  style={styles.textDescription}
+                                >
+                                  {activeData[0].reading[0]?.description}
+                                </H9fontMediumLightBlack>
+                              </View>
+                            )}
+                          {/* Mesaj de cumpărare */}
+                          <Text style={styles.partialContent}>
+                            {partialContent}
+                          </Text>
+                          {/* Buton pentru achiziție */}
+                          <TouchableOpacity
+                            style={styles.purchaseButton}
+                            onPress={handlePurchase}
+                          >
+                            <Text style={styles.purchaseButtonText}>
+                              Achiziționează Interpretarea Completă
+                            </Text>
+                          </TouchableOpacity>
+                        </>
+                      )}
+                    </View>
                   </View>
                   {/* {aspectsData && (
       <AstrologyAspectsView aspectsData={aspectsData} />
@@ -691,6 +827,64 @@ function SinastrieRelatie({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+  // Stil pentru textul de conținut parțial
+  partialContent: {
+    fontSize: 14,
+    color: "#F0F0F0",
+    textAlign: "center",
+    marginVertical: 15,
+    marginHorizontal: 20,
+    lineHeight: 20,
+  },
+
+  // Stil pentru selectorul de limbă (dacă nu este deja complet)
+  languageSelector: {
+    marginBottom: 20,
+    width: "100%",
+    alignItems: "center",
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 10,
+    color: "#FFFFFF",
+  },
+  picker: {
+    height: 50,
+    width: "90%",
+    backgroundColor: "#303030",
+    borderRadius: 5,
+    color: "#FFFFFF",
+  },
+
+  // Stil pentru butonul de achiziție
+  purchaseButton: {
+    backgroundColor: "#4285F4",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    marginTop: 20,
+    alignSelf: "center",
+  },
+  purchaseButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+
+  downloadButton: {
+    backgroundColor: "#34A853",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    marginTop: 20,
+  },
+  downloadButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+
   backgroundConstellation: {
     zIndex: 1,
     position: "absolute",

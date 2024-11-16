@@ -85,10 +85,25 @@ function NewPersonScreen({ navigation, route }) {
   }, []);
 
   useEffect(() => {
-    // Check if we're in edit mode
     if (route.params?.editMode) {
       setIsEditMode(true);
-      loadUserData();
+      if (route.params?.personData) {
+        const person = route.params.personData;
+        setName(person.full_name || "");
+        setSelectedDate(person.selectedDate || null);
+        setSelectedTime(person.selectedTime || null);
+        setGender(person.gender || "male");
+        setRelationshipStatus(person.relationshipStatus || "");
+        setNumarNorocos(person.numarNorocos || "");
+        setPlace(person.place || "");
+        setAdress(person.adress || "");
+        setTara(person.tara || "");
+        setDay(person.day || "Zi");
+        setMonth(person.month || "Lună");
+        setYear(person.year || "An");
+        setLong(person.lon || "");
+        setLat(person.lat || "");
+      }
     }
   }, [route.params]);
 
@@ -112,33 +127,34 @@ function NewPersonScreen({ navigation, route }) {
     }, [navigation, isEditMode])
   );
 
-  const loadUserData = async () => {
-    try {
-      const userData = await AsyncStorage.getItem("userData");
-      // console.log("loaded user data...", userData);
-      if (userData) {
-        const parsedData = JSON.parse(userData);
-        if (parsedData.p2) {
-          setName(parsedData.p2.full_name);
-          setSelectedDate(parsedData.p2.selectedDate);
-          setSelectedTime(parsedData.p2.selectedTime);
-          setGender(parsedData.p2.gender);
-          setRelationshipStatus(parsedData.p2.relationshipStatus);
-          setNumarNorocos(parsedData.p2.numarNorocos);
-          setPlace(parsedData.p2.place);
-          setAdress(parsedData.p2.place);
-          setTara(parsedData.p2.tara);
-          setDay(parsedData.p2.day);
-          setYear(parsedData.p2.year);
-          setMonth(parsedData.p2.month);
-          setLong(parsedData.p2.lon);
-          setLat(parsedData.p2.lat);
-        }
-      }
-    } catch (error) {
-      console.error("Error loading user data:", error);
-    }
-  };
+  //ELIMINAT CAND S A TRECUT LA ADAUGAREA MAI MULTOR UTILIZATORI
+  // const loadUserData = async () => {
+  //   try {
+  //     const userData = await AsyncStorage.getItem("userData");
+  //     // console.log("loaded user data...", userData);
+  //     if (userData) {
+  //       const parsedData = JSON.parse(userData);
+  //       if (parsedData.p2) {
+  //         setName(parsedData.p2.full_name);
+  //         setSelectedDate(parsedData.p2.selectedDate);
+  //         setSelectedTime(parsedData.p2.selectedTime);
+  //         setGender(parsedData.p2.gender);
+  //         setRelationshipStatus(parsedData.p2.relationshipStatus);
+  //         setNumarNorocos(parsedData.p2.numarNorocos);
+  //         setPlace(parsedData.p2.place);
+  //         setAdress(parsedData.p2.place);
+  //         setTara(parsedData.p2.tara);
+  //         setDay(parsedData.p2.day);
+  //         setYear(parsedData.p2.year);
+  //         setMonth(parsedData.p2.month);
+  //         setLong(parsedData.p2.lon);
+  //         setLat(parsedData.p2.lat);
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.error("Error loading user data:", error);
+  //   }
+  // };
 
   const handleContinue = async () => {
     try {

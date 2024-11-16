@@ -116,6 +116,7 @@ import NewPersonScreen from "./src/pages/astral/initials/new.person.screen";
 import PersonsScreen from "./src/pages/astral/initials/persons.screen";
 import SinastrieRelatie from "./src/pages/astral/initials/SinastrieRelatie";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import PersonListScreen from "./src/pages/astral/initials/PersonListScreen";
 // import BirthDateScreen from "./src/pages/astral/initials/birth-date.screen";
 // import RelationshipScreen from "./src/pages/astral/initials/relationship.screen";
 // import SexScreen from "./src/pages/astral/initials/sex.screen";
@@ -277,6 +278,11 @@ const HomeNavigation = (props: NavigationProps) => {
         <Stack.Screen
           name="Sinastrie"
           component={SinastrieRelatie}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="PersonsList"
+          component={PersonListScreen}
           options={{ headerShown: false }}
         />
         {/* <Stack.Screen

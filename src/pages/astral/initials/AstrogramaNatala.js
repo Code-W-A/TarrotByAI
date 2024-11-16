@@ -3,14 +3,19 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Dimensions,
+  FlatList,
   Platform,
   SafeAreaView,
   StyleSheet,
+  TouchableOpacity,
   View,
 } from "react-native";
 import {
   Divider,
+  Modal,
+  Portal,
   ProgressBar,
   Subheading,
   Text,
@@ -65,6 +70,9 @@ import i18n from "../../../../i18n";
 import { useLanguage } from "../../../context/LanguageContext";
 import { handleToTranslate } from "../../../utils/AstralUtils/fetchGPTData";
 import LoadingOverlay from "../../../components/Astral/components/zodiac/LoadingOverlay";
+import PurchaseModal from "../../../components/Astral/components/PurchaseModal ";
+import * as Print from "expo-print";
+import * as Sharing from "expo-sharing";
 
 // const LuckyNumber = ({ number }) => {
 //   return (
@@ -229,7 +237,160 @@ function AstrogramaNatala({ navigation }) {
   const [ascendantReport, setAscendantReport] = useState(null);
   const [selectedTab, setSelectedTab] = useState("natal");
   const [userD, setUserD] = useState({});
-  const { language, changeLanguage } = useLanguage();
+  const [visible, setVisible] = useState(false);
+  const { language, changeLanguage, userData, setUserData } = useLanguage();
+
+  // plata stripe sistem
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState("en"); // Limba implicită
+
+  const [isPaid, setIsPaid] = useState(false); // Simulează starea de plată
+  const [partialContent, setPartialContent] = useState(
+    "Aceasta este o secțiune limitată din interpretarea astrogramei tale. Pentru a accesa interpretarea completă, finalizează achiziția."
+  );
+  const [fullContent, setFullContent] = useState(
+    "Aceasta este interpretarea completă a astrogramei tale. Include toate detaliile despre aspectele astrologice, case și planete relevante."
+  );
+  const generateFullInterpretation = async (selectedLanguage, userData) => {
+    try {
+      const categories = [
+        "generalCategory",
+        "dragosteCategory",
+        "familieCategory",
+        "baniCategory",
+        "muncaStudiiCategory",
+        "prieteniCategory",
+        "sanatateCategory",
+        "spiritualitateCategory",
+      ];
+
+      for (const category of categories) {
+        userData[category] = await handleToTranslate(
+          userData[category],
+          selectedLanguage,
+          userData.actualLanguageAstrograma
+        );
+      }
+
+      setUserData(userData);
+
+      const content = categories
+        .map((category) => `${category}: ${userData[category]}`)
+        .join("\n\n");
+      setFullContent(content);
+
+      await AsyncStorage.setItem("userData", JSON.stringify(userData));
+    } catch (error) {
+      console.error("Eroare la generarea interpretării complete:", error);
+    }
+  };
+
+  const handleDismissModal = () => {
+    setModalVisible(false);
+  };
+
+  const handleConfirmPurchase = async () => {
+    console.log("is paying...");
+    setIsPaid(!isPaid);
+  };
+
+  const generatePDFContent = () => {
+    return `
+      <html>
+        <head>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              padding: 20px;
+              line-height: 1.6;
+            }
+            h1, h2, h3 {
+              text-align: center;
+              color: #4CAF50;
+            }
+            p {
+              margin-bottom: 10px;
+            }
+            .section {
+              margin-top: 20px;
+            }
+          </style>
+        </head>
+        <body>
+          <h1>Interpretare Astrogramă</h1>
+          <h2>${userD.full_name}</h2>
+          <p>Data nașterii: ${userD.day}-${userD.month}-${userD.year}</p>
+          <p>Ora nașterii: ${userD.selectedTime}</p>
+          <p>Locul nașterii: ${userD.place}</p>
+          <div class="section">
+            <h3>General</h3>
+            <p>${userD.generalCategory}</p>
+          </div>
+          <div class="section">
+            <h3>Dragoste</h3>
+            <p>${userD.dragosteCategory}</p>
+          </div>
+          <div class="section">
+            <h3>Familie</h3>
+            <p>${userD.familieCategory}</p>
+          </div>
+          <div class="section">
+            <h3>Bani</h3>
+            <p>${userD.baniCategory}</p>
+          </div>
+          <div class="section">
+            <h3>Muncă și Studii</h3>
+            <p>${userD.muncaStudiiCategory}</p>
+          </div>
+          <div class="section">
+            <h3>Prieteni</h3>
+            <p>${userD.prieteniCategory}</p>
+          </div>
+          <div class="section">
+            <h3>Sănătate</h3>
+            <p>${userD.sanatateCategory}</p>
+          </div>
+          <div class="section">
+            <h3>Spiritualitate</h3>
+            <p>${userD.spiritualitateCategory}</p>
+          </div>
+        </body>
+      </html>
+    `;
+  };
+
+  const handleDownloadPDF = async () => {
+    if (!isPaid) {
+      Alert.alert(
+        "Acces restricționat",
+        "Trebuie să achiziționezi interpretarea completă pentru a descărca PDF-ul."
+      );
+      return;
+    }
+
+    try {
+      const htmlContent = generatePDFContent();
+
+      const { uri } = await Print.printToFileAsync({
+        html: htmlContent,
+      });
+
+      Alert.alert("PDF generat", `Fișier salvat la: ${uri}`);
+
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(uri);
+      } else {
+        Alert.alert(
+          "Partajare indisponibilă",
+          "PDF-ul a fost generat, dar partajarea nu este disponibilă."
+        );
+      }
+    } catch (error) {
+      Alert.alert("Eroare", "Nu s-a putut genera PDF-ul.");
+      console.error(error);
+    }
+  };
+  // plata stripe sistem
 
   const isValidBase64 = (base64) => {
     const regex = /^[A-Za-z0-9+/]+={0,2}$/;
@@ -592,29 +753,48 @@ function AstrogramaNatala({ navigation }) {
                     >
                       {i18n.translate("General")}
                     </H6fontBoldYellow>
-
                     <H9fontMediumLightBlack style={styles.textDescription}>
                       {userD.generalCategory}
                     </H9fontMediumLightBlack>
-                    <H6fontBoldYellow
-                      style={[styles.textTitles, { marginTop: "7%" }]}
-                    >
-                      {i18n.translate("Dragoste")}
-                    </H6fontBoldYellow>
 
-                    <H9fontMediumLightBlack style={styles.textDescription}>
-                      {userD.dragosteCategory}
-                    </H9fontMediumLightBlack>
-                    <H6fontBoldYellow
-                      style={[styles.textTitles, { marginTop: "7%" }]}
-                    >
-                      {i18n.translate("Familie")}
-                    </H6fontBoldYellow>
+                    {!isPaid ? (
+                      <TouchableOpacity
+                        style={styles.purchaseButton}
+                        onPress={() => setModalVisible(true)} // Deschide modalul
+                      >
+                        <Text style={styles.purchaseButtonText}>
+                          Achiziționează Interpretarea Completă
+                        </Text>
+                      </TouchableOpacity>
+                    ) : (
+                      <>
+                        <H6fontBoldYellow
+                          style={[styles.textTitles, { marginTop: "7%" }]}
+                        >
+                          {i18n.translate("General")}
+                        </H6fontBoldYellow>
+                        <H9fontMediumLightBlack style={styles.textDescription}>
+                          {userD.generalCategory}
+                        </H9fontMediumLightBlack>
+                        <H6fontBoldYellow
+                          style={[styles.textTitles, { marginTop: "7%" }]}
+                        >
+                          {i18n.translate("Dragoste")}
+                        </H6fontBoldYellow>
 
-                    <H9fontMediumLightBlack style={styles.textDescription}>
-                      {userD.familieCategory}
-                    </H9fontMediumLightBlack>
-                    {/* <H6fontBoldYellow
+                        <H9fontMediumLightBlack style={styles.textDescription}>
+                          {userD.dragosteCategory}
+                        </H9fontMediumLightBlack>
+                        <H6fontBoldYellow
+                          style={[styles.textTitles, { marginTop: "7%" }]}
+                        >
+                          {i18n.translate("Familie")}
+                        </H6fontBoldYellow>
+
+                        <H9fontMediumLightBlack style={styles.textDescription}>
+                          {userD.familieCategory}
+                        </H9fontMediumLightBlack>
+                        {/* <H6fontBoldYellow
                       style={[styles.textTitles, { marginTop: "7%" }]}
                     >
                       Cariera
@@ -624,55 +804,65 @@ function AstrogramaNatala({ navigation }) {
                       {userD.carieraCategory}
                     </H9fontMediumLightBlack> */}
 
-                    <H6fontBoldYellow
-                      style={[styles.textTitles, { marginTop: "7%" }]}
-                    >
-                      {i18n.translate("Bani")}
-                    </H6fontBoldYellow>
+                        <H6fontBoldYellow
+                          style={[styles.textTitles, { marginTop: "7%" }]}
+                        >
+                          {i18n.translate("Bani")}
+                        </H6fontBoldYellow>
 
-                    <H9fontMediumLightBlack style={styles.textDescription}>
-                      {userD.baniCategory}
-                    </H9fontMediumLightBlack>
+                        <H9fontMediumLightBlack style={styles.textDescription}>
+                          {userD.baniCategory}
+                        </H9fontMediumLightBlack>
 
-                    <H6fontBoldYellow
-                      style={[styles.textTitles, { marginTop: "7%" }]}
-                    >
-                      {i18n.translate("MuncaSiStudii")}
-                    </H6fontBoldYellow>
+                        <H6fontBoldYellow
+                          style={[styles.textTitles, { marginTop: "7%" }]}
+                        >
+                          {i18n.translate("MuncaSiStudii")}
+                        </H6fontBoldYellow>
 
-                    <H9fontMediumLightBlack style={styles.textDescription}>
-                      {userD.muncaStudiiCategory}
-                    </H9fontMediumLightBlack>
+                        <H9fontMediumLightBlack style={styles.textDescription}>
+                          {userD.muncaStudiiCategory}
+                        </H9fontMediumLightBlack>
 
-                    <H6fontBoldYellow
-                      style={[styles.textTitles, { marginTop: "7%" }]}
-                    >
-                      {i18n.translate("Prieteni")}
-                    </H6fontBoldYellow>
+                        <H6fontBoldYellow
+                          style={[styles.textTitles, { marginTop: "7%" }]}
+                        >
+                          {i18n.translate("Prieteni")}
+                        </H6fontBoldYellow>
 
-                    <H9fontMediumLightBlack style={styles.textDescription}>
-                      {userD.prieteniCategory}
-                    </H9fontMediumLightBlack>
+                        <H9fontMediumLightBlack style={styles.textDescription}>
+                          {userD.prieteniCategory}
+                        </H9fontMediumLightBlack>
 
-                    <H6fontBoldYellow
-                      style={[styles.textTitles, { marginTop: "7%" }]}
-                    >
-                      {i18n.translate("Sanatate")}
-                    </H6fontBoldYellow>
+                        <H6fontBoldYellow
+                          style={[styles.textTitles, { marginTop: "7%" }]}
+                        >
+                          {i18n.translate("Sanatate")}
+                        </H6fontBoldYellow>
 
-                    <H9fontMediumLightBlack style={styles.textDescription}>
-                      {userD.sanatateCategory}
-                    </H9fontMediumLightBlack>
+                        <H9fontMediumLightBlack style={styles.textDescription}>
+                          {userD.sanatateCategory}
+                        </H9fontMediumLightBlack>
 
-                    <H6fontBoldYellow
-                      style={[styles.textTitles, { marginTop: "7%" }]}
-                    >
-                      {i18n.translate("Spiritualitate")}
-                    </H6fontBoldYellow>
+                        <H6fontBoldYellow
+                          style={[styles.textTitles, { marginTop: "7%" }]}
+                        >
+                          {i18n.translate("Spiritualitate")}
+                        </H6fontBoldYellow>
 
-                    <H9fontMediumLightBlack style={styles.textDescription}>
-                      {userD.spiritualitateCategory}
-                    </H9fontMediumLightBlack>
+                        <H9fontMediumLightBlack style={styles.textDescription}>
+                          {userD.spiritualitateCategory}
+                        </H9fontMediumLightBlack>
+                        <TouchableOpacity
+                          style={styles.downloadButton}
+                          onPress={handleDownloadPDF}
+                        >
+                          <Text style={styles.downloadButtonText}>
+                            Descarcă PDF-ul Interpretării
+                          </Text>
+                        </TouchableOpacity>
+                      </>
+                    )}
                   </View>
                   {/* {aspectsData && (
       <AstrologyAspectsView aspectsData={aspectsData} />
@@ -694,11 +884,76 @@ function AstrogramaNatala({ navigation }) {
           )}
         </LinearGradient>
       </MainContainer>
+      {/* Modal pentru selecția limbii */}
+      <PurchaseModal
+        visible={isModalVisible}
+        onDismiss={handleDismissModal}
+        onConfirm={handleConfirmPurchase}
+        selectedLanguage={selectedLanguage}
+        setSelectedLanguage={setSelectedLanguage}
+      />
     </>
   );
 }
 
 const styles = StyleSheet.create({
+  languageSelector: {
+    marginBottom: 20,
+    width: "80%",
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 10,
+  },
+  picker: {
+    height: 50,
+    width: "100%",
+    backgroundColor: "#f0f0f0",
+    borderRadius: 5,
+  },
+
+  container: {
+    flex: 1,
+    padding: 20,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f8f9fa",
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 20,
+    color: "#333",
+  },
+  content: {
+    fontSize: 16,
+    color: "#555",
+    textAlign: "center",
+    marginBottom: 30,
+  },
+  purchaseButton: {
+    backgroundColor: "#4285F4",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    marginBottom: 20,
+  },
+  purchaseButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  downloadButton: {
+    backgroundColor: "#34A853",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+  },
+  downloadButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
   backgroundConstellation: {
     zIndex: 1,
     position: "absolute",
