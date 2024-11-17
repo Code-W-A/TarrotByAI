@@ -8,6 +8,7 @@ import {
   SafeAreaView,
   ScrollView,
   StyleSheet,
+  TouchableOpacity,
   View,
 } from "react-native";
 import {
@@ -72,6 +73,7 @@ import LoadingOverlay from "../../../components/Astral/components/zodiac/Loading
 import AspectTableSinastrie from "../../../components/Astral/components/AspectTableSinastrie";
 import HorizontalTabSelector from "../../../components/Astral/components/HorizontalTabSelector";
 import SvgComponent from "../../../components/Astral/components/SvgComponent";
+import PurchaseModal from "../../../components/Astral/components/PurchaseModal ";
 
 // const LuckyNumber = ({ number }) => {
 //   return (
@@ -242,7 +244,7 @@ const ProgressItemStyles = StyleSheet.create({
  * @returns {*}
  * @constructor
  */
-function SinastrieRelatie({ navigation }) {
+function SinastrieRelatie({ navigation, route }) {
   const dataIndex = daily.findIndex(
     (item) =>
       item.day.split("-")[2].toString() === new Date().getDate().toString()
@@ -273,17 +275,16 @@ function SinastrieRelatie({ navigation }) {
   const [moonPhase, setMoonPhase] = useState(null);
   const [ascendantReport, setAscendantReport] = useState(null);
   const [selectedTab, setSelectedTab] = useState("natal");
-  const [userD, setUserD] = useState({});
+  const { personData } = route.params || {}; // Extrage datele persoanei din navigare
+  const [userD, setUserD] = useState(personData || {});
+  const [currentUserData, setCurrentUserData] = useState({});
   const { language, changeLanguage } = useLanguage();
 
   //ACHIZITIONARE SINASTRIE
-
-  const [isPaid, setIsPaid] = useState(false); // Starea de plată
-  const [partialContent, setPartialContent] = useState(
-    "Aceasta este o secțiune limitată din interpretarea sinastriei tale. Pentru a accesa interpretarea completă, finalizează achiziția."
-  );
-  const [fullContent, setFullContent] = useState(""); // Conținut complet după plată
-  const translateSinastryCategories = async (userData, selectedLanguage) => {
+  const [isPaid, setIsPaid] = useState(false); // Starea pentru achiziție
+  const [isModalVisible, setModalVisible] = useState(false); // Starea pentru afișarea modalului
+  const [selectedLanguage, setSelectedLanguage] = useState("ro"); // Limba implicită
+  const translateSinastryCategories = async (userData, language) => {
     const categories = [
       "harmoniousAspectReading",
       "conflictingAspectReading",
@@ -296,57 +297,42 @@ function SinastrieRelatie({ navigation }) {
       "financialCompatibility",
     ];
 
-    const translationPromises = categories.map(async (category) => {
-      const categoryData = userData?.synastry?.[category]?.data;
-      if (categoryData && Array.isArray(categoryData)) {
-        await Promise.all(
-          categoryData.map(async (item) => {
-            if (item.reading) {
-              await Promise.all(
-                item.reading.map(async (reading) => {
-                  if (reading.description) {
-                    reading.description = await handleToTranslate(
-                      reading.description,
-                      selectedLanguage,
-                      userData.actualLanguageSinastrie
-                    );
-                  }
-                  if (reading.title) {
-                    reading.title = await handleToTranslate(
-                      reading.title,
-                      selectedLanguage,
-                      userData.actualLanguageSinastrie
-                    );
-                  }
-                })
-              );
-            }
-          })
-        );
-      }
-    });
+    const translatedData = { ...userData }; // Creează o copie a userData
 
-    await Promise.all(translationPromises);
-  };
-
-  const handlePurchase = async () => {
-    const updatedUserData = { ...userD, actualLanguageSinastrie: language };
-
-    await AsyncStorage.setItem("userData", JSON.stringify(updatedUserData));
-
-    Alert.alert(
-      "Proces de plată",
-      `Interpretarea completă va fi generată în limba ${language}.`,
-      [
-        {
-          text: "OK",
-          onPress: async () => {
-            await translateSinastryCategories(updatedUserData, language);
-            setIsPaid(true);
-          },
-        },
-      ]
+    await Promise.all(
+      categories.map(async (category) => {
+        const categoryData = translatedData?.synastry?.[category]?.data;
+        if (categoryData && Array.isArray(categoryData)) {
+          await Promise.all(
+            categoryData.map(async (item) => {
+              if (item.reading) {
+                await Promise.all(
+                  item.reading.map(async (reading) => {
+                    if (reading.description) {
+                      reading.description = await handleToTranslate(
+                        reading.description,
+                        language,
+                        userData.actualLanguageSinastrie
+                      );
+                    }
+                    if (reading.title) {
+                      reading.title = await handleToTranslate(
+                        reading.title,
+                        language,
+                        userData.actualLanguageSinastrie
+                      );
+                    }
+                  })
+                );
+              }
+            })
+          );
+        }
+      })
     );
+
+    translatedData.actualLanguageSinastrie = language;
+    return translatedData; // Returnează datele traduse
   };
 
   //ACHIZITIONARE SINASTRIE
@@ -381,39 +367,199 @@ function SinastrieRelatie({ navigation }) {
     }
   };
 
+  // VERSIUNE VECHE DE DINAINTE DE ADAUGARE MAI MULTE PERSOANE SI STRIPE
+  // const handleNatalChart = async () => {
+  //   try {
+  //     const userDataJson = await AsyncStorage.getItem("userData");
+  //     const userData = userDataJson ? JSON.parse(userDataJson) : null;
+  //     console.log("user lang...", userData.actualLanguageAstrograma);
+
+  //     if (!userData) {
+  //       console.log(
+  //         "Nu există date de utilizator disponibile în AsyncStorage."
+  //       );
+  //       setIsLoading(false);
+  //       return;
+  //     }
+  //     console.log("data....here", language);
+  //     if (userData && userData.synastry) {
+  //       console.log(
+  //         "Cheile din userData.synastry:",
+  //         Object.keys(userData.synastry)
+  //       );
+  //     } else {
+  //       console.log(
+  //         "userData.synastry nu este disponibil sau userData nu este definit."
+  //       );
+  //     }
+
+  //     // TRADUCERE DACA ESTE NECESARA
+  //     if (language !== userData.actualLanguageSinastrie) {
+  //       console.log(
+  //         "userData.actualLanguageSinastrie...",
+  //         userData.actualLanguageSinastrie
+  //       );
+  //       setIsLoading(true);
+  //       const paths = [
+  //         "harmoniousAspectReading",
+  //         "conflictingAspectReading",
+  //         "contrastingAspectReading",
+  //         "intenseCompatibility",
+  //         "physicalCompatibility",
+  //         "emotionalCompatibility",
+  //         "sexualCompatibility",
+  //         "spiritualCompatibility",
+  //         "financialCompatibility",
+  //       ];
+
+  //       const translationPromises = [];
+
+  //       paths.forEach((path) => {
+  //         const category = userData?.synastry?.[path]?.data;
+  //         if (category && Array.isArray(category)) {
+  //           category.forEach((item) => {
+  //             if (item.reading && Array.isArray(item.reading)) {
+  //               item.reading.forEach((reading) => {
+  //                 if (reading.description) {
+  //                   const promiseDesc = handleToTranslate(
+  //                     reading.description,
+  //                     language,
+  //                     userData.actualLanguage
+  //                   ).then((translated) => {
+  //                     reading.description = translated;
+  //                   });
+  //                   translationPromises.push(promiseDesc);
+  //                 }
+  //                 if (reading.title) {
+  //                   const promiseTitle = handleToTranslate(
+  //                     reading.title,
+  //                     language,
+  //                     userData.actualLanguage
+  //                   ).then((translated) => {
+  //                     reading.title = translated;
+  //                   });
+  //                   translationPromises.push(promiseTitle);
+  //                 }
+  //               });
+  //             }
+  //           });
+  //         }
+  //       });
+
+  //       // Așteaptă ca toate promisiunile de traducere să se finalizeze
+  //       await Promise.all(translationPromises);
+
+  //       userData.actualLanguageSinastrie = language;
+  //     }
+  //     console.log(
+  //       "userData.actualLanguageSinastrie...",
+  //       userData.actualLanguageSinastrie
+  //     );
+  //     setUserD(userData);
+
+  //     console.log(
+  //       "wheel chart....sinastrie....",
+  //       userData.synastry.harmoniousAspectReading
+  //     );
+  //     if (
+  //       userData.synastry.natalWheelChart &&
+  //       userData.synastry.natalWheelChart.data
+  //     ) {
+  //       const svgElementsP1 = parseSVG(
+  //         userData.synastry.natalWheelChart.data.p1.svg
+  //       );
+  //       const svgElementsP2 = parseSVG(
+  //         userData.synastry.natalWheelChart.data.p2.svg
+  //       );
+  //       setSvgData({ svgElementsP1, svgElementsP2 });
+
+  //       let base64ImageP1 =
+  //         userData.synastry.natalWheelChart.data.p1.base64_image.replace(
+  //           "data:image/svg+xml;base64,",
+  //           ""
+  //         );
+  //       base64ImageP1 = base64.decode(base64ImageP1);
+
+  //       let base64ImageP2 =
+  //         userData.synastry.natalWheelChart.data.p2.base64_image.replace(
+  //           "data:image/svg+xml;base64,",
+  //           ""
+  //         );
+  //       base64ImageP2 = base64.decode(base64ImageP2);
+
+  //       setWheelImage({ base64ImageP1, base64ImageP2 });
+  //     }
+
+  //     // // Set aspects data
+  //     let aspectsP1 = userData?.synastry?.aspect?.data?.p1_p2_aspect?.aspects;
+  //     let aspectsP2 = userData?.synastry?.aspect?.data?.p2_p1_aspect?.aspects;
+  //     setAspectsData(
+  //       userData.synastry.aspect ? { aspectsP1, aspectsP2 } : null
+  //     );
+
+  //     // // Set planetary data
+  //     let planetaryP1 = userData?.synastry?.planetaryPositions?.data?.p1_data;
+  //     let planetaryP2 = userData?.synastry?.planetaryPositions?.data?.p2_data;
+
+  //     setPlanetaryData(
+  //       userData.synastry.planetaryPositions
+  //         ? { planetaryP1, planetaryP2 }
+  //         : null
+  //     );
+
+  //     // Set house cusps data
+  //     let housesP1 = userData?.synastry?.houseCusps?.data?.p1_data;
+  //     let housesP2 = userData?.synastry?.houseCusps?.data?.p2_data;
+  //     setHouseCusps(
+  //       userData.synastry.houseCusps ? { housesP1, housesP2 } : null
+  //     );
+  //     console.log("userData...", userData.sanatateCategory);
+  //     await AsyncStorage.setItem("userData", JSON.stringify(userData));
+  //     setIsLoading(false);
+  //   } catch (error) {
+  //     console.error(
+  //       "Eroare la preluarea și procesarea astrogramei natale:",
+  //       error
+  //     );
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
   const handleNatalChart = async () => {
     try {
+      // Extrage datele persoanei din route.params sau fallback la AsyncStorage
+      const personIndex = route.params?.personIndex;
       const userDataJson = await AsyncStorage.getItem("userData");
       const userData = userDataJson ? JSON.parse(userDataJson) : null;
-      console.log("user lang...", userData.actualLanguageAstrograma);
 
-      if (!userData) {
-        console.log(
-          "Nu există date de utilizator disponibile în AsyncStorage."
+      if (!userData || !userData.people || personIndex === undefined) {
+        console.error(
+          "Nu există date de utilizator disponibile sau index invalid."
         );
         setIsLoading(false);
         return;
       }
-      console.log("data....here", language);
-      if (userData && userData.synastry) {
-        console.log(
-          "Cheile din userData.synastry:",
-          Object.keys(userData.synastry)
-        );
-      } else {
-        console.log(
-          "userData.synastry nu este disponibil sau userData nu este definit."
-        );
+
+      setCurrentUserData(userData);
+      const person = userData.people[personIndex];
+      if (!person) {
+        console.error("Persoana specificată nu există în lista people.");
+        setIsLoading(false);
+        return;
       }
 
-      // TRADUCERE DACA ESTE NECESARA
-      if (language !== userData.actualLanguageSinastrie) {
-        console.log(
-          "userData.actualLanguageSinastrie...",
-          userData.actualLanguageSinastrie
-        );
+      console.log("Procesare date pentru persoana:", person);
+
+      // Verifică dacă traducerea este necesară
+      if (language !== person.actualLanguageSinastrie) {
+        console.log("Traducere necesară, limbă curentă:", language);
         setIsLoading(true);
-        const paths = [
+
+        // Creează o copie temporară a datelor persoanei
+        const translatedPerson = { ...person };
+
+        const categories = [
           "harmoniousAspectReading",
           "conflictingAspectReading",
           "contrastingAspectReading",
@@ -425,116 +571,106 @@ function SinastrieRelatie({ navigation }) {
           "financialCompatibility",
         ];
 
-        const translationPromises = [];
-
-        paths.forEach((path) => {
-          const category = userData?.synastry?.[path]?.data;
-          if (category && Array.isArray(category)) {
-            category.forEach((item) => {
-              if (item.reading && Array.isArray(item.reading)) {
-                item.reading.forEach((reading) => {
-                  if (reading.description) {
-                    const promiseDesc = handleToTranslate(
-                      reading.description,
-                      language,
-                      userData.actualLanguage
-                    ).then((translated) => {
-                      reading.description = translated;
-                    });
-                    translationPromises.push(promiseDesc);
+        // Parcurge și traduce fiecare categorie
+        await Promise.all(
+          categories.map(async (category) => {
+            const categoryData = translatedPerson.synastry?.[category]?.data;
+            if (categoryData && Array.isArray(categoryData)) {
+              await Promise.all(
+                categoryData.map(async (item) => {
+                  if (item.reading) {
+                    await Promise.all(
+                      item.reading.map(async (reading) => {
+                        if (reading.description) {
+                          reading.description = await handleToTranslate(
+                            reading.description,
+                            language,
+                            translatedPerson.actualLanguageSinastrie
+                          );
+                        }
+                        if (reading.title) {
+                          reading.title = await handleToTranslate(
+                            reading.title,
+                            language,
+                            translatedPerson.actualLanguageSinastrie
+                          );
+                        }
+                      })
+                    );
                   }
-                  if (reading.title) {
-                    const promiseTitle = handleToTranslate(
-                      reading.title,
-                      language,
-                      userData.actualLanguage
-                    ).then((translated) => {
-                      reading.title = translated;
-                    });
-                    translationPromises.push(promiseTitle);
-                  }
-                });
-              }
-            });
-          }
-        });
+                })
+              );
+            }
+          })
+        );
 
-        // Așteaptă ca toate promisiunile de traducere să se finalizeze
-        await Promise.all(translationPromises);
+        // Actualizează limba curentă pentru persoană
+        translatedPerson.actualLanguageSinastrie = language;
 
-        userData.actualLanguageSinastrie = language;
+        // Actualizează persoana tradusă în `userData`
+        userData.people[personIndex] = translatedPerson;
+
+        // Salvează datele actualizate în AsyncStorage
+        await AsyncStorage.setItem("userData", JSON.stringify(userData));
+
+        // Setează persoana tradusă în starea locală
+        setUserD(translatedPerson);
+      } else {
+        setUserD(person); // Folosește datele existente dacă traducerea nu este necesară
       }
-      console.log(
-        "userData.actualLanguageSinastrie...",
-        userData.actualLanguageSinastrie
-      );
-      setUserD(userData);
 
-      console.log(
-        "wheel chart....sinastrie....",
-        userData.synastry.harmoniousAspectReading
-      );
-      if (
-        userData.synastry.natalWheelChart &&
-        userData.synastry.natalWheelChart.data
-      ) {
+      // Procesează graficele natale
+      if (person.synastry?.natalWheelChart?.data) {
         const svgElementsP1 = parseSVG(
-          userData.synastry.natalWheelChart.data.p1.svg
+          person.synastry.natalWheelChart.data.p1.svg
         );
         const svgElementsP2 = parseSVG(
-          userData.synastry.natalWheelChart.data.p2.svg
+          person.synastry.natalWheelChart.data.p2.svg
         );
         setSvgData({ svgElementsP1, svgElementsP2 });
 
-        let base64ImageP1 =
-          userData.synastry.natalWheelChart.data.p1.base64_image.replace(
+        const base64ImageP1 = base64.decode(
+          person.synastry.natalWheelChart.data.p1.base64_image.replace(
             "data:image/svg+xml;base64,",
             ""
-          );
-        base64ImageP1 = base64.decode(base64ImageP1);
-
-        let base64ImageP2 =
-          userData.synastry.natalWheelChart.data.p2.base64_image.replace(
+          )
+        );
+        const base64ImageP2 = base64.decode(
+          person.synastry.natalWheelChart.data.p2.base64_image.replace(
             "data:image/svg+xml;base64,",
             ""
-          );
-        base64ImageP2 = base64.decode(base64ImageP2);
+          )
+        );
 
         setWheelImage({ base64ImageP1, base64ImageP2 });
       }
 
-      // // Set aspects data
-      let aspectsP1 = userData?.synastry?.aspect?.data?.p1_p2_aspect?.aspects;
-      let aspectsP2 = userData?.synastry?.aspect?.data?.p2_p1_aspect?.aspects;
-      setAspectsData(
-        userData.synastry.aspect ? { aspectsP1, aspectsP2 } : null
-      );
+      // Procesează aspectele astrogramei
+      const aspectsP1 = person.synastry?.aspect?.data?.p1_p2_aspect?.aspects;
+      const aspectsP2 = person.synastry?.aspect?.data?.p2_p1_aspect?.aspects;
+      setAspectsData(person.synastry?.aspect ? { aspectsP1, aspectsP2 } : null);
 
-      // // Set planetary data
-      let planetaryP1 = userData?.synastry?.planetaryPositions?.data?.p1_data;
-      let planetaryP2 = userData?.synastry?.planetaryPositions?.data?.p2_data;
-
+      // Procesează pozițiile planetare
+      const planetaryP1 = person.synastry?.planetaryPositions?.data?.p1_data;
+      const planetaryP2 = person.synastry?.planetaryPositions?.data?.p2_data;
       setPlanetaryData(
-        userData.synastry.planetaryPositions
+        person.synastry?.planetaryPositions
           ? { planetaryP1, planetaryP2 }
           : null
       );
 
-      // Set house cusps data
-      let housesP1 = userData?.synastry?.houseCusps?.data?.p1_data;
-      let housesP2 = userData?.synastry?.houseCusps?.data?.p2_data;
+      // Procesează cuspidele caselor
+      const housesP1 = person.synastry?.houseCusps?.data?.p1_data;
+      const housesP2 = person.synastry?.houseCusps?.data?.p2_data;
       setHouseCusps(
-        userData.synastry.houseCusps ? { housesP1, housesP2 } : null
+        person.synastry?.houseCusps ? { housesP1, housesP2 } : null
       );
-      console.log("userData...", userData.sanatateCategory);
-      await AsyncStorage.setItem("userData", JSON.stringify(userData));
+
+      console.log("Date procesate cu succes pentru persoana:", person);
+
       setIsLoading(false);
     } catch (error) {
-      console.error(
-        "Eroare la preluarea și procesarea astrogramei natale:",
-        error
-      );
-    } finally {
+      console.error("Eroare la prelucrarea datelor astrogramei:", error);
       setIsLoading(false);
     }
   };
@@ -613,6 +749,45 @@ function SinastrieRelatie({ navigation }) {
                 <View style={{ flex: 1, flexDirection: "row" }}>
                   <View style={{ flexDirection: "column", width: "55%" }}>
                     <View style={styles.horoscopeTodayContainer}>
+                      <H8fontMediumWhite style={styles.textTitles}>
+                        {currentUserData.full_name}
+                      </H8fontMediumWhite>
+                    </View>
+                    <View style={styles.horoscopeTodayContainer}>
+                      <H8fontMediumWhite
+                        style={[styles.textDescription, { marginTop: 0 }]}
+                      >
+                        {currentUserData.day} - {currentUserData.month} -{" "}
+                        {currentUserData.year}
+                      </H8fontMediumWhite>
+                    </View>
+                    <View style={styles.horoscopeTodayContainer}>
+                      <H8fontMediumWhite
+                        style={[styles.textDescription, { marginTop: 0 }]}
+                      >
+                        {currentUserData.selectedTime}
+                      </H8fontMediumWhite>
+                    </View>
+                    <View style={styles.horoscopeTodayContainer}>
+                      <H8fontMediumWhite
+                        style={[
+                          styles.textDescription,
+                          { marginTop: 0, maxWidth: "80%" },
+                        ]}
+                      >
+                        {currentUserData.place}
+                      </H8fontMediumWhite>
+                    </View>
+                    <View style={styles.horoscopeTodayContainer}>
+                      <H8fontMediumWhite
+                        style={[styles.textDescription, { marginTop: 0 }]}
+                      >
+                        {currentUserData.gender}
+                      </H8fontMediumWhite>
+                    </View>
+                  </View>
+                  <View style={{ flexDirection: "column", width: "55%" }}>
+                    <View style={styles.horoscopeTodayContainer}>
                       <H7fontBoldWhite style={styles.textTitles}>
                         {userD?.full_name}
                       </H7fontBoldWhite>
@@ -646,45 +821,6 @@ function SinastrieRelatie({ navigation }) {
                         style={[styles.textDescription, { marginTop: 0 }]}
                       >
                         {userD?.gender}
-                      </H8fontMediumWhite>
-                    </View>
-                  </View>
-                  <View style={{ flexDirection: "column", width: "55%" }}>
-                    <View style={styles.horoscopeTodayContainer}>
-                      <H8fontMediumWhite style={styles.textTitles}>
-                        {userD?.p2?.full_name}
-                      </H8fontMediumWhite>
-                    </View>
-                    <View style={styles.horoscopeTodayContainer}>
-                      <H8fontMediumWhite
-                        style={[styles.textDescription, { marginTop: 0 }]}
-                      >
-                        {userD?.p2?.day} - {userD?.p2?.month} -{" "}
-                        {userD?.p2?.year}
-                      </H8fontMediumWhite>
-                    </View>
-                    <View style={styles.horoscopeTodayContainer}>
-                      <H8fontMediumWhite
-                        style={[styles.textDescription, { marginTop: 0 }]}
-                      >
-                        {userD?.p2?.selectedTime}
-                      </H8fontMediumWhite>
-                    </View>
-                    <View style={styles.horoscopeTodayContainer}>
-                      <H8fontMediumWhite
-                        style={[
-                          styles.textDescription,
-                          { marginTop: 0, maxWidth: "80%" },
-                        ]}
-                      >
-                        {userD?.p2?.place}
-                      </H8fontMediumWhite>
-                    </View>
-                    <View style={styles.horoscopeTodayContainer}>
-                      <H8fontMediumWhite
-                        style={[styles.textDescription, { marginTop: 0 }]}
-                      >
-                        {userD?.p2?.gender}
                       </H8fontMediumWhite>
                     </View>
                   </View>
@@ -723,54 +859,28 @@ function SinastrieRelatie({ navigation }) {
                       },
                     ]}
                   >
-                    <View style={styles.languageSelector}>
-                      <Text style={styles.label}>Selectează limba:</Text>
-                      <Picker
-                        selectedValue={language}
-                        onValueChange={(value) => changeLanguage(value)}
-                        style={styles.picker}
-                      >
-                        <Picker.Item label="Engleză" value="en" />
-                        <Picker.Item label="Română" value="ro" />
-                        <Picker.Item label="Germană" value="de" />
-                        <Picker.Item label="Spaniolă" value="es" />
-                        {/* Adaugă alte limbi */}
-                      </Picker>
-                    </View>
-
                     <View>
                       {isPaid ? (
-                        <>
-                          {/* Afișează toate elementele din activeData dacă este achiziționat */}
-                          {activeData.map((aspect, index) => (
-                            <View key={index}>
-                              {aspect.reading.map((read, readIndex) => (
-                                <View key={readIndex} style={{ marginTop: 20 }}>
-                                  <H7fontBoldWhite style={[styles.textTitles]}>
-                                    {read?.title}
-                                  </H7fontBoldWhite>
-                                  <H9fontMediumLightBlack
-                                    style={styles.textDescription}
-                                  >
-                                    {read?.description}
-                                  </H9fontMediumLightBlack>
-                                </View>
-                              ))}
-                            </View>
-                          ))}
-                          {/* Buton de descărcare PDF */}
-                          <TouchableOpacity
-                            style={styles.downloadButton}
-                            onPress={handleDownloadPDF}
-                          >
-                            <Text style={styles.downloadButtonText}>
-                              Descarcă PDF
-                            </Text>
-                          </TouchableOpacity>
-                        </>
+                        // Afișează conținutul complet dacă este achiziționat
+                        activeData.map((aspect, index) => (
+                          <View key={index}>
+                            {aspect.reading.map((read, readIndex) => (
+                              <View key={readIndex} style={{ marginTop: 20 }}>
+                                <H7fontBoldWhite style={[styles.textTitles]}>
+                                  {read?.title}
+                                </H7fontBoldWhite>
+                                <H9fontMediumLightBlack
+                                  style={styles.textDescription}
+                                >
+                                  {read?.description}
+                                </H9fontMediumLightBlack>
+                              </View>
+                            ))}
+                          </View>
+                        ))
                       ) : (
+                        // Afișează conținut limitat dacă nu este achiziționat
                         <>
-                          {/* Afișează doar primul element din activeData dacă nu este achiziționat */}
                           {activeData.length > 0 &&
                             activeData[0]?.reading?.length > 0 && (
                               <View>
@@ -784,14 +894,14 @@ function SinastrieRelatie({ navigation }) {
                                 </H9fontMediumLightBlack>
                               </View>
                             )}
-                          {/* Mesaj de cumpărare */}
                           <Text style={styles.partialContent}>
-                            {partialContent}
+                            Aceasta este o secțiune limitată din interpretarea
+                            sinastriei tale. Pentru a accesa interpretarea
+                            completă, finalizează achiziția.
                           </Text>
-                          {/* Buton pentru achiziție */}
                           <TouchableOpacity
                             style={styles.purchaseButton}
-                            onPress={handlePurchase}
+                            onPress={() => setModalVisible(true)}
                           >
                             <Text style={styles.purchaseButtonText}>
                               Achiziționează Interpretarea Completă
@@ -817,11 +927,34 @@ function SinastrieRelatie({ navigation }) {
                 planetaryData={planetaryData}
                 aspects={aspectsData}
                 userD={userD}
+                currentUserData={currentUserData}
               />
             </ShowFromTop>
           )}
         </LinearGradient>
       </MainContainer>
+      <PurchaseModal
+        visible={isModalVisible}
+        onDismiss={() => setModalVisible(false)}
+        onConfirm={async () => {
+          setModalVisible(false);
+          setIsPaid(true);
+
+          // Actualizează limbajul în userData
+          const updatedUserData = {
+            ...userD,
+            actualLanguageSinastrie: selectedLanguage,
+          };
+          await translateSinastryCategories(updatedUserData, selectedLanguage);
+          await AsyncStorage.setItem(
+            "userData",
+            JSON.stringify(updatedUserData)
+          );
+          setUserD(updatedUserData); // Setează datele actualizate
+        }}
+        selectedLanguage={selectedLanguage}
+        setSelectedLanguage={setSelectedLanguage}
+      />
     </>
   );
 }
@@ -835,6 +968,20 @@ const styles = StyleSheet.create({
     marginVertical: 15,
     marginHorizontal: 20,
     lineHeight: 20,
+  },
+  purchaseButton: {
+    backgroundColor: "#4285F4",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    marginTop: 20,
+    alignSelf: "center",
+  },
+  purchaseButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+    textAlign: "center",
   },
 
   // Stil pentru selectorul de limbă (dacă nu este deja complet)
@@ -854,22 +1001,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#303030",
     borderRadius: 5,
     color: "#FFFFFF",
-  },
-
-  // Stil pentru butonul de achiziție
-  purchaseButton: {
-    backgroundColor: "#4285F4",
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-    marginTop: 20,
-    alignSelf: "center",
-  },
-  purchaseButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-    textAlign: "center",
   },
 
   downloadButton: {

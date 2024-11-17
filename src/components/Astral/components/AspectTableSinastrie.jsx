@@ -22,6 +22,7 @@ const AspectTableSinastrie = ({
   planetaryData,
   aspects,
   userD,
+  currentUserData,
 }) => {
   return (
     <ScrollView
@@ -36,7 +37,7 @@ const AspectTableSinastrie = ({
           marginTop: "0%",
         }}
       >
-        <H6fontBoldYellow> {userD?.full_name}</H6fontBoldYellow>
+        <H6fontBoldYellow> {currentUserData?.full_name}</H6fontBoldYellow>
       </View>
       <ScrollView
         contentContainerStyle={{
@@ -85,7 +86,7 @@ const AspectTableSinastrie = ({
           marginTop: "5%",
         }}
       >
-        <H6fontBoldYellow> {userD?.p2?.full_name}</H6fontBoldYellow>
+        <H6fontBoldYellow> {userD?.full_name}</H6fontBoldYellow>
       </View>
       <ScrollView
         contentContainerStyle={{
@@ -147,7 +148,7 @@ const AspectTableSinastrie = ({
       >
         <H6fontBoldYellow style={{ fontSize: 20 }}>
           {" "}
-          {userD?.full_name}
+          {currentUserData?.full_name}
         </H6fontBoldYellow>
       </View>
       <ScrollView
@@ -212,7 +213,7 @@ const AspectTableSinastrie = ({
       >
         <H6fontBoldYellow style={{ fontSize: 20 }}>
           {" "}
-          {userD?.p2?.full_name}
+          {userD?.full_name}
         </H6fontBoldYellow>
       </View>
       <ScrollView
@@ -287,7 +288,7 @@ const AspectTableSinastrie = ({
       >
         <H6fontBoldYellow style={{ fontSize: 20 }}>
           {" "}
-          {userD?.full_name}
+          {currentUserData?.full_name}
         </H6fontBoldYellow>
       </View>
       <ScrollView
@@ -347,7 +348,7 @@ const AspectTableSinastrie = ({
       >
         <H6fontBoldYellow style={{ fontSize: 20 }}>
           {" "}
-          {userD?.p2?.full_name}
+          {userD?.full_name}
         </H6fontBoldYellow>
       </View>
       <ScrollView

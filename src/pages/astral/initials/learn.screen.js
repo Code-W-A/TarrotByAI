@@ -388,11 +388,7 @@ function LearnScreen({ navigation }) {
                       },
                     }}
                     labelStyle={{ fontSize: 12, letterSpacing: 0 }}
-                    onPress={() =>
-                      handleViewLesson(
-                        userD?.p2?.full_name ? "Sinastrie" : "Persons"
-                      )
-                    }
+                    onPress={() => handleViewLesson("Persons")}
                   >
                     {i18n.translate("clinicLoginRedirect")}
                   </Button>

@@ -107,25 +107,25 @@ function NewPersonScreen({ navigation, route }) {
     }
   }, [route.params]);
 
-  useFocusEffect(
-    React.useCallback(() => {
-      if (!route.params?.editMode) {
-        const checkUserData = async () => {
-          try {
-            const userData = await AsyncStorage.getItem("userData");
-            const parsedData = JSON.parse(userData);
-            // console.log("Retrieved user data:", userData);
-            if (parsedData.p2 && !isEditMode) {
-              navigation.navigate("Learn");
-            }
-          } catch (error) {
-            console.error("Error checking user data:", error);
-          }
-        };
-        checkUserData();
-      }
-    }, [navigation, isEditMode])
-  );
+  // useFocusEffect(
+  //   React.useCallback(() => {
+  //     if (!route.params?.editMode) {
+  //       const checkUserData = async () => {
+  //         try {
+  //           const userData = await AsyncStorage.getItem("userData");
+  //           const parsedData = JSON.parse(userData);
+  //           // console.log("Retrieved user data:", userData);
+  //           if (parsedData.p2 && !isEditMode) {
+  //             navigation.navigate("Learn");
+  //           }
+  //         } catch (error) {
+  //           console.error("Error checking user data:", error);
+  //         }
+  //       };
+  //       checkUserData();
+  //     }
+  //   }, [navigation, isEditMode])
+  // );
 
   //ELIMINAT CAND S A TRECUT LA ADAUGAREA MAI MULTOR UTILIZATORI
   // const loadUserData = async () => {
@@ -155,17 +155,190 @@ function NewPersonScreen({ navigation, route }) {
   //     console.error("Error loading user data:", error);
   //   }
   // };
+  // HANDLE CONTINUE DIN TRECUT INAINTE DE MODIFICARE PE ADAUGARE PERSOANE
+  // const handleContinue = async () => {
+  //   try {
+  //     setIsLoading(true);
+  //     const userD = await AsyncStorage.getItem("userData");
+  //     const parsedData = JSON.parse(userD);
+
+  //     const birthDate = moment(selectedDate, "DD-MM-YYYY");
+  //     const birthTime = selectedTime ? moment(selectedTime, "HH:mm") : moment();
+  //     const timezoneOffset = await fetchTimeZone(lat, long);
+
+  //     const zodiacSign = getZodiacSign(day, month);
+  //     const zodiacSignFristUpperCase = capitalizeFirstLetter(
+  //       zodiacSign.toLowerCase()
+  //     );
+  //     const currentDate = new Date();
+  //     const formattedDate = currentDate.toISOString().split("T")[0];
+
+  //     const pOneData = {
+  //       full_name: parsedData.full_name,
+  //       day: parsedData.day,
+  //       month: parsedData.month,
+  //       year: parsedData.year,
+  //       hour: parsedData.hour,
+  //       min: parsedData.min,
+  //       sec: parsedData.sec,
+  //       selectedDate: "--",
+  //       selectedTime: parsedData.selectedTime,
+  //       gender: parsedData.gender,
+  //       place: parsedData.place,
+  //       adress: parsedData.adress,
+  //       localitate: parsedData.localitate,
+  //       tara: parsedData.tara,
+  //       lat: parsedData.lat,
+  //       lon: parsedData.lon,
+  //       tzone: parsedData.tzone,
+  //       actualLanguage: parsedData.actualLanguage,
+  //       actualLanguageAstrograma: parsedData.actualLanguage,
+  //       actualLanguageSinastrie: "en",
+  //       zodiacSign: parsedData.zodiacSign,
+  //       zodiacSignFristUpperCase: parsedData.zodiacSignFristUpperCase,
+  //       dataHoroscop: parsedData.dataHoroscop,
+  //     };
+
+  //     const userData = {
+  //       ...parsedData,
+  //       ...pOneData,
+  //       p2: {
+  //         // datele pentru al doilea utilizator
+  //         full_name: name,
+  //         day: day,
+  //         month: month,
+  //         year: year,
+  //         hour: birthTime.hour(),
+  //         min: birthTime.minute(),
+  //         sec: birthTime.second(),
+  //         selectedDate: "--",
+  //         selectedTime: selectedTime,
+  //         gender,
+  //         place,
+  //         adress,
+  //         localitate,
+  //         tara,
+  //         lat: lat,
+  //         lon: long,
+  //         tzone: timezoneOffset,
+  //         actualLanguage: "en",
+  //         actualLanguageAstrograma: "en",
+  //         zodiacSign,
+  //         zodiacSignFristUpperCase,
+  //         dataHoroscop: formattedDate,
+  //       },
+  //       // Inițializăm obiectul synastry pentru a evita eroarea de undefined
+  //       synastry: {},
+  //     };
+  //     // console.log("p2....", userData.p2);
+  //     const sinastrieUrls = {
+  //       natalWheelChart:
+  //         "https://astroapi-4.divineapi.com/western-api/v1/synastry/natal-wheel-chart",
+  //       houseCusps:
+  //         "https://astroapi-4.divineapi.com/western-api/v1/synastry/house-cusps",
+  //       planetaryPositions:
+  //         "https://astroapi-4.divineapi.com/western-api/v1/synastry/planetary-positions",
+  //       aspect:
+  //         "https://astroapi-4.divineapi.com/western-api/v1/synastry/aspect",
+  //       harmoniousAspectReading:
+  //         "https://astroapi-4.divineapi.com/western-api/v1/synastry/harmonious-aspect-reading",
+  //       conflictingAspectReading:
+  //         "https://astroapi-4.divineapi.com/western-api/v1/synastry/conflicting-aspect-reading",
+  //       contrastingAspectReading:
+  //         "https://astroapi-4.divineapi.com/western-api/v1/synastry/contrasting-aspect-reading",
+  //       intenseCompatibility:
+  //         "https://astroapi-4.divineapi.com/western-api/v1/synastry/intense-aspect-reading",
+  //       physicalCompatibility:
+  //         "https://astroapi-4.divineapi.com/western-api/v1/synastry/physical-compatibility",
+  //       emotionalCompatibility:
+  //         "https://astroapi-4.divineapi.com/western-api/v1/synastry/emotional-compatibility",
+  //       sexualCompatibility:
+  //         "https://astroapi-4.divineapi.com/western-api/v1/synastry/sexual-compatibility",
+  //       spiritualCompatibility:
+  //         "https://astroapi-4.divineapi.com/western-api/v1/synastry/spiritual-compatibility",
+  //       financialCompatibility:
+  //         "https://astroapi-4.divineapi.com/western-api/v1/synastry/financial-compatibility",
+  //     };
+
+  //     const results = await Promise.all(
+  //       Object.keys(sinastrieUrls).map((key) =>
+  //         fetchSinastrieData(
+  //           sinastrieUrls[key],
+  //           userData.full_name,
+  //           userData.day,
+  //           userData.month,
+  //           userData.year,
+  //           userData.hour,
+  //           userData.min,
+  //           userData.sec,
+  //           userData.gender,
+  //           userData.place,
+  //           userData.lat,
+  //           userData.lon,
+  //           userData.tzone,
+  //           userData.p2
+  //         )
+  //       )
+  //     );
+
+  //     const [
+  //       natalWheelChart,
+  //       houseCusps,
+  //       planetaryPositions,
+  //       aspect,
+  //       harmoniousAspectReading,
+  //       conflictingAspectReading,
+  //       contrastingAspectReading,
+  //       intenseCompatibility,
+  //       physicalCompatibility,
+  //       emotionalCompatibility,
+  //       sexualCompatibility,
+  //       spiritualCompatibility,
+  //       financialCompatibility,
+  //     ] = results;
+
+  //     // console.log("sianstryData....data....", aspect);
+  //     // console.log("sianstryData....data....", aspect.data.p2_data);
+
+  //     userData.synastry.natalWheelChart = natalWheelChart;
+  //     userData.synastry.houseCusps = houseCusps;
+  //     userData.synastry.planetaryPositions = planetaryPositions;
+  //     userData.synastry.aspect = aspect;
+  //     userData.synastry.harmoniousAspectReading = harmoniousAspectReading;
+  //     userData.synastry.conflictingAspectReading = conflictingAspectReading;
+  //     userData.synastry.contrastingAspectReading = contrastingAspectReading;
+  //     userData.synastry.intenseCompatibility = intenseCompatibility;
+  //     userData.synastry.physicalCompatibility = physicalCompatibility;
+  //     userData.synastry.emotionalCompatibility = emotionalCompatibility;
+  //     userData.synastry.sexualCompatibility = sexualCompatibility;
+  //     userData.synastry.spiritualCompatibility = spiritualCompatibility;
+  //     userData.synastry.financialCompatibility = financialCompatibility;
+
+  //     console.log("astrologyData....data....", userData.full_name);
+
+  //     // const { houses, planets, aspectsD } = prepareAstroData(userData);
+
+  //     await AsyncStorage.setItem("userData", JSON.stringify(userData));
+  //     navigation.navigate("Learn");
+  //     setIsLoading(false);
+  //   } catch (error) {
+  //     setIsLoading(false);
+  //     console.error("Error saving user data:", error);
+  //   }
+  // };
 
   const handleContinue = async () => {
     try {
       setIsLoading(true);
+
+      // Obține datele existente
       const userD = await AsyncStorage.getItem("userData");
       const parsedData = JSON.parse(userD);
 
+      // Calculați informațiile personale ale noii persoane
       const birthDate = moment(selectedDate, "DD-MM-YYYY");
       const birthTime = selectedTime ? moment(selectedTime, "HH:mm") : moment();
       const timezoneOffset = await fetchTimeZone(lat, long);
-
       const zodiacSign = getZodiacSign(day, month);
       const zodiacSignFristUpperCase = capitalizeFirstLetter(
         zodiacSign.toLowerCase()
@@ -173,64 +346,47 @@ function NewPersonScreen({ navigation, route }) {
       const currentDate = new Date();
       const formattedDate = currentDate.toISOString().split("T")[0];
 
-      const pOneData = {
-        full_name: parsedData.full_name,
-        day: parsedData.day,
-        month: parsedData.month,
-        year: parsedData.year,
-        hour: parsedData.hour,
-        min: parsedData.min,
-        sec: parsedData.sec,
-        selectedDate: "--",
-        selectedTime: parsedData.selectedTime,
-        gender: parsedData.gender,
-        place: parsedData.place,
-        adress: parsedData.adress,
-        localitate: parsedData.localitate,
-        tara: parsedData.tara,
-        lat: parsedData.lat,
-        lon: parsedData.lon,
-        tzone: parsedData.tzone,
-        actualLanguage: parsedData.actualLanguage,
-        actualLanguageAstrograma: parsedData.actualLanguage,
-        actualLanguageSinastrie: "en",
-        zodiacSign: parsedData.zodiacSign,
-        zodiacSignFristUpperCase: parsedData.zodiacSignFristUpperCase,
-        dataHoroscop: parsedData.dataHoroscop,
+      const newPersonData = {
+        full_name: name,
+        day,
+        month,
+        year,
+        hour: birthTime.hour(),
+        min: birthTime.minute(),
+        sec: birthTime.second(),
+        selectedDate,
+        selectedTime,
+        gender,
+        place,
+        adress,
+        localitate,
+        tara,
+        lat,
+        lon: long,
+        tzone: timezoneOffset,
+        actualLanguage: "naan",
+        actualLanguageAstrograma: "naan",
+        actualLanguageSinastrie: "naan",
+        zodiacSign,
+        zodiacSignFristUpperCase,
+        dataHoroscop: formattedDate,
       };
 
-      const userData = {
-        ...parsedData,
-        ...pOneData,
-        p2: {
-          // datele pentru al doilea utilizator
-          full_name: name,
-          day: day,
-          month: month,
-          year: year,
-          hour: birthTime.hour(),
-          min: birthTime.minute(),
-          sec: birthTime.second(),
-          selectedDate: "--",
-          selectedTime: selectedTime,
-          gender,
-          place,
-          adress,
-          localitate,
-          tara,
-          lat: lat,
-          lon: long,
-          tzone: timezoneOffset,
-          actualLanguage: "en",
-          actualLanguageAstrograma: "en",
-          zodiacSign,
-          zodiacSignFristUpperCase,
-          dataHoroscop: formattedDate,
-        },
-        // Inițializăm obiectul synastry pentru a evita eroarea de undefined
-        synastry: {},
-      };
-      // console.log("p2....", userData.p2);
+      // Actualizați array-ul `people`
+      const updatedPeople = parsedData.people || [];
+      let currentPersonIndex;
+
+      if (isEditMode && route.params?.personIndex !== undefined) {
+        // Edităm persoana existentă
+        currentPersonIndex = route.params.personIndex;
+        updatedPeople[currentPersonIndex] = newPersonData;
+      } else {
+        // Adăugăm o persoană nouă
+        updatedPeople.push(newPersonData);
+        currentPersonIndex = updatedPeople.length - 1; // Indexul ultimei persoane adăugate
+      }
+
+      // Configurați URL-urile pentru analizele de sinastrie
       const sinastrieUrls = {
         natalWheelChart:
           "https://astroapi-4.divineapi.com/western-api/v1/synastry/natal-wheel-chart",
@@ -260,23 +416,24 @@ function NewPersonScreen({ navigation, route }) {
           "https://astroapi-4.divineapi.com/western-api/v1/synastry/financial-compatibility",
       };
 
+      // Efectuați analizele de sinastrie pentru persoana curentă
       const results = await Promise.all(
         Object.keys(sinastrieUrls).map((key) =>
           fetchSinastrieData(
             sinastrieUrls[key],
-            userData.full_name,
-            userData.day,
-            userData.month,
-            userData.year,
-            userData.hour,
-            userData.min,
-            userData.sec,
-            userData.gender,
-            userData.place,
-            userData.lat,
-            userData.lon,
-            userData.tzone,
-            userData.p2
+            parsedData.full_name,
+            parsedData.day,
+            parsedData.month,
+            parsedData.year,
+            parsedData.hour,
+            parsedData.min,
+            parsedData.sec,
+            parsedData.gender,
+            parsedData.place,
+            parsedData.lat,
+            parsedData.lon,
+            parsedData.tzone,
+            updatedPeople[currentPersonIndex]
           )
         )
       );
@@ -297,28 +454,32 @@ function NewPersonScreen({ navigation, route }) {
         financialCompatibility,
       ] = results;
 
-      // console.log("sianstryData....data....", aspect);
-      // console.log("sianstryData....data....", aspect.data.p2_data);
+      // Salvați analizele în datele sinastriei persoanei curente
+      updatedPeople[currentPersonIndex].synastry = {
+        natalWheelChart,
+        houseCusps,
+        planetaryPositions,
+        aspect,
+        harmoniousAspectReading,
+        conflictingAspectReading,
+        contrastingAspectReading,
+        intenseCompatibility,
+        physicalCompatibility,
+        emotionalCompatibility,
+        sexualCompatibility,
+        spiritualCompatibility,
+        financialCompatibility,
+      };
 
-      userData.synastry.natalWheelChart = natalWheelChart;
-      userData.synastry.houseCusps = houseCusps;
-      userData.synastry.planetaryPositions = planetaryPositions;
-      userData.synastry.aspect = aspect;
-      userData.synastry.harmoniousAspectReading = harmoniousAspectReading;
-      userData.synastry.conflictingAspectReading = conflictingAspectReading;
-      userData.synastry.contrastingAspectReading = contrastingAspectReading;
-      userData.synastry.intenseCompatibility = intenseCompatibility;
-      userData.synastry.physicalCompatibility = physicalCompatibility;
-      userData.synastry.emotionalCompatibility = emotionalCompatibility;
-      userData.synastry.sexualCompatibility = sexualCompatibility;
-      userData.synastry.spiritualCompatibility = spiritualCompatibility;
-      userData.synastry.financialCompatibility = financialCompatibility;
+      // Actualizați datele utilizatorului
+      const updatedUserData = {
+        ...parsedData,
+        people: updatedPeople,
+      };
 
-      console.log("astrologyData....data....", userData.full_name);
-
-      // const { houses, planets, aspectsD } = prepareAstroData(userData);
-
-      await AsyncStorage.setItem("userData", JSON.stringify(userData));
+      // Salvați datele actualizate
+      console.log("date care se vor salva...", updatedUserData.people);
+      await AsyncStorage.setItem("userData", JSON.stringify(updatedUserData));
       navigation.navigate("Learn");
       setIsLoading(false);
     } catch (error) {
