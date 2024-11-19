@@ -265,6 +265,7 @@ const SignInScreenClinic: React.FC<Props> = ({
           last_name: "",
           email: user.email || "Email necunoscut",
           photoURL: user.photoURL || "",
+          auth_provider: "Google",
         };
 
         console.log("Start....nou", value);
@@ -487,13 +488,16 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#4285F4", // Albastru Google
-    paddingVertical: 12, // Padding mai mare pentru un aspect robust
+    paddingVertical: 12,
     paddingHorizontal: 20,
-    borderRadius: 4, // Colțuri ușor rotunjite
+    borderRadius: 4,
     marginTop: 15,
-    width: "80%", // Lățime pentru a ocupa o porțiune semnificativă a ecranului
-    justifyContent: "center", // Centrarea iconului și a textului
+    width: "80%", // Proporție relativă a lățimii ecranului
+    maxWidth: 400, // Dimensiune maximă pentru ecrane mari
+    justifyContent: "center", // Centrează iconul și textul
+    alignSelf: "center", // Centrează butonul pe orizontală
   },
+
   googleButtonText: {
     color: "white",
     fontSize: 16,
@@ -503,7 +507,7 @@ const styles = StyleSheet.create({
   subContainer: {
     flex: 1,
     paddingHorizontal: 20,
-    // paddingVertical: 15,
+    marginTop: "20%",
     justifyContent: "center",
   },
   gradient: {

@@ -123,7 +123,7 @@ const TarrotSettings: React.FC<Props> = ({ navigation }): JSX.Element => {
   const [modalVisibleDelete, setModalVisibleDelete] = useState(false);
   const [showSnackBar, setShowSnackback] = useState(false);
   const [snackMessage, setSnackMessage] = useState("");
-  const {isGranted, openNotificationSettings} = usePushNotifications()
+  const { isGranted, openNotificationSettings } = usePushNotifications();
 
   let pwd = watch("password");
   const auth = authentication;
@@ -311,77 +311,81 @@ const TarrotSettings: React.FC<Props> = ({ navigation }): JSX.Element => {
                           >
                             {i18n.translate("createAccountCTAMessage")}
                           </H7fontMediumPrimary>
-                          <View style={{width:"100%", justifyContent:"center", alignItems:"center", height:"50%"}}>
-                          <Button
-                            disabled={false}
-                            funCallback={() => {
-                              handleLogout().then(() => {
-                                setAsGuestUser(false).then(() => {
-                                  navigation.navigate(
-                                    screenName.SignInScreenClinic as any
-                                  );
+                          <View
+                            style={{
+                              width: "100%",
+                              justifyContent: "center",
+                              alignItems: "center",
+                              height: "50%",
+                            }}
+                          >
+                            <Button
+                              disabled={false}
+                              funCallback={() => {
+                                handleLogout().then(() => {
+                                  setAsGuestUser(false).then(() => {
+                                    navigation.navigate(
+                                      screenName.SignInScreenClinic as any
+                                    );
+                                  });
                                 });
-                              });
-                            }}
-                            borderWidth={0.2}
-                            bgColor={colors.primary3}
-                            // txtColor={colors.primary2}
-                            label={i18n.translate("register")}
-                            borderColor={colors.white}
-                            success={true}
-                            style={{ marginTop: "0%", width: "100%" }}
-                            txtColor={colors.white}
-                          />
-                          <Button
-                            disabled={false}
-                            funCallback={() => {
-                              navigation.navigate(
-                                screenName.termConditionsClinic as any
-                              );
-                            }}
-                            borderWidth={0.2}
-                            bgColor={colors.gradientLogin1}
-                            // txtColor={colors.primary2}
-                            label={"Privacy Policy & Terms"}
-                            borderColor={colors.white}
-                            success={true}
-                            style={{ marginTop: "0%", width: "70%" }}
-                            txtColor={colors.white}
-                          />
-                          {
-                            !isGranted
-                            ?
+                              }}
+                              borderWidth={0.2}
+                              bgColor={colors.primary3}
+                              // txtColor={colors.primary2}
+                              label={i18n.translate("register")}
+                              borderColor={colors.white}
+                              success={true}
+                              style={{ marginTop: "0%", width: "100%" }}
+                              txtColor={colors.white}
+                            />
                             <Button
-                            disabled={false}
-                            funCallback={() => {
-                              openNotificationSettings()
-                            }}
-                            borderWidth={0.2}
-                            bgColor={colors.gradientLogin1}
-                            // txtColor={colors.primary2}
-                            label={"Activate notifications"}
-                            borderColor={colors.white}
-                            success={true}
-                            style={{ marginTop: "0%", width: "70%" }}
-                            txtColor={colors.white}
-                          />
-                            :
-                            <Button
-                            disabled={false}
-                            funCallback={() => {
-                              openNotificationSettings()
-                            }}
-                            borderWidth={0.2}
-                            bgColor={colors.gradientLogin1}
-                            // txtColor={colors.primary2}
-                            label={"Stop notifications"}
-                            borderColor={colors.white}
-                            success={true}
-                            style={{ marginTop: "0%", width: "70%" }}
-                            txtColor={colors.white}
-                          />
-                          }
-                        
+                              disabled={false}
+                              funCallback={() => {
+                                navigation.navigate(
+                                  screenName.termConditionsClinic as any
+                                );
+                              }}
+                              borderWidth={0.2}
+                              bgColor={colors.gradientLogin1}
+                              // txtColor={colors.primary2}
+                              label={"Privacy Policy & Terms"}
+                              borderColor={colors.white}
+                              success={true}
+                              style={{ marginTop: "0%", width: "70%" }}
+                              txtColor={colors.white}
+                            />
+                            {!isGranted ? (
+                              <Button
+                                disabled={false}
+                                funCallback={() => {
+                                  openNotificationSettings();
+                                }}
+                                borderWidth={0.2}
+                                bgColor={colors.gradientLogin1}
+                                // txtColor={colors.primary2}
+                                label={"Activate notifications"}
+                                borderColor={colors.white}
+                                success={true}
+                                style={{ marginTop: "0%", width: "70%" }}
+                                txtColor={colors.white}
+                              />
+                            ) : (
+                              <Button
+                                disabled={false}
+                                funCallback={() => {
+                                  openNotificationSettings();
+                                }}
+                                borderWidth={0.2}
+                                bgColor={colors.gradientLogin1}
+                                // txtColor={colors.primary2}
+                                label={"Stop notifications"}
+                                borderColor={colors.white}
+                                success={true}
+                                style={{ marginTop: "0%", width: "70%" }}
+                                txtColor={colors.white}
+                              />
+                            )}
                           </View>
                         </View>
                       </View>
@@ -491,202 +495,216 @@ const TarrotSettings: React.FC<Props> = ({ navigation }): JSX.Element => {
                               )}
                             />
                           )}
-                          {registerType === "email" && (
-                            <Controller
-                              name={formKeys.email}
-                              control={control}
-                              render={({ field: { onChange, value } }) => (
-                                <InputFields
-                                  errorMessage={errors[
-                                    formKeys.email
-                                  ]?.message.toString()}
-                                  value={value}
-                                  onChangeText={onChange}
-                                  placeholder={i18n.translate("email")}
-                                  image={"email"}
-                                />
-                              )}
-                              rules={{
-                                required: emailValue
-                                  ? requiredValidation(i18n.translate("email"))
-                                  : undefined,
-                                validate: emailValidation,
-                              }}
-                            />
-                          )}
+                          {registerType === "email" &&
+                            !userData.auth_provider && (
+                              <Controller
+                                name={formKeys.email}
+                                control={control}
+                                render={({ field: { onChange, value } }) => (
+                                  <InputFields
+                                    errorMessage={errors[
+                                      formKeys.email
+                                    ]?.message.toString()}
+                                    value={value}
+                                    onChangeText={onChange}
+                                    placeholder={i18n.translate("email")}
+                                    image={"email"}
+                                  />
+                                )}
+                                rules={{
+                                  required: emailValue
+                                    ? requiredValidation(
+                                        i18n.translate("email")
+                                      )
+                                    : undefined,
+                                  validate: emailValidation,
+                                }}
+                              />
+                            )}
 
-                          {registerType === "email" && (
-                            <Controller
-                              name={formKeys.password}
-                              control={control}
-                              render={({ field: { onChange, value } }) => (
-                                <InputFields
-                                  isPassword={true}
-                                  value={value}
-                                  isSecure={true}
-                                  onChangeText={onChange}
-                                  placeholder={i18n.translate("createPassword")}
-                                  errorMessage={errors[
-                                    formKeys.password
-                                  ]?.message.toString()}
-                                  image={"lock-outline"}
-                                />
-                              )}
-                              rules={{
-                                required: passwordValue
-                                  ? requiredValidation(
-                                      i18n.translate("createPassword")
-                                    )
-                                  : undefined,
-                                minLength: passwordValue
-                                  ? minLengthValidation(
-                                      validationSchema.password.minLength
-                                    )
-                                  : undefined,
-                                // Poți adăuga aici alte validări pentru complexitate, dacă este necesar.
-                              }}
-                            />
-                          )}
+                          {registerType === "email" &&
+                            !userData.auth_provider && (
+                              <Controller
+                                name={formKeys.password}
+                                control={control}
+                                render={({ field: { onChange, value } }) => (
+                                  <InputFields
+                                    isPassword={true}
+                                    value={value}
+                                    isSecure={true}
+                                    onChangeText={onChange}
+                                    placeholder={i18n.translate(
+                                      "createPassword"
+                                    )}
+                                    errorMessage={errors[
+                                      formKeys.password
+                                    ]?.message.toString()}
+                                    image={"lock-outline"}
+                                  />
+                                )}
+                                rules={{
+                                  required: passwordValue
+                                    ? requiredValidation(
+                                        i18n.translate("createPassword")
+                                      )
+                                    : undefined,
+                                  minLength: passwordValue
+                                    ? minLengthValidation(
+                                        validationSchema.password.minLength
+                                      )
+                                    : undefined,
+                                  // Poți adăuga aici alte validări pentru complexitate, dacă este necesar.
+                                }}
+                              />
+                            )}
 
-                          {registerType === "email" && (
-                            <Controller
-                              name={formKeys.confirmPassword}
-                              control={control}
-                              render={({ field: { onChange, value } }) => (
-                                <InputFields
-                                  isPassword={true}
-                                  value={value}
-                                  isSecure={true}
-                                  onChangeText={onChange}
-                                  placeholder={i18n.translate(
-                                    "confirmPassword"
-                                  )}
-                                  errorMessage={errors[
-                                    formKeys.confirmPassword
-                                  ]?.message.toString()}
-                                  image={"lock-outline"}
-                                />
-                              )}
-                              rules={{
-                                validate: passwordValue
-                                  ? (value) =>
-                                      value === passwordValue ||
-                                      i18n.translate("passDontMatch")
-                                  : undefined,
-                              }}
-                            />
-                          )}
+                          {registerType === "email" &&
+                            !userData.auth_provider && (
+                              <Controller
+                                name={formKeys.confirmPassword}
+                                control={control}
+                                render={({ field: { onChange, value } }) => (
+                                  <InputFields
+                                    isPassword={true}
+                                    value={value}
+                                    isSecure={true}
+                                    onChangeText={onChange}
+                                    placeholder={i18n.translate(
+                                      "confirmPassword"
+                                    )}
+                                    errorMessage={errors[
+                                      formKeys.confirmPassword
+                                    ]?.message.toString()}
+                                    image={"lock-outline"}
+                                  />
+                                )}
+                                rules={{
+                                  validate: passwordValue
+                                    ? (value) =>
+                                        value === passwordValue ||
+                                        i18n.translate("passDontMatch")
+                                    : undefined,
+                                }}
+                              />
+                            )}
                         </View>
+                        <View
+                          style={{
+                            width: "100%",
+                            alignSelf: "center",
 
-                        <Button
-                          disabled={false}
-                          funCallback={handleSubmit(onsubmit)}
-                          label={i18n.translate("saveChanges")}
-                          success={true}
-                          bgColor={colors.primary3}
-                          borderColor={colors.white}
-                          borderWidth={0.2}
-                          txtColor={colors.white}
-                        />
-
-                        <Button
-                          disabled={false}
-                          funCallback={() => {
-                            navigation.navigate(
-                              screenName.termConditionsClinic as any
-                            );
+                            flex: 1,
+                            justifyContent: "center",
+                            alignItems: "center",
+                            maxHeight: "10%",
+                            marginTop: "30%",
                           }}
-                          label={"Privacy Policy & Terms"}
-                          success={true}
-                          bgColor={colors.gradientLogin2}
-                          borderColor={colors.white}
-                          borderWidth={0.2}
-                          txtColor={colors.black}
-                        />
-
-{
-                            !isGranted
-                            ?
-                            <Button
+                        >
+                          <Button
                             disabled={false}
-                            funCallback={() => {
-                              openNotificationSettings()
-                            }}
-                            borderWidth={0.2}
-                            bgColor={colors.gradientLogin1}
-                            // txtColor={colors.primary2}
-                            label={"Activate notifications"}
-                            borderColor={colors.white}
+                            funCallback={handleSubmit(onsubmit)}
+                            label={i18n.translate("saveChanges")}
                             success={true}
-                            style={{ marginTop: "0%", width: "100%" }}
+                            bgColor={colors.primary3}
+                            borderColor={colors.white}
+                            borderWidth={0.2}
                             txtColor={colors.white}
                           />
-                            :
-                            <Button
+
+                          <Button
                             disabled={false}
                             funCallback={() => {
-                              openNotificationSettings()
+                              navigation.navigate(
+                                screenName.termConditionsClinic as any
+                              );
                             }}
-                            borderWidth={0.2}
-                            bgColor={colors.gradientLogin1}
-                            // txtColor={colors.primary2}
-                            label={"Stop notifications"}
-                            borderColor={colors.white}
+                            label={"Privacy Policy & Terms"}
                             success={true}
-                            style={{ marginTop: "0%", width: "100%" }}
-                            txtColor={colors.white}
+                            bgColor={colors.gradientLogin2}
+                            borderColor={colors.white}
+                            borderWidth={0.2}
+                            txtColor={colors.black}
                           />
-                          }
 
-                        
-
-                        <View>
-                          <View style={styles.infoTextViewStyle}>
-                            <TouchableOpacity
-                              onPress={() => {
-                                handleLogout().then(() => {
-                                  setAsGuestUser(false).then(() => {
-                                    navigation.navigate(
-                                      screenName.SignInScreenClinic as any
-                                    );
-                                  });
-                                });
+                          {!isGranted ? (
+                            <Button
+                              disabled={false}
+                              funCallback={() => {
+                                openNotificationSettings();
                               }}
-                            >
-                              <H7fontMediumPrimary>
-                                {i18n.translate("logOut")}
-                              </H7fontMediumPrimary>
-                            </TouchableOpacity>
-                          </View>
-                          <View style={styles.infoTextViewStyle}>
-                            <TouchableOpacity
-                              onPress={() =>
-                                Alert.alert(
-                                  "Are you sure you want to delete your account?",
-                                  "You will have to register again",
-                                  [
-                                    {
-                                      text: "Cancel",
-                                      onPress: () =>
-                                        console.log("Cancel Pressed"),
-                                      style: "cancel",
-                                    },
-                                    {
-                                      text: "Delete",
-                                      onPress: () => handleDeleteModal(),
-                                    },
-                                  ]
-                                )
-                              }
-                            >
-                              <H7fontMediumPrimary>
-                                {i18n.translate("deleteAccount")}
-                              </H7fontMediumPrimary>
-                            </TouchableOpacity>
-                          </View>
-                          {/* <View style={styles.borderLineStyle}>
+                              borderWidth={0.2}
+                              bgColor={colors.gradientLogin1}
+                              // txtColor={colors.primary2}
+                              label={"Activate notifications"}
+                              borderColor={colors.white}
+                              success={true}
+                              style={{ marginTop: "0%", width: "100%" }}
+                              txtColor={colors.white}
+                            />
+                          ) : (
+                            <Button
+                              disabled={false}
+                              funCallback={() => {
+                                openNotificationSettings();
+                              }}
+                              borderWidth={0.2}
+                              bgColor={colors.gradientLogin1}
+                              // txtColor={colors.primary2}
+                              label={"Stop notifications"}
+                              borderColor={colors.white}
+                              success={true}
+                              style={{ marginTop: "0%", width: "100%" }}
+                              txtColor={colors.white}
+                            />
+                          )}
+                          <View>
+                            <View style={styles.infoTextViewStyle}>
+                              <TouchableOpacity
+                                onPress={() => {
+                                  handleLogout().then(() => {
+                                    setAsGuestUser(false).then(() => {
+                                      navigation.navigate(
+                                        screenName.SignInScreenClinic as any
+                                      );
+                                    });
+                                  });
+                                }}
+                              >
+                                <H7fontMediumPrimary>
+                                  {i18n.translate("logOut")}
+                                </H7fontMediumPrimary>
+                              </TouchableOpacity>
+                            </View>
+                            <View style={styles.infoTextViewStyle}>
+                              <TouchableOpacity
+                                onPress={() =>
+                                  Alert.alert(
+                                    "Are you sure you want to delete your account?",
+                                    "You will have to register again",
+                                    [
+                                      {
+                                        text: "Cancel",
+                                        onPress: () =>
+                                          console.log("Cancel Pressed"),
+                                        style: "cancel",
+                                      },
+                                      {
+                                        text: "Delete",
+                                        onPress: () => handleDeleteModal(),
+                                      },
+                                    ]
+                                  )
+                                }
+                              >
+                                <H7fontMediumPrimary>
+                                  {i18n.translate("deleteAccount")}
+                                </H7fontMediumPrimary>
+                              </TouchableOpacity>
+                            </View>
+                            {/* <View style={styles.borderLineStyle}>
                   <CommonLineView />
                 </View> */}
+                          </View>
                         </View>
                       </ScrollView>
                     </>

@@ -3,6 +3,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Dimensions,
   Platform,
   SafeAreaView,
@@ -18,7 +19,8 @@ import {
   Text,
   useTheme,
 } from "react-native-paper";
-
+import * as Print from "expo-print";
+import * as Sharing from "expo-sharing";
 import ShowFromTop from "../../../components/Astral/components/show-from-top";
 import ScrollViewFadeFirst from "../../../components/Astral/components/scroll-view-fade-first";
 
@@ -74,6 +76,7 @@ import AspectTableSinastrie from "../../../components/Astral/components/AspectTa
 import HorizontalTabSelector from "../../../components/Astral/components/HorizontalTabSelector";
 import SvgComponent from "../../../components/Astral/components/SvgComponent";
 import PurchaseModal from "../../../components/Astral/components/PurchaseModal ";
+import { Button } from "../../../components/commonButton";
 
 // const LuckyNumber = ({ number }) => {
 //   return (
@@ -333,6 +336,91 @@ function SinastrieRelatie({ navigation, route }) {
 
     translatedData.actualLanguageSinastrie = language;
     return translatedData; // Returnează datele traduse
+  };
+
+  const generatePDFContent = () => {
+    const categories = [
+      { title: "General", content: userD.generalCategory },
+      { title: "Dragoste", content: userD.dragosteCategory },
+      { title: "Familie", content: userD.familieCategory },
+      { title: "Bani", content: userD.baniCategory },
+      { title: "Muncă și Studii", content: userD.muncaStudiiCategory },
+      { title: "Prieteni", content: userD.prieteniCategory },
+      { title: "Sănătate", content: userD.sanatateCategory },
+      { title: "Spiritualitate", content: userD.spiritualitateCategory },
+    ];
+
+    return `
+      <html>
+        <head>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              padding: 20px;
+              line-height: 1.6;
+            }
+            h1, h2, h3 {
+              text-align: center;
+              color: #4CAF50;
+            }
+            p {
+              margin-bottom: 10px;
+            }
+            .section {
+              margin-top: 20px;
+            }
+          </style>
+        </head>
+        <body>
+          <h1>Interpretare Astrogramă</h1>
+          <h2>${userD.full_name}</h2>
+          <p>Data nașterii: ${userD.day}-${userD.month}-${userD.year}</p>
+          <p>Ora nașterii: ${userD.selectedTime}</p>
+          <p>Locul nașterii: ${userD.place}</p>
+          ${categories
+            .map(
+              (category) =>
+                `<div class="section">
+                  <h3>${category.title}</h3>
+                  <p>${category.content}</p>
+                </div>`
+            )
+            .join("")}
+        </body>
+      </html>
+    `;
+  };
+
+  const handleDownloadPDF = async () => {
+    if (!isPaid) {
+      Alert.alert(
+        "Acces restricționat",
+        "Trebuie să achiziționezi interpretarea completă pentru a descărca PDF-ul."
+      );
+      return;
+    }
+
+    try {
+      const htmlContent = generatePDFContent();
+
+      const { uri } = await Print.printToFileAsync({
+        html: htmlContent,
+      });
+
+      Alert.alert("PDF generat", `Fișier salvat la: ${uri}`);
+
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(uri);
+      } else {
+        Alert.alert(
+          "Partajare indisponibilă",
+          "PDF-ul a fost generat, dar partajarea nu este disponibilă."
+        );
+      }
+    } catch (error) {
+      Alert.alert("Eroare", "Nu s-a putut genera PDF-ul.");
+      console.error(error);
+    }
   };
 
   //ACHIZITIONARE SINASTRIE
@@ -862,22 +950,35 @@ function SinastrieRelatie({ navigation, route }) {
                     <View>
                       {isPaid ? (
                         // Afișează conținutul complet dacă este achiziționat
-                        activeData.map((aspect, index) => (
-                          <View key={index}>
-                            {aspect.reading.map((read, readIndex) => (
-                              <View key={readIndex} style={{ marginTop: 20 }}>
-                                <H7fontBoldWhite style={[styles.textTitles]}>
-                                  {read?.title}
-                                </H7fontBoldWhite>
-                                <H9fontMediumLightBlack
-                                  style={styles.textDescription}
-                                >
-                                  {read?.description}
-                                </H9fontMediumLightBlack>
-                              </View>
-                            ))}
-                          </View>
-                        ))
+                        <>
+                          {activeData.map((aspect, index) => (
+                            <View key={index}>
+                              {aspect.reading.map((read, readIndex) => (
+                                <View key={readIndex} style={{ marginTop: 20 }}>
+                                  <H7fontBoldWhite style={[styles.textTitles]}>
+                                    {read?.title}
+                                  </H7fontBoldWhite>
+                                  <H9fontMediumLightBlack
+                                    style={styles.textDescription}
+                                  >
+                                    {read?.description}
+                                  </H9fontMediumLightBlack>
+                                </View>
+                              ))}
+                            </View>
+                          ))}
+                          <Button
+                            disabled={false}
+                            funCallback={handleDownloadPDF}
+                            label={" Descarcă PDF-ul Interpretării"}
+                            success={true}
+                            bgColor={colors.gradientLogin11}
+                            borderColor={colors.white}
+                            borderWidth={0.2}
+                            txtColor={colors.white}
+                            style={{ marginTop: "10%" }}
+                          />
+                        </>
                       ) : (
                         // Afișează conținut limitat dacă nu este achiziționat
                         <>
@@ -899,14 +1000,17 @@ function SinastrieRelatie({ navigation, route }) {
                             sinastriei tale. Pentru a accesa interpretarea
                             completă, finalizează achiziția.
                           </Text>
-                          <TouchableOpacity
-                            style={styles.purchaseButton}
-                            onPress={() => setModalVisible(true)}
-                          >
-                            <Text style={styles.purchaseButtonText}>
-                              Achiziționează Interpretarea Completă
-                            </Text>
-                          </TouchableOpacity>
+                          <Button
+                            disabled={false}
+                            funCallback={() => setModalVisible(true)}
+                            label={"Achiziționează Interpretarea Completă"}
+                            success={true}
+                            bgColor={colors.gradientLogin11}
+                            borderColor={colors.white}
+                            borderWidth={0.2}
+                            txtColor={colors.white}
+                            style={{ marginTop: "10%" }}
+                          />
                         </>
                       )}
                     </View>

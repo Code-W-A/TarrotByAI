@@ -73,6 +73,7 @@ import LoadingOverlay from "../../../components/Astral/components/zodiac/Loading
 import PurchaseModal from "../../../components/Astral/components/PurchaseModal ";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
+import { Button } from "../../../components/commonButton";
 
 // const LuckyNumber = ({ number }) => {
 //   return (
@@ -758,14 +759,17 @@ function AstrogramaNatala({ navigation }) {
                     </H9fontMediumLightBlack>
 
                     {!isPaid ? (
-                      <TouchableOpacity
-                        style={styles.purchaseButton}
-                        onPress={() => setModalVisible(true)} // Deschide modalul
-                      >
-                        <Text style={styles.purchaseButtonText}>
-                          Achiziționează Interpretarea Completă
-                        </Text>
-                      </TouchableOpacity>
+                      <Button
+                        disabled={false}
+                        funCallback={() => setModalVisible(true)}
+                        label={"Achiziționează Interpretarea Completă"}
+                        success={true}
+                        bgColor={colors.gradientLogin11}
+                        borderColor={colors.white}
+                        borderWidth={0.2}
+                        txtColor={colors.white}
+                        style={{ marginTop: "10%" }}
+                      />
                     ) : (
                       <>
                         <H6fontBoldYellow
@@ -853,14 +857,18 @@ function AstrogramaNatala({ navigation }) {
                         <H9fontMediumLightBlack style={styles.textDescription}>
                           {userD.spiritualitateCategory}
                         </H9fontMediumLightBlack>
-                        <TouchableOpacity
-                          style={styles.downloadButton}
-                          onPress={handleDownloadPDF}
-                        >
-                          <Text style={styles.downloadButtonText}>
-                            Descarcă PDF-ul Interpretării
-                          </Text>
-                        </TouchableOpacity>
+
+                        <Button
+                          disabled={false}
+                          funCallback={handleDownloadPDF}
+                          label={" Descarcă PDF-ul Interpretării"}
+                          success={true}
+                          bgColor={colors.gradientLogin11}
+                          borderColor={colors.white}
+                          borderWidth={0.2}
+                          txtColor={colors.white}
+                          style={{ marginTop: "10%" }}
+                        />
                       </>
                     )}
                   </View>

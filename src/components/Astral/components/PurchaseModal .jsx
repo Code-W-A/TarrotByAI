@@ -7,8 +7,9 @@ import {
   StyleSheet,
   View,
   Image,
-  Button,
 } from "react-native";
+import { Button, SocialMediaLogin } from "../../../components/commonButton";
+import { colors } from "../../../utils/colors";
 
 const PurchaseModal = ({
   visible,
@@ -93,13 +94,26 @@ const PurchaseModal = ({
           <View style={styles.buttonContainer}>
             <View style={styles.button}>
               <Button
-                title="Confirmă Achiziția"
-                onPress={handleConfirm}
-                disabled={!selectedLanguage}
+                disabled={false}
+                funCallback={handleConfirm}
+                label={"Achizitioneaza"}
+                success={true}
+                bgColor={colors.primary3}
+                borderColor={colors.white}
+                borderWidth={0.2}
+                txtColor={colors.white}
               />
-            </View>
-            <View style={styles.button}>
-              <Button title="Anulează" onPress={onDismiss} color="#888" />
+              <Button
+                disabled={false}
+                funCallback={handleConfirm}
+                label={"Anuleaza"}
+                success={true}
+                bgColor={colors.primary3}
+                borderColor={colors.primary3}
+                borderWidth={0.2}
+                txtColor={colors.white}
+                style={{ marginTop: "6%" }}
+              />
             </View>
           </View>
         </View>
@@ -150,12 +164,16 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "center",
+    alignItems: "center",
+
     marginTop: 20,
   },
   button: {
     flex: 1,
     marginHorizontal: 5,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 

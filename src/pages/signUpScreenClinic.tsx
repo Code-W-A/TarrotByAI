@@ -193,6 +193,7 @@ const SignUpScreenClinic: React.FC<Props> = ({ navigation }): JSX.Element => {
           last_name: "",
           email: user.email || "Email necunoscut",
           photoURL: user.photoURL || "",
+          auth_provider: "Google", // Indică provider-ul de autentificare
         };
 
         console.log("Start....", value);
@@ -241,7 +242,7 @@ const SignUpScreenClinic: React.FC<Props> = ({ navigation }): JSX.Element => {
             style={styles.gradient}
           >
             <KeyboardAvoidingView
-              style={{ flex: 1, marginTop: "10%" }}
+              style={{ flex: 1, marginTop: "25%" }}
               keyboardVerticalOffset={65}
             >
               <View style={styles.subContainer}>
@@ -264,50 +265,52 @@ const SignUpScreenClinic: React.FC<Props> = ({ navigation }): JSX.Element => {
                 </View>
 
                 <View>
-                  {registerType === "email" && (
-                    <Controller
-                      name={formKeys.firstName}
-                      control={control}
-                      render={({ field: { onChange, value } }) => (
-                        <InputFields
-                          errorMessage={errors[
-                            formKeys.firstName
-                          ]?.message.toString()}
-                          value={value}
-                          onChangeText={onChange}
-                          placeholder={i18n.translate("firstName")}
-                          image={"person"}
-                        />
-                      )}
-                      rules={{
-                        required: requiredValidation(
-                          i18n.translate("firstName")
-                        ),
-                      }}
-                    />
-                  )}
-                  {registerType === "email" && (
-                    <Controller
-                      name={formKeys.lastName}
-                      control={control}
-                      render={({ field: { onChange, value } }) => (
-                        <InputFields
-                          errorMessage={errors[
-                            formKeys.lastName
-                          ]?.message.toString()}
-                          value={value}
-                          onChangeText={onChange}
-                          placeholder={i18n.translate("lastName")}
-                          image={"person"}
-                        />
-                      )}
-                      rules={{
-                        required: requiredValidation(
-                          i18n.translate("lastName")
-                        ),
-                      }}
-                    />
-                  )}
+                  <View style={styles.row}>
+                    {registerType === "email" && (
+                      <Controller
+                        name={formKeys.firstName}
+                        control={control}
+                        render={({ field: { onChange, value } }) => (
+                          <InputFields
+                            errorMessage={errors[
+                              formKeys.firstName
+                            ]?.message.toString()}
+                            value={value}
+                            onChangeText={onChange}
+                            placeholder={i18n.translate("firstName")}
+                            image={"person"}
+                          />
+                        )}
+                        rules={{
+                          required: requiredValidation(
+                            i18n.translate("firstName")
+                          ),
+                        }}
+                      />
+                    )}
+                    {registerType === "email" && (
+                      <Controller
+                        name={formKeys.lastName}
+                        control={control}
+                        render={({ field: { onChange, value } }) => (
+                          <InputFields
+                            errorMessage={errors[
+                              formKeys.lastName
+                            ]?.message.toString()}
+                            value={value}
+                            onChangeText={onChange}
+                            placeholder={i18n.translate("lastName")}
+                            image={"person"}
+                          />
+                        )}
+                        rules={{
+                          required: requiredValidation(
+                            i18n.translate("lastName")
+                          ),
+                        }}
+                      />
+                    )}
+                  </View>
                   {registerType === "email" && (
                     <Controller
                       name={formKeys.email}
@@ -421,29 +424,41 @@ const SignUpScreenClinic: React.FC<Props> = ({ navigation }): JSX.Element => {
                     <Text>.</Text>
                   </View>
                 </View>
-                {isChecked ? (
-                  <Button
-                    disabled={false}
-                    funCallback={handleSubmit(onSubmit)}
-                    label={i18n.translate("register")}
-                    success={true}
-                    bgColor={colors.primary3}
-                    borderColor={colors.white}
-                    borderWidth={0.2}
-                    txtColor={colors.white}
-                  />
-                ) : (
-                  <Button
-                    disabled={!isChecked ? true : false}
-                    funCallback={handleSubmit(onSubmit)}
-                    label={"Agree terms and policy to continue"}
-                    success={true}
-                    bgColor={"transparent"}
-                    borderColor={colors.white}
-                    borderWidth={0.2}
-                    txtColor={colors.black}
-                  />
-                )}
+                <View
+                  style={{
+                    width: "100%",
+                    alignSelf: "center",
+
+                    flex: 1,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    maxHeight: "10%",
+                  }}
+                >
+                  {isChecked ? (
+                    <Button
+                      disabled={false}
+                      funCallback={handleSubmit(onSubmit)}
+                      label={i18n.translate("register")}
+                      success={true}
+                      bgColor={colors.primary3}
+                      borderColor={colors.white}
+                      borderWidth={0.2}
+                      txtColor={colors.white}
+                    />
+                  ) : (
+                    <Button
+                      disabled={!isChecked}
+                      funCallback={handleSubmit(onSubmit)}
+                      label={"Agree terms and policy to continue"}
+                      success={true}
+                      bgColor={"transparent"}
+                      borderColor={colors.white}
+                      borderWidth={0.2}
+                      txtColor={colors.black}
+                    />
+                  )}
+                </View>
 
                 <TouchableOpacity
                   style={styles.googleButton}
@@ -501,13 +516,16 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#4285F4", // Albastru Google
-    paddingVertical: 12, // Padding mai mare pentru un aspect robust
+    paddingVertical: 12,
     paddingHorizontal: 20,
-    borderRadius: 4, // Colțuri ușor rotunjite
+    borderRadius: 4,
     marginTop: 15,
-    width: "80%", // Lățime pentru a ocupa o porțiune semnificativă a ecranului
-    justifyContent: "center", // Centrarea iconului și a textului
+    width: "80%", // Proporție relativă a lățimii ecranului
+    maxWidth: 400, // Dimensiune maximă pentru ecrane mari
+    justifyContent: "center", // Centrează iconul și textul
+    alignSelf: "center", // Centrează butonul pe orizontală
   },
+
   googleButtonText: {
     color: "white",
     fontSize: 16,

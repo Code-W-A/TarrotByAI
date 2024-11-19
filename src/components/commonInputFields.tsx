@@ -21,6 +21,7 @@ interface InputFieldsProps {
   isPassword?: boolean;
   setIsWhite1?: any;
   setIsWhite2?: any;
+  style?: any;
 }
 
 export const InputFields: React.FC<InputFieldsProps> = ({
@@ -34,6 +35,7 @@ export const InputFields: React.FC<InputFieldsProps> = ({
   isPassword,
   setIsWhite1,
   setIsWhite2,
+  style,
 }) => {
   const [showPass, setShowPass] = useState<boolean>(isSecure);
   const [isFocused, setIsFocused] = useState<boolean>(false);
@@ -50,6 +52,7 @@ export const InputFields: React.FC<InputFieldsProps> = ({
       <View
         style={[
           styles.testBoxRowStyle,
+
           { borderColor: isFocused ? "white" : colors.primary3 },
         ]}
       >

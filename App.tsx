@@ -51,7 +51,7 @@ import { ApiDataProvider } from "./src/context/ApiContext";
 import store from "./Store";
 import * as Font from "expo-font";
 import { NumberProvider } from "./src/context/NumberContext";
-
+import { StripeProvider } from "@stripe/stripe-react-native";
 import { usePushNotifications } from "./src/hooks/usePushNotifications";
 
 //---ADS---
@@ -190,6 +190,7 @@ const App = () => {
           <LanguageProvider>
             <NavigationProvider>
               <NavBarVisibilityProvider>
+                {/* <StripeProvider publishableKey="pk_test_YourPublishableKeyHere"> */}
                 <AuthProvider>
                   <NavigationContainer>
                     <StatusBar style="light" />
@@ -200,6 +201,7 @@ const App = () => {
                     </Provider>
                   </NavigationContainer>
                 </AuthProvider>
+                {/* </StripeProvider> */}
               </NavBarVisibilityProvider>
             </NavigationProvider>
           </LanguageProvider>

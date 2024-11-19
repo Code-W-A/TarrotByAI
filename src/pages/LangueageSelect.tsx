@@ -241,12 +241,15 @@ const styles = StyleSheet.create({
   continueButton: {
     marginTop: "10%",
     backgroundColor: colors.primary3,
-    padding: 20,
-    width: 250,
+    paddingVertical: 10, // Mai mic decât valoarea anterioară
+    paddingHorizontal: 20, // Adaptează dimensiunile
+    width: "60%", // Dimensiune relativă pentru a fi responsive
+    maxWidth: 300, // Limitează dimensiunea maximă
     borderRadius: 10,
     alignItems: "center",
     height: "auto",
   },
+
   continueButtonText: {
     fontSize: 18,
   },

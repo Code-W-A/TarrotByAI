@@ -17,6 +17,7 @@
     "@react-navigation/native-stack": "^6.6.2",
     "@react-navigation/stack": "^6.3.20",
     "@redux-devtools/core": "^3.13.1",
+    "@stripe/stripe-react-native": "^0.39.0",
     "axios": "^1.6.2",
     "expo": "^51.0.31",
     "expo-application": "~5.9.1",
@@ -36,8 +37,10 @@
     "expo-localization": "~15.0.3",
     "expo-location": "~17.0.1",
     "expo-notifications": "~0.28.16",
+    "expo-print": "~13.0.1",
     "expo-random": "~14.0.1",
     "expo-secure-store": "~13.0.2",
+    "expo-sharing": "~12.0.1",
     "expo-sms": "~12.0.1",
     "expo-splash-screen": "~0.27.5",
     "expo-status-bar": "~1.12.1",
@@ -82,9 +85,7 @@
     "rn-fetch-blob": "^0.12.0",
     "typescript": "~5.3.3",
     "xmldom": "^0.6.0",
-    "yup": "^1.0.2",
-    "expo-print": "~13.0.1",
-    "expo-sharing": "~12.0.1"
+    "yup": "^1.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
