@@ -760,11 +760,54 @@ function SinastrieRelatie({ navigation, route }) {
 
       setIsLoadingBuy(true);
 
-      // 1) Creează PaymentIntent prin Firebase
+      // **5) Marchează sinastria ca plătită și salvează în AsyncStorage**
+      setIsPaid(true);
+
+      // Obține datele salvate
+      const personsDataString = await AsyncStorage.getItem("personsData");
+      const personsData = personsDataString
+        ? JSON.parse(personsDataString)
+        : [];
+
+      // Găsește și actualizează persoana
+      const updatedPersons = personsData.map((person) =>
+        person.full_name === userD.full_name
+          ? { ...person, isPaid: true }
+          : person
+      );
+
+      // Salvează lista actualizată în AsyncStorage
+      await AsyncStorage.setItem("personsData", JSON.stringify(updatedPersons));
+      // Verifică în consola dacă s-a salvat corect:
+      const verifyPersonsData = await AsyncStorage.getItem("personsData");
+      const parsedData = JSON.parse(verifyPersonsData);
+      const specificPerson = parsedData.find(
+        (person) => person.full_name === userD.full_name
+      );
+      console.log("📝 Element actualizat din asyncstorage:", specificPerson);
+
       const functions = getFunctions();
+
+      // 5) După finalizarea plății, generează conținutul HTML pentru PDF
+      const pdfHtmlContent = generatePDFContent();
+      console.log("📝 Generated PDF HTML content.");
+      // 6) Apelează funcția backend pentru a trimite emailul cu PDF-ul
+      console.log("📧 Calling sendPdfEmail function...");
+      const sendPdfEmailFn = httpsCallable(functions, "sendPdfEmail");
+      console.log("📧 sendPdfEmailFn:", sendPdfEmailFn);
+      const emailResponse = await sendPdfEmailFn({
+        email: email, // sau userD.email, în funcție de sursa datelor
+        pdfHtml: pdfHtmlContent,
+        fullName: "dear user!",
+      });
+      console.log("📧 Email function response:", emailResponse);
+
+      // 1) Creează PaymentIntent prin Firebase
+
       const createPaymentIntentFn = httpsCallable(
         functions,
-        "createPaymentIntent"
+        // "createPaymentIntent"
+        "createPaymentIntentTest"
       );
 
       const resp = await createPaymentIntentFn({
@@ -811,7 +854,8 @@ function SinastrieRelatie({ navigation, route }) {
       // 4) Creează factura pe server și marchează-o ca plătită
       const createInvoiceFn = httpsCallable(
         functions,
-        "createInvoiceAfterPayment"
+        // "createInvoiceAfterPayment"
+        "createInvoiceAfterPaymentTest"
       );
       const invoiceResp = await createInvoiceFn({
         transactionId,
@@ -830,25 +874,6 @@ function SinastrieRelatie({ navigation, route }) {
 
       console.log("Factura creată:", invoiceResp.data);
       Alert.alert(achizitieCompleta1, achizitieCompleta2);
-
-      // **5) Marchează sinastria ca plătită și salvează în AsyncStorage**
-      setIsPaid(true);
-
-      // Obține datele salvate
-      const personsDataString = await AsyncStorage.getItem("personsData");
-      const personsData = personsDataString
-        ? JSON.parse(personsDataString)
-        : [];
-
-      // Găsește și actualizează persoana
-      const updatedPersons = personsData.map((person) =>
-        person.full_name === userD.full_name
-          ? { ...person, isPaid: true }
-          : person
-      );
-
-      // Salvează lista actualizată în AsyncStorage
-      await AsyncStorage.setItem("personsData", JSON.stringify(updatedPersons));
     } catch (error) {
       console.error("Eroare handlePayment:", error);
       Alert.alert("Eroare", "Nu s-a putut procesa plata sau factura.");
@@ -856,6 +881,24 @@ function SinastrieRelatie({ navigation, route }) {
       setIsLoadingBuy(false);
     }
   };
+
+  useEffect(() => {
+    let timeoutId;
+    if (isLoading) {
+      timeoutId = setTimeout(() => {
+        Alert.alert(
+          i18n.translate("slowLoading"),
+          i18n.translate("slowLoadingText")
+        );
+      }, 10000); // 10 secunde timeout
+    }
+
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [isLoading]);
 
   //traducere inline text
   const achizitioneazaInterpretareCompletaText2 = useTranslation(

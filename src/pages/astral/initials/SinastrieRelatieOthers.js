@@ -532,12 +532,55 @@ function SinastrieRelatieOthers({ navigation, route }) {
       }
 
       setIsLoadingBuy(true);
+      setIsPaid(true);
+
+      // 5) Actualizează analiza ca plătită în `personsDataOthers`
+      const existingOtherDataString = await AsyncStorage.getItem(
+        "personsDataOthers"
+      );
+      const existingOtherData = existingOtherDataString
+        ? JSON.parse(existingOtherDataString)
+        : [];
+
+      console.log("📦 Date existente în personsDataOthers:", existingOtherData);
+
+      const updatePaidStatus = (dataList) => {
+        return dataList.map((item) =>
+          item.id === analysisData.id ? { ...item, isPaid: true } : item
+        );
+      };
+
+      const updatedOtherData = updatePaidStatus(existingOtherData);
+      await AsyncStorage.setItem(
+        "personsDataOthers",
+        JSON.stringify(updatedOtherData)
+      );
+
+      console.log(
+        "✅ Analiza din personsDataOthers marcată ca plătită și salvată în AsyncStorage."
+      );
+
+      const functions = getFunctions();
+
+      // 5) După finalizarea plății, generează conținutul HTML pentru PDF
+      const pdfHtmlContent = generatePDFContent();
+      console.log("📝 Generated PDF HTML content.");
+      // 6) Apelează funcția backend pentru a trimite emailul cu PDF-ul
+      console.log("📧 Calling sendPdfEmail function...");
+      const sendPdfEmailFn = httpsCallable(functions, "sendPdfEmail");
+      console.log("📧 sendPdfEmailFn:", sendPdfEmailFn);
+      const emailResponse = await sendPdfEmailFn({
+        email: email, // sau userD.email, în funcție de sursa datelor
+        pdfHtml: pdfHtmlContent,
+        fullName: "dear user!",
+      });
+      console.log("📧 Email function response:", emailResponse);
 
       // 1) Creează PaymentIntent prin Firebase
-      const functions = getFunctions();
       const createPaymentIntentFn = httpsCallable(
         functions,
-        "createPaymentIntent"
+        // "createPaymentIntent"
+        "createPaymentIntentTest"
       );
 
       console.log("📡 Trimitere către Firebase createPaymentIntent:", {
@@ -594,7 +637,8 @@ function SinastrieRelatieOthers({ navigation, route }) {
       // 4) Creează factura pe server și marchează-o ca plătită
       const createInvoiceFn = httpsCallable(
         functions,
-        "createInvoiceAfterPayment"
+        // "createInvoiceAfterPayment"
+        "createInvoiceAfterPaymentTest"
       );
       const invoiceResp = await createInvoiceFn({
         transactionId,
@@ -613,34 +657,6 @@ function SinastrieRelatieOthers({ navigation, route }) {
 
       console.log("✅ Factura creată:", invoiceResp.data);
       Alert.alert(achizitieCompleta1, achizitieCompleta2);
-
-      setIsPaid(true);
-
-      // 5) Actualizează analiza ca plătită în `personsDataOthers`
-      const existingOtherDataString = await AsyncStorage.getItem(
-        "personsDataOthers"
-      );
-      const existingOtherData = existingOtherDataString
-        ? JSON.parse(existingOtherDataString)
-        : [];
-
-      console.log("📦 Date existente în personsDataOthers:", existingOtherData);
-
-      const updatePaidStatus = (dataList) => {
-        return dataList.map((item) =>
-          item.id === analysisData.id ? { ...item, isPaid: true } : item
-        );
-      };
-
-      const updatedOtherData = updatePaidStatus(existingOtherData);
-      await AsyncStorage.setItem(
-        "personsDataOthers",
-        JSON.stringify(updatedOtherData)
-      );
-
-      console.log(
-        "✅ Analiza din personsDataOthers marcată ca plătită și salvată în AsyncStorage."
-      );
     } catch (error) {
       console.error("❌ Eroare handlePayment:", error);
       Alert.alert("Eroare", "Nu s-a putut procesa plata sau factura.");
@@ -956,6 +972,24 @@ function SinastrieRelatieOthers({ navigation, route }) {
       )}
     </View>
   );
+
+  useEffect(() => {
+    let timeoutId;
+    if (isLoading) {
+      timeoutId = setTimeout(() => {
+        Alert.alert(
+          i18n.translate("slowLoading"),
+          i18n.translate("slowLoadingText")
+        );
+      }, 10000); // 10 secunde timeout
+    }
+
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [isLoading]);
 
   //Traducere inline text
 

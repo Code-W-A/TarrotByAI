@@ -1499,3 +1499,96 @@ exports.createInvoiceAfterPaymentTest = functions.https.onCall(
 );
 
 // -----------------PAYMENT test END----------
+
+// -----------------SEND EMAIL PDF----------
+
+const nodemailer = require("nodemailer");
+const chromium = require("chrome-aws-lambda");
+const puppeteer = require("puppeteer-core");
+
+// Configurare transportator email (exemplu folosind Gmail)
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: "webdynamicx@gmail.com",
+    pass: "ypeb yvmi ygat lahn",
+  },
+});
+
+/**
+ * Generates a PDF buffer from the provided HTML content using Puppeteer.
+ *
+ * @param {string} htmlContent - The HTML content to convert into a PDF.
+ * @return {Promise<Buffer>} - A promise that resolves with the PDF buffer.
+ */
+async function generatePdfBuffer(htmlContent) {
+  const browser = await puppeteer.launch({
+    args: chromium.args,
+    defaultViewport: chromium.defaultViewport,
+    executablePath: await chromium.executablePath,
+    headless: chromium.headless,
+  });
+  const page = await browser.newPage();
+  await page.setContent(htmlContent, {waitUntil: "networkidle0"});
+  const pdfBuffer = await page.pdf({format: "A4"});
+  await browser.close();
+  return pdfBuffer;
+}
+
+/**
+ * Cloud function to send a PDF email with the astrological analysis.
+ *
+ * @param {Object} data - The data payload for the function.
+ * @param {string} data.email - The recipient's email address.
+ * @param {string} data.pdfHtml - The HTML content to be converted into a PDF.
+ * @param {string} [data.fullName] - The full name of the recipient.
+ * @param {Object} context - The function context.
+ * @return {Promise<Object>} - A promise that resolves with the result object.
+ * @throws {functions.https.HttpsError} - If the email
+ */
+const sendPdfEmail = async (data, context) => {
+  const {email, pdfHtml, fullName} = data;
+  if (!email || !pdfHtml) {
+    throw new functions.https.HttpsError(
+        "invalid-argument",
+        "Email or PDF content is missing.",
+    );
+  }
+
+  try {
+    // Generate PDF from HTML
+    const pdfBuffer = await generatePdfBuffer(pdfHtml);
+
+    // Configure email options with minimal English text
+    const mailOptions = {
+      from: "webdynamicx@gmail.com",
+      to: email,
+      subject: "Astrological Analysis PDF",
+      text:
+        `Hi ${fullName || ""},\n` +
+        `Attached is your PDF report.\n` +
+        `Technical issues: webdynamicx@gmail.com`,
+      attachments: [
+        {
+          filename: "RaportAnaliza.pdf",
+          content: pdfBuffer,
+          contentType: "application/pdf",
+        },
+      ],
+    };
+
+    // Send the email
+    await transporter.sendMail(mailOptions);
+    return {success: true, message: "Email sent successfully."};
+  } catch (error) {
+    console.error("Error sending email:", error);
+    throw new functions.https.HttpsError("internal", "Error sending email.");
+  }
+};
+
+exports.sendPdfEmail = functions
+    .runWith({
+      memory: "512MB", // Crește limita de memorie la 512MB
+      timeoutSeconds: 60, // (Opțional)
+    })
+    .https.onCall(sendPdfEmail);

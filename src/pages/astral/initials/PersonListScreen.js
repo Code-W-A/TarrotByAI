@@ -32,6 +32,12 @@ import { useFocusEffect } from "@react-navigation/native";
 import LoadingOverlay from "../../../components/Astral/components/zodiac/LoadingOverlay";
 import { useTranslation } from "../../../utils/translateUtil";
 import { useLanguage } from "../../../context/LanguageContext";
+import {
+  backupAnalizeSinastrieOnePersonToFirestore,
+  backupAnalizeSinastrieOthersToFirestore,
+  retrieveAnalizeSinastrieOnePersonByPhone,
+  retrieveAnalizeSinastrieOthersByPhone,
+} from "../../../utils/backupAnalysisUtils";
 
 const PersonListScreen = ({ navigation }) => {
   const [persons, setPersons] = useState([]);
@@ -65,7 +71,7 @@ const PersonListScreen = ({ navigation }) => {
     //   // Afișează mesajul de achiziție
     //   setPurchaseModalVisible(true);
     // } else {
-    // Navighează către ecranul de adăugare
+    // Navighează către e cranul de adăugare
     navigation.navigate("NewPerson", { editMode: false });
     // }
   };
@@ -79,31 +85,63 @@ const PersonListScreen = ({ navigation }) => {
     // }
   };
 
-  const handleRecoverBoughtAnalysis = async () => {
-    setIsLoading(true);
-    console.log("🔄 handleRecoverBoughtAnalysis started...");
+  // const handleRecoverBoughtAnalysis = async () => {
+  //   setIsLoading(true);
+  //   console.log("🔄 handleRecoverBoughtAnalysis started...");
 
+  //   try {
+  //     // 🔹 Citește datele existente din AsyncStorage
+  //     const existingPersonalData = await AsyncStorage.getItem("personsData");
+  //     const existingOtherData = await AsyncStorage.getItem("personsDataOthers");
+
+  //     // 🔹 Parsează datele
+  //     const parsedPersonalData = existingPersonalData
+  //       ? JSON.parse(existingPersonalData)
+  //       : [];
+  //     const parsedOtherData = existingOtherData
+  //       ? JSON.parse(existingOtherData)
+  //       : [];
+
+  //     // 🔹 Setează state-ul pentru a afișa datele în UI
+  //     setPersons(parsedPersonalData);
+  //     setOtherPersons(parsedOtherData);
+
+  //     console.log("✅ personsData:", parsedPersonalData);
+  //     console.log("✅ personsDataOthers:", parsedOtherData);
+  //   } catch (error) {
+  //     console.error("❌ Error in handleRecoverBoughtAnalysis:", error);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     handleRecoverBoughtAnalysis();
+  //   }, [])
+  // );
+
+  // Funcție pentru sincronizarea datelor:
+  // 1. Se face backup-ul (din AsyncStorage în Firestore) pentru ambele colecții sinastrie.
+  // 2. Se recuperează documentele din Firestore (filtrate după telefonul utilizatorului).
+  // 3. Se actualizează state-urile cu datele preluate din Firestore.
+  const synchronizeData = async () => {
     try {
-      // 🔹 Citește datele existente din AsyncStorage
-      const existingPersonalData = await AsyncStorage.getItem("personsData");
-      const existingOtherData = await AsyncStorage.getItem("personsDataOthers");
+      setIsLoading(true);
+      // Apelăm separat funcțiile de backup:
+      await backupAnalizeSinastrieOnePersonToFirestore();
+      await backupAnalizeSinastrieOthersToFirestore();
+      console.log("✅ [Sinastrie] Backup-ul s-a efectuat.");
 
-      // 🔹 Parsează datele
-      const parsedPersonalData = existingPersonalData
-        ? JSON.parse(existingPersonalData)
-        : [];
-      const parsedOtherData = existingOtherData
-        ? JSON.parse(existingOtherData)
-        : [];
-
-      // 🔹 Setează state-ul pentru a afișa datele în UI
-      setPersons(parsedPersonalData);
-      setOtherPersons(parsedOtherData);
-
-      console.log("✅ personsData:", parsedPersonalData);
-      console.log("✅ personsDataOthers:", parsedOtherData);
+      // Recuperăm documentele din Firestore:
+      const onePersonDocs = await retrieveAnalizeSinastrieOnePersonByPhone();
+      const othersDocs = await retrieveAnalizeSinastrieOthersByPhone();
+      setPersons(
+        Array.isArray(onePersonDocs) ? onePersonDocs : [onePersonDocs]
+      );
+      setOtherPersons(Array.isArray(othersDocs) ? othersDocs : [othersDocs]);
     } catch (error) {
-      console.error("❌ Error in handleRecoverBoughtAnalysis:", error);
+      console.error("Eroare la sincronizarea datelor sinastrie:", error);
     } finally {
       setIsLoading(false);
     }
@@ -111,7 +149,7 @@ const PersonListScreen = ({ navigation }) => {
 
   useFocusEffect(
     useCallback(() => {
-      handleRecoverBoughtAnalysis();
+      synchronizeData();
     }, [])
   );
 
@@ -321,7 +359,6 @@ const PersonListScreen = ({ navigation }) => {
           <FloatingActionButton
             handleAddYourSinastrie={handleAddPerson}
             handleAddOtherSinastrie={handleAddPersonForOthers}
-            handleRecoverBoughtAnalysis={handleRecoverBoughtAnalysis}
           />
         </View>
 

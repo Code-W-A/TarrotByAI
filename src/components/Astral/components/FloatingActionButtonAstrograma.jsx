@@ -36,7 +36,7 @@ const FloatingActionButtonAstrograma = ({
               <Text style={styles.modalButtonText}>{astrogramaNoua}</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
+            {/* <TouchableOpacity
               style={styles.modalButton}
               onPress={() => {
                 toggleModal();
@@ -46,7 +46,7 @@ const FloatingActionButtonAstrograma = ({
               <Text style={styles.modalButtonText}>
                 Recupereaza analizele cumparate
               </Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
             <TouchableOpacity style={styles.cancelButton} onPress={toggleModal}>
               <Text style={styles.cancelButtonText}>Închide</Text>
             </TouchableOpacity>

@@ -1,5 +1,8 @@
 export const langObj = {
   en: {
+    slowLoading: "Slow loading..",
+    slowLoadingText:
+      "The translation is taking longer than usual. Please be patient.",
     Harmony: "Harmony",
     Conflict: "Conflict",
     Contrast: "Contrast",
@@ -191,6 +194,9 @@ export const langObj = {
     clinicLoginRedirect: "Continue",
   },
   ro: {
+    slowLoading: "Încărcare lentă..",
+    slowLoadingText:
+      "Traducerea durează mai mult decât de obicei. Vă rugăm să aveți răbdare.",
     Harmony: "Armonie",
     Conflict: "Conflict",
     Contrast: "Contrast",
@@ -390,6 +396,9 @@ export const langObj = {
     clinicLoginRedirect: "Continuă",
   },
   es: {
+    slowLoading: "Carga lenta..",
+    slowLoadingText:
+      "La traducción está tardando más de lo habitual. Por favor, tenga paciencia.",
     Harmony: "Armonía",
     Conflict: "Conflicto",
     Contrast: "Contraste",
@@ -590,6 +599,9 @@ export const langObj = {
     clinicLoginRedirect: "Continuar",
   },
   it: {
+    slowLoading: "Caricamento lento..",
+    slowLoadingText:
+      "La traduzione sta impiegando più tempo del solito. Per favore, sii paziente.",
     Harmony: "Armonia",
     Conflict: "Conflitto",
     Contrast: "Contrasto",
@@ -810,6 +822,9 @@ export const langObj = {
     clinicLoginRedirect: "Continua",
   },
   pl: {
+    slowLoading: "Ładowanie wolne..",
+    slowLoadingText:
+      "Tłumaczenie trwa dłużej niż zwykle. Prosimy o cierpliwość.",
     Harmony: "Harmonia",
     Conflict: "Konflikt",
     Contrast: "Kontrast",
@@ -1029,6 +1044,9 @@ export const langObj = {
     clinicLoginRedirect: "Kontynuuj",
   },
   bg: {
+    slowLoading: "Бавно зареждане..",
+    slowLoadingText:
+      "Преводът отнема повече време от обичайното. Моля, бъдете търпеливи.",
     Harmony: "Хармония",
     Conflict: "Конфликт",
     Contrast: "Контраст",
@@ -1223,6 +1241,8 @@ export const langObj = {
     clinicLoginRedirect: "Продължете",
   },
   cs: {
+    slowLoading: "Pomalé načítání..",
+    slowLoadingText: "Překlad trvá déle než obvykle. Prosím, mějte trpělivost.",
     Harmony: "Harmonie",
     Conflict: "Konflikt",
     Contrast: "Kontrast",
@@ -1418,6 +1438,9 @@ export const langObj = {
     clinicLoginRedirect: "Pokračovat",
   },
   de: {
+    slowLoading: "Langsames Laden..",
+    slowLoadingText:
+      "Die Übersetzung dauert länger als gewöhnlich. Bitte haben Sie Geduld.",
     Harmony: "Harmonie",
     Conflict: "Konflikt",
     Contrast: "Kontrast",
@@ -1616,6 +1639,9 @@ export const langObj = {
     clinicLoginRedirect: "Fortfahren",
   },
   el: {
+    slowLoading: "Αργή φόρτωση..",
+    slowLoadingText:
+      "Η μετάφραση διαρκεί περισσότερο από το συνηθισμένο. Παρακαλώ περιμένετε.",
     Harmony: "Αρμονία",
     Conflict: "Σύγκρουση",
     Contrast: "Αντίθεση",
@@ -1815,6 +1841,9 @@ export const langObj = {
     clinicLoginRedirect: "Συνέχεια",
   },
   fr: {
+    slowLoading: "Chargement lent..",
+    slowLoadingText:
+      "La traduction prend plus de temps que d'habitude. Veuillez patienter.",
     Harmony: "Harmonie",
     Conflict: "Conflit",
     Contrast: "Contraste",
@@ -2012,6 +2041,9 @@ export const langObj = {
     clinicLoginRedirect: "Continuer",
   },
   hr: {
+    slowLoading: "Sporo učitavanje..",
+    slowLoadingText:
+      "Prijevod traje duže nego inače. Molimo vas za strpljenje.",
     Harmony: "Harmonija",
     Conflict: "Sukob",
     Contrast: "Kontrast",
@@ -2204,6 +2236,8 @@ export const langObj = {
     clinicLoginRedirect: "Nastavi",
   },
   hi: {
+    slowLoading: "धीमा लोड हो रहा है..",
+    slowLoadingText: "अनुवाद सामान्य से अधिक समय ले रहा है। कृपया धैर्य रखें।",
     Harmony: "सामंजस्य",
     Conflict: "संघर्ष",
     Contrast: "विरोधाभास",
@@ -2397,6 +2431,9 @@ export const langObj = {
     clinicLoginRedirect: "जारी रखें",
   },
   id: {
+    slowLoading: "Memuat lambat..",
+    slowLoadingText:
+      "Terjemahan membutuhkan waktu lebih lama dari biasanya. Harap bersabar.",
     Harmony: "Harmoni",
     Conflict: "Konflik",
     Contrast: "Kontras",
@@ -2592,6 +2629,9 @@ export const langObj = {
     clinicLoginRedirect: "Lanjutkan",
   },
   sk: {
+    slowLoading: "Pomalé načítanie..",
+    slowLoadingText:
+      "Preklad trvá dlhšie ako obvykle. Prosím, buďte trpezliví.",
     Harmony: "Harmónia",
     Conflict: "Konflikt",
     Contrast: "Kontrast",
@@ -2785,6 +2825,9 @@ export const langObj = {
     clinicLoginRedirect: "Pokračovať",
   },
   ru: {
+    slowLoading: "Медленная загрузка..",
+    slowLoadingText:
+      "Перевод занимает больше времени, чем обычно. Пожалуйста, наберитесь терпения.",
     Harmony: "Гармония",
     Conflict: "Конфликт",
     Contrast: "Контраст",
@@ -2980,6 +3023,9 @@ export const langObj = {
     clinicLoginRedirect: "Продолжить",
   },
   tr: {
+    slowLoading: "Yavaş yükleniyor..",
+    slowLoadingText:
+      "Çeviri beklenenden daha uzun sürüyor. Lütfen sabırlı olun.",
     Harmony: "Uyum",
     Conflict: "Çatışma",
     Contrast: "Zıtlık",
@@ -3174,6 +3220,9 @@ export const langObj = {
     clinicLoginRedirect: "Devam Et",
   },
   ar: {
+    slowLoading: "تحميل بطيء..",
+    slowLoadingText:
+      "الترجمة تستغرق وقتًا أطول من المعتاد. يرجى التحلي بالصبر.",
     Harmony: "انسجام",
     Conflict: "صراع",
     Contrast: "تباين",
@@ -3364,6 +3413,9 @@ export const langObj = {
     clinicLoginRedirect: "متابعة",
   },
   sq: {
+    slowLoading: "Ngarkim i ngadaltë..",
+    slowLoadingText:
+      "Përkthimi po zgjat më shumë se zakonisht. Ju lutemi të keni durim.",
     Harmony: "Harmoni",
     Conflict: "Konflikt",
     Contrast: "Kontrast",

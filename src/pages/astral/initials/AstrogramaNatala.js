@@ -223,48 +223,6 @@ function AstrogramaNatala({ navigation, route }) {
   const [fullContent, setFullContent] = useState(
     "Aceasta este interpretarea completă a astrogramei tale. Include toate detaliile despre aspectele astrologice, case și planete relevante."
   );
-  // const generateFullInterpretation = async (selectedLanguage, userData) => {
-  //   try {
-  //     const categories = [
-  //       "generalCategory",
-  //       "dragosteCategory",
-  //       "familieCategory",
-  //       "baniCategory",
-  //       "muncaStudiiCategory",
-  //       "prieteniCategory",
-  //       "sanatateCategory",
-  //       "spiritualitateCategory",
-  //     ];
-
-  //     for (const category of categories) {
-  //       userData[category] = await handleToTranslate(
-  //         userData[category],
-  //         selectedLanguage,
-  //         userData.actualLanguageAstrograma
-  //       );
-  //     }
-
-  //     setUserData(userData);
-
-  //     const content = categories
-  //       .map((category) => `${category}: ${userData[category]}`)
-  //       .join("\n\n");
-  //     setFullContent(content);
-
-  //     await AsyncStorage.setItem("userData", JSON.stringify(userData));
-  //   } catch (error) {
-  //     console.error("Eroare la generarea interpretării complete:", error);
-  //   }
-  // };
-
-  // const handleDismissModal = () => {
-  //   setModalVisible(false);
-  // };
-
-  // const handleConfirmPurchase = async () => {
-  //   console.log("is paying...");
-  //   setIsPaid(!isPaid);
-  // };
 
   const generatePDFContent = () => {
     const natalWheelChart = userD.natalData?.data?.svg; // Obține SVG-ul natal wheel
@@ -504,218 +462,6 @@ function AstrogramaNatala({ navigation, route }) {
     }
   };
 
-  // const handleNatalChart = async () => {
-  //   try {
-  //     const userDataJson = await AsyncStorage.getItem("userData");
-  //     const userData = userDataJson ? JSON.parse(userDataJson) : null;
-
-  //     console.log("userData.aspectsData...", userData.generalSignTextData);
-  //     console.log(
-  //       "userData.aspectsData...",
-  //       userData.generalSignTextData.Chiron.data.planet_name
-  //     );
-  //     console.log(
-  //       "userData.aspectsData...",
-  //       userData.generalSignTextData.Chiron.data.sign_name
-  //     );
-  //     console.log(
-  //       "userData.aspectsData...",
-  //       userData.generalSignTextData.Chiron.data.report
-  //     );
-
-  //     if (!userData) {
-  //       console.log(
-  //         "Nu există date de utilizator disponibile în AsyncStorage."
-  //       );
-  //       setIsLoading(false);
-  //       return;
-  //     }
-  //     console.log("data....here", language);
-  //     console.log("data....here", userData.actualLanguageAstrograma);
-
-  //     if (language !== userData.actualLanguageAstrograma) {
-  //       setIsLoading(true);
-  //       console.log("language is not in userData....", language);
-  //       console.log(
-  //         "language is not in userData....",
-  //         userData.actualLanguageAstrograma
-  //       );
-
-  //       let translationFailed = false; // Flag pentru a urmări dacă traducerea a eșuat
-  //       const translatedUserData = JSON.parse(JSON.stringify(userData)); // Creează o copie profundă a datelor
-
-  //       try {
-  //         translatedUserData.actualLanguageAstrograma = language;
-
-  //         const ascendantData = await handleToTranslate(
-  //           translatedUserData.ascendantData.data.result,
-  //           language,
-  //           translatedUserData.actualLanguageAstrograma
-  //         );
-  //         translatedUserData.ascendantData.data.result = ascendantData;
-  //         await delay(4000); // delay de 2 secunde
-
-  //         await translateGeneralSignTextData(translatedUserData, language);
-  //         await delay(4000); // delay de 2 secunde
-
-  //         // Simulăm o eroare la ultima traducere
-
-  //         await translateGeneralHouseTextData(translatedUserData, language);
-  //         await delay(4000); // delay de 2 secunde
-
-  //         console.log(
-  //           "after translate user data....",
-  //           translatedUserData.actualLanguageAstrograma
-  //         );
-
-  //         // Salvăm doar dacă traducerea este completă
-  //         await AsyncStorage.setItem(
-  //           "userData",
-  //           JSON.stringify(translatedUserData)
-  //         );
-  //       } catch (error) {
-  //         console.error("Eroare în procesul de traducere:", error);
-  //         translationFailed = true;
-  //       }
-
-  //       if (translationFailed) {
-  //         console.log(
-  //           "Traducerea a eșuat. Datele originale sunt păstrate și nemodificate."
-  //         );
-  //         // Datele originale rămân neschimbate, iar traducerea incompletă nu se aplică
-  //       }
-  //     }
-
-  //     // traducere INITIALA FARA HANDLE ERROR
-  //     // if (language != userData.actualLanguageAstrograma) {
-  //     //   setIsLoading(true);
-  //     //   console.log("language is not in userData....", language);
-  //     //   console.log(
-  //     //     "language is not in userData....",
-  //     //     userData.actualLanguageAstrograma
-  //     //   );
-  //     //   userData.actualLanguageAstrograma = language;
-
-  //     //   const ascendantData = await handleToTranslate(
-  //     //     userData.ascendantData.data.result,
-  //     //     language,
-  //     //     userData.actualLanguageAstrograma
-  //     //   );
-  //     //   userData.ascendantData.data.result = ascendantData;
-  //     //   await delay(4000); // delay de 1 secundă
-
-  //     //   await translateGeneralSignTextData(userData, language);
-  //     //   await delay(4000); // delay de 1 secundă
-  //     //   await translateGeneralHouseTextData(userData, language);
-  //     //   await delay(4000); // delay de 1 secundă
-
-  //     //   // console.log(
-  //     //   //   "after translate user data....",
-  //     //   //   userData.spiritualitateCategory
-  //     //   // );
-  //     //   // console.log(
-  //     //   //   "after translate user data....",
-  //     //   //   userData.horoscopeResultsDaily
-  //     //   // );
-  //     //   console.log(
-  //     //     "after translate user data....",
-  //     //     userData.actualLanguageAstrograma
-  //     //   );
-
-  //     //   await AsyncStorage.setItem("userData", JSON.stringify(userData));
-  //     // }
-
-  //     setUserD(userData);
-  //     // const {
-  //     //   full_name,
-  //     //   day,
-  //     //   month,
-  //     //   year,
-  //     //   hour,
-  //     //   min,
-  //     //   sec,
-  //     //   gender,
-  //     //   place,
-  //     //   lat,
-  //     //   lon,
-  //     //   tzone,
-  //     // } = userData;
-
-  //     // const urls = {
-  //     //   natalWheelChart:
-  //     //     "https://astroapi-4.divineapi.com/western-api/v1/natal-wheel-chart",
-  //     //   aspectTable:
-  //     //     "https://astroapi-4.divineapi.com/western-api/v2/aspect-table",
-  //     //   planetaryPositions:
-  //     //     "https://astroapi-4.divineapi.com/western-api/v1/planetary-positions",
-  //     //   houseCusps:
-  //     //     "https://astroapi-4.divineapi.com/western-api/v1/house-cusps",
-  //     //   moonPhases:
-  //     //     "https://astroapi-4.divineapi.com/western-api/v1/moon-phases",
-  //     //   ascendantReport:
-  //     //     "https://astroapi-4.divineapi.com/western-api/v1/ascendant-report",
-  //     // };
-
-  //     // const results = await Promise.all(
-  //     //   Object.keys(urls).map((key) =>
-  //     //     fetchAstroData(
-  //     //       urls[key],
-  //     //       full_name,
-  //     //       day,
-  //     //       month,
-  //     //       year,
-  //     //       hour,
-  //     //       min,
-  //     //       sec,
-  //     //       gender,
-  //     //       place,
-  //     //       lat,
-  //     //       lon,
-  //     //       tzone
-  //     //     )
-  //     //   )
-  //     // );
-
-  //     // const [
-  //     //   natalData,
-  //     //   aspectsData,
-  //     //   planetaryData,
-  //     //   cuspsData,
-  //     //   moonPhaseData,
-  //     //   ascendantData,
-  //     // ] = results;
-
-  //     if (userData.natalData && userData.natalData.data) {
-  //       const svgElements = parseSVG(userData.natalData.data.svg);
-  //       setSvgData(svgElements);
-  //       const base64Image = userData.natalData.data.base64_image.replace(
-  //         "data:image/svg+xml;base64,",
-  //         ""
-  //       );
-  //       setWheelImage(base64.decode(base64Image));
-  //     }
-
-  //     setAspectsData(userData.aspectsData ? userData.aspectsData.data : null);
-  //     setPlanetaryData(
-  //       userData.planetaryData ? userData.planetaryData.data : null
-  //     );
-  //     setHouseCusps(userData.cuspsData ? userData.cuspsData.data : null);
-  //     setMoonPhase(userData.moonPhaseData ? userData.moonPhaseData.data : null);
-  //     setAscendantReport(
-  //       userData.ascendantData ? userData.ascendantData.data : null
-  //     );
-  //     console.log("test...", userData.cuspsData.data);
-  //     setIsLoading(false);
-  //   } catch (error) {
-  //     console.error(
-  //       "Eroare la preluarea și procesarea astrogramei natale:",
-  //       error
-  //     );
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
-
   const handleNatalChart = async () => {
     try {
       setIsLoading(true);
@@ -842,18 +588,7 @@ function AstrogramaNatala({ navigation, route }) {
   const Header = (
     <View>
       <View style={[styles.headerContainer]}></View>
-      {/* <Divider /> */}
-      {/* {svgData && <AstrogramaSvg svgXml={svgData} />} */}
-      {/* <AstrogramaImage svgImage={wheelImage} /> */}
-      {/* <SvgUri width="200" height="200" svgXmlData={testSvg} /> */}
-      {/* <TestSvg width={300} height={300} /> */}
-      {/* {wheelImage && (
-        <WebView
-          originWhitelist={["*"]}
-          source={{ html: wheelImage }}
-          style={{ width: 400, height: 400 }}
-        />
-      )} */}
+
       <View style={{ width: "100%", height: "100%", overflow: "hidden" }}>
         {wheelImage && (
           <SvgXml
@@ -863,15 +598,6 @@ function AstrogramaNatala({ navigation, route }) {
             preserveAspectRatio="xMidYMid meet"
           />
         )}
-        {/* {Object.entries(zodiacSigns).map(([sign, { color, top, right }]) => (
-          <View style={[styles.iconContainer, { top, right }]}>
-            <MaterialCommunityIcons
-              name={`zodiac-${sign.toLowerCase()}`}
-              size={17}
-              color={color}
-            />
-          </View>
-        ))} */}
       </View>
     </View>
   );
@@ -890,6 +616,8 @@ function AstrogramaNatala({ navigation, route }) {
 
   const handlePayment = async () => {
     try {
+      console.log("🚀 Starting handlePayment...");
+      console.log("🛠️ Address fields:", { line1, city, country });
       if (!line1 || !city || !country) {
         Alert.alert(
           "Eroare",
@@ -900,13 +628,44 @@ function AstrogramaNatala({ navigation, route }) {
 
       setIsLoadingBuy(true);
 
-      // 1) Creează PaymentIntent prin Firebase
+      console.log("🔥 Payment loading started; isPaid set to true.");
+
       const functions = getFunctions();
+      // 5) După finalizarea plății, generează conținutul HTML pentru PDF
+      const pdfHtmlContent = generatePDFContent();
+      console.log("📝 Generated PDF HTML content.");
+      // 6) Apelează funcția backend pentru a trimite emailul cu PDF-ul
+      console.log("📧 Calling sendPdfEmail function...");
+      const sendPdfEmailFn = httpsCallable(functions, "sendPdfEmail");
+      console.log("📧 sendPdfEmailFn:", sendPdfEmailFn);
+      const emailResponse = await sendPdfEmailFn({
+        email: email, // sau userD.email, în funcție de sursa datelor
+        pdfHtml: pdfHtmlContent,
+        fullName: "dear user!",
+      });
+      console.log("📧 Email function response:", emailResponse);
+
+      // 5) Actualizează AsyncStorage cu isPaid: true
+      setIsPaid(true);
+      const userDataJson = await AsyncStorage.getItem("userData");
+      const userData = userDataJson ? JSON.parse(userDataJson) : null;
+      console.log("📥 Fetched userData from AsyncStorage:", userData);
+
+      if (userData) {
+        userData.isPaid = true;
+        await AsyncStorage.setItem("userData", JSON.stringify(userData));
+        console.log("✅ AsyncStorage updated: isPaid set to true.");
+      }
+
+      // 1) Creează PaymentIntent prin Firebase
+
+      console.log("⚙️ getFunctions returned:", functions);
       const createPaymentIntentFn = httpsCallable(
         functions,
-        "createPaymentIntent"
+        "createPaymentIntentTest"
+        // "createPaymentIntent"
       );
-
+      console.log("💳 Calling createPaymentIntentFn...");
       // 🔥 Adaugă numele pachetului
       const packageName = "Analiză Astrogramă"; // Sau poate fi dintr-un state/dinamic
 
@@ -918,6 +677,7 @@ function AstrogramaNatala({ navigation, route }) {
         email,
         phone,
       });
+      console.log("💳 PaymentIntent response:", resp);
 
       const { clientSecret, transactionId } = resp.data;
       if (!clientSecret || !transactionId) {
@@ -925,6 +685,10 @@ function AstrogramaNatala({ navigation, route }) {
       }
 
       // 2) Inițializează Payment Sheet
+      console.log(
+        "🔧 Initializing Payment Sheet with clientSecret:",
+        clientSecret
+      );
       const { error: initError } = await initPaymentSheet({
         paymentIntentClientSecret: clientSecret,
         merchantDisplayName: "Cristina Zurba tarot",
@@ -937,24 +701,29 @@ function AstrogramaNatala({ navigation, route }) {
       });
 
       if (initError) {
-        console.error("Eroare initPaymentSheet:", initError);
+        console.error("❌ Eroare initPaymentSheet:", initError);
         Alert.alert("Eroare", initError.message);
         return;
       }
+      console.log("🔧 Payment Sheet initialized successfully.");
 
       // 3) Afișează Payment Sheet
+      console.log("📲 Presenting Payment Sheet...");
       const { error: presentError } = await presentPaymentSheet();
       if (presentError) {
-        console.error("Eroare la prezentarea Payment Sheet:", presentError);
+        console.error("❌ Eroare la prezentarea Payment Sheet:", presentError);
         return;
       }
+      console.log("📲 Payment Sheet presented successfully.");
 
-      console.log("Plată finalizată! Generăm factura...");
+      console.log("🎉 Payment successful! Generating invoice...");
 
       // 4) Creează factura pe server și marchează-o ca plătită
+      console.log("🧾 Creating invoice...");
       const createInvoiceFn = httpsCallable(
         functions,
-        "createInvoiceAfterPayment"
+        "createInvoiceAfterPaymentTest"
+        // "createInvoiceAfterPayment"
       );
       const invoiceResp = await createInvoiceFn({
         transactionId,
@@ -968,30 +737,136 @@ function AstrogramaNatala({ navigation, route }) {
           postal_code: postalCode,
           country,
         },
-        analysisData: userD,
+        analysisData: userData,
       });
 
-      console.log("Factura creată:", invoiceResp.data);
+      console.log("🧾 Invoice created:", invoiceResp.data);
       Alert.alert(achizitieCompleta1, achizitieCompleta2);
-
-      setIsPaid(true);
-
-      // 5) Actualizează AsyncStorage cu isPaid: true
-      const userDataJson = await AsyncStorage.getItem("userData");
-      const userData = userDataJson ? JSON.parse(userDataJson) : null;
-
-      if (userData) {
-        userData.isPaid = true;
-        await AsyncStorage.setItem("userData", JSON.stringify(userData));
-        console.log("Actualizare AsyncStorage: isPaid setat la true.");
-      }
     } catch (error) {
-      console.error("Eroare handlePayment:", error);
+      console.error("❌ Eroare handlePayment:", error);
       Alert.alert("Eroare", "Nu s-a putut procesa plata sau factura.");
     } finally {
       setIsLoadingBuy(false);
+      console.log("🏁 handlePayment complete. isLoadingBuy set to false.");
     }
   };
+
+  // const handlePayment = async () => {
+  //   try {
+  //     if (!line1 || !city || !country) {
+  //       Alert.alert(
+  //         "Eroare",
+  //         "Te rugăm să completezi toate câmpurile de adresă."
+  //       );
+  //       return;
+  //     }
+
+  //     setIsLoadingBuy(true);
+  //     setIsPaid(true);
+
+  //     // 5) Actualizează AsyncStorage cu isPaid: true
+  //     const userDataJson = await AsyncStorage.getItem("userData");
+  //     const userData = userDataJson ? JSON.parse(userDataJson) : null;
+
+  //     if (userData) {
+  //       userData.isPaid = true;
+  //       await AsyncStorage.setItem("userData", JSON.stringify(userData));
+  //       console.log("Actualizare AsyncStorage: isPaid setat la true.");
+  //     }
+
+  //     // 5) După finalizarea plății, generează conținutul HTML pentru PDF
+  //     const pdfHtmlContent = generatePDFContent();
+
+  //     // 6) Apelează funcția backend pentru a trimite emailul cu PDF-ul
+  //     const sendPdfEmailFn = httpsCallable(functions, "sendPdfEmail");
+  //     const emailResponse = await sendPdfEmailFn({
+  //       email: email, // sau userD.email, în funcție de sursa datelor
+  //       pdfHtml: pdfHtmlContent,
+  //       fullName: userD.full_name, // opțional, pentru personalizare
+  //     });
+
+  //     // 1) Creează PaymentIntent prin Firebase
+  //     const functions = getFunctions();
+  //     const createPaymentIntentFn = httpsCallable(
+  //       functions,
+  //       "createPaymentIntentTest"
+  //       // "createPaymentIntent"
+  //     );
+
+  //     // 🔥 Adaugă numele pachetului
+  //     const packageName = "Analiză Astrogramă"; // Sau poate fi dintr-un state/dinamic
+
+  //     const resp = await createPaymentIntentFn({
+  //       amount: 200, // 3.00 RON
+  //       currency: "ron",
+  //       firstName,
+  //       lastName,
+  //       email,
+  //       phone,
+  //     });
+
+  //     const { clientSecret, transactionId } = resp.data;
+  //     if (!clientSecret || !transactionId) {
+  //       throw new Error("Lipsesc datele PaymentIntent. Verifică serverul.");
+  //     }
+
+  //     // 2) Inițializează Payment Sheet
+  //     const { error: initError } = await initPaymentSheet({
+  //       paymentIntentClientSecret: clientSecret,
+  //       merchantDisplayName: "Cristina Zurba tarot",
+  //       billingDetailsCollectionConfiguration: {
+  //         name: "required",
+  //         phone: "required",
+  //         email: "required",
+  //         address: "never",
+  //       },
+  //     });
+
+  //     if (initError) {
+  //       console.error("Eroare initPaymentSheet:", initError);
+  //       Alert.alert("Eroare", initError.message);
+  //       return;
+  //     }
+
+  //     // 3) Afișează Payment Sheet
+  //     const { error: presentError } = await presentPaymentSheet();
+  //     if (presentError) {
+  //       console.error("Eroare la prezentarea Payment Sheet:", presentError);
+  //       return;
+  //     }
+
+  //     console.log("Plată finalizată! Generăm factura...");
+
+  //     // 4) Creează factura pe server și marchează-o ca plătită
+  //     const createInvoiceFn = httpsCallable(
+  //       functions,
+  //       "createInvoiceAfterPaymentTest"
+  //       // "createInvoiceAfterPayment"
+  //     );
+  //     const invoiceResp = await createInvoiceFn({
+  //       transactionId,
+  //       firstName,
+  //       lastName,
+  //       email,
+  //       phone,
+  //       address: {
+  //         line1,
+  //         city,
+  //         postal_code: postalCode,
+  //         country,
+  //       },
+  //       analysisData: userD,
+  //     });
+
+  //     console.log("Factura creată:", invoiceResp.data);
+  //     Alert.alert(achizitieCompleta1, achizitieCompleta2);
+  //   } catch (error) {
+  //     console.error("Eroare handlePayment:", error);
+  //     Alert.alert("Eroare", "Nu s-a putut procesa plata sau factura.");
+  //   } finally {
+  //     setIsLoadingBuy(false);
+  //   }
+  // };
 
   //Traducere inline text
 
@@ -1100,13 +975,7 @@ function AstrogramaNatala({ navigation, route }) {
                       {userD.gender}
                     </H8fontBoldWhite>
                   </View>
-                  {/* Interpretează următoarea diagramă natală: Născut pe 10 martie 1994, la 14:05, în București, România. Soarele în Pești, Luna în Capricorn, Mercur în Vărsător, Venus în Berbec, și Marte în Pești. Ascendentul este în Scorpion. Soarele formează o conjuncție cu Venus, Luna este în opoziție cu Marte, iar Mercur formează un trigon cu Saturn. */}
-                  {/* Interpretează următoarea diagramă natală si sa fie pe categorii General, Personalitate, Dragoste, Cariera, Bani:  */}
-                  {/* {aspectsData && (
-        <AstrologyAspectsView aspectsData={aspectsData} />
-      )} */}
                 </View>
-                {/* <ChatComponent /> */}
 
                 <View style={{ paddingVertical: 10 }} />
               </ShowFromTop>
@@ -1237,11 +1106,7 @@ function AstrogramaNatala({ navigation, route }) {
                       </View>
                     )}
                   </View>
-                  {/* {aspectsData && (
-      <AstrologyAspectsView aspectsData={aspectsData} />
-    )} */}
                 </View>
-                {/* <ChatComponent /> */}
 
                 <View style={{ paddingVertical: 10 }} />
               </ShowFromTop>

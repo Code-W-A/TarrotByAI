@@ -911,11 +911,58 @@ function AstrogramaNatalaOtherPerson({ navigation }) {
 
       setIsLoadingBuy(true);
 
-      // 1) Creează PaymentIntent prin Firebase
+      setIsPaid(true);
+
+      // 5) **Actualizează doar analiza cumpărată cu `isPaid: true` în `personsDataAstrograma`**
+      const personsDataAstrogramaJson = await AsyncStorage.getItem(
+        "personsDataAstrograma"
+      );
+      let updatedPersonsDataAstrograma = personsDataAstrogramaJson
+        ? JSON.parse(personsDataAstrogramaJson)
+        : [];
+
+      if (Array.isArray(updatedPersonsDataAstrograma)) {
+        updatedPersonsDataAstrograma = updatedPersonsDataAstrograma.map(
+          (analysis) =>
+            analysis.full_name === userD.full_name
+              ? { ...analysis, isPaid: true }
+              : analysis
+        );
+      } else if (updatedPersonsDataAstrograma.full_name === userD.full_name) {
+        updatedPersonsDataAstrograma.isPaid = true;
+      }
+
+      // **Salvează modificările în AsyncStorage**
+      await AsyncStorage.setItem(
+        "personsDataAstrograma",
+        JSON.stringify(updatedPersonsDataAstrograma)
+      );
       const functions = getFunctions();
+
+      console.log(
+        "✅ AsyncStorage updated: isPaid setat la true pentru analiza curentă."
+      );
+
+      // 5) După finalizarea plății, generează conținutul HTML pentru PDF
+      const pdfHtmlContent = generatePDFContent();
+      console.log("📝 Generated PDF HTML content.");
+      // 6) Apelează funcția backend pentru a trimite emailul cu PDF-ul
+      console.log("📧 Calling sendPdfEmail function...");
+      const sendPdfEmailFn = httpsCallable(functions, "sendPdfEmail");
+      console.log("📧 sendPdfEmailFn:", sendPdfEmailFn);
+      const emailResponse = await sendPdfEmailFn({
+        email: email, // sau userD.email, în funcție de sursa datelor
+        pdfHtml: pdfHtmlContent,
+        fullName: "dear user!",
+      });
+      console.log("📧 Email function response:", emailResponse);
+
+      // 1) Creează PaymentIntent prin Firebase
+
       const createPaymentIntentFn = httpsCallable(
         functions,
-        "createPaymentIntent"
+        "createPaymentIntentTest"
+        // "createPaymentIntent"
       );
 
       const resp = await createPaymentIntentFn({
@@ -962,7 +1009,8 @@ function AstrogramaNatalaOtherPerson({ navigation }) {
       // 4) Creează factura pe server și marchează-o ca plătită
       const createInvoiceFn = httpsCallable(
         functions,
-        "createInvoiceAfterPayment"
+        "createInvoiceAfterPaymentTest"
+        // "createInvoiceAfterPayment"
       );
       const invoiceResp = await createInvoiceFn({
         transactionId,
@@ -981,37 +1029,6 @@ function AstrogramaNatalaOtherPerson({ navigation }) {
 
       console.log("Factura creată:", invoiceResp.data);
       Alert.alert(achizitieCompleta1, achizitieCompleta2);
-
-      setIsPaid(true);
-
-      // 5) **Actualizează doar analiza cumpărată cu `isPaid: true` în `personsDataAstrograma`**
-      const personsDataAstrogramaJson = await AsyncStorage.getItem(
-        "personsDataAstrograma"
-      );
-      let updatedPersonsDataAstrograma = personsDataAstrogramaJson
-        ? JSON.parse(personsDataAstrogramaJson)
-        : [];
-
-      if (Array.isArray(updatedPersonsDataAstrograma)) {
-        updatedPersonsDataAstrograma = updatedPersonsDataAstrograma.map(
-          (analysis) =>
-            analysis.full_name === userD.full_name
-              ? { ...analysis, isPaid: true }
-              : analysis
-        );
-      } else if (updatedPersonsDataAstrograma.full_name === userD.full_name) {
-        updatedPersonsDataAstrograma.isPaid = true;
-      }
-
-      // **Salvează modificările în AsyncStorage**
-      await AsyncStorage.setItem(
-        "personsDataAstrograma",
-        JSON.stringify(updatedPersonsDataAstrograma)
-      );
-
-      console.log(
-        "✅ AsyncStorage updated: isPaid setat la true pentru analiza curentă."
-      );
     } catch (error) {
       console.error("Eroare handlePayment:", error);
       Alert.alert("Eroare", "Nu s-a putut procesa plata sau factura.");

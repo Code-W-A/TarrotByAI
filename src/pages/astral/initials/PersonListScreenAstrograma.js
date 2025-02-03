@@ -29,6 +29,16 @@ import LoadingOverlay from "../../../components/Astral/components/zodiac/Loading
 import { useTranslation } from "../../../utils/translateUtil";
 import { useLanguage } from "../../../context/LanguageContext";
 import FloatingActionButtonAstrograma from "../../../components/Astral/components/FloatingActionButtonAstrograma";
+import {
+  backupAnalysesToFirestore,
+  retrieveBackupsByPhone,
+} from "../../../utils/firestoreUtils";
+import {
+  backupAnalizeAstrogramaNatalaOthersToFirestore,
+  backupAnalizeAstrogramaNatalaPersonalaToFirestore,
+  retrieveAnalizeAstrogramaNatalaOthersByPhone,
+  retrieveAnalizeAstrogramaNatalaPersonalaByPhone,
+} from "../../../utils/backupAnalysisUtils";
 
 const PersonListScreenAstrograma = ({ navigation }) => {
   const [persons, setPersons] = useState([]);
@@ -45,48 +55,35 @@ const PersonListScreenAstrograma = ({ navigation }) => {
   const handleAddPerson = () => {
     navigation.navigate("NewPersonAstrograma", { editMode: false });
   };
-  const handleRecoverBoughtAnalysis = async () => {
-    console.log("🔄 handleRecoverBoughtAnalysis called...");
-    setIsLoading(true); // Set loading to true at the start
 
+  // Funcție pentru sincronizarea datelor:
+  // 1. Se face backup-ul (din AsyncStorage în Firestore)
+  // 2. Se recuperează backup-urile din Firestore (filtrate după telefonul utilizatorului)
+  // 3. Se actualizează state-ul cu datele preluate din Firestore
+  const synchronizeData = async () => {
     try {
-      // 🔹 Citire din AsyncStorage pentru userData
-      const userDataJson = await AsyncStorage.getItem("userData");
-      const parsedUserData = userDataJson ? JSON.parse(userDataJson) : [];
+      setIsLoading(true);
+      // Apelăm separat backup-urile:
+      await backupAnalizeAstrogramaNatalaPersonalaToFirestore();
+      await backupAnalizeAstrogramaNatalaOthersToFirestore();
+      console.log("✅ Backup-ul s-a efectuat.");
 
-      // 🔹 Citire din AsyncStorage pentru personsDataAstrograma
-      const personsDataAstrogramaJson = await AsyncStorage.getItem(
-        "personsDataAstrograma"
-      );
-      const parsedPersonsDataAstrograma = personsDataAstrogramaJson
-        ? JSON.parse(personsDataAstrogramaJson)
-        : [];
-
-      // 🔹 Setează datele în state
-      setPersons(
-        Array.isArray(parsedUserData) ? parsedUserData : [parsedUserData]
-      );
-      setAsyncPersons(
-        Array.isArray(parsedPersonsDataAstrograma)
-          ? parsedPersonsDataAstrograma
-          : [parsedPersonsDataAstrograma]
-      );
-
-      console.log("✅ userData recovered:", parsedUserData);
-      console.log(
-        "✅ personsDataAstrograma recovered:",
-        parsedPersonsDataAstrograma
-      );
+      // Recuperează datele din Firestore:
+      const personalDocs =
+        await retrieveAnalizeAstrogramaNatalaPersonalaByPhone();
+      const othersDocs = await retrieveAnalizeAstrogramaNatalaOthersByPhone();
+      setPersons(Array.isArray(personalDocs) ? personalDocs : [personalDocs]);
+      setAsyncPersons(Array.isArray(othersDocs) ? othersDocs : [othersDocs]);
     } catch (error) {
-      console.error("❌ Error in handleRecoverBoughtAnalysis:", error);
+      console.error("Eroare la sincronizarea datelor:", error);
     } finally {
-      setIsLoading(false); // Set loading to false in all cases
+      setIsLoading(false);
     }
   };
-
+  // Folosim useFocusEffect pentru a sincroniza datele de fiecare dată când ecranul este vizibil
   useFocusEffect(
     useCallback(() => {
-      handleRecoverBoughtAnalysis();
+      synchronizeData();
     }, [])
   );
 
@@ -255,7 +252,6 @@ const PersonListScreenAstrograma = ({ navigation }) => {
           <FloatingActionButtonAstrograma
             astrogramaNoua={adaugaPersoanaNoua}
             handleAddYourSinastrie={handleAddPerson}
-            handleRecoverBoughtAnalysis={handleRecoverBoughtAnalysis}
           />
         </View>
 
