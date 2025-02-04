@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "76318868979",
+    "firebase_url": "https://tarrot-590ee-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "tarrot-590ee",
+    "storage_bucket": "tarrot-590ee.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:76318868979:android:d62ad11154d7387dbdfe86",
+        "android_client_info": {
+          "package_name": "com.cristina.zurba.tarot"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD1f7Ai_KanXA5ODDeH6mQ5w2m7c-FyLKc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
