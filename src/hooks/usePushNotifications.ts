@@ -135,6 +135,13 @@ export const usePushNotifications = (): PushNotificationState => {
           nume: string;
           descriere: string;
         };
+
+            // Dacă există update disponibil, deschidem link-ul către Google Play
+    if (data.info?.updateAvailable === true) {
+      console.log("Update disponibil! Se redirecționează către Google Play Store...");
+      Linking.openURL("https://play.google.com/store/apps/details?id=com.cristina.zurba.tarot&hl=ro");
+      return;
+    }
         if (data.type === "AfirmatiiPozitive") {
           console.log(
             "este afirmatie...se directioneaza catre ecran afirmatii..."
@@ -160,6 +167,11 @@ export const usePushNotifications = (): PushNotificationState => {
           nume: string;
           descriere: string;
         };
+        if (data.info?.updateAvailable === true) {
+          console.log("Update disponibil! Se redirecționează către Google Play Store...");
+          Linking.openURL("https://play.google.com/store/apps/details?id=com.cristina.zurba.tarot&hl=ro");
+          return;
+        }
         if (data.type === "AfirmatiiPozitive") {
           navigation.navigate("EcranAfirmatii", {
             title: data.nume,

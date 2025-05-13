@@ -6,7 +6,8 @@ import {
   View,
   TextInput,
   Alert,
-  ScrollView, // Importăm ScrollView
+  ScrollView,
+  TouchableOpacity, // Importăm ScrollView
 } from "react-native";
 import PhoneInput from "react-native-international-phone-number";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -14,6 +15,7 @@ import { Button } from "../../../components/commonButton";
 import { colors } from "../../../utils/colors";
 import { useTranslation } from "../../../utils/translateUtil";
 import { useLanguage } from "../../../context/LanguageContext";
+import { Checkbox } from "react-native-paper";
 
 const PurchaseModal = ({
   visible,
@@ -40,6 +42,12 @@ const PurchaseModal = ({
   const [phoneError, setPhoneError] = useState(false);
   const [nameError, setNameError] = useState(false);
   const [addressError, setAddressError] = useState(false);
+
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [termsError, setTermsError] = useState(false);
+
+  const [isChecked, setIsChecked] = useState(false);
+  const [termsVisible, setTermsVisible] = useState(false); // Modal pentru Terms & Conditions
 
   const [selectedCountry, setSelectedCountry] = useState(null);
 
@@ -75,6 +83,14 @@ const PurchaseModal = ({
       valid = false;
     } else {
       setAddressError(false);
+    }
+
+    if (!isChecked) {
+      Alert.alert(
+        "Terms & Conditions",
+        "You must accept the Terms & Conditions to proceed."
+      );
+      valid = false;
     }
 
     return valid;
@@ -150,6 +166,16 @@ const PurchaseModal = ({
   );
   const completeazaInfoText6 = useTranslation(
     "Te rugăm să completezi toate câmpurile de adresă.",
+    language,
+    "PurchaseModal"
+  );
+  const termsText1 = useTranslation(
+    "By purchasing this analysis, you accept the",
+    language,
+    "PurchaseModal"
+  );
+  const termsText2 = useTranslation(
+    "Terms & Conditions",
     language,
     "PurchaseModal"
   );
@@ -263,18 +289,34 @@ const PurchaseModal = ({
               <Text style={styles.errorText}>{completeazaInfoText6}</Text>
             )}
 
+            <View style={styles.checkboxContainer}>
+              <Checkbox
+                status={isChecked ? "checked" : "unchecked"}
+                onPress={() => setIsChecked(!isChecked)}
+                color={colors.primary3}
+              />
+
+              <TouchableOpacity onPress={() => setTermsVisible(true)}>
+                <Text style={styles.termsText}>
+                  {termsText1}{" "}
+                  <Text style={styles.termsLink}>{termsText2}</Text>
+                </Text>
+              </TouchableOpacity>
+            </View>
+
             <View style={styles.buttonContainer}>
               <Button
-                disabled={false}
+                disabled={!isChecked} // Butonul este activ doar dacă checkbox-ul e bifat
                 funCallback={handleConfirm}
                 label={AchiziționatText}
                 success={true}
-                bgColor={colors.primary3}
+                bgColor={isChecked ? colors.primary3 : "#ccc"} // Culoare gri dacă nu e bifat
                 borderColor={colors.white}
                 borderWidth={0.2}
                 txtColor={colors.white}
                 style={styles.btnMargin}
               />
+
               <Button
                 disabled={false}
                 funCallback={onDismiss}
@@ -288,6 +330,44 @@ const PurchaseModal = ({
             </View>
           </View>
         </ScrollView>
+
+        <Modal
+          transparent
+          visible={termsVisible}
+          animationType="slide"
+          onRequestClose={() => setTermsVisible(false)}
+        >
+          <View style={styles.overlay}>
+            <ScrollView contentContainerStyle={styles.scrollContainer}>
+              <View style={styles.modalContainer}>
+                <Text style={styles.modalTitle}>Terms & Conditions</Text>
+                <Text style={styles.termsContent}>
+                  - By completing a purchase, you agree to the processing of
+                  your personal data in accordance with our Privacy Policy and
+                  applicable laws.
+                  {"\n\n"}- Your email and phone number are collected solely for
+                  the purpose of order confirmation, service delivery, and
+                  customer support.
+                  {"\n\n"}- We do not share your personal data with third
+                  parties unless required by law or necessary for payment
+                  processing and order fulfillment.
+                  {"\n\n"}- Payments are processed securely through encrypted
+                  channels. Refunds and cancellations are subject to our Refund
+                  Policy.
+                  {"\n\n"}- GDPR Compliance: You have the right to access,
+                  modify, delete, or restrict the processing of your personal
+                  data. You can exercise these rights by contacting our support
+                  team.
+                </Text>
+
+                <Button
+                  funCallback={() => setTermsVisible(false)}
+                  label="Close"
+                />
+              </View>
+            </ScrollView>
+          </View>
+        </Modal>
       </View>
     </Modal>
   );
@@ -296,6 +376,23 @@ const PurchaseModal = ({
 export default PurchaseModal;
 
 const styles = StyleSheet.create({
+  checkboxContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 10,
+  },
+  termsText: {
+    fontSize: 14,
+  },
+  termsLink: {
+    color: "blue",
+    textDecorationLine: "underline",
+  },
+  termsContent: {
+    fontSize: 14,
+    marginVertical: 10,
+  },
+
   overlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.7)",

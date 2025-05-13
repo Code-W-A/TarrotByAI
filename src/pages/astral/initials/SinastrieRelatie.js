@@ -95,6 +95,7 @@ import { handleLanguagei18n } from "../../../utils/handleLanguageGeneral";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { useStripe } from "@stripe/stripe-react-native";
 import { useTranslation } from "../../../utils/translateUtil";
+import { capturePaymentIntentTest, createInvoiceAfterPaymentTest, createPaymentIntentTest, sendPdfEmail } from "../../../utils/constant";
 
 export const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -385,67 +386,124 @@ function SinastrieRelatie({ navigation, route }) {
     `;
   };
 
+  // const handleDownloadPDF = async () => {
+  //   try {
+  //     console.log("Generare PDF în curs...");
+  //     const htmlContent = generatePDFContent();
+
+  //     // Generează PDF-ul
+  //     const { uri } = await Print.printToFileAsync({ html: htmlContent });
+  //     console.log("PDF generat:", uri);
+
+  //     if (Platform.OS === "android" && Platform.Version < 29) {
+  //       // Pentru Android 10 și mai vechi
+  //       const fileUri = `${FileSystem.documentDirectory}RaportAnaliza.pdf`;
+  //       await FileSystem.copyAsync({ from: uri, to: fileUri });
+
+  //       Alert.alert(
+  //         "Fișier salvat",
+  //         `PDF-ul a fost salvat cu succes la: ${fileUri}`
+  //       );
+  //       console.log("Fișier salvat cu succes:", fileUri);
+  //     } else {
+  //       // Pentru Android 11 și mai nou
+  //       const permissions =
+  //         await StorageAccessFramework.requestDirectoryPermissionsAsync();
+  //       if (!permissions.granted) {
+  //         Alert.alert(
+  //           "Permisiune refuzată",
+  //           "Trebuie să acorzi permisiunea pentru a salva fișierul."
+  //         );
+  //         return;
+  //       }
+
+  //       const directoryUri = permissions.directoryUri;
+  //       console.log("Director selectat:", directoryUri);
+
+  //       const fileName = "RaportAnaliza.pdf";
+  //       const base64Content = await FileSystem.readAsStringAsync(uri, {
+  //         encoding: FileSystem.EncodingType.Base64,
+  //       });
+  //       const fileUri = await StorageAccessFramework.createFileAsync(
+  //         directoryUri,
+  //         fileName,
+  //         "application/pdf"
+  //       );
+
+  //       await FileSystem.writeAsStringAsync(fileUri, base64Content, {
+  //         encoding: FileSystem.EncodingType.Base64,
+  //       });
+
+  //       Alert.alert(
+  //         "Fișier salvat",
+  //         `PDF-ul a fost salvat cu succes la: ${fileUri}`
+  //       );
+  //       console.log("Fișier salvat cu succes:", fileUri);
+  //     }
+  //   } catch (error) {
+  //     console.error("Eroare la salvarea fișierului:", error);
+  //     Alert.alert("Eroare", "Nu s-a putut salva fișierul.");
+  //   }
+  // };
+
+  //ACHIZITIONARE SINASTRIE
+
   const handleDownloadPDF = async () => {
     try {
       console.log("Generare PDF în curs...");
       const htmlContent = generatePDFContent();
-
+    
       // Generează PDF-ul
       const { uri } = await Print.printToFileAsync({ html: htmlContent });
       console.log("PDF generat:", uri);
-
-      if (Platform.OS === "android" && Platform.Version < 29) {
-        // Pentru Android 10 și mai vechi
+    
+      if (Platform.OS === "android") {
+        if (Platform.Version < 29) {
+          // Pentru Android 10 și mai vechi, nu se cere alegerea directorului
+          const fileUri = `${FileSystem.documentDirectory}RaportAnaliza.pdf`;
+          await FileSystem.copyAsync({ from: uri, to: fileUri });
+          Alert.alert("Fișier salvat", `PDF-ul a fost salvat cu succes la: ${fileUri}`);
+          console.log("Fișier salvat cu succes:", fileUri);
+        } else {
+          // Pentru Android 11 și mai nou, solicită utilizatorului să aleagă un director
+          const permissions = await StorageAccessFramework.requestDirectoryPermissionsAsync();
+          if (!permissions.granted) {
+            Alert.alert("Permisiune refuzată", "Trebuie să acorzi permisiunea pentru a salva fișierul.");
+            return;
+          }
+          const directoryUri = permissions.directoryUri;
+          console.log("Director selectat:", directoryUri);
+    
+          const fileName = "RaportAnaliza.pdf";
+          const base64Content = await FileSystem.readAsStringAsync(uri, {
+            encoding: FileSystem.EncodingType.Base64,
+          });
+          const fileUri = await StorageAccessFramework.createFileAsync(directoryUri, fileName, "application/pdf");
+          await FileSystem.writeAsStringAsync(fileUri, base64Content, {
+            encoding: FileSystem.EncodingType.Base64,
+          });
+    
+          Alert.alert("Fișier salvat", `PDF-ul a fost salvat cu succes la: ${fileUri}`);
+          console.log("Fișier salvat cu succes:", fileUri);
+        }
+      } else {
+        // Pe iOS, nu putem alege o locație. Putem salva automat sau putem folosi expo-sharing.
+        // Aici salvăm automat în documentDirectory:
         const fileUri = `${FileSystem.documentDirectory}RaportAnaliza.pdf`;
         await FileSystem.copyAsync({ from: uri, to: fileUri });
-
-        Alert.alert(
-          "Fișier salvat",
-          `PDF-ul a fost salvat cu succes la: ${fileUri}`
-        );
+        await Sharing.shareAsync(uri);
+        Alert.alert("Fișier salvat", `PDF-ul a fost salvat cu succes la: ${fileUri}`);
         console.log("Fișier salvat cu succes:", fileUri);
-      } else {
-        // Pentru Android 11 și mai nou
-        const permissions =
-          await StorageAccessFramework.requestDirectoryPermissionsAsync();
-        if (!permissions.granted) {
-          Alert.alert(
-            "Permisiune refuzată",
-            "Trebuie să acorzi permisiunea pentru a salva fișierul."
-          );
-          return;
-        }
-
-        const directoryUri = permissions.directoryUri;
-        console.log("Director selectat:", directoryUri);
-
-        const fileName = "RaportAnaliza.pdf";
-        const base64Content = await FileSystem.readAsStringAsync(uri, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
-        const fileUri = await StorageAccessFramework.createFileAsync(
-          directoryUri,
-          fileName,
-          "application/pdf"
-        );
-
-        await FileSystem.writeAsStringAsync(fileUri, base64Content, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
-
-        Alert.alert(
-          "Fișier salvat",
-          `PDF-ul a fost salvat cu succes la: ${fileUri}`
-        );
-        console.log("Fișier salvat cu succes:", fileUri);
+    
+        // Alternativ, pentru a permite utilizatorului să decidă ce face cu fișierul, poți folosi:
+        // await Sharing.shareAsync(uri);
       }
     } catch (error) {
       console.error("Eroare la salvarea fișierului:", error);
       Alert.alert("Eroare", "Nu s-a putut salva fișierul.");
     }
   };
-
-  //ACHIZITIONARE SINASTRIE
+  
 
   const isValidBase64 = (base64) => {
     const regex = /^[A-Za-z0-9+/]+={0,2}$/;
@@ -482,8 +540,10 @@ function SinastrieRelatie({ navigation, route }) {
       console.log("tesdasdasdsadsads");
       // Extrage datele persoanei din route.params sau fallback la AsyncStorage
       const personIndex = route.params?.personIndex;
+
       const userDataJson = await AsyncStorage.getItem("personsData");
-      const userData = userDataJson ? JSON.parse(userDataJson) : null;
+      let userData = userDataJson ? JSON.parse(userDataJson) : null;
+      userData = personData
       const userJson = await AsyncStorage.getItem("userData");
       const userD = userJson ? JSON.parse(userJson) : null;
 
@@ -497,14 +557,17 @@ function SinastrieRelatie({ navigation, route }) {
 
       setUData(userD);
       setCurrentUserData(userData);
-      const person = userData[personIndex];
+      let person = userData;
+      // let person = userData[personIndex];
       if (!person) {
         console.error("Persoana specificată nu există în lista people.");
         setIsLoading(false);
         return;
       }
-
-      console.log("Procesare date pentru persoana:", person);
+      if(!person.synastry?.natalWheelChart){
+        person = personData
+      }
+      // console.log("Procesare date pentru persoana:", person);
 
       // Verifică dacă traducerea este necesară
 
@@ -593,78 +656,11 @@ function SinastrieRelatie({ navigation, route }) {
           setIsLoading(false);
         }
       } else {
+        console.log("Traducere nu este necesară, limbă curentă:", language);
         setUserD(person); // Folosește datele existente dacă traducerea nu este necesară
       }
 
-      //VARIANTA INITIALA TRADUCERI FARA ERROR HANDLE
-      // if (language !== person.actualLanguageSinastrie) {
-      //   console.log("Traducere necesară, limbă curentă:", language);
-      //   setIsLoading(true);
-
-      //   // Creează o copie temporară a datelor persoanei
-      //   const translatedPerson = { ...person };
-
-      //   const categories = [
-      //     "harmoniousAspectReading",
-      //     "conflictingAspectReading",
-      //     "contrastingAspectReading",
-      //     "intenseCompatibility",
-      //     "physicalCompatibility",
-      //     "emotionalCompatibility",
-      //     "sexualCompatibility",
-      //     "spiritualCompatibility",
-      //     "financialCompatibility",
-      //   ];
-
-      //   // Parcurge și traduce fiecare categorie
-      //   await Promise.all(
-      //     categories.map(async (category) => {
-      //       const categoryData = translatedPerson.synastry?.[category]?.data;
-      //       if (categoryData && Array.isArray(categoryData)) {
-      //         await Promise.all(
-      //           categoryData.map(async (item) => {
-      //             if (item.reading) {
-      //               await Promise.all(
-      //                 item.reading.map(async (reading) => {
-      //                   if (reading.description) {
-      //                     reading.description = await handleToTranslate(
-      //                       reading.description,
-      //                       language,
-      //                       translatedPerson.actualLanguageSinastrie
-      //                     );
-      //                   }
-      //                   if (reading.title) {
-      //                     reading.title = await handleToTranslate(
-      //                       reading.title,
-      //                       language,
-      //                       translatedPerson.actualLanguageSinastrie
-      //                     );
-      //                   }
-      //                 })
-      //               );
-      //             }
-      //           })
-      //         );
-      //       }
-      //     })
-      //   );
-
-      //   // Actualizează limba curentă pentru persoană
-      //   translatedPerson.actualLanguageSinastrie = language;
-
-      //   // Actualizează persoana tradusă în `userData`
-      //   userData[personIndex] = translatedPerson;
-
-      //   // Salvează datele actualizate în AsyncStorage
-      //   await AsyncStorage.setItem("personsData", JSON.stringify(userData));
-
-      //   // Setează persoana tradusă în starea locală
-      //   setUserD(translatedPerson);
-      // } else {
-      //   setUserD(person); // Folosește datele existente dacă traducerea nu este necesară
-      // }
-
-      // Procesează graficele natale
+     
 
       console.log(
         "person.synastry?.natalWheelChart...",
@@ -716,7 +712,7 @@ function SinastrieRelatie({ navigation, route }) {
         person.synastry?.houseCusps ? { housesP1, housesP2 } : null
       );
 
-      console.log("Date procesate cu succes pentru persoana:", person);
+      // console.log("Date procesate cu succes pentru persoana:", person);
 
       setIsLoading(false);
     } catch (error) {
@@ -748,83 +744,37 @@ function SinastrieRelatie({ navigation, route }) {
     "SinastrieRelatieOthers"
   );
 
+
   const handlePayment = async () => {
     try {
+      // 1. Verifică câmpurile de adresă
       if (!line1 || !city || !country) {
-        Alert.alert(
-          "Eroare",
-          "Te rugăm să completezi toate câmpurile de adresă."
-        );
+        Alert.alert("Eroare", "Te rugăm să completezi toate câmpurile de adresă.");
         return;
       }
-
+  
       setIsLoadingBuy(true);
-
-      // **5) Marchează sinastria ca plătită și salvează în AsyncStorage**
-      setIsPaid(true);
-
-      // Obține datele salvate
-      const personsDataString = await AsyncStorage.getItem("personsData");
-      const personsData = personsDataString
-        ? JSON.parse(personsDataString)
-        : [];
-
-      // Găsește și actualizează persoana
-      const updatedPersons = personsData.map((person) =>
-        person.full_name === userD.full_name
-          ? { ...person, isPaid: true }
-          : person
-      );
-
-      // Salvează lista actualizată în AsyncStorage
-      await AsyncStorage.setItem("personsData", JSON.stringify(updatedPersons));
-      // Verifică în consola dacă s-a salvat corect:
-      const verifyPersonsData = await AsyncStorage.getItem("personsData");
-      const parsedData = JSON.parse(verifyPersonsData);
-      const specificPerson = parsedData.find(
-        (person) => person.full_name === userD.full_name
-      );
-      console.log("📝 Element actualizat din asyncstorage:", specificPerson);
-
       const functions = getFunctions();
-
-      // 5) După finalizarea plății, generează conținutul HTML pentru PDF
-      const pdfHtmlContent = generatePDFContent();
-      console.log("📝 Generated PDF HTML content.");
-      // 6) Apelează funcția backend pentru a trimite emailul cu PDF-ul
-      console.log("📧 Calling sendPdfEmail function...");
-      const sendPdfEmailFn = httpsCallable(functions, "sendPdfEmail");
-      console.log("📧 sendPdfEmailFn:", sendPdfEmailFn);
-      const emailResponse = await sendPdfEmailFn({
-        email: email, // sau userD.email, în funcție de sursa datelor
-        pdfHtml: pdfHtmlContent,
-        fullName: "dear user!",
-      });
-      console.log("📧 Email function response:", emailResponse);
-
-      // 1) Creează PaymentIntent prin Firebase
-
-      const createPaymentIntentFn = httpsCallable(
-        functions,
-        "createPaymentIntent"
-        // "createPaymentIntentTest"
-      );
-
+  
+      // 2. Creează PaymentIntent cu capture_method: "manual"
+      const createPaymentIntentFn = httpsCallable(functions, createPaymentIntentTest);
+      console.log("💳 Calling createPaymentIntentFn...");
       const resp = await createPaymentIntentFn({
-        amount: 2000, // Ex: 20.00 euro
+        amount: 2000, // de exemplu, 20.00 EUR
         currency: "eur",
         firstName,
         lastName,
         email,
         phone,
       });
-
+      console.log("💳 PaymentIntent response:", resp);
       const { clientSecret, transactionId } = resp.data;
       if (!clientSecret || !transactionId) {
         throw new Error("Lipsesc datele PaymentIntent. Verifică serverul.");
       }
-
-      // 2) Inițializează Payment Sheet
+  
+      // 3. Inițializează Payment Sheet
+      console.log("🔧 Initializing Payment Sheet with clientSecret:", clientSecret);
       const { error: initError } = await initPaymentSheet({
         paymentIntentClientSecret: clientSecret,
         merchantDisplayName: "Cristina Zurba tarot",
@@ -835,52 +785,104 @@ function SinastrieRelatie({ navigation, route }) {
           address: "never",
         },
       });
-
       if (initError) {
-        console.error("Eroare initPaymentSheet:", initError);
+        console.error("❌ Eroare initPaymentSheet:", initError);
         Alert.alert("Eroare", initError.message);
         return;
       }
-
-      // 3) Afișează Payment Sheet
+      console.log("🔧 Payment Sheet initialized successfully.");
+  
+      // 4. Prezintă Payment Sheet
+      console.log("📲 Presenting Payment Sheet...");
       const { error: presentError } = await presentPaymentSheet();
       if (presentError) {
-        console.error("Eroare la prezentarea Payment Sheet:", presentError);
+        console.error("❌ Eroare la prezentarea Payment Sheet:", presentError);
+        Alert.alert("Eroare", presentError.message);
         return;
       }
-
-      console.log("Plată finalizată! Generăm factura...");
-
-      // 4) Creează factura pe server și marchează-o ca plătită
-      const createInvoiceFn = httpsCallable(
-        functions,
-        "createInvoiceAfterPayment"
-        // "createInvoiceAfterPaymentTest"
-      );
-      const invoiceResp = await createInvoiceFn({
-        transactionId,
-        firstName,
-        lastName,
-        email,
-        phone,
-        address: {
-          line1,
-          city,
-          postal_code: postalCode,
-          country,
-        },
-        analysisData: userD,
+      console.log("📲 Payment Sheet presented successfully.");
+      // Plata este autorizată (status: "requires_capture"), dar nu este capturată încă.
+  
+      // 5. Generează conținutul PDF
+      const pdfHtmlContent = generatePDFContent();
+      console.log("📝 Generated PDF HTML content.");
+  
+      // 6. Trimite emailul cu PDF-ul
+      console.log("📧 Calling sendPdfEmail function...");
+      const sendPdfEmailFn = httpsCallable(functions, sendPdfEmail);
+      const emailResponse = await sendPdfEmailFn({
+        email, // sau userD.email, după caz
+        pdfHtml: pdfHtmlContent,
+        fullName: userD.full_name,
       });
-
-      console.log("Factura creată:", invoiceResp.data);
-      Alert.alert(achizitieCompleta1, achizitieCompleta2);
+      console.log("📧 Email function response:", emailResponse);
+  
+      if (emailResponse.data && emailResponse.data.success) {
+        // 7. Capturează PaymentIntent (fondurile vor fi reținute definitiv)
+        console.log("🔒 Capturing PaymentIntent...");
+        const capturePaymentFn = httpsCallable(functions, capturePaymentIntentTest);
+        const captureResp = await capturePaymentFn({ transactionId });
+        if (captureResp.data && captureResp.data.captured) {
+          console.log("✅ Payment captured successfully.");
+  
+          // 8. Actualizează analiza în AsyncStorage (personsData) – identic ca în componenta originală
+          // Marchează sinastria ca plătită în starea locală
+          setIsPaid(true);
+          // Obține datele salvate
+          const personsDataString = await AsyncStorage.getItem("personsData");
+          let personsData = personsDataString ? JSON.parse(personsDataString) : [];
+          personsData = [personData]
+          // Găsește și actualizează persoana corespunzătoare
+          const updatedPersons = personsData.map((person) =>
+            person.full_name === userD.full_name
+              ? { ...person, isPaid: true }
+              : person
+          );
+          // Salvează lista actualizată în AsyncStorage
+          await AsyncStorage.setItem("personsData", JSON.stringify(updatedPersons));
+          // Verifică în consolă dacă s-a salvat corect:
+          const verifyPersonsData = await AsyncStorage.getItem("personsData");
+          const parsedData = JSON.parse(verifyPersonsData);
+          const specificPerson = parsedData.find(
+            (person) => person.full_name === userD.full_name
+          );
+          console.log("📝 Element actualizat din AsyncStorage:", specificPerson);
+  
+          // 9. Creează factura pe server
+          console.log("🧾 Creating invoice...");
+          const createInvoiceFn = httpsCallable(functions, createInvoiceAfterPaymentTest);
+          const invoiceResp = await createInvoiceFn({
+            transactionId,
+            firstName,
+            lastName,
+            email,
+            phone,
+            address: { line1, city, postal_code: postalCode, country },
+            analysisData: userD,
+          });
+          console.log("🧾 Invoice created:", invoiceResp.data);
+          Alert.alert(achizitieCompleta1, achizitieCompleta2);
+        } else {
+          throw new Error("Capturarea plății a eșuat.");
+        }
+      } else {
+        // Dacă trimiterea emailului a eșuat, nu se capturează plata
+        Alert.alert(
+          "Eroare",
+          "Email-ul cu PDF nu a putut fi trimis. Plata nu va fi finalizată. Te rugăm să reîncerci."
+        );
+        // (Opțional: poți anula PaymentIntent printr-o funcție backend dedicată.)
+      }
     } catch (error) {
-      console.error("Eroare handlePayment:", error);
+      console.error("❌ Eroare handlePayment:", error);
       Alert.alert("Eroare", "Nu s-a putut procesa plata sau factura.");
     } finally {
       setIsLoadingBuy(false);
+      console.log("🏁 handlePayment complete. isLoadingBuy set to false.");
     }
   };
+  
+  
 
   useEffect(() => {
     let timeoutId;

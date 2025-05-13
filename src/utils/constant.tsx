@@ -1,7 +1,13 @@
+
 import { screenName } from "./screenName";
 
 import { colors } from "./colors";
 import i18n from "../../i18n";
+
+export const createPaymentIntentTest = "createPaymentIntent"
+export const sendPdfEmail = "sendPdfEmail"
+export const capturePaymentIntentTest = "capturePaymentIntent"
+export const createInvoiceAfterPaymentTest = "createInvoiceAfterPayment"
 
 export const dayOptions = [
   { name: "Mo", no: 10 },

@@ -83,6 +83,7 @@ import AspectTableSinastrieOthers from "../../../components/Astral/components/As
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { StorageAccessFramework } from "expo-file-system";
 import { useTranslation } from "../../../utils/translateUtil";
+import { capturePaymentIntentTest, createInvoiceAfterPaymentTest, createPaymentIntentTest, sendPdfEmail } from "../../../utils/constant";
 
 // const LuckyNumber = ({ number }) => {
 //   return (
@@ -450,59 +451,109 @@ function SinastrieRelatieOthers({ navigation, route }) {
     `;
   };
 
+  // const handleDownloadPDF = async () => {
+  //   try {
+  //     console.log("Generare PDF în curs...");
+  //     const htmlContent = generatePDFContent();
+
+  //     // Generează PDF-ul
+  //     const { uri } = await Print.printToFileAsync({ html: htmlContent });
+  //     console.log("PDF generat:", uri);
+
+  //     if (Platform.OS === "android" && Platform.Version < 29) {
+  //       // Pentru Android 10 și mai vechi
+  //       const fileUri = `${FileSystem.documentDirectory}RaportAnaliza.pdf`;
+  //       await FileSystem.copyAsync({ from: uri, to: fileUri });
+
+  //       Alert.alert(
+  //         "Fișier salvat",
+  //         `PDF-ul a fost salvat cu succes la: ${fileUri}`
+  //       );
+  //       console.log("Fișier salvat cu succes:", fileUri);
+  //     } else {
+  //       // Pentru Android 11 și mai nou
+  //       const permissions =
+  //         await StorageAccessFramework.requestDirectoryPermissionsAsync();
+  //       if (!permissions.granted) {
+  //         Alert.alert(
+  //           "Permisiune refuzată",
+  //           "Trebuie să acorzi permisiunea pentru a salva fișierul."
+  //         );
+  //         return;
+  //       }
+
+  //       const directoryUri = permissions.directoryUri;
+  //       console.log("Director selectat:", directoryUri);
+
+  //       const fileName = "RaportAnaliza.pdf";
+  //       const base64Content = await FileSystem.readAsStringAsync(uri, {
+  //         encoding: FileSystem.EncodingType.Base64,
+  //       });
+  //       const fileUri = await StorageAccessFramework.createFileAsync(
+  //         directoryUri,
+  //         fileName,
+  //         "application/pdf"
+  //       );
+
+  //       await FileSystem.writeAsStringAsync(fileUri, base64Content, {
+  //         encoding: FileSystem.EncodingType.Base64,
+  //       });
+
+  //       Alert.alert(
+  //         "Fișier salvat",
+  //         `PDF-ul a fost salvat cu succes la: ${fileUri}`
+  //       );
+  //       console.log("Fișier salvat cu succes:", fileUri);
+  //     }
+  //   } catch (error) {
+  //     console.error("Eroare la salvarea fișierului:", error);
+  //     Alert.alert("Eroare", "Nu s-a putut salva fișierul.");
+  //   }
+  // };
+
+
   const handleDownloadPDF = async () => {
     try {
       console.log("Generare PDF în curs...");
       const htmlContent = generatePDFContent();
-
+  
       // Generează PDF-ul
       const { uri } = await Print.printToFileAsync({ html: htmlContent });
       console.log("PDF generat:", uri);
-
-      if (Platform.OS === "android" && Platform.Version < 29) {
-        // Pentru Android 10 și mai vechi
-        const fileUri = `${FileSystem.documentDirectory}RaportAnaliza.pdf`;
-        await FileSystem.copyAsync({ from: uri, to: fileUri });
-
-        Alert.alert(
-          "Fișier salvat",
-          `PDF-ul a fost salvat cu succes la: ${fileUri}`
-        );
-        console.log("Fișier salvat cu succes:", fileUri);
-      } else {
-        // Pentru Android 11 și mai nou
-        const permissions =
-          await StorageAccessFramework.requestDirectoryPermissionsAsync();
-        if (!permissions.granted) {
-          Alert.alert(
-            "Permisiune refuzată",
-            "Trebuie să acorzi permisiunea pentru a salva fișierul."
-          );
-          return;
+  
+      if (Platform.OS === "android") {
+        if (Platform.Version < 29) {
+          // Pentru Android 10 și mai vechi: salvare automată în documentDirectory
+          const fileUri = `${FileSystem.documentDirectory}RaportAnaliza.pdf`;
+          await FileSystem.copyAsync({ from: uri, to: fileUri });
+          Alert.alert("Fișier salvat", `PDF-ul a fost salvat cu succes la: ${fileUri}`);
+          console.log("Fișier salvat cu succes:", fileUri);
+        } else {
+          // Pentru Android 11 și mai nou: solicită permisiuni și permite alegerea directorului
+          const permissions = await StorageAccessFramework.requestDirectoryPermissionsAsync();
+          if (!permissions.granted) {
+            Alert.alert("Permisiune refuzată", "Trebuie să acorzi permisiunea pentru a salva fișierul.");
+            return;
+          }
+          const directoryUri = permissions.directoryUri;
+          console.log("Director selectat:", directoryUri);
+    
+          const fileName = "RaportAnaliza.pdf";
+          const base64Content = await FileSystem.readAsStringAsync(uri, {
+            encoding: FileSystem.EncodingType.Base64,
+          });
+          const fileUri = await StorageAccessFramework.createFileAsync(directoryUri, fileName, "application/pdf");
+          await FileSystem.writeAsStringAsync(fileUri, base64Content, {
+            encoding: FileSystem.EncodingType.Base64,
+          });
+    
+          Alert.alert("Fișier salvat", `PDF-ul a fost salvat cu succes la: ${fileUri}`);
+          console.log("Fișier salvat cu succes:", fileUri);
         }
-
-        const directoryUri = permissions.directoryUri;
-        console.log("Director selectat:", directoryUri);
-
-        const fileName = "RaportAnaliza.pdf";
-        const base64Content = await FileSystem.readAsStringAsync(uri, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
-        const fileUri = await StorageAccessFramework.createFileAsync(
-          directoryUri,
-          fileName,
-          "application/pdf"
-        );
-
-        await FileSystem.writeAsStringAsync(fileUri, base64Content, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
-
-        Alert.alert(
-          "Fișier salvat",
-          `PDF-ul a fost salvat cu succes la: ${fileUri}`
-        );
-        console.log("Fișier salvat cu succes:", fileUri);
+      } else {
+        // Pe iOS: deschidem share sheet pentru ca utilizatorul să aleagă ce face cu fișierul
+        await Sharing.shareAsync(uri);
+        console.log("iOS share sheet prezentat");
       }
     } catch (error) {
       console.error("Eroare la salvarea fișierului:", error);
@@ -521,68 +572,21 @@ function SinastrieRelatieOthers({ navigation, route }) {
     "SinastrieRelatieOthers"
   );
 
+  //ACHIZITIONARE SINASTRIE
+
   const handlePayment = async () => {
     try {
+      // Verifică câmpurile de adresă
       if (!line1 || !city || !country) {
-        Alert.alert(
-          "Eroare",
-          "Te rugăm să completezi toate câmpurile de adresă."
-        );
+        Alert.alert("Eroare", "Te rugăm să completezi toate câmpurile de adresă.");
         return;
       }
-
+  
       setIsLoadingBuy(true);
-      setIsPaid(true);
-
-      // 5) Actualizează analiza ca plătită în `personsDataOthers`
-      const existingOtherDataString = await AsyncStorage.getItem(
-        "personsDataOthers"
-      );
-      const existingOtherData = existingOtherDataString
-        ? JSON.parse(existingOtherDataString)
-        : [];
-
-      console.log("📦 Date existente în personsDataOthers:", existingOtherData);
-
-      const updatePaidStatus = (dataList) => {
-        return dataList.map((item) =>
-          item.id === analysisData.id ? { ...item, isPaid: true } : item
-        );
-      };
-
-      const updatedOtherData = updatePaidStatus(existingOtherData);
-      await AsyncStorage.setItem(
-        "personsDataOthers",
-        JSON.stringify(updatedOtherData)
-      );
-
-      console.log(
-        "✅ Analiza din personsDataOthers marcată ca plătită și salvată în AsyncStorage."
-      );
-
       const functions = getFunctions();
-
-      // 5) După finalizarea plății, generează conținutul HTML pentru PDF
-      const pdfHtmlContent = generatePDFContent();
-      console.log("📝 Generated PDF HTML content.");
-      // 6) Apelează funcția backend pentru a trimite emailul cu PDF-ul
-      console.log("📧 Calling sendPdfEmail function...");
-      const sendPdfEmailFn = httpsCallable(functions, "sendPdfEmail");
-      console.log("📧 sendPdfEmailFn:", sendPdfEmailFn);
-      const emailResponse = await sendPdfEmailFn({
-        email: email, // sau userD.email, în funcție de sursa datelor
-        pdfHtml: pdfHtmlContent,
-        fullName: "dear user!",
-      });
-      console.log("📧 Email function response:", emailResponse);
-
-      // 1) Creează PaymentIntent prin Firebase
-      const createPaymentIntentFn = httpsCallable(
-        functions,
-        "createPaymentIntent"
-        // "createPaymentIntentTest"
-      );
-
+  
+      // 1) Creează PaymentIntent cu capture_method: "manual"
+      const createPaymentIntentFn = httpsCallable(functions, createPaymentIntentTest);
       console.log("📡 Trimitere către Firebase createPaymentIntent:", {
         amount: 2000,
         currency: "eur",
@@ -591,23 +595,24 @@ function SinastrieRelatieOthers({ navigation, route }) {
         email,
         phone,
       });
-
+  
       const resp = await createPaymentIntentFn({
-        amount: 2000, // 3.00 RON
+        amount: 2000, // de exemplu, 20.00 eur
         currency: "eur",
         firstName,
         lastName,
         email,
         phone,
       });
-
+  
       const { clientSecret, transactionId } = resp.data;
       if (!clientSecret || !transactionId) {
         console.error("❌ Lipsesc datele PaymentIntent:", resp.data);
         throw new Error("Lipsesc datele PaymentIntent. Verifică serverul.");
       }
-
+  
       // 2) Inițializează Payment Sheet
+      console.log("🔧 Initializing Payment Sheet with clientSecret:", clientSecret);
       const { error: initError } = await initPaymentSheet({
         paymentIntentClientSecret: clientSecret,
         merchantDisplayName: "Cristina Zurba tarot",
@@ -618,55 +623,102 @@ function SinastrieRelatieOthers({ navigation, route }) {
           address: "never",
         },
       });
-
       if (initError) {
         console.error("❌ Eroare initPaymentSheet:", initError);
         Alert.alert("Eroare", initError.message);
         return;
       }
-
+  
       // 3) Afișează Payment Sheet
       const { error: presentError } = await presentPaymentSheet();
       if (presentError) {
         console.error("❌ Eroare la prezentarea Payment Sheet:", presentError);
+        Alert.alert("Eroare", presentError.message);
         return;
       }
-
-      console.log("✅ Plată finalizată! Generăm factura...");
-
-      // 4) Creează factura pe server și marchează-o ca plătită
-      const createInvoiceFn = httpsCallable(
-        functions,
-        "createInvoiceAfterPayment"
-        // "createInvoiceAfterPaymentTest"
-      );
-      const invoiceResp = await createInvoiceFn({
-        transactionId,
-        firstName,
-        lastName,
-        email,
-        phone,
-        address: {
-          line1,
-          city,
-          postal_code: postalCode,
-          country,
-        },
-        analysisData,
+      console.log("✅ Plată autorizată! (PaymentIntent în starea requires_capture)");
+  
+      // 4) Generează conținutul PDF
+      const pdfHtmlContent = generatePDFContent();
+      console.log("📝 Generated PDF HTML content.");
+  
+      // 5) Trimite emailul cu PDF-ul
+      console.log("📧 Calling sendPdfEmail function...");
+      const sendPdfEmailFn = httpsCallable(functions, sendPdfEmail);
+      const emailResponse = await sendPdfEmailFn({
+        email, // sau userD.email, după caz
+        pdfHtml: pdfHtmlContent,
+        fullName: userD.full_name,
       });
-
-      console.log("✅ Factura creată:", invoiceResp.data);
-      Alert.alert(achizitieCompleta1, achizitieCompleta2);
+      console.log("📧 Email function response:", emailResponse);
+  
+      if (emailResponse.data && emailResponse.data.success) {
+        // 6) Capturează PaymentIntent (fondurile vor fi reținute definitiv)
+        console.log("🔒 Capturing PaymentIntent...");
+        const capturePaymentFn = httpsCallable(functions, capturePaymentIntentTest);
+        const captureResp = await capturePaymentFn({ transactionId });
+        if (captureResp.data && captureResp.data.captured) {
+          console.log("✅ Payment captured successfully.");
+  
+          // 7) Actualizează analiza ca plătită în personsDataOthers din AsyncStorage
+          // Actualizarea se face identic ca în versiunea originală:
+          setIsPaid(true);
+          const existingOtherDataString = await AsyncStorage.getItem("personsDataOthers");
+          let existingOtherData = existingOtherDataString ? JSON.parse(existingOtherDataString) : [];
+          existingOtherData = [analysisData];
+          console.log("📦 Date existente în personsDataOthers:", existingOtherData);
+  
+          const updatePaidStatus = (dataList) => {
+            return dataList.map((item) =>
+              item.id === analysisData.id ? { ...item, isPaid: true } : item
+            );
+          };
+  
+          const updatedOtherData = updatePaidStatus(existingOtherData);
+          await AsyncStorage.setItem("personsDataOthers", JSON.stringify(updatedOtherData));
+          console.log("✅ Analiza din personsDataOthers marcată ca plătită.");
+  
+          // 8) Creează factura pe server
+          console.log("🧾 Creating invoice...");
+          const createInvoiceFn = httpsCallable(functions, createInvoiceAfterPaymentTest);
+          const invoiceResp = await createInvoiceFn({
+            transactionId,
+            firstName,
+            lastName,
+            email,
+            phone,
+            address: {
+              line1,
+              city,
+              postal_code: postalCode,
+              country,
+            },
+            analysisData,
+          });
+          console.log("✅ Factura creată:", invoiceResp.data);
+          Alert.alert(achizitieCompleta1, achizitieCompleta2);
+        } else {
+          throw new Error("Capturarea plății a eșuat.");
+        }
+      } else {
+        // Dacă trimiterea emailului eșuează, plata nu se capturează
+        Alert.alert(
+          "Eroare",
+          "Email-ul cu PDF nu a putut fi trimis. Plata nu va fi finalizată. Te rugăm să reîncerci."
+        );
+        // Opțional, se poate apela o funcție backend pentru a anula PaymentIntent
+      }
     } catch (error) {
       console.error("❌ Eroare handlePayment:", error);
       Alert.alert("Eroare", "Nu s-a putut procesa plata sau factura.");
     } finally {
       setIsLoadingBuy(false);
+      console.log("🏁 handlePayment complete. isLoadingBuy set to false.");
     }
   };
-
-  //ACHIZITIONARE SINASTRIE
-
+  
+  
+  
   const isValidBase64 = (base64) => {
     const regex = /^[A-Za-z0-9+/]+={0,2}$/;
     return regex.test(base64);
@@ -702,7 +754,8 @@ function SinastrieRelatieOthers({ navigation, route }) {
       // Extrage datele persoanei din route.params sau fallback la AsyncStorage
       const personIndex = route.params?.analysisIndex;
       const userDataJson = await AsyncStorage.getItem("personsDataOthers");
-      const userData = userDataJson ? JSON.parse(userDataJson) : null;
+      let userData = userDataJson ? JSON.parse(userDataJson) : null;
+      userData = analysisData
       console.log("Data....", userData);
 
       if (!userData || !userData || personIndex === undefined) {
@@ -713,7 +766,8 @@ function SinastrieRelatieOthers({ navigation, route }) {
         return;
       }
 
-      const analiza = userData[personIndex];
+      // const analiza = userData[personIndex];
+      const analiza = userData;
 
       if (language !== analiza.actualLanguageSinastrie) {
         console.log("Traducere necesară, limbă curentă:", language);
@@ -785,7 +839,8 @@ function SinastrieRelatieOthers({ navigation, route }) {
           translatedAnaliza.actualLanguageSinastrie = language;
 
           // Actualizează persoana tradusă în `userData`
-          userData[personIndex] = translatedAnaliza;
+          userData = translatedAnaliza;
+          // userData[personIndex] = translatedAnaliza;
 
           // Salvează datele actualizate în AsyncStorage
           await AsyncStorage.setItem(
@@ -810,80 +865,7 @@ function SinastrieRelatieOthers({ navigation, route }) {
         setUserD(analiza); // Folosește datele existente dacă traducerea nu este necesară
       }
 
-      // traducere initiala fara verificare erori
-      // if (language !== analiza.actualLanguageSinastrie) {
-      //   console.log("Traducere necesară, limbă curentă:", language);
-      //   setIsLoading(true);
-
-      //   // Creează o copie temporară a datelor persoanei
-      //   const translatedAnaliza = { ...analiza };
-
-      //   const categories = [
-      //     "harmoniousAspectReading",
-      //     "conflictingAspectReading",
-      //     "contrastingAspectReading",
-      //     "intenseCompatibility",
-      //     "physicalCompatibility",
-      //     "emotionalCompatibility",
-      //     "sexualCompatibility",
-      //     "spiritualCompatibility",
-      //     "financialCompatibility",
-      //   ];
-
-      //   // Parcurge și traduce fiecare categorie
-      //   await Promise.all(
-      //     categories.map(async (category) => {
-      //       const categoryData = translatedAnaliza.synastry?.[category]?.data;
-      //       if (categoryData && Array.isArray(categoryData)) {
-      //         await Promise.all(
-      //           categoryData.map(async (item) => {
-      //             if (item.reading) {
-      //               await Promise.all(
-      //                 item.reading.map(async (reading) => {
-      //                   if (reading.description) {
-      //                     reading.description = await handleToTranslate(
-      //                       reading.description,
-      //                       language,
-      //                       translatedAnaliza.actualLanguageSinastrie
-      //                     );
-      //                   }
-      //                   if (reading.title) {
-      //                     reading.title = await handleToTranslate(
-      //                       reading.title,
-      //                       language,
-      //                       translatedAnaliza.actualLanguageSinastrie
-      //                     );
-      //                   }
-      //                 })
-      //               );
-      //             }
-      //           })
-      //         );
-      //       }
-      //     })
-      //   );
-
-      //   // Actualizează limba curentă pentru persoană
-      //   translatedAnaliza.actualLanguageSinastrie = language;
-
-      //   // Actualizează persoana tradusă în `userData`
-      //   userData[personIndex] = translatedAnaliza;
-
-      //   // Salvează datele actualizate în AsyncStorage
-      //   await AsyncStorage.setItem(
-      //     "personsDataOthers",
-      //     JSON.stringify(userData)
-      //   );
-
-      //   // Setează persoana tradusă în starea locală
-      //   setUserD(translatedAnaliza);
-      // } else {
-      //   console.log("analiza....alta", analiza);
-      //   console.log("analiza....alta", analiza.person2);
-      //   console.log("analiza....alta", analiza.synastry);
-
-      //   setUserD(analiza); // Folosește datele existente dacă traducerea nu este necesară
-      // }
+     
 
       // Procesează graficele natale
       if (analiza.synastry?.natalWheelChart?.data) {
@@ -914,6 +896,8 @@ function SinastrieRelatieOthers({ navigation, route }) {
       // Procesează aspectele astrogramei
       const aspectsP1 = analiza.synastry?.aspect?.data?.p1_p2_aspect?.aspects;
       const aspectsP2 = analiza.synastry?.aspect?.data?.p2_p1_aspect?.aspects;
+      console.log("aspectsP1", aspectsP1);
+      console.log("aspectsP2", aspectsP2);
       setAspectsData(
         analiza.synastry?.aspect ? { aspectsP1, aspectsP2 } : null
       );

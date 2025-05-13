@@ -29,10 +29,7 @@ import LoadingOverlay from "../../../components/Astral/components/zodiac/Loading
 import { useTranslation } from "../../../utils/translateUtil";
 import { useLanguage } from "../../../context/LanguageContext";
 import FloatingActionButtonAstrograma from "../../../components/Astral/components/FloatingActionButtonAstrograma";
-import {
-  backupAnalysesToFirestore,
-  retrieveBackupsByPhone,
-} from "../../../utils/firestoreUtils";
+
 import {
   backupAnalizeAstrogramaNatalaOthersToFirestore,
   backupAnalizeAstrogramaNatalaPersonalaToFirestore,
@@ -119,7 +116,11 @@ const PersonListScreenAstrograma = ({ navigation }) => {
     language,
     "PersonListAstrograma"
   );
-
+  const helpText = useTranslation(
+    "Dacă întâmpini probleme, contactează-ne la adresa de email: webdynamicx@gmail.com",
+    language,
+    "PersonListAstrograma"
+  );
   //Traducere inline text
 
   const handleUpdate = (person) => {
@@ -192,6 +193,7 @@ const PersonListScreenAstrograma = ({ navigation }) => {
                   index === 0
                     ? navigation.navigate("AstrogramaNatala", {
                         isPaid: item?.isPaid,
+                        personData: item
                       })
                     : navigation.navigate("AstrogramaNatalaOtherPersonData", {
                         personData: item,
@@ -238,6 +240,9 @@ const PersonListScreenAstrograma = ({ navigation }) => {
       >
         <SpaceSky />
         <View style={styles.listContainer}>
+           <View style={styles.helpContainer}>
+                  <Text style={styles.helpText}>{helpText}</Text>
+                </View>
           <FlatList
             data={[...persons, ...asyncPersons]}
             keyExtractor={(item, index) => `person-${index}`}
@@ -332,6 +337,15 @@ const PersonListScreenAstrograma = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
+  helpContainer: {
+    padding: 10,
+    alignItems: 'center',
+  },
+  helpText: {
+    fontSize: 14,
+    color: 'white',
+    textAlign: 'center',
+  },
   statusBadge: {
     position: "absolute",
     top: 10,

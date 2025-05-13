@@ -91,57 +91,107 @@ const News = () => {
       id: doc.id,
       ...doc.data(),
     }));
-    // for (const article of moreArticles) {
-    //   await updateArticleWithTimestamp(article.documentId, article.firstUploadDate, article.firstUploadtime);
-    // }
-    // console.log("more articles...", moreArticles[0].firstUploadDate)
+
     moreArticles = filterArticlesBeforeCurrentTime(moreArticles);
     setArticles(refresh ? moreArticles : [...articles, ...moreArticles]);
     setLastVisible(documentSnapshots.docs[documentSnapshots.docs.length - 1]);
     setIsLoading(false);
   };
 
+  // const handleQueryData = async () => {
+  //   console.log("query....");
+  //   let dataArt = await handleQueryFirestoreGeneral(
+  //     "BlogArticole",
+  //     "categorie",
+  //     selectedCategory
+  //   );
+  //   console.log("articles data...query...", dataArt[0]);
+  //   console.log("query....2");
+
+  //   let articlesData = filterArticlesBeforeCurrentTime(dataArt);
+  //   console.log("Articole...aici...", articlesData[0].firstUploadDate);
+
+  //   let articles = {};
+  //   if (articlesData.length > 0) {
+  //     // Sortarea articolelor după data și ora lor
+  //     const sortedArticles = articlesData.sort((a, b) => {
+  //       // Combină data și ora într-un singur string și convertește-le în obiecte de tip Date
+  //       const dateTimeA = new Date(`${a.firstUploadDate} ${a.firstUploadtime}`);
+  //       const dateTimeB = new Date(`${b.firstUploadDate} ${b.firstUploadtime}`);
+
+  //       // Compară obiectele de tip Date
+  //       return dateTimeB - dateTimeA;
+  //     });
+
+  //     // Selectarea celor mai noi două articole
+  //     const latestArticles = sortedArticles.slice(0, 2);
+
+  //     // Selectarea celor mai noi cinci articole
+  //     const latestFiveArticles = sortedArticles.slice(0, 5);
+
+  //     // Selectarea celui mai nou articol
+  //     const lastArticle = sortedArticles[0]; // Primul articol din lista sortată este cel mai recent
+
+  //     // Returnarea datelor către componenta Next.js
+  //     articles = articlesData;
+  //     console.log("Articole...aici...", articles[0].firstUploadDate);
+  //   } else {
+  //     articles = articlesData;
+  //   }
+  //   setArticles(articles);
+  // };
+
   const handleQueryData = async () => {
-    console.log("query....");
-    let dataArt = await handleQueryFirestoreGeneral(
-      "BlogArticole",
-      "categorie",
-      selectedCategory
+    console.log("Start query...");
+
+    let articlesRef = collection(db, "BlogArticole");
+
+    // Construim query-ul cu filtrarea după categorie și sortarea după timestamp
+    let q = query(
+      articlesRef,
+      where("categorie", "==", selectedCategory),
+      orderBy("firstUploadTimestamp", "desc")
     );
-    console.log("articles data...query...", dataArt[0]);
-    console.log("query....2");
 
-    let articlesData = filterArticlesBeforeCurrentTime(dataArt);
-    console.log("Articole...aici...", articlesData[0].firstUploadDate);
+    try {
+      setIsLoading(true);
+      const documentSnapshots = await getDocs(q);
 
-    let articles = {};
-    if (articlesData.length > 0) {
-      // Sortarea articolelor după data și ora lor
-      const sortedArticles = articlesData.sort((a, b) => {
-        // Combină data și ora într-un singur string și convertește-le în obiecte de tip Date
-        const dateTimeA = new Date(`${a.firstUploadDate} ${a.firstUploadtime}`);
-        const dateTimeB = new Date(`${b.firstUploadDate} ${b.firstUploadtime}`);
+      // Convertim documentele într-un array de obiecte
+      let articlesData = documentSnapshots.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
 
-        // Compară obiectele de tip Date
-        return dateTimeB - dateTimeA;
-      });
+      console.log("Raw articles data:", articlesData);
 
-      // Selectarea celor mai noi două articole
-      const latestArticles = sortedArticles.slice(0, 2);
+      // Aplicăm filtrul pentru a elimina articolele cu timestamp în viitor
+      articlesData = filterArticlesBeforeCurrentTime(articlesData);
 
-      // Selectarea celor mai noi cinci articole
-      const latestFiveArticles = sortedArticles.slice(0, 5);
+      console.log("Filtered articles:", articlesData);
 
-      // Selectarea celui mai nou articol
-      const lastArticle = sortedArticles[0]; // Primul articol din lista sortată este cel mai recent
+      let articles = {};
+      if (articlesData.length > 0) {
+        // Luăm cele mai noi 2 și 5 articole
+        const latestArticles = articlesData.slice(0, 2);
+        const latestFiveArticles = articlesData.slice(0, 5);
+        const lastArticle = articlesData[0]; // Cel mai recent articol
 
-      // Returnarea datelor către componenta Next.js
-      articles = articlesData;
-      console.log("Articole...aici...", articles[0].firstUploadDate);
-    } else {
-      articles = articlesData;
+        console.log("Cele mai noi 2 articole:", latestArticles);
+        console.log("Cele mai noi 5 articole:", latestFiveArticles);
+        console.log("Cel mai recent articol:", lastArticle);
+
+        articles = articlesData;
+      } else {
+        articles = [];
+      }
+
+      setArticles(articles);
+    } catch (error) {
+      console.error("Eroare la interogarea articolelor:", error);
+    } finally {
+      setIsLoading(false);
     }
-    setArticles(articles);
   };
 
   useEffect(() => {
@@ -269,12 +319,6 @@ const News = () => {
     const closeListener = interstitialAd.addAdEventListener(
       AdEventType.CLOSED,
       () => {
-        // Navigația se face după închiderea interstitialului
-        // if (isFuture) {
-        //   navigation.navigate(screenName.FutureReading, {
-        //     item,
-        //   });
-        // }
         // Reîncărcați interstitialul pentru utilizări ulterioare
         setInterstitialLoaded(false);
         interstitialAd.load();

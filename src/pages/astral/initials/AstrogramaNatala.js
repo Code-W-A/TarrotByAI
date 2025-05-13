@@ -84,6 +84,7 @@ import {
   useTranslate,
   useTranslation,
 } from "../../../utils/translateUtil";
+import { capturePaymentIntentTest, createInvoiceAfterPaymentTest, createPaymentIntentTest, sendPdfEmail } from "../../../utils/constant";
 
 // const LuckyNumber = ({ number }) => {
 //   return (
@@ -619,58 +620,19 @@ function AstrogramaNatala({ navigation, route }) {
       console.log("🚀 Starting handlePayment...");
       console.log("🛠️ Address fields:", { line1, city, country });
       if (!line1 || !city || !country) {
-        Alert.alert(
-          "Eroare",
-          "Te rugăm să completezi toate câmpurile de adresă."
-        );
+        Alert.alert("Eroare", "Te rugăm să completezi toate câmpurile de adresă.");
         return;
       }
-
+  
       setIsLoadingBuy(true);
-
-      console.log("🔥 Payment loading started; isPaid set to true.");
-
       const functions = getFunctions();
-      // 5) După finalizarea plății, generează conținutul HTML pentru PDF
-      const pdfHtmlContent = generatePDFContent();
-      console.log("📝 Generated PDF HTML content.");
-      // 6) Apelează funcția backend pentru a trimite emailul cu PDF-ul
-      console.log("📧 Calling sendPdfEmail function...");
-      const sendPdfEmailFn = httpsCallable(functions, "sendPdfEmail");
-      console.log("📧 sendPdfEmailFn:", sendPdfEmailFn);
-      const emailResponse = await sendPdfEmailFn({
-        email: email, // sau userD.email, în funcție de sursa datelor
-        pdfHtml: pdfHtmlContent,
-        fullName: "dear user!",
-      });
-      console.log("📧 Email function response:", emailResponse);
-
-      // 5) Actualizează AsyncStorage cu isPaid: true
-      setIsPaid(true);
-      const userDataJson = await AsyncStorage.getItem("userData");
-      const userData = userDataJson ? JSON.parse(userDataJson) : null;
-      console.log("📥 Fetched userData from AsyncStorage:", userData);
-
-      if (userData) {
-        userData.isPaid = true;
-        await AsyncStorage.setItem("userData", JSON.stringify(userData));
-        console.log("✅ AsyncStorage updated: isPaid set to true.");
-      }
-
-      // 1) Creează PaymentIntent prin Firebase
-
+  
+      // 1) Creează PaymentIntent cu capture_method: "manual"
       console.log("⚙️ getFunctions returned:", functions);
-      const createPaymentIntentFn = httpsCallable(
-        functions,
-        // "createPaymentIntentTest"
-        "createPaymentIntent"
-      );
+      const createPaymentIntentFn = httpsCallable(functions, createPaymentIntentTest);
       console.log("💳 Calling createPaymentIntentFn...");
-      // 🔥 Adaugă numele pachetului
-      const packageName = "Analiză Astrogramă"; // Sau poate fi dintr-un state/dinamic
-
       const resp = await createPaymentIntentFn({
-        amount: 1500, // 3.00 RON
+        amount: 1500, // de exemplu, 15,00 EUR (sau 3.00 RON în funcție de unități)
         currency: "eur",
         firstName,
         lastName,
@@ -678,17 +640,13 @@ function AstrogramaNatala({ navigation, route }) {
         phone,
       });
       console.log("💳 PaymentIntent response:", resp);
-
       const { clientSecret, transactionId } = resp.data;
       if (!clientSecret || !transactionId) {
         throw new Error("Lipsesc datele PaymentIntent. Verifică serverul.");
       }
-
+  
       // 2) Inițializează Payment Sheet
-      console.log(
-        "🔧 Initializing Payment Sheet with clientSecret:",
-        clientSecret
-      );
+      console.log("🔧 Initializing Payment Sheet with clientSecret:", clientSecret);
       const { error: initError } = await initPaymentSheet({
         paymentIntentClientSecret: clientSecret,
         merchantDisplayName: "Cristina Zurba tarot",
@@ -699,58 +657,96 @@ function AstrogramaNatala({ navigation, route }) {
           address: "never",
         },
       });
-
       if (initError) {
         console.error("❌ Eroare initPaymentSheet:", initError);
         Alert.alert("Eroare", initError.message);
         return;
       }
       console.log("🔧 Payment Sheet initialized successfully.");
-
+  
       // 3) Afișează Payment Sheet
       console.log("📲 Presenting Payment Sheet...");
       const { error: presentError } = await presentPaymentSheet();
       if (presentError) {
         console.error("❌ Eroare la prezentarea Payment Sheet:", presentError);
+        Alert.alert("Eroare", presentError.message);
         return;
       }
       console.log("📲 Payment Sheet presented successfully.");
-
-      console.log("🎉 Payment successful! Generating invoice...");
-
-      // 4) Creează factura pe server și marchează-o ca plătită
-      console.log("🧾 Creating invoice...");
-      const createInvoiceFn = httpsCallable(
-        functions,
-        // "createInvoiceAfterPaymentTest"
-        "createInvoiceAfterPayment"
-      );
-      const invoiceResp = await createInvoiceFn({
-        transactionId,
-        firstName,
-        lastName,
-        email,
-        phone,
-        address: {
-          line1,
-          city,
-          postal_code: postalCode,
-          country,
-        },
-        analysisData: userData,
+      // La acest punct, plata este autorizată, dar nu este capturată.
+  
+      // 4) Generează conținutul PDF
+      const pdfHtmlContent = generatePDFContent();
+      console.log("📝 Generated PDF HTML content.");
+  
+      // 5) Trimite emailul cu PDF-ul
+      console.log("📧 Calling sendPdfEmail function...");
+      const sendPdfEmailFn = httpsCallable(functions, sendPdfEmail);
+      const emailResponse = await sendPdfEmailFn({
+        email: email, // sau userD.email, după caz
+        pdfHtml: pdfHtmlContent,
+        fullName: userD.full_name, // folosește numele real al utilizatorului
       });
+      console.log("📧 Email function response:", emailResponse);
+  
 
-      console.log("🧾 Invoice created:", invoiceResp.data);
-      Alert.alert(achizitieCompleta1, achizitieCompleta2);
+// Pentru test: simulează o eroare după trimiterea emailului
+// DECOMENTEAZĂ LINIA DE MAI JOS PENTRU TESTARE:
+// throw new Error("Test error: Simulated failure after email sent");
+
+      if (emailResponse.data && emailResponse.data.success) {
+        // 6) Capturează plata
+        console.log("🔒 Capturing PaymentIntent...");
+        const capturePaymentFn = httpsCallable(functions, capturePaymentIntentTest);
+        const captureResp = await capturePaymentFn({ transactionId });
+        if (captureResp.data && captureResp.data.captured) {
+          console.log("✅ Payment captured successfully.");
+          // 7) Actualizează starea și salvează în AsyncStorage
+          setIsPaid(true);
+          const userDataJson = await AsyncStorage.getItem("userData");
+          const userData = userDataJson ? JSON.parse(userDataJson) : {};
+          userData.isPaid = true;
+          await AsyncStorage.setItem("userData", JSON.stringify(userData));
+  
+          // 8) Creează factura pe server
+          console.log("🧾 Creating invoice...");
+          const createInvoiceFn = httpsCallable(functions, createInvoiceAfterPaymentTest);
+          const invoiceResp = await createInvoiceFn({
+            transactionId,
+            firstName,
+            lastName,
+            email,
+            phone,
+            address: {
+              line1,
+              city,
+              postal_code: postalCode,
+              country,
+            },
+            analysisData: userData,
+          });
+          console.log("🧾 Invoice created:", invoiceResp.data);
+          Alert.alert(achizitieCompleta1, achizitieCompleta2);
+        } else {
+          throw new Error("Capturarea plății a eșuat.");
+        }
+      } else {
+        // Dacă emailul nu a fost trimis, nu capturează plata
+        Alert.alert(
+          "Eroare",
+          "Email-ul cu PDF nu a putut fi trimis. Plata nu va fi finalizată. Te rugăm să reîncerci. Contact webdynamicx@gmail.com"
+        );
+        // Opțional, poți apela o funcție backend pentru a anula PaymentIntent
+      }
     } catch (error) {
       console.error("❌ Eroare handlePayment:", error);
-      Alert.alert("Eroare", "Nu s-a putut procesa plata sau factura.");
+      Alert.alert("Eroare", "Nu s-a putut procesa plata sau factura. Contact webdynamicx@gmail.com");
     } finally {
       setIsLoadingBuy(false);
       console.log("🏁 handlePayment complete. isLoadingBuy set to false.");
     }
   };
-
+  
   // const handlePayment = async () => {
   //   try {
   //     if (!line1 || !city || !country) {

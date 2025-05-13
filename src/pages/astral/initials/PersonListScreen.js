@@ -52,19 +52,7 @@ const PersonListScreen = ({ navigation }) => {
   const [isLoading, setIsLoading] = useState(true);
   const { language, changeLanguage, userData, setUserData } = useLanguage();
 
-  // varianta noua
 
-  // Adaugă o metodă pentru confirmare înainte de ștergere
-  // const confirmDeleteAnalysis = (analysis) => {
-  //   setAnalysisToDelete(analysis);
-  //   setModalVisibleOthers(true);
-  // };
-
-  // const confirmDelete = (person) => {
-  //   console.log("person...person...", person);
-  //   setPersonToDelete(person);
-  //   setModalVisible(true);
-  // };
 
   const handleAddPerson = () => {
     // if (persons.length > 0) {
@@ -85,46 +73,27 @@ const PersonListScreen = ({ navigation }) => {
     // }
   };
 
-  // const handleRecoverBoughtAnalysis = async () => {
-  //   setIsLoading(true);
-  //   console.log("🔄 handleRecoverBoughtAnalysis started...");
 
-  //   try {
-  //     // 🔹 Citește datele existente din AsyncStorage
-  //     const existingPersonalData = await AsyncStorage.getItem("personsData");
-  //     const existingOtherData = await AsyncStorage.getItem("personsDataOthers");
-
-  //     // 🔹 Parsează datele
-  //     const parsedPersonalData = existingPersonalData
-  //       ? JSON.parse(existingPersonalData)
-  //       : [];
-  //     const parsedOtherData = existingOtherData
-  //       ? JSON.parse(existingOtherData)
-  //       : [];
-
-  //     // 🔹 Setează state-ul pentru a afișa datele în UI
-  //     setPersons(parsedPersonalData);
-  //     setOtherPersons(parsedOtherData);
-
-  //     console.log("✅ personsData:", parsedPersonalData);
-  //     console.log("✅ personsDataOthers:", parsedOtherData);
-  //   } catch (error) {
-  //     console.error("❌ Error in handleRecoverBoughtAnalysis:", error);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
-
-  // useFocusEffect(
-  //   useCallback(() => {
-  //     handleRecoverBoughtAnalysis();
-  //   }, [])
-  // );
 
   // Funcție pentru sincronizarea datelor:
   // 1. Se face backup-ul (din AsyncStorage în Firestore) pentru ambele colecții sinastrie.
   // 2. Se recuperează documentele din Firestore (filtrate după telefonul utilizatorului).
   // 3. Se actualizează state-urile cu datele preluate din Firestore.
+
+  const containsServiceUnavailable = (obj) => {
+    if (typeof obj === "string") {
+      return obj === "Service Unavailable";
+    }
+    if (Array.isArray(obj)) {
+      return obj.some(item => containsServiceUnavailable(item));
+    }
+    if (typeof obj === "object" && obj !== null) {
+      return Object.values(obj).some(value => containsServiceUnavailable(value));
+    }
+    return false;
+  };
+  
+
   const synchronizeData = async () => {
     try {
       setIsLoading(true);
@@ -132,20 +101,70 @@ const PersonListScreen = ({ navigation }) => {
       await backupAnalizeSinastrieOnePersonToFirestore();
       await backupAnalizeSinastrieOthersToFirestore();
       console.log("✅ [Sinastrie] Backup-ul s-a efectuat.");
-
+  
       // Recuperăm documentele din Firestore:
       const onePersonDocs = await retrieveAnalizeSinastrieOnePersonByPhone();
       const othersDocs = await retrieveAnalizeSinastrieOthersByPhone();
-      setPersons(
-        Array.isArray(onePersonDocs) ? onePersonDocs : [onePersonDocs]
-      );
-      setOtherPersons(Array.isArray(othersDocs) ? othersDocs : [othersDocs]);
+  
+      // Filtrăm documentele din onePersonDocs:
+      const filteredOnePersonDocs = Array.isArray(onePersonDocs)
+        ? onePersonDocs.filter(doc => {
+            const synastry = doc?.synastry;
+            if (!synastry) return false;
+            if (synastry.natalWheelChart === null) return false;
+            if (synastry.aspect === null) return false;
+            // Verificăm dacă emotionalCompatibility și mesajul există și dacă mesajul este "Service Unavailable"
+            if (
+              synastry.emotionalCompatibility &&
+              synastry.emotionalCompatibility.message &&
+              synastry.emotionalCompatibility.message === "Service Unavailable"
+            ) {
+              return false;
+            }
+            return true;
+          })
+        : (
+            onePersonDocs?.synastry &&
+            onePersonDocs?.synastry.natalWheelChart !== null &&
+            onePersonDocs?.synastry.aspect !== null &&
+            (
+              !onePersonDocs?.synastry.emotionalCompatibility ||
+              onePersonDocs?.synastry.emotionalCompatibility.message !== "Service Unavailable"
+            )
+            ? [onePersonDocs]
+            : []
+          );
+  
+  // Filtrăm documentele din othersDocs:
+  const filteredOthersDocs = Array.isArray(othersDocs)
+  ? othersDocs.filter(doc => {
+      const synastry = doc?.synastry;
+      if (!synastry) return false;
+      if (synastry.natalWheelChart === null) return false;
+      if (synastry.aspect === null) return false;
+      if (containsServiceUnavailable(synastry)) return false;
+      return true;
+    })
+  : (
+      othersDocs?.synastry &&
+      othersDocs?.synastry.natalWheelChart !== null &&
+      othersDocs?.synastry.aspect !== null &&
+      (!containsServiceUnavailable(othersDocs?.synastry))
+      ? [othersDocs]
+      : []
+    );
+
+      setPersons(filteredOnePersonDocs);
+      setOtherPersons(filteredOthersDocs);
     } catch (error) {
       console.error("Eroare la sincronizarea datelor sinastrie:", error);
     } finally {
       setIsLoading(false);
     }
   };
+  
+  
+  
 
   useFocusEffect(
     useCallback(() => {
@@ -184,6 +203,11 @@ const PersonListScreen = ({ navigation }) => {
   );
   const dataNasteriiText = useTranslation(
     "Data nasterii",
+    language,
+    "PersonListAstrograma"
+  );
+  const helpText = useTranslation(
+    "Dacă întâmpini probleme, contactează-ne la adresa de email: webdynamicx@gmail.com",
     language,
     "PersonListAstrograma"
   );
@@ -242,11 +266,13 @@ const PersonListScreen = ({ navigation }) => {
                   style={styles.sinButton}
                   onPress={
                     () =>
+                    {
                       navigation.navigate("Sinastrie", {
                         personIndex: item.indexArray,
                         personData: item,
                       })
-                    // console.log("item...", item.synastry.natalWheelChart.data)
+                    console.log("item...", item.synastry)
+                  }
                   }
                 >
                   {veziAnalizaText}
@@ -267,8 +293,8 @@ const PersonListScreen = ({ navigation }) => {
     }
 
     if (item.listType === "otherPersons") {
-      console.log("other person...", item.actualLanguageSinastrie);
-      console.log("other person...", item);
+      // console.log("other person...", item.actualLanguageSinastrie);
+      // console.log("other person...", item);
       return (
         <Surface
           style={[styles.surfaceRight, { backgroundColor: "transparent" }]}
@@ -313,7 +339,7 @@ const PersonListScreen = ({ navigation }) => {
                       analysisIndex: item.indexArray,
                       analysisData: item,
                     });
-                    console.log(item);
+               
                   }}
                 >
                   {veziAnalizaText}
@@ -347,6 +373,9 @@ const PersonListScreen = ({ navigation }) => {
         <SpaceSky />
 
         <View style={styles.listContainer}>
+        <View style={styles.helpContainer}>
+        <Text style={styles.helpText}>{helpText}</Text>
+      </View>
           <FlatList
             data={unifiedData}
             keyExtractor={(item, index) =>
@@ -403,6 +432,15 @@ const PersonListScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
+  helpContainer: {
+    padding: 10,
+    alignItems: 'center',
+  },
+  helpText: {
+    fontSize: 14,
+    color: 'white',
+    textAlign: 'center',
+  },
   statusBadge: {
     position: "absolute",
     top: 10,

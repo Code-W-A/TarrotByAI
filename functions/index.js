@@ -13,7 +13,7 @@ const db = admin.firestore();
 exports.checkAndSendNotifications = functions.pubsub
     .schedule("every 5 minutes")
     .timeZone("Europe/Bucharest")
-    .onRun(async (context) => {
+    .onRun(async () => {
       const now = new Date();
       const offset = 2;
       now.setHours(now.getHours() + offset);
@@ -103,7 +103,7 @@ exports.checkAndSendNotifications = functions.pubsub
 exports.checkAndSendNotificationsIos = functions.pubsub
     .schedule("every 5 minutes")
     .timeZone("Europe/Bucharest")
-    .onRun(async (context) => {
+    .onRun(async () => {
       const now = new Date();
       const offset = 2;
       now.setHours(now.getHours() + offset);
@@ -193,7 +193,7 @@ exports.checkAndSendNotificationsIos = functions.pubsub
 exports.sendRandomNotification = functions.pubsub
     .schedule("every 120 minutes")
     .timeZone("Europe/Bucharest")
-    .onRun(async (context) => {
+    .onRun(async () => {
       console.log("📢 Începerea procesului de trimitere a notificărilor...");
 
       // 1️⃣ Obține toate notificările din Firestore
@@ -296,7 +296,7 @@ exports.sendRandomNotification = functions.pubsub
 exports.sendRegularNotificationsIos = functions.pubsub
     .schedule("every 120 minutes")
     .timeZone("Europe/Bucharest")
-    .onRun(async (context) => {
+    .onRun(async () => {
     // Obține toate notificările din Firestore
       const loc = "RegularNotifications";
       const nS = await admin.firestore().collection(loc).get();
@@ -367,7 +367,7 @@ exports.sendRandomAfirmatii = functions
     .runWith({timeoutSeconds: 300, memory: "512MB"}) // 5 minute timeout
     .pubsub.schedule("every 120 minutes")
     .timeZone("Europe/Bucharest")
-    .onRun(async (context) => {
+    .onRun(async () => {
       console.log(
           "📢 Începerea procesului de trimitere a afirmațiilor pozitive...",
       );
@@ -467,7 +467,7 @@ exports.sendRandomAfirmatii = functions
 exports.sendRegularAfirmatiiIos = functions.pubsub
     .schedule("every 120 minutes")
     .timeZone("Europe/Bucharest")
-    .onRun(async (context) => {
+    .onRun(async () => {
     // Obține toate notificările din Firestore
       const loc = "AfirmatiiPozitive";
       const nS = await admin.firestore().collection(loc).get();
@@ -547,7 +547,7 @@ exports.sendRegularAfirmatiiIos = functions.pubsub
 exports.sendHoroscopeNotificationsAndroid = functions.pubsub
     .schedule("every 24 hours")
     .timeZone("Europe/Bucharest")
-    .onRun(async (context) => {
+    .onRun(async () => {
       const collectionRef = db.collection("NotificariHoroscop");
 
       const nS = await collectionRef.get();
@@ -613,7 +613,7 @@ exports.sendHoroscopeNotificationsAndroid = functions.pubsub
 exports.sendHoroscopeNotificationsIos = functions.pubsub
     .schedule("every 24 hours")
     .timeZone("Europe/Bucharest")
-    .onRun(async (context) => {
+    .onRun(async () => {
       const collectionRef = db.collection("NotificariHoroscop");
 
       const nS = await collectionRef.get();
@@ -1244,8 +1244,204 @@ exports.createNotificariHoroscop = functions.https.onRequest(
     },
 );
 
+// TRIMITERE NOTIFICARI MANUALE ANDROID
+
+exports.sendManualNotificationsAndroid = functions.runWith({timeoutSeconds: 300, memory: "512MB"}).firestore
+    .document("NotificariManuale/{docId}")
+    .onCreate(async (snap, context) => {
+      console.log("[ANDROID] - Declanșat onCreate pentru NotificariManuale");
+
+      // Preluăm datele documentului nou creat
+      const docData = snap.data();
+      if (!docData) {
+        console.log("[ANDROID] - Nu a fost găsită nicio notificare (docData e null/undefined).");
+        return null;
+      }
+
+      console.log("[ANDROID] - Document Data:", JSON.stringify(docData));
+
+      // Obținem toți userii (pentru a filtra manual isIos === false sau undefined)
+      console.log("[ANDROID] - Obținem toți userii din userTokens...");
+      const tS = await admin.firestore().collection("userTokens").get();
+      const users = [];
+      tS.forEach((doc) => users.push(doc.data()));
+
+      console.log(`[ANDROID] - Număr total de useri găsiți: ${users.length}`);
+
+      if (users.length === 0) {
+        console.log("[ANDROID] - Niciun token de notificare disponibil.");
+        return null;
+      }
+
+      const messages = [];
+
+      // Iterăm prin fiecare user
+      users.forEach((user, index) => {
+        const {token, language, isIos} = user;
+        console.log(`[ANDROID] - User #${index + 1} => language: ${language}, isIos: ${isIos}, token: ${token}`);
+
+        // Filtrăm utilizatorii care sunt Android (isIos===false) sau isIos e nedefinit
+        if (isIos === false || isIos === undefined) {
+        // Fallback la "ro" dacă nu are language
+          const userLanguage = language || "ro";
+          console.log(`[ANDROID] - Limba utilizator: ${userLanguage}`);
+
+          // Căutăm datele de limbă în docData.info
+          const langData = docData.info[userLanguage] || docData.info["ro"];
+          if (!langData) {
+            console.log(`[ANDROID] - Lipsesc datele pentru limba ${userLanguage}. Fallback pe "ro"??`);
+            return;
+          }
+
+          const {nume, descriere} = langData;
+          console.log(`[ANDROID] - notă: ${nume}, descriere: ${descriere}`);
+
+          if (Expo.isExpoPushToken(token)) {
+            messages.push({
+              to: token,
+              sound: "default",
+              title: nume || "Notificare",
+              body: descriere || "",
+              data: {type: "NotificariManuale", ...docData},
+            });
+            console.log(`[ANDROID] - Mesaj pregătit pentru token: ${token}`);
+          } else {
+            console.error(`[ANDROID] - Tokenul ${token} nu este valid pentru Expo.`);
+          }
+        } else {
+          console.log(`[ANDROID] - User #${index + 1} este iOS, deci nu primește notificări Android.`);
+        }
+      });
+
+      console.log(`[ANDROID] - Total mesaje pregătite: ${messages.length}`);
+
+      if (messages.length === 0) {
+        console.log("[ANDROID] - Niciun mesaj valid pentru trimitere.");
+        return null;
+      }
+
+      // Trimitem notificările în bucăți (chunks)
+      const chunks = expo.chunkPushNotifications(messages);
+      console.log(`[ANDROID] - Avem ${chunks.length} chunk-uri de trimis.`);
+      const tickets = [];
+
+      for (let i = 0; i < chunks.length; i++) {
+        const chunk = chunks[i];
+        console.log(`[ANDROID] - Trimitem chunk-ul #${i + 1} care conține ${chunk.length} mesaje.`);
+
+        try {
+          const ticketChunk = await expo.sendPushNotificationsAsync(chunk);
+          tickets.push(...ticketChunk);
+          console.log(`[ANDROID] - Chunk-ul #${i + 1} trimis cu succes. Rezultat:`, ticketChunk);
+        } catch (error) {
+          console.error(`[ANDROID] - Eroare la trimiterea chunk-ului #${i + 1}: ${error}`);
+        }
+      }
+
+      console.log(`[ANDROID] - Notificări Android trimise cu succes. Total ticket-uri: ${tickets.length}`);
+      return null;
+    });
+
+
+// TRIMITERE NOTIFICARI MANUALE IOS
+
+exports.sendManualNotificationsIos = functions.runWith({timeoutSeconds: 300, memory: "512MB"}).firestore
+    .document("NotificariManuale/{docId}")
+    .onCreate(async (snap, context) => {
+      console.log("[iOS] - Declanșat onCreate pentru NotificariManuale");
+
+      // Preluăm datele documentului nou creat
+      const docData = snap.data();
+      if (!docData) {
+        console.log("[iOS] - Nu a fost găsită nicio notificare (docData e null/undefined).");
+        return null;
+      }
+
+      console.log("[iOS] - Document Data:", JSON.stringify(docData));
+
+      // Preluăm doar userii iOS
+      console.log("[iOS] - Obținem toți userii iOS din userTokens...");
+      const tS = await admin
+          .firestore()
+          .collection("userTokens")
+          .where("isIos", "==", true)
+          .get();
+
+      const users = [];
+      tS.forEach((doc) => users.push(doc.data()));
+      console.log(`[iOS] - Număr total de useri iOS găsiți: ${users.length}`);
+
+      if (users.length === 0) {
+        console.log("[iOS] - Niciun token de notificare iOS disponibil.");
+        return null;
+      }
+
+      const messages = [];
+
+      users.forEach((user, index) => {
+        const {token, language} = user;
+        console.log(`[iOS] - User #${index + 1} => language: ${language}, token: ${token}`);
+
+        // Fallback la "ro" dacă userLanguage nu există
+        const userLanguage = language || "ro";
+        console.log(`[iOS] - Limba utilizator: ${userLanguage}`);
+
+        // Verificăm dacă există datele pentru limba respectivă
+        const langData = docData.info[userLanguage] || docData.info["ro"];
+        if (!langData) {
+          console.log(`[iOS] - Lipsesc datele pentru limba ${userLanguage}.`);
+          return;
+        }
+
+        const {nume, descriere} = langData;
+        console.log(`[iOS] - notă: ${nume}, descriere: ${descriere}`);
+
+        if (Expo.isExpoPushToken(token)) {
+          messages.push({
+            to: token,
+            sound: "default",
+            title: nume || "Notificare",
+            body: descriere || "",
+            data: {type: "NotificariManuale", ...docData},
+          });
+          console.log(`[iOS] - Mesaj pregătit pentru token: ${token}`);
+        } else {
+          console.error(`[iOS] - Tokenul ${token} nu este valid pentru Expo.`);
+        }
+      });
+
+      console.log(`[iOS] - Total mesaje pregătite: ${messages.length}`);
+
+      if (messages.length === 0) {
+        console.log("[iOS] - Niciun mesaj valid pentru trimitere.");
+        return null;
+      }
+
+      // Trimitem notificările în bucăți (chunks)
+      const chunks = expo.chunkPushNotifications(messages);
+      console.log(`[iOS] - Avem ${chunks.length} chunk-uri de trimis.`);
+      const tickets = [];
+
+      for (let i = 0; i < chunks.length; i++) {
+        const chunk = chunks[i];
+        console.log(`[iOS] - Trimitem chunk-ul #${i + 1} care conține ${chunk.length} mesaje.`);
+
+        try {
+          const ticketChunk = await expo.sendPushNotificationsAsync(chunk);
+          tickets.push(...ticketChunk);
+          console.log(`[iOS] - Chunk-ul #${i + 1} trimis cu succes. Rezultat:`, ticketChunk);
+        } catch (error) {
+          console.error(`[iOS] - Eroare la trimiterea chunk-ului #${i + 1}: ${error}`);
+        }
+      }
+
+      console.log(`[iOS] - Notificări iOS trimise cu succes. Total ticket-uri: ${tickets.length}`);
+      return null;
+    });
+
+
 // -----------------PAYMENT LIVE START----------
-exports.createPaymentIntent = functions.https.onCall(async (data, context) => {
+exports.createPaymentIntent = functions.https.onCall(async (data ) => {
   const {amount, currency, firstName, lastName, email, phone} = data;
 
   try {
@@ -1279,6 +1475,7 @@ exports.createPaymentIntent = functions.https.onCall(async (data, context) => {
       currency: currency || "ron",
       customer: customer.id,
       payment_method_types: ["card"],
+      capture_method: "manual", // Fondurile autorizate inițial
     });
 
     return {
@@ -1295,7 +1492,7 @@ exports.createPaymentIntent = functions.https.onCall(async (data, context) => {
 });
 
 exports.createInvoiceAfterPayment = functions.https.onCall(
-    async (data, context) => {
+    async (data ) => {
       const {transactionId, firstName, lastName, address} = data;
 
       try {
@@ -1373,13 +1570,35 @@ exports.createInvoiceAfterPayment = functions.https.onCall(
       }
     },
 );
+
+exports.capturePaymentIntent = functions.https.onCall(async (data) => {
+  const {transactionId} = data;
+  try {
+    // Retrieve PaymentIntent using stripeTest
+    const tId= transactionId;
+    const paymentIntent = await stripe.paymentIntents.retrieve(tId);
+    console.log("PaymentIntent status before capture:", paymentIntent.status);
+
+    // Dacă PaymentIntent-ul este deja capturat (status: "succeeded")
+    if (paymentIntent.status === "succeeded") {
+      return {captured: true, paymentIntent};
+    }
+
+    // Altfel, capturează PaymentIntent-ul
+    const capturedPaymentIntent = await stripe.paymentIntents.capture(tId);
+    return {captured: true, paymentIntent: capturedPaymentIntent};
+  } catch (error) {
+    console.error("Eroare la capturarea PaymentIntent:", error);
+    throw new functions.https.HttpsError("internal", "Nu putut captur plata");
+  }
+});
 // -----------------PAYMENT LIVE end----------
 
 // -----------------PAYMENT test START----------
 const stripeTest = require("stripe")(functions.config().stripe.test_secret_key);
 
 exports.createPaymentIntentTest = functions.https.onCall(
-    async (data, context) => {
+    async (data ) => {
       const {amount, currency, firstName, lastName, email, phone} = data;
 
       try {
@@ -1408,6 +1627,7 @@ exports.createPaymentIntentTest = functions.https.onCall(
           currency: currency || "ron",
           customer: customer.id,
           payment_method_types: ["card"],
+          capture_method: "manual", // Fondurile autorizate inițial
         });
 
         return {
@@ -1424,8 +1644,31 @@ exports.createPaymentIntentTest = functions.https.onCall(
     },
 );
 
+exports.capturePaymentIntentTest = functions.https.onCall(async (data) => {
+  const {transactionId} = data;
+  try {
+    // Retrieve PaymentIntent using stripeTest
+    const tId= transactionId;
+    const paymentIntent = await stripeTest.paymentIntents.retrieve(tId);
+    console.log("PaymentIntent status before capture:", paymentIntent.status);
+
+    // Dacă PaymentIntent-ul este deja capturat (status: "succeeded")
+    if (paymentIntent.status === "succeeded") {
+      return {captured: true, paymentIntent};
+    }
+
+    // Altfel, capturează PaymentIntent-ul
+    const capturedPaymentIntent = await stripeTest.paymentIntents.capture(tId);
+    return {captured: true, paymentIntent: capturedPaymentIntent};
+  } catch (error) {
+    console.error("Eroare la capturarea PaymentIntent:", error);
+    throw new functions.https.HttpsError("internal", "Nu putut captur plata");
+  }
+});
+
+
 exports.createInvoiceAfterPaymentTest = functions.https.onCall(
-    async (data, context) => {
+    async (data ) => {
       const {transactionId, firstName, lastName, address} = data;
 
       try {
@@ -1546,7 +1789,7 @@ async function generatePdfBuffer(htmlContent) {
  * @return {Promise<Object>} - A promise that resolves with the result object.
  * @throws {functions.https.HttpsError} - If the email
  */
-const sendPdfEmail = async (data, context) => {
+const sendPdfEmail = async (data ) => {
   const {email, pdfHtml, fullName} = data;
   if (!email || !pdfHtml) {
     throw new functions.https.HttpsError(
