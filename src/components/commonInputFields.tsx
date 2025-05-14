@@ -22,6 +22,8 @@ interface InputFieldsProps {
   setIsWhite1?: any;
   setIsWhite2?: any;
   style?: any;
+  containerStyle?: any;
+  textInputStyle?: any;
 }
 
 export const InputFields: React.FC<InputFieldsProps> = ({
@@ -36,6 +38,8 @@ export const InputFields: React.FC<InputFieldsProps> = ({
   setIsWhite1,
   setIsWhite2,
   style,
+  containerStyle,
+  textInputStyle,
 }) => {
   const [showPass, setShowPass] = useState<boolean>(isSecure);
   const [isFocused, setIsFocused] = useState<boolean>(false);
@@ -52,7 +56,8 @@ export const InputFields: React.FC<InputFieldsProps> = ({
       <View
         style={[
           styles.testBoxRowStyle,
-
+          containerStyle,
+          style,
           { borderColor: isFocused ? "white" : colors.primary3 },
         ]}
       >
@@ -68,11 +73,14 @@ export const InputFields: React.FC<InputFieldsProps> = ({
         <TextInput
           onFocus={handleOnFocus}
           onBlur={handleOnBlur}
-          style={{
-            flex: 1,
-            marginRight: isPassword ? 30 : 0,
-            color: isFocused ? "white" : "white",
-          }} // Ajustează margin-right dacă este o parolă pentru a face loc pentru icon
+          style={[
+            {
+              flex: 1,
+              marginRight: isPassword ? 30 : 0,
+              color: isFocused ? "white" : "white",
+            },
+            textInputStyle,
+          ]}
           placeholder={placeholder}
           value={value}
           placeholderTextColor={isFocused ? "white" : colors.grayText}

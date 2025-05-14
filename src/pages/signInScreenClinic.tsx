@@ -123,6 +123,8 @@ interface Props extends GeneralProps {
   route: Route<string, object | undefined>;
 }
 
+const deviceWidth = Dimensions.get('window').width;
+
 const SignInScreenClinic: React.FC<Props> = ({
   navigation,
   route,
@@ -301,64 +303,58 @@ const SignInScreenClinic: React.FC<Props> = ({
   }, [response]);
 
   return (
-    <TouchableWithoutFeedback onPress={() => console.log("ass")}>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <Fragment>
         <CustomLoader isLoading={isLoading} />
         <LinearGradient
-          colors={[
-            colors.gradientLogin1,
-            colors.gradientLogin2,
-            colors.gradientLogin2,
-          ]} // Înlocuiește cu culorile gradientului tău
+          colors={['#FAF7F2', '#F5E9D6', '#FEF495', '#FFFBEA']}
           style={styles.gradient}
+          start={{ x: 0.5, y: 0 }}
+          end={{ x: 0.5, y: 1 }}
         >
           <KeyboardAvoidingView
-            style={{ flex: 1, justifyContent: "center" }}
-            keyboardVerticalOffset={65}
+            style={{ flex: 1 }}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            keyboardVerticalOffset={40}
           >
-            <View style={styles.subContainer}>
-              <View
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  position: "relative",
-                  bottom: "8%",
-                }}
-              >
-                <Image
-                  source={require("../../assets/headerIcon.png")}
-                  style={{ width: 300, height: 100, marginBottom: "5%" }}
-                  resizeMode="contain" // Aceasta va asigura că întreaga imagine se va încadra în spațiul disponibil, păstrând proporțiile.
-                />
-                <H6fontBoldWhite style={{ top: "5%" }}>
-                  {i18n.translate("login")}
-                </H6fontBoldWhite>
-              </View>
-
-              <View>
-                <View>
+            <ScrollView
+              contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-start' }}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+            >
+              <View style={[styles.subContainerNew, { paddingTop: 10 }]}>
+                <View style={styles.headerContainerNew}>
+                  <Image
+                    source={require('../../assets/headerIcon.png')}
+                    style={styles.logoCrownResponsive}
+                    resizeMode="contain"
+                  />
+                  <View style={styles.goldLineNew} />
+                  <H6fontBoldPrimary>
+                    {i18n.translate('login')}
+                  </H6fontBoldPrimary>
+                </View>
+                <View style={styles.formContainerNew}>
                   <Controller
                     name={formKeys.email}
                     control={control}
                     render={({ field: { onChange, value } }) => (
                       <InputFields
-                        errorMessage={errors[
-                          formKeys.email
-                        ]?.message.toString()}
+                        errorMessage={errors[formKeys.email]?.message?.toString()}
                         value={value}
                         onChangeText={onChange}
-                        placeholder={i18n.translate("email")}
+                        placeholder={i18n.translate('email')}
                         image={"email"}
+                        containerStyle={styles.inputWrapperNew}
+                        textInputStyle={styles.inputTextNew}
                         setIsWhite1={setIsWhite1}
                       />
                     )}
                     rules={{
-                      required: requiredValidation(i18n.translate("email")),
+                      required: requiredValidation(i18n.translate('email')),
                       validate: emailValidation,
                     }}
                   />
-
                   <Controller
                     name={formKeys.password}
                     control={control}
@@ -368,106 +364,80 @@ const SignInScreenClinic: React.FC<Props> = ({
                         value={value}
                         isSecure={true}
                         onChangeText={onChange}
-                        placeholder={i18n.translate("password")}
-                        errorMessage={errors[
-                          formKeys.password
-                        ]?.message.toString()}
+                        placeholder={i18n.translate('password')}
+                        errorMessage={errors[formKeys.password]?.message?.toString()}
                         image={"lock-outline"}
+                        containerStyle={styles.inputWrapperNew}
+                        textInputStyle={styles.inputTextNew}
                         setIsWhite2={setIsWhite2}
                       />
                     )}
                     rules={{
-                      required: requiredValidation(i18n.translate("password")),
-                      minLength: minLengthValidation(
-                        validationSchema.password.minLength
-                      ),
+                      required: requiredValidation(i18n.translate('password')),
+                      minLength: minLengthValidation(validationSchema.password.minLength),
                     }}
                   />
-                </View>
-
-                <RowView style={[mt10, alignSelfRight]}>
-                  {loginType === "email" && (
+                  <RowView style={styles.forgotRowNew} height={undefined}>
+                    {loginType === 'email' && (
+                      <TouchableOpacity
+                        onPress={() => navigation.navigate(screenName.ForgotPasswordClinic as any)}
+                      >
+                        <H7fontBoldPrimary>
+                          {i18n.translate('forgotPassword')}
+                        </H7fontBoldPrimary>
+                      </TouchableOpacity>
+                    )}
+                  </RowView>
+                  <View style={styles.buttonGroupNew}>
+                    <Button
+                      disabled={false}
+                      funCallback={handleLoginAsGuest}
+                      borderWidth={2}
+                      bgColor={'#fff'}
+                      txtColor={'#000'}
+                      label={i18n.translate('loginNowNoAccount')}
+                      borderColor={'#C9A14A'}
+                      success={true}
+                      style={styles.guestButtonNew}
+                      txtStyle={styles.guestButtonTextNew}
+                    />
+                    <Button
+                      disabled={false}
+                      funCallback={handleSubmit(onsubmit)}
+                      borderWidth={0}
+                      bgColor={'#C9A14A'}
+                      style={styles.loginButtonNew}
+                      label={i18n.translate('loginNow')}
+                      borderColor={'#C9A14A'}
+                      success={true}
+                      txtColor={'#fff'}
+                      txtStyle={styles.loginButtonTextNew}
+                    />
                     <TouchableOpacity
-                      onPress={() =>
-                        navigation.navigate(
-                          screenName.ForgotPasswordClinic as any
-                        )
-                      }
+                      style={styles.googleButtonNew}
+                      onPress={() => promptAsync()}
+                      disabled={!request}
+                      activeOpacity={0.85}
                     >
-                      <H7fontBoldPrimary>
-                        {i18n.translate("forgotPassword")}
-                      </H7fontBoldPrimary>
+                      <Icon name="google" size={22} color="#C9A14A" style={{ marginRight: 10 }} />
+                      <Text style={styles.googleButtonTextNew}>{i18n.translate('loginWithGoogle')}</Text>
                     </TouchableOpacity>
-                  )}
-                </RowView>
-                <View
-                  style={{
-                    width: "100%",
-
-                    height: "32%",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                >
-                  <Button
-                    disabled={false}
-                    funCallback={handleLoginAsGuest}
-                    borderWidth={3}
-                    bgColor={"transparent"}
-                    txtColor={colors.primary3}
-                    label={i18n.translate("loginNowNoAccount")}
-                    borderColor={colors.white}
-                    success={true}
-                    style={{ height: "42%", marginTop: "5%" }}
-                    txtStyle={{ fontSize: 20 }}
-                  />
-
-                  <Button
-                    disabled={false}
-                    funCallback={handleSubmit(onsubmit)}
-                    borderWidth={2}
-                    bgColor={colors.primary3}
-                    style={{ marginTop: "5%" }}
-                    label={i18n.translate("loginNow")}
-                    borderColor={colors.primary3}
-                    success={true}
-                    txtColor={colors.white}
-                  />
-                </View>
-
-                <TouchableOpacity
-                  style={styles.googleButton}
-                  onPress={() => promptAsync()} // Acțiunea butonului rămâne aceeași
-                  disabled={!request}
-                >
-                  <Icon name="google" size={24} color="white" />
-                </TouchableOpacity>
-                <View>
-                  <View style={styles.infoTextViewStyle}>
+                  </View>
+                  <View style={styles.infoTextViewStyleNew}>
                     <H7fontBoldPrimary>
-                      {i18n.translate("dntHaveAccount")}{" "}
+                      {i18n.translate('dntHaveAccount')} {" "}
                     </H7fontBoldPrimary>
                     <TouchableOpacity
-                      onPress={() =>
-                        navigation.navigate(
-                          screenName.SignUpScreenClinic as any,
-                          { item: loginType }
-                        )
-                      }
+                      onPress={() => navigation.navigate(screenName.SignUpScreenClinic as any, { item: loginType })}
                     >
-                      <H7fontBoldPrimary
-                        style={{
-                          textDecorationLine: "underline",
-                        }}
-                      >
-                        {i18n.translate("signUp")}
+                      <H7fontBoldPrimary>
+                        {i18n.translate('signUp')}
                       </H7fontBoldPrimary>
                     </TouchableOpacity>
                   </View>
                 </View>
               </View>
-            </View>
-            {/* </View> */}
+            </ScrollView>
           </KeyboardAvoidingView>
           <SnackBar
             showSnackBar={showSnackback}
@@ -557,4 +527,167 @@ const styles = StyleSheet.create({
 
   borderLineStyle: { paddingTop: 10 },
   footerComponentView: { paddingTop: 30 },
+  subContainerNew: {
+    flex: 1,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: deviceWidth < 400 ? 10 : 30,
+  },
+  headerContainerNew: {
+    alignItems: 'center',
+    marginBottom: deviceWidth < 400 ? 8 : 18,
+    width: '100%',
+  },
+  logoCrownResponsive: {
+    width: deviceWidth * 0.55,
+    height: deviceWidth * 0.55,
+    maxWidth: 340,
+    maxHeight: 340,
+    minWidth: 120,
+    minHeight: 120,
+    marginBottom: 8,
+    alignSelf: 'center',
+  },
+  goldLineNew: {
+    width: 60,
+    height: 3,
+    backgroundColor: '#C9A14A',
+    borderRadius: 2,
+    marginBottom: 12,
+  },
+  titleNew: {
+    fontSize: 28,
+    color: '#C9A14A',
+    fontFamily: 'LoraBold',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  formContainerNew: {
+    width: '100%',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  inputWrapperNew: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderWidth: 1.5,
+    borderColor: '#C9A14A',
+    borderRadius: 22,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    marginBottom: 16,
+    width: '100%',
+    shadowColor: '#C9A14A',
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  inputIconNew: {
+    marginRight: 10,
+  },
+  inputFieldNew: {
+    flex: 1,
+    backgroundColor: 'transparent',
+    borderWidth: 0,
+    color: '#C9A14A',
+    fontSize: 16,
+    fontFamily: 'Lora',
+  },
+  inputTextNew: {
+    color: '#C9A14A',
+    fontSize: 16,
+    fontFamily: 'Lora',
+  },
+  forgotRowNew: {
+    width: '100%',
+    justifyContent: 'flex-end',
+    marginBottom: 8,
+    paddingRight: 8,
+  },
+  forgotTextNew: {
+    color: '#C9A14A',
+    textDecorationLine: 'underline',
+    fontSize: 14,
+    fontFamily: 'Lora',
+  },
+  buttonGroupNew: {
+    width: '100%',
+    alignItems: 'center',
+    marginTop: 10,
+    marginBottom: 10,
+  },
+  guestButtonNew: {
+    width: '100%',
+    borderRadius: 22,
+    marginBottom: 10,
+    borderColor: '#C9A14A',
+    backgroundColor: '#fff',
+    shadowColor: '#C9A14A',
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  guestButtonTextNew: {
+    color: '#000',
+    fontSize: 18,
+    fontFamily: 'LoraBold',
+  },
+  loginButtonNew: {
+    width: '100%',
+    borderRadius: 22,
+    marginBottom: 10,
+    backgroundColor: '#C9A14A',
+    shadowColor: '#C9A14A',
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  loginButtonTextNew: {
+    color: '#fff',
+    fontSize: 18,
+    fontFamily: 'LoraBold',
+  },
+  googleButtonNew: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderWidth: 1.5,
+    borderColor: '#C9A14A',
+    borderRadius: 22,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    marginTop: 8,
+    marginBottom: 8,
+    width: '100%',
+    justifyContent: 'center',
+    shadowColor: '#C9A14A',
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  googleButtonTextNew: {
+    color: '#C9A14A',
+    fontSize: 16,
+    fontFamily: 'LoraBold',
+  },
+  infoTextViewStyleNew: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  signupPromptNew: {
+    color: '#C9A14A',
+    fontSize: 15,
+    fontFamily: 'Lora',
+  },
+  signupLinkNew: {
+    color: '#C9A14A',
+    textDecorationLine: 'underline',
+    fontSize: 15,
+    fontFamily: 'LoraBold',
+    marginLeft: 4,
+  },
 });

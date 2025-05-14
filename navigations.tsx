@@ -364,11 +364,17 @@ const RootNavigation = () => {
 
   useEffect(() => {
     const initializeScreen = async () => {
+      // Nou: verifică dacă utilizatorul a văzut onboarding-ul
+      const hasSeenOnboarding = await AsyncStorage.getItem("hasSeenOnboarding");
+      if (!hasSeenOnboarding) {
+        setInitialScreen(screenName.OnboardingScreen);
+        return;
+      }
       let screen = isGuestUser
         ? screenName.ClinicDashBoard
         : currentUser
         ? screenName.SignInScreenClinic
-        : screenName.OnboardingScreen;
+        : screenName.languageSelectScreen;
 
       try {
         const userDataJson = await AsyncStorage.getItem("userData");

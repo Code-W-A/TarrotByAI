@@ -6,252 +6,273 @@ import {
   StyleSheet,
   Image,
   ScrollView,
+  SafeAreaView,
+  Platform,
+  Animated,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { colors } from "../utils/colors";
 import {
-  H15fontMediumBlack,
   H2fontBoldPrimary,
   H6fontBoldPrimary,
   H6fontMediumWhite,
-  H6fontRegularWhite,
-  H7fontBoldPrimary,
-  H8fontBoldYellow,
-  H8fontMediumPrimary,
   H8fontMediumWhite,
 } from "../components/commonText";
 import { useNavigation } from "@react-navigation/native";
 import { screenName } from "../utils/screenName";
 import { handleLanguagei18n } from "../utils/handleLanguageGeneral";
 import i18n from "../../i18n";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const gold = "#C9A14A"; // auriu cald pentru accente
+const cream = "#FAF7F2"; // fundal crem deschis
+const cream2 = "#F5E9D6";
+
+const languages = [
+  { code: "ro", name: "Română", flag: require("../../assets/flags/romania.png") },
+  { code: "en", name: "English", flag: require("../../assets/flags/english.png") },
+  { code: "es", name: "Español", flag: require("../../assets/flags/spanish.png") },
+  { code: "bg", name: "Български", flag: require("../../assets/flags/bulgaria.png") },
+  { code: "cs", name: "Čeština", flag: require("../../assets/flags/czech.png") },
+  { code: "de", name: "Deutsch", flag: require("../../assets/flags/germany.png") },
+  { code: "el", name: "Ελληνικά", flag: require("../../assets/flags/greece.png") },
+  { code: "fr", name: "Français", flag: require("../../assets/flags/france.png") },
+  { code: "hr", name: "Hrvatski", flag: require("../../assets/flags/croatia.png") },
+  { code: "hi", name: "हिन्दी", flag: require("../../assets/flags/india.png") },
+  { code: "it", name: "Italiano", flag: require("../../assets/flags/italy.png") },
+  { code: "pl", name: "Polski", flag: require("../../assets/flags/poland.png") },
+  { code: "id", name: "Bahasa Indonesia", flag: require("../../assets/flags/indonesia.png") },
+  { code: "sk", name: "Slovenčina", flag: require("../../assets/flags/slovakia.png") },
+];
 
 const LanguageSelectScreen = () => {
   const [selectedLanguage, setSelectedLanguage] = useState(null);
+  const navigation = useNavigation();
+  const [pressed, setPressed] = useState(false);
 
   const handleLanguageSelect = (language, name) => {
-    console.log("test...", language);
     setSelectedLanguage(name);
-    console.log(`${name} Selected`);
     handleLanguagei18n(language);
   };
 
-  const navigation = useNavigation();
-
-  // Lista limbilor și a steagurilor corespunzătoare
-  const languages = [
-    {
-      code: "ro",
-      name: "Romanian",
-      flag: require("../../assets/flags/romania.png"),
-    },
-    {
-      code: "en",
-      name: "English",
-      flag: require("../../assets/flags/english.png"),
-    },
-    {
-      code: "es",
-      name: "Spanish",
-      flag: require("../../assets/flags/spanish.png"),
-    },
-    {
-      code: "bg",
-      name: "Bulgarian",
-      flag: require("../../assets/flags/bulgaria.png"),
-    },
-    {
-      code: "cs",
-      name: "Czech",
-      flag: require("../../assets/flags/czech.png"),
-    },
-    {
-      code: "de",
-      name: "German",
-      flag: require("../../assets/flags/germany.png"),
-    },
-    {
-      code: "el",
-      name: "Greek",
-      flag: require("../../assets/flags/greece.png"),
-    },
-    {
-      code: "fr",
-      name: "French",
-      flag: require("../../assets/flags/france.png"),
-    },
-    {
-      code: "hr",
-      name: "Croatian",
-      flag: require("../../assets/flags/croatia.png"),
-    },
-    {
-      code: "hi",
-      name: "Hindi",
-      flag: require("../../assets/flags/india.png"),
-    },
-    {
-      code: "it",
-      name: "Italian",
-      flag: require("../../assets/flags/italy.png"),
-    },
-    {
-      code: "pl",
-      name: "Polish",
-      flag: require("../../assets/flags/poland.png"),
-    },
-    {
-      code: "id",
-      name: "Indonesian",
-      flag: require("../../assets/flags/indonesia.png"),
-    },
-    {
-      code: "sk",
-      name: "Slovak",
-      flag: require("../../assets/flags/slovakia.png"),
-    },
-    // Adăugați aici alte limbi și steaguri, dacă este necesar
-  ];
-
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.safeArea}>
       <LinearGradient
-        colors={[
-          colors.gradientLogin1,
-          colors.gradientLogin2,
-          colors.gradientLogin2,
-        ]} // Înlocuiește cu culorile gradientului tău
+        colors={[cream, cream2, "#FFFBEA"]}
         style={styles.gradient}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
       >
-        <View style={styles.headerContainer}>
-          <Image
-            source={require("../../assets/Onboarding2.png")}
-            style={styles.headerImage}
-            resizeMode="contain"
-          />
-          <H6fontBoldPrimary style={styles.headerText}>
-            {i18n.translate("selectLanguage")}
-          </H6fontBoldPrimary>
-        </View>
-
-        <View
-          style={{
-            width: "100%",
-            height: "40%",
-            marginTop: "10%",
-          }}
-        >
-          <ScrollView contentContainerStyle={styles.buttonContainer}>
-            {languages.map((language) => (
-              <LanguageButton
-                key={language.code}
-                language={language.name}
-                flagSource={language.flag}
-                onSelect={() =>
-                  handleLanguageSelect(language.code, language.name)
-                }
-                isSelected={selectedLanguage === language.name}
-              />
-            ))}
+        <View style={styles.container}>
+          <View style={styles.headerContainer}>
+            <Image
+              source={require("../../assets/LogoPngTransparent.png")}
+              style={styles.headerImage}
+              resizeMode="contain"
+            />
+            <View style={styles.goldLine} />
+            <Text style={styles.headerTitle}>{i18n.translate("welcomeTitle")}</Text>
+            <Text style={styles.headerSubtitle}>{i18n.translate("welcomeSubtitle")}</Text>
+          </View>
+          <Text style={styles.sectionTitle}>{i18n.translate("selectLanguage")}</Text>
+          <ScrollView
+            contentContainerStyle={styles.languageList}
+            style={styles.languageScroll}
+            showsVerticalScrollIndicator={false}
+          >
+            {languages.map((lang) => {
+              const isSelected = selectedLanguage === lang.name;
+              return (
+                <TouchableOpacity
+                  key={lang.code}
+                  activeOpacity={0.85}
+                  style={[
+                    styles.languageButton,
+                    isSelected && styles.languageButtonSelected,
+                    isSelected && { transform: [{ scale: 1.06 }] },
+                  ]}
+                  onPress={() => handleLanguageSelect(lang.code, lang.name)}
+                >
+                  <Image source={lang.flag} style={styles.flag} />
+                  <Text style={styles.languageText}>{lang.name}</Text>
+                  {isSelected && (
+                    <View style={styles.checkCircle}>
+                      <Image source={require("../../assets/starRatting.png")} style={styles.checkIcon} />
+                    </View>
+                  )}
+                </TouchableOpacity>
+              );
+            })}
           </ScrollView>
+          <View style={styles.bottomContainer}>
+            <TouchableOpacity
+              style={[styles.continueButton, pressed && styles.continueButtonPressed]}
+              onPressIn={() => setPressed(true)}
+              onPressOut={() => setPressed(false)}
+              onPress={() => navigation.navigate(screenName.SignInScreenClinic)}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.continueButtonText}>{i18n.translate("clinicLoginRedirect")}</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-
-        <TouchableOpacity
-          style={styles.continueButton}
-          onPress={() => navigation.navigate(screenName.SignInScreenClinic)}
-        >
-          <H6fontMediumWhite style={styles.continueButtonText}>
-            {i18n.translate("clinicLoginRedirect")}
-          </H6fontMediumWhite>
-        </TouchableOpacity>
       </LinearGradient>
-    </View>
+    </SafeAreaView>
   );
 };
 
-const LanguageButton = ({ language, flagSource, onSelect, isSelected }) => (
-  <TouchableOpacity
-    style={[styles.button, isSelected ? styles.selectedButton : null]}
-    onPress={onSelect}
-  >
-    <H8fontMediumWhite style={styles.buttonText}>{language}</H8fontMediumWhite>
-    <Image style={styles.image} source={flagSource} />
-  </TouchableOpacity>
-);
-
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: cream,
   },
   gradient: {
     flex: 1,
-    width: "100%",
-    height: "100%",
-    justifyContent: "center",
+  },
+  container: {
+    flex: 1,
     alignItems: "center",
+    justifyContent: "flex-start",
+    paddingTop: Platform.OS === "android" ? 30 : 0,
+    paddingHorizontal: 0,
   },
   headerContainer: {
     alignItems: "center",
-    width: "100%",
-    height: "30%",
+    marginBottom: 10,
+    width: "90%",
   },
   headerImage: {
-    width: 380,
-    height: 230,
+    width: 120,
+    height: 120,
+    marginBottom: 10,
   },
-  headerText: {
-    marginBottom: 30,
+  goldLine: {
+    width: 60,
+    height: 3,
+    backgroundColor: gold,
+    borderRadius: 2,
+    marginBottom: 12,
   },
-  buttonContainer: {
-    justifyContent: "center",
-    alignItems: "flex-start",
-    width: "100%",
-    paddingHorizontal: 20,
-    paddingVertical: "25%",
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: "700",
+    color: gold,
+    fontFamily: "LoraBold",
+    marginBottom: 4,
   },
-  button: {
-    backgroundColor: colors.primary3,
-    paddingHorizontal: 10,
-    marginVertical: 10,
-    paddingBottom: "1%",
-
-    width: "100%",
-    minHeight: "6%",
-    borderRadius: 10,
-    justifyContent: "space-between",
-    alignItems: "center",
-    flexDirection: "row",
+  headerSubtitle: {
+    fontSize: 16,
+    color: colors.primary3,
+    textAlign: "center",
+    fontFamily: "Lora",
+    marginBottom: 10,
   },
-  selectedButton: {
-    backgroundColor: colors.primary1,
-  },
-  buttonText: {
-    color: "white",
+  sectionTitle: {
     fontSize: 18,
+    color: gold,
+    fontWeight: "600",
+    marginBottom: 8,
+    fontFamily: "LoraBold",
+    alignSelf: "center",
   },
-  image: {
-    width: 30,
-    height: 30,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "#000",
+  languageScroll: {
+    flex: 1,
+    width: "100%",
+    marginBottom: 10,
+  },
+  languageList: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    paddingBottom: 20,
+  },
+  languageButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    borderWidth: 1.5,
+    borderColor: gold,
+    borderRadius: 22,
+    paddingVertical: 12,
+    paddingHorizontal: 22,
+    margin: 8,
+    shadowColor: gold,
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 3,
+    minWidth: 130,
+    minHeight: 48,
+    position: "relative",
+  },
+  languageButtonSelected: {
+    backgroundColor: cream2,
+    borderColor: gold,
+    shadowOpacity: 0.25,
+    elevation: 6,
+  },
+  flag: {
+    width: 32,
+    height: 22,
+    borderRadius: 4,
+    marginRight: 12,
+  },
+  languageText: {
+    fontSize: 16,
+    color: colors.primary3,
+    fontFamily: "LoraBold",
+  },
+  checkCircle: {
+    position: "absolute",
+    top: -10,
+    right: -10,
+    backgroundColor: gold,
+    borderRadius: 12,
+    width: 24,
+    height: 24,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+    borderColor: "#fff",
+    shadowColor: gold,
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  checkIcon: {
+    width: 16,
+    height: 16,
+    tintColor: "#fff8e1",
+  },
+  bottomContainer: {
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    paddingBottom: Platform.OS === "android" ? 20 : 10,
+    backgroundColor: "transparent",
   },
   continueButton: {
-    marginTop: "10%",
-    backgroundColor: colors.primary3,
-    paddingVertical: 10, // Mai mic decât valoarea anterioară
-    paddingHorizontal: 20, // Adaptează dimensiunile
-    width: "60%", // Dimensiune relativă pentru a fi responsive
-    maxWidth: 300, // Limitează dimensiunea maximă
-    borderRadius: 10,
-    alignItems: "center",
-    height: "auto",
+    backgroundColor: gold,
+    borderRadius: 24,
+    paddingVertical: 14,
+    paddingHorizontal: 48,
+    marginTop: 10,
+    marginBottom: 10,
+    alignSelf: "center",
+    shadowColor: gold,
+    shadowOpacity: 0.18,
+    shadowRadius: 10,
+    elevation: 5,
+    transform: [{ scale: 1 }],
   },
-
+  continueButtonPressed: {
+    backgroundColor: "#b08d2b",
+    transform: [{ scale: 0.97 }],
+  },
   continueButtonText: {
+    color: cream,
     fontSize: 18,
+    fontWeight: "700",
+    fontFamily: "LoraBold",
+    letterSpacing: 0.5,
   },
 });
 
