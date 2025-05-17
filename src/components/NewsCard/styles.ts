@@ -21,6 +21,8 @@ export default StyleSheet.create({
     borderRadius: 24,
     marginHorizontal: 16,
     ...boxShadow,
+    borderBottomColor: '#bfa76a',
+    borderBottomWidth: 2,
   },
   imageContainer: { flex: 1 },
   image: {
@@ -41,10 +43,11 @@ export default StyleSheet.create({
     alignItems: "flex-start",
   },
   text: {
-    fontSize: 18,
-    fontWeight: "600",
-    lineHeight: 24,
-    color: "#fff",
+    fontFamily: 'LoraBold',
+    fontSize: 20,
+    color: '#bfa76a',
+    letterSpacing: 0.5,
+    lineHeight: 26,
     paddingBottom: 24,
   },
   content: {

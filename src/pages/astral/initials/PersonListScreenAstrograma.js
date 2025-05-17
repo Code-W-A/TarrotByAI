@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   Modal,
   Alert,
+  Linking,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
@@ -48,6 +49,10 @@ const PersonListScreenAstrograma = ({ navigation }) => {
   const { language, changeLanguage, userData, setUserData } = useLanguage();
   const [warningModalVisible, setWarningModalVisible] = useState(false);
   const [selectedPerson, setSelectedPerson] = useState(null);
+
+  // Debug: log persons and asyncPersons
+  console.log('DEBUG persons:', persons);
+  console.log('DEBUG asyncPersons:', asyncPersons);
 
   const handleAddPerson = () => {
     navigation.navigate("NewPersonAstrograma", { editMode: false });
@@ -137,25 +142,41 @@ const PersonListScreenAstrograma = ({ navigation }) => {
     navigation.navigate("Name", { editMode: true });
   };
 
+  // Funcție pentru ștergerea datelor din AsyncStorage (debug)
+  const handleDeletePersonsData = async () => {
+    try {
+      await AsyncStorage.removeItem('personsDataAstrograma');
+      setPersons([]);
+      Alert.alert('Șters!', 'Datele au fost șterse din AsyncStorage.');
+    } catch (e) {
+      Alert.alert('Eroare', 'Nu s-au putut șterge datele.');
+    }
+  };
+
   const renderItem = ({ item, index }) => {
+    // Protecție: nu randa dacă itemul e undefined sau nu e obiect
+    if (!item || typeof item !== 'object') {
+      console.warn('SKIP renderItem: item invalid', item);
+      return null;
+    }
     const isUserData = item?.actualLanguage !== undefined; // Verifică dacă este userData
     const hasFullName = !!item?.full_name;
     const hasDateOfBirth = item?.day && item?.month && item?.year;
 
     return (
       <Surface
-        style={[styles.surfaceRight, { backgroundColor: "transparent" }]}
+        style={[styles.surfaceRight, { backgroundColor: "#fffbeae0", borderColor: "#C9A14A", borderWidth: 1.2 }]}
       >
-        <View style={[StyleSheet.absoluteFill, { top: -25, opacity: 0.3 }]}>
+        <View style={[StyleSheet.absoluteFill, { top: -10, left: -10, opacity: 0.28 }]}> 
           <Constellation
-            color={colors.gradientLogin2 + "3D"}
-            dotColor={colors.gradientLogin2}
+            color={'#C9A14A99'}
+            dotColor={'#C9A14A'}
             width={250}
             height={300}
           />
         </View>
         <LinearGradient
-          colors={["transparent", "#4c4c4c" + "E6", "#4c4c4c" + "E6"]}
+          colors={["#FFFBEA99", "#FAF7F299", "#F7E7B499"]}
           start={[0, 0]}
           end={[1, 0]}
           style={styles.gradientRight}
@@ -175,7 +196,7 @@ const PersonListScreenAstrograma = ({ navigation }) => {
               </Text>
             </View>
             {hasFullName && (
-              <Title style={styles.nameText}>{item?.full_name}</Title>
+              <Text style={styles.nameText}>{item?.full_name}</Text>
             )}
 
             {hasDateOfBirth && (
@@ -199,6 +220,8 @@ const PersonListScreenAstrograma = ({ navigation }) => {
                         personData: item,
                       });
                 }}
+                theme={{ colors: { primary: '#C9A14A', text: '#2D2A22' } }}
+                labelStyle={{ fontFamily: 'LoraBold', fontSize: 14 }}
               >
                 {veziAstrogramaText}
               </Button>
@@ -217,6 +240,7 @@ const PersonListScreenAstrograma = ({ navigation }) => {
                           personData: item, // Trimiți datele persoanei selectate
                         });
                   }}
+                  theme={{ colors: { primary: '#C9A14A', text: '#C9A14A' } }}
                 >
                   {actualizeazaAstrogramaText}
                 </Button>
@@ -233,16 +257,29 @@ const PersonListScreenAstrograma = ({ navigation }) => {
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <View style={{ flex: 1 }}>
       <LinearGradient
-        colors={[colors.gradientLogin1, colors.gradientLogin11]}
-        style={styles.container}
-      >
-        <SpaceSky />
+        colors={[
+          '#F7E7B4',
+          '#F9EFD6CC',
+          '#FAF7F2',
+          '#FFFBEA00'
+        ]}
+        style={{ ...StyleSheet.absoluteFillObject, zIndex: 0 }}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
+      />
+      <SpaceSky style={{ ...StyleSheet.absoluteFillObject, zIndex: 1 }} />
+      <View style={{ flex: 1, zIndex: 2 }}>
         <View style={styles.listContainer}>
-           <View style={styles.helpContainer}>
-                  <Text style={styles.helpText}>{helpText}</Text>
-                </View>
+          <View style={styles.helpContainer}>
+            <Text style={styles.helpText}>
+              {helpText.split('webdynamicx@gmail.com')[0]}
+              <TouchableOpacity onPress={() => Linking.openURL('mailto:webdynamicx@gmail.com')}>
+                <Text style={{ fontWeight: 'bold', color: '#C9A14A', textDecorationLine: 'underline' }}>webdynamicx@gmail.com</Text>
+              </TouchableOpacity>
+            </Text>
+          </View>
           <FlatList
             data={[...persons, ...asyncPersons]}
             keyExtractor={(item, index) => `person-${index}`}
@@ -331,8 +368,8 @@ const PersonListScreenAstrograma = ({ navigation }) => {
             </View>
           </View>
         </Modal>
-      </LinearGradient>
-    </SafeAreaView>
+      </View>
+    </View>
   );
 };
 
@@ -343,7 +380,7 @@ const styles = StyleSheet.create({
   },
   helpText: {
     fontSize: 14,
-    color: 'white',
+    color: '#C9A14A',
     textAlign: 'center',
   },
   statusBadge: {
@@ -356,30 +393,37 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   statusBadgePaid: {
-    backgroundColor: "#4CAF50", // Verde pentru achiziționat
+    backgroundColor: "#C9A14A", // Auriu pentru achiziționat
   },
   statusBadgeUnpaid: {
-    backgroundColor: "#F44336", // Roșu pentru neachiziționat
+    backgroundColor: "#fffbe6", // Crem deschis pentru neachiziționat
+    borderWidth: 1.5,
+    borderColor: "#C9A14A",
   },
   statusBadgeText: {
-    color: "#FFFFFF",
+    color: "#C9A14A",
     fontSize: 12,
-    fontWeight: "bold",
+    fontFamily: 'LoraBold',
   },
 
   safeArea: {
     flex: 1,
+    backgroundColor: '#fffbe6',
   },
   container: {
     flex: 1,
     paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+    backgroundColor: '#fffbe6',
   },
   listContainer: {
-    flex: 0.8,
+    flex: 1,
+    backgroundColor: 'transparent',
+    paddingTop: 40,
   },
   flatListContent: {
     paddingVertical: 20,
     paddingHorizontal: 10,
+    paddingBottom:100
   },
   surfaceRight: {
     elevation: 3,
@@ -389,6 +433,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginVertical: 10,
     overflow: "hidden",
+    backgroundColor: '#fff',
+    borderWidth: 1.5,
+    borderColor: '#C9A14A',
   },
   gradientRight: {
     padding: 15,
@@ -396,15 +443,18 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 25,
     flex: 1,
     flexDirection: "column",
+    backgroundColor: '#fff',
   },
   nameText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: colors.gradientLogin2,
+    fontSize: 20,
+    fontFamily: 'LoraBold',
+    color: '#C9A14A',
+    marginBottom: 2,
   },
   detailsText: {
-    fontSize: 14,
-    color: "#FFFFFF",
+    fontSize: 15,
+    color: '#131523',
+    fontFamily: 'Lora',
     marginVertical: 5,
   },
   buttonRow: {
@@ -413,18 +463,28 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   sinButton: {
-    backgroundColor: colors.gradientLogin11,
+    backgroundColor: '#C9A14A',
     marginRight: 10,
+    borderRadius: 22,
+    minWidth: 120,
   },
   updateButton: {
-    borderColor: colors.gradientLogin2,
-    borderWidth: 1,
-    color: "white",
+    borderColor: '#C9A14A',
+    borderWidth: 1.5,
+    backgroundColor: '#fff',
+    borderRadius: 22,
+    minWidth: 120,
+  },
+  updateButtonLabel: {
+    color: '#C9A14A',
+    fontFamily: 'LoraBold',
+    fontSize: 15,
   },
   emptyText: {
     textAlign: "center",
     fontSize: 16,
-    color: "white",
+    color: '#C9A14A',
+    fontFamily: 'LoraBold',
     marginTop: 20,
   },
   buttonContainer: {
@@ -436,11 +496,8 @@ const styles = StyleSheet.create({
   },
   addButton: {
     width: "100%",
-    backgroundColor: colors.gradientLogin11,
-  },
-  updateButtonLabel: {
-    color: "#FFFFFF",
-    fontSize: 14,
+    backgroundColor: '#C9A14A',
+    borderRadius: 22,
   },
   modalOverlay: {
     flex: 1,
@@ -449,16 +506,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   modalContainer: {
-    backgroundColor: "white",
-    borderRadius: 10,
-    padding: 20,
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 24,
     width: "80%",
     alignItems: "center",
+    borderWidth: 1.5,
+    borderColor: '#C9A14A',
   },
   modalText: {
     fontSize: 16,
     textAlign: "center",
     marginBottom: 20,
+    color: '#131523',
+    fontFamily: 'Lora',
   },
   modalButtonRow: {
     flexDirection: "row",
@@ -473,14 +534,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   cancelButton: {
-    backgroundColor: "#f0f0f0",
+    backgroundColor: '#fffbe6',
+    borderWidth: 1.5,
+    borderColor: '#C9A14A',
   },
   confirmButton: {
-    backgroundColor: "#686e79",
-    color: "white",
+    backgroundColor: '#C9A14A',
   },
   modalButtonText: {
-    color: "#333",
+    color: '#131523',
+    fontFamily: 'LoraBold',
     fontSize: 16,
   },
 });

@@ -181,52 +181,49 @@ const MotivationalQuotes = () => {
 
   return (
     <View style={{ flex: 1 }}>
-      <MainContainer style={{ flex: 1 }}>
+      <MainContainer secondary={false} style={{ flex: 1 }}>
         <ImageBackground
           source={randomImage}
           resizeMode="cover"
-          style={styles.imageBackground}
+          style={{ flex: 1 }}
         >
-          <View style={styles.overlay}>
-            {/* Bara și buton de Back */}
-            <GreetingBar isGoBack={true} />
+          <GreetingBar isGoBack={true} />
 
-            {/* Imaginea header */}
-            <View style={styles.secondImageContainer}>
-              <Image
-                source={require("../../../assets/headerIcon.png")}
-                style={styles.secondImage}
-                resizeMode="contain"
-              />
-            </View>
+          {/* Imaginea header */}
+          <View style={styles.secondImageContainer}>
+            <Image
+              source={require("../../../assets/headerIcon.png")}
+              style={styles.secondImage}
+              resizeMode="contain"
+            />
+          </View>
 
-            <View style={styles.contentContainer}>
-              {/* Titlul (dacă avem citat) */}
-              {zilnicCitateMotivationale.info && (
-                <H3fontBoldWhite style={styles.title}>
-                  {i18n.translate("motivationalQuoteOfTheDay")}
-                </H3fontBoldWhite>
+          <View style={styles.contentContainer}>
+            {/* Titlul (dacă avem citat) */}
+            {zilnicCitateMotivationale.info && (
+              <H3fontBoldWhite style={styles.title}>
+                {i18n.translate("motivationalQuoteOfTheDay")}
+              </H3fontBoldWhite>
+            )}
+
+            {/* ScrollView cu textul citatului */}
+            <ScrollView
+              style={styles.scrollArea}
+              contentContainerStyle={styles.scrollContentContainer}
+            >
+              {!!quoteText && (
+                <H6fontMediumWhite style={styles.description}>
+                  {quoteText}
+                </H6fontMediumWhite>
               )}
+            </ScrollView>
 
-              {/* ScrollView cu textul citatului */}
-              <ScrollView
-                style={styles.scrollArea}
-                contentContainerStyle={styles.scrollContentContainer}
-              >
-                {!!quoteText && (
-                  <H6fontMediumWhite style={styles.description}>
-                    {quoteText}
-                  </H6fontMediumWhite>
-                )}
-              </ScrollView>
-
-              {/* Mențiune sub zona scrollabilă */}
-              {zilnicCitateMotivationale.info && (
-                <H7fontBoldWhite style={styles.mention}>
-                  @cristinazurba
-                </H7fontBoldWhite>
-              )}
-            </View>
+            {/* Mențiune sub zona scrollabilă */}
+            {zilnicCitateMotivationale.info && (
+              <H7fontBoldWhite style={styles.mention}>
+                @cristinazurba
+              </H7fontBoldWhite>
+            )}
           </View>
         </ImageBackground>
       </MainContainer>

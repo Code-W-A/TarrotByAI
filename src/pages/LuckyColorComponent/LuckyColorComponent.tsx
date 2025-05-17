@@ -95,49 +95,40 @@ const LuckyColor = () => {
     return () => setIsNavBarVisible(true); // Restabilește vizibilitatea la ieșirea din componentă
   }, []);
   return (
-    <View style={{ flex: 1 }}>
-      <MainContainer style={{ flex: 1 }}>
-        <LinearGradient
-          colors={[
-            colors.gradientLogin1,
-            colors.gradientLogin2,
-            colors.gradientLogin2,
-          ]}
-          style={styles.gradient}
+    <MainContainer secondary={false} style={{ flex: 1 }}>
+      <ImageBackground
+        source={require("../../../assets/dashboardbg.jpg")}
+        style={{ flex: 1, paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0 }}
+        imageStyle={{ opacity: 1 }}
+      >
+        <ImageBackground
+          source={require("../../../assets/shadowBg.png")}
+          resizeMode="cover"
+          style={{ flex: 1 }}
         >
-          <ImageBackground
-            source={require("../../../assets/shadowBg.png")}
-            resizeMode="cover"
-            style={{
-              flex: 1,
-              width: null,
-              height: null,
-              // alignItems: 'flex-end',
-            }}
-          >
-            <GreetingBar isGoBack={true} />
-            <View style={styles.overlay}>
-              <View style={styles.imageContainer}>
-                {isImageLoading && (
-                  <ActivityIndicator
-                    size="large"
-                    color={colors.primary3}
-                    style={{ position: "relative", top: 150 }}
-                  />
-                )}
-                <Image
-                  style={styles.image}
-                  source={{
-                    uri: zilnicCuloriNorocoase.image
-                      ? zilnicCuloriNorocoase.image.finalUri
-                      : "",
-                  }}
-                  onLoad={() => setIsImageLoading(false)} // Ascunde spinner-ul după încărcare
-                  onError={() => setIsImageLoading(false)} // Ascunde spinner-ul în caz de eroare
+          <GreetingBar isGoBack={true} />
+          <View style={styles.overlay}>
+            <View style={[styles.imageContainer, { borderColor: '#C9A14A', borderWidth: 3, backgroundColor: '#FFFBEA', borderRadius: 18, shadowOpacity: 0.08, shadowRadius: 8 }]}>
+              {isImageLoading && (
+                <ActivityIndicator
+                  size="large"
+                  color={colors.primary3}
+                  style={{ position: "relative", top: 150 }}
                 />
-              </View>
+              )}
+              <Image
+                style={[styles.image, { borderColor: '#C9A14A', borderWidth: 2, borderRadius: 14 }]}
+                source={{
+                  uri: zilnicCuloriNorocoase.image
+                    ? zilnicCuloriNorocoase.image.finalUri
+                    : "",
+                }}
+                onLoad={() => setIsImageLoading(false)}
+                onError={() => setIsImageLoading(false)}
+              />
             </View>
-            {/* <View style={styles.secondImageContainer}>
+          </View>
+          {/* <View style={styles.secondImageContainer}>
                 <Image
                   source={require("../../../assets/headerIcon.png")}
                   style={styles.secondImage}
@@ -145,62 +136,67 @@ const LuckyColor = () => {
                 />
               </View> */}
 
-            <View
-              style={{
-                height: "54%",
+          <View
+            style={{
+              height: "54%",
 
-                paddingBottom: 10,
-                paddingLeft: 10,
-                paddingRight: 10,
+              paddingBottom: 10,
+              paddingLeft: 10,
+              paddingRight: 10,
+            }}
+          >
+            <H6fontBoldPrimary
+              style={{
+                alignSelf: "center",
+                marginTop: "5%",
+                textAlign: "center",
+                color: '#C9A14A',
+                fontFamily: 'Lora',
+                fontWeight: '700',
+                fontSize: 38,
+                marginVertical: 16,
+                backgroundColor: 'transparent',
               }}
             >
-              <H6fontBoldPrimary
-                style={{
-                  alignSelf: "center",
-                  marginTop: "5%",
-                  textAlign: "center",
-                }}
-              >
-                {i18n.translate("luckyColorOfTheDay")}
-              </H6fontBoldPrimary>
-              <ScrollView contentContainerStyle={styles.scrollViewContainer}>
-                {zilnicCuloriNorocoase.info ? (
-                  <>
-                    <H8fontBoldPrimary
-                      style={{
-                        alignSelf: "center",
-                        marginTop: "5%",
-                        textAlign: "center",
-                      }}
-                    >
-                      {language === "hi"
-                        ? zilnicCuloriNorocoase.info?.hu?.nume
-                        : language === "id"
-                        ? zilnicCuloriNorocoase.info?.ru?.nume
-                        : language === "ru"
-                        ? zilnicCuloriNorocoase.info?.rusa?.nume
-                        : zilnicCuloriNorocoase.info[language]?.nume}
-                    </H8fontBoldPrimary>
+              {i18n.translate("luckyColorOfTheDay")}
+            </H6fontBoldPrimary>
+            <ScrollView contentContainerStyle={[styles.scrollViewContainer, {flexGrow: 1}]} style={{flex: 1}}>
+              {zilnicCuloriNorocoase.info ? (
+                <>
+                  <H8fontBoldPrimary
+                    style={{
+                      alignSelf: "center",
+                      marginTop: "5%",
+                      textAlign: "center",
+                    }}
+                  >
+                    {language === "hi"
+                      ? zilnicCuloriNorocoase.info?.hu?.nume
+                      : language === "id"
+                      ? zilnicCuloriNorocoase.info?.ru?.nume
+                      : language === "ru"
+                      ? zilnicCuloriNorocoase.info?.rusa?.nume
+                      : zilnicCuloriNorocoase.info[language]?.nume}
+                  </H8fontBoldPrimary>
 
-                    <H7fontMediumPrimary
-                      style={{ textAlign: "justify", marginTop: "5%" }}
-                    >
-                      {language === "hi"
-                        ? zilnicCuloriNorocoase.info.hu?.descriere
-                        : language === "id"
-                        ? zilnicCuloriNorocoase.info.ru?.descriere
-                        : language === "ru"
-                        ? zilnicCuloriNorocoase.info.rusa?.descriere
-                        : zilnicCuloriNorocoase.info[language]?.descriere}
-                    </H7fontMediumPrimary>
-                  </>
-                ) : null}
-              </ScrollView>
-            </View>
-          </ImageBackground>
-        </LinearGradient>
-      </MainContainer>
-    </View>
+                  <H7fontMediumPrimary
+                    style={{ textAlign: "justify", marginTop: 16, color: '#131523', fontFamily: 'Lora', fontWeight: '400', fontSize: 19, lineHeight: 28, backgroundColor: 'transparent' }}
+                  >
+                    {language === "hi"
+                      ? zilnicCuloriNorocoase.info.hu?.descriere
+                      : language === "id"
+                      ? zilnicCuloriNorocoase.info.ru?.descriere
+                      : language === "ru"
+                      ? zilnicCuloriNorocoase.info.rusa?.descriere
+                      : zilnicCuloriNorocoase.info[language]?.descriere}
+                  </H7fontMediumPrimary>
+                </>
+              ) : null}
+            </ScrollView>
+          </View>
+        </ImageBackground>
+      </ImageBackground>
+    </MainContainer>
   );
 };
 

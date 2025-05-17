@@ -8,14 +8,12 @@ import {
   H8fontMediumPrimary,
   H9fontMediumWhite,
 } from "../../commonText";
-import SpaceSky from "./space-sky";
 
 const MyTopBar = ({ onChangeTab }) => {
   const [activeTab, setActiveTab] = useState("natal");
 
   return (
     <View style={styles.tabContainer}>
-      <SpaceSky />
       <TouchableOpacity
         style={[styles.tab, activeTab === "natal" && styles.activeTab]}
         onPress={() => {
@@ -23,9 +21,7 @@ const MyTopBar = ({ onChangeTab }) => {
           onChangeTab("natal");
         }}
       >
-        <H9fontMediumWhite style={styles.tabText}>
-          Natal Chart
-        </H9fontMediumWhite>
+        <Text style={[styles.tabText, activeTab === "natal" ? styles.activeTabText : styles.inactiveTabText]}>Natal Chart</Text>
       </TouchableOpacity>
       <TouchableOpacity
         style={[styles.tab, activeTab === "table" && styles.activeTab]}
@@ -34,9 +30,7 @@ const MyTopBar = ({ onChangeTab }) => {
           onChangeTab("table");
         }}
       >
-        <H9fontMediumWhite style={styles.tabText}>
-          Aspect Table
-        </H9fontMediumWhite>
+        <Text style={[styles.tabText, activeTab === "table" ? styles.activeTabText : styles.inactiveTabText]}>Aspect Table</Text>
       </TouchableOpacity>
       <TouchableOpacity
         style={[styles.tab, activeTab === "interpretation" && styles.activeTab]}
@@ -45,9 +39,7 @@ const MyTopBar = ({ onChangeTab }) => {
           onChangeTab("interpretation");
         }}
       >
-        <H9fontMediumWhite style={styles.tabText}>
-          Interpretation
-        </H9fontMediumWhite>
+        <Text style={[styles.tabText, activeTab === "interpretation" ? styles.activeTabText : styles.inactiveTabText]}>Interpretation</Text>
       </TouchableOpacity>
     </View>
   );
@@ -57,7 +49,7 @@ const styles = StyleSheet.create({
   tabContainer: {
     flexDirection: "row",
     paddingTop: 20,
-    backgroundColor: colors.primary3,
+    backgroundColor: 'transparent',
   },
   tab: {
     flex: 1,
@@ -66,11 +58,20 @@ const styles = StyleSheet.create({
   },
   activeTab: {
     borderBottomWidth: 2,
-    borderBottomColor: "white",
+    borderBottomColor: '#C9A14A',
   },
   tabText: {
     fontSize: 14,
-    color: colors.white,
+    fontFamily: 'Lora',
+    fontWeight: '500',
+    textAlign: 'center',
+    letterSpacing: 0.2,
+  },
+  activeTabText: {
+    color: '#C9A14A',
+  },
+  inactiveTabText: {
+    color: '#131523',
   },
 });
 

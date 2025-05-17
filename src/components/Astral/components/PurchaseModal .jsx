@@ -190,12 +190,12 @@ const PurchaseModal = ({
       <View style={styles.overlay}>
         {/* ScrollView ca să permită derularea dacă e prea mult conținut */}
         <ScrollView contentContainerStyle={styles.scrollContainer}>
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>{completeazaInfoText}:</Text>
+          <View style={styles.modalContainerCustom}>
+            <Text style={styles.modalTitleCustom}>{completeazaInfoText}:</Text>
 
             {/* NUME */}
             <TextInput
-              style={[styles.input, nameError && styles.errorInput]}
+              style={[styles.inputCustom, nameError && styles.errorInputCustom]}
               placeholder="Prenume"
               value={firstName}
               onChangeText={(text) => {
@@ -204,7 +204,7 @@ const PurchaseModal = ({
               }}
             />
             <TextInput
-              style={[styles.input, nameError && styles.errorInput]}
+              style={[styles.inputCustom, nameError && styles.errorInputCustom]}
               placeholder="Nume"
               value={lastName}
               onChangeText={(text) => {
@@ -213,12 +213,12 @@ const PurchaseModal = ({
               }}
             />
             {nameError && (
-              <Text style={styles.errorText}>{completeazaInfoText2}</Text>
+              <Text style={styles.errorTextCustom}>{completeazaInfoText2}</Text>
             )}
 
             {/* EMAIL */}
             <TextInput
-              style={[styles.input, emailError && styles.errorInput]}
+              style={[styles.inputCustom, emailError && styles.errorInputCustom]}
               placeholder="Email"
               keyboardType="email-address"
               value={email}
@@ -228,11 +228,11 @@ const PurchaseModal = ({
               }}
             />
             {emailError && (
-              <Text style={styles.errorText}>{completeazaInfoText3}</Text>
+              <Text style={styles.errorTextCustom}>{completeazaInfoText3}</Text>
             )}
 
             {/* TELEFON */}
-            <View style={styles.phoneInputContainer}>
+            <View style={styles.phoneInputContainerCustom}>
               <PhoneInput
                 value={phone}
                 onChangePhoneNumber={setPhone}
@@ -240,16 +240,16 @@ const PurchaseModal = ({
                 onChangeSelectedCountry={setSelectedCountry}
                 defaultCountry="RO"
                 placeholder={completeazaInfoText4}
-                containerStyle={[styles.input, phoneError && styles.errorInput]}
+                containerStyle={[styles.inputCustom, phoneError && styles.errorInputCustom]}
               />
               {phoneError && (
-                <Text style={styles.errorText}>{completeazaInfoText5}</Text>
+                <Text style={styles.errorTextCustom}>{completeazaInfoText5}</Text>
               )}
             </View>
 
             {/* ADRESĂ */}
             <TextInput
-              style={[styles.input, addressError && styles.errorInput]}
+              style={[styles.inputCustom, addressError && styles.errorInputCustom]}
               placeholder="Strada și numărul (line1)"
               value={line1}
               onChangeText={(text) => {
@@ -258,7 +258,7 @@ const PurchaseModal = ({
               }}
             />
             <TextInput
-              style={[styles.input, addressError && styles.errorInput]}
+              style={[styles.inputCustom, addressError && styles.errorInputCustom]}
               placeholder="Oraș"
               value={city}
               onChangeText={(text) => {
@@ -277,7 +277,7 @@ const PurchaseModal = ({
               }}
             /> */}
             <TextInput
-              style={[styles.input, addressError && styles.errorInput]}
+              style={[styles.inputCustom, addressError && styles.errorInputCustom]}
               placeholder="Țară"
               value={country}
               onChangeText={(text) => {
@@ -286,10 +286,10 @@ const PurchaseModal = ({
               }}
             />
             {addressError && (
-              <Text style={styles.errorText}>{completeazaInfoText6}</Text>
+              <Text style={styles.errorTextCustom}>{completeazaInfoText6}</Text>
             )}
 
-            <View style={styles.checkboxContainer}>
+            <View style={styles.checkboxContainerCustom}>
               <Checkbox
                 status={isChecked ? "checked" : "unchecked"}
                 onPress={() => setIsChecked(!isChecked)}
@@ -297,14 +297,14 @@ const PurchaseModal = ({
               />
 
               <TouchableOpacity onPress={() => setTermsVisible(true)}>
-                <Text style={styles.termsText}>
+                <Text style={styles.termsTextCustom}>
                   {termsText1}{" "}
-                  <Text style={styles.termsLink}>{termsText2}</Text>
+                  <Text style={styles.termsLinkCustom}>{termsText2}</Text>
                 </Text>
               </TouchableOpacity>
             </View>
 
-            <View style={styles.buttonContainer}>
+            <View style={styles.buttonContainerCustom}>
               <Button
                 disabled={!isChecked} // Butonul este activ doar dacă checkbox-ul e bifat
                 funCallback={handleConfirm}
@@ -339,9 +339,9 @@ const PurchaseModal = ({
         >
           <View style={styles.overlay}>
             <ScrollView contentContainerStyle={styles.scrollContainer}>
-              <View style={styles.modalContainer}>
-                <Text style={styles.modalTitle}>Terms & Conditions</Text>
-                <Text style={styles.termsContent}>
+              <View style={styles.modalContainerCustom}>
+                <Text style={styles.modalTitleCustom}>Terms & Conditions</Text>
+                <Text style={styles.termsContentCustom}>
                   - By completing a purchase, you agree to the processing of
                   your personal data in accordance with our Privacy Policy and
                   applicable laws.
@@ -376,70 +376,92 @@ const PurchaseModal = ({
 export default PurchaseModal;
 
 const styles = StyleSheet.create({
-  checkboxContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 10,
-  },
-  termsText: {
-    fontSize: 14,
-  },
-  termsLink: {
-    color: "blue",
-    textDecorationLine: "underline",
-  },
-  termsContent: {
-    fontSize: 14,
-    marginVertical: 10,
-  },
-
   overlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.7)",
   },
   scrollContainer: {
-    // Center + Padding astfel încât conținutul să fie vizibil
     flexGrow: 1,
     justifyContent: "center",
     alignItems: "center",
+    padding: 24,
   },
-  modalContainer: {
-    width: "90%",
-    backgroundColor: "white",
-    borderRadius: 15,
-    padding: 20,
-    elevation: 10,
+  modalContainerCustom: {
+    backgroundColor: '#FAF7F2',
+    borderRadius: 18,
+    borderWidth: 1.5,
+    borderColor: '#C9A14A',
+    padding: 24,
+    width: '100%',
+    maxWidth: 400,
+    alignSelf: 'center',
+    shadowColor: '#C9A14A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 6,
   },
-  modalTitle: {
+  modalTitleCustom: {
     fontSize: 20,
-    marginBottom: 10,
-    textAlign: "center",
-    fontWeight: "bold",
+    fontWeight: '700',
+    color: '#C9A14A',
+    fontFamily: 'Lora',
+    marginBottom: 18,
+    textAlign: 'center',
   },
-  input: {
+  inputCustom: {
+    backgroundColor: '#fffbe6',
     borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 10,
-    padding: 15,
-    marginVertical: 5,
-    fontSize: 16,
-    width: "100%",
+    borderColor: '#C9A14A',
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 10,
+    fontFamily: 'Lora',
+    color: '#131523',
+    fontSize: 15,
   },
-  phoneInputContainer: {
-    marginVertical: 10,
+  errorInputCustom: {
+    borderColor: '#d9534f',
+    backgroundColor: '#fff0f0',
   },
-  errorText: {
-    color: "red",
-    fontSize: 14,
-    marginTop: 5,
-    marginBottom: 5,
+  errorTextCustom: {
+    color: '#d9534f',
+    fontSize: 13,
+    marginBottom: 6,
+    fontFamily: 'Lora',
   },
-  errorInput: {
-    borderColor: "red",
+  phoneInputContainerCustom: {
+    marginBottom: 10,
   },
-  buttonContainer: {
+  checkboxContainerCustom: {
+    flexDirection: "row",
     alignItems: "center",
-    marginTop: 15,
+    marginTop: 10,
+  },
+  termsTextCustom: {
+    fontSize: 14,
+    color: '#131523',
+    fontFamily: 'Lora',
+  },
+  termsLinkCustom: {
+    color: '#C9A14A',
+    textDecorationLine: 'underline',
+    fontWeight: '700',
+    fontFamily: 'Lora',
+  },
+  buttonContainerCustom: {
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'stretch',
+    marginTop: 18,
+    gap: 10,
+  },
+  termsContentCustom: {
+    fontSize: 14,
+    marginVertical: 10,
+    color: '#131523',
+    fontFamily: 'Lora',
+    textAlign: 'left',
   },
   btnMargin: {
     marginBottom: 10,

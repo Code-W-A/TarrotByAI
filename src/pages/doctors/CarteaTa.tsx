@@ -7,6 +7,7 @@ import {
   Platform,
   View,
   Image,
+  ImageBackground,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import FlipCard from "../../components/FlipCard/FlipCard";
@@ -243,27 +244,12 @@ const CarteaTa = ({ route }) => {
 
   return (
     <Fragment>
-      <MainContainer>
-        <LinearGradient
-          colors={[
-            colors.gradientLogin1,
-            colors.gradientLogin2,
-            colors.gradientLogin2,
-          ]} // Înlocuiește cu culorile gradientului tău
-          style={{
-            flex: 1,
-            paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
-          }}
+      <MainContainer secondary={false} style={{ flex: 1 }}>
+        <ImageBackground
+          source={require("../../../assets/dashboardbg.jpg")}
+          style={{ flex: 1, paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0 }}
+          imageStyle={{ opacity: 1 }}
         >
-          <Image
-            source={require("../../../assets/bg-inner.png")}
-            style={{
-              position: "absolute",
-              width: "100%",
-              height: 200,
-              top: 0, // Ajustează dacă este necesar
-            }}
-          />
           {/* <GreetingBar isGoBack={true} /> */}
           {loading ? (
             <CustomSpinner size={74} color={colors.primary3} />
@@ -290,7 +276,7 @@ const CarteaTa = ({ route }) => {
               </SingleCardLayout>
             </ScrollView>
           )}
-        </LinearGradient>
+        </ImageBackground>
       </MainContainer>
     </Fragment>
   );

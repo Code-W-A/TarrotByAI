@@ -56,7 +56,6 @@ import { doc, getFirestore, updateDoc } from "firebase/firestore";
 import { screenName } from "../../../utils/screenName";
 
 const SubHeading = () => {
-  const { colors } = useTheme();
   return (
     <View
       style={{
@@ -64,15 +63,38 @@ const SubHeading = () => {
         alignItems: "center",
       }}
     >
-      <H6fontBoldYellow style={{ textAlign: "center" }}>
+      <Text
+        style={{
+          color: "#C9A14A", // gold
+          fontSize: 22,
+          fontWeight: "700",
+          fontFamily: "LoraBold",
+          textAlign: "center",
+          marginBottom: 4,
+          letterSpacing: 1.1,
+          textShadowColor: '#fffbeae0',
+          textShadowOffset: { width: 0, height: 2 },
+          textShadowRadius: 6,
+        }}
+      >
         {i18n.translate("digitalAstrology")}
-      </H6fontBoldYellow>
+      </Text>
       <View style={{ height: 10 }} />
-      <H9fontMediumWhite style={{ textAlign: "center" }}>
+      <Text
+        style={{
+          color: "#2D2A22", // dark elegant
+          fontSize: 16,
+          fontFamily: "Lora",
+          textAlign: "center",
+          opacity: 0.85,
+          maxWidth: 340,
+          letterSpacing: 0.2,
+        }}
+      >
         {i18n.translate(
           "exploreTheNatalChartAnalyzeRelationshipsThroughSynastryAndDiscoverDailyHoroscopeForecasts"
         )}
-      </H9fontMediumWhite>
+      </Text>
     </View>
   );
 };
@@ -257,21 +279,17 @@ function LearnScreen({ navigation }) {
     <SafeAreaView style={{ flex: 1 }}>
       <LinearGradient
         colors={[
-          colors.gradientLogin1,
-          colors.gradientLogin1,
-          colors.gradientLogin1,
-          colors.gradientLogin1,
-          colors.gradientLogin1,
-          colors.gradientLogin1,
-          colors.gradientLogin1,
-          colors.gradientLogin1,
-          colors.gradientLogin1,
-          colors.gradientLogin11,
-        ]} // Înlocuiește cu culorile gradientului tău
+          '#F7E7B4', // Aurie pastel, foarte soft, sus
+          '#F9EFD6CC', // Crem-auriu luminos, semi-transparent
+          '#FAF7F2',   // Crem foarte deschis
+          '#FFFBEA00'  // Complet transparent jos
+        ]}
         style={{
           flex: 1,
           paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
         }}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
       >
         <SpaceSky />
         <View style={{ marginBottom: 10 }}>
@@ -283,48 +301,36 @@ function LearnScreen({ navigation }) {
           <Surface
             style={[
               styles.surfaceRight,
-              { backgroundColor: "transparent", marginTop: 10 },
+              { backgroundColor: "#fffbeae0", marginTop: 10, borderColor: "#C9A14A", borderWidth: 1.2 },
             ]}
           >
-            <View style={[StyleSheet.absoluteFill, { top: -25, opacity: 0.8 }]}>
+            <View style={[StyleSheet.absoluteFill, { top: -10, left: -10, opacity: 0.32 }]}>
               <Constellation
-                color={colors.gradientLogin2 + "3D"}
-                dotColor={colors.gradientLogin2}
-                width={250}
-                height={300}
+                color={'#C9A14A99'}
+                dotColor={'#C9A14A'}
+                width={280}
+                height={340}
               />
             </View>
             <LinearGradient
-              colors={["transparent", "#4c4c4c" + "E6", "#4c4c4c" + "E6"]}
+              colors={["#FFFBEA99", "#FAF7F299", "#F7E7B499"]}
               start={[0, 0]}
               end={[1, 0]}
               style={styles.gradientRight}
             >
               <View style={{ flex: 0.8 }} />
               <View style={{ flex: 1 }}>
-                <H7fontBoldWhite>
-                  {i18n.translate("natalAstrogram")}
-                </H7fontBoldWhite>
-                <H9fontMediumWhite
-                  theme={{ colors: { text: colors.gradientLogin2 } }}
-                >
-                  {i18n.translate("exploreTheAstralProfile")}
-                </H9fontMediumWhite>
-                <H9fontMediumWhite
-                  theme={{ colors: { text: "#FFFFFF" } }}
-                  style={{ marginTop: -3 }}
-                >
-                  {i18n.translate("withTheNatalAstrogram")}
-                </H9fontMediumWhite>
+                <Text style={{ color: '#C9A14A', fontFamily: 'LoraBold', fontSize: 18, marginBottom: 2 }}>{i18n.translate("natalAstrogram")}</Text>
+                <Text style={{ color: '#2D2A22', fontFamily: 'Lora', fontSize: 15, marginBottom: 0 }}>{i18n.translate("exploreTheAstralProfile")}</Text>
+                <Text style={{ color: '#2D2A22', fontFamily: 'Lora', fontSize: 15, marginTop: -3 }}>{i18n.translate("withTheNatalAstrogram")}</Text>
                 <View style={{ heigt: 200, justifyContent: "flex-start" }}>
                   <Button
                     mode="contained"
-                    // icon="lock-outline"
                     style={{ borderRadius: 25, marginTop: 5 }}
                     theme={{
                       colors: {
-                        primary: colors.gradientLogin1,
-                        text: "#FFFFFF",
+                        primary: '#C9A14A',
+                        text: "#2D2A22",
                       },
                     }}
                     labelStyle={{ fontSize: 12, letterSpacing: 0 }}
@@ -339,34 +345,29 @@ function LearnScreen({ navigation }) {
           <View style={{ height: 20 }} />
 
           <Surface
-            style={[styles.surfaceRight, { backgroundColor: "transparent" }]}
+            style={[styles.surfaceRight, { backgroundColor: "#fffbeae0", borderColor: "#C9A14A", borderWidth: 1.2 }]}
           >
-            <View style={[StyleSheet.absoluteFill, { top: -25, opacity: 0.3 }]}>
-              <Leo color={colors.white} width={200} height={200} />
+            <View style={[StyleSheet.absoluteFill, { top: -10, left: -10, opacity: 0.28 }]}>
+              <Leo color={'#C9A14A'} width={220} height={220} />
             </View>
             <LinearGradient
-              colors={["transparent", "#13366f" + "E6", "#13366f" + "E6"]}
+              colors={["#FFFBEA99", "#FAF7F299", "#F7E7B499"]}
               start={[0, 0]}
               end={[1, 0]}
               style={styles.gradientRight}
             >
               <View style={{ flex: 0.8 }} />
               <View style={{ flex: 1 }}>
-                <H7fontBoldWhite>
-                  {i18n.translate("dailyHoroscope")}
-                </H7fontBoldWhite>
-                <H9fontMediumWhite>
-                  {i18n.translate("personalizedHoroscope")}
-                </H9fontMediumWhite>
+                <Text style={{ color: '#C9A14A', fontFamily: 'LoraBold', fontSize: 18, marginBottom: 2 }}>{i18n.translate("dailyHoroscope")}</Text>
+                <Text style={{ color: '#2D2A22', fontFamily: 'Lora', fontSize: 15 }}>{i18n.translate("personalizedHoroscope")}</Text>
                 <View style={{ flex: 1, justifyContent: "flex-end" }}>
                   <Button
                     mode="contained"
-                    // icon="lock-outline"
                     style={{ borderRadius: 25, marginTop: 5 }}
                     theme={{
                       colors: {
-                        primary: colors.gradientLogin1,
-                        text: "#FFFFFF",
+                        primary: '#C9A14A',
+                        text: "#2D2A22",
                       },
                     }}
                     labelStyle={{ fontSize: 12, letterSpacing: 0 }}
@@ -381,32 +382,29 @@ function LearnScreen({ navigation }) {
           <View style={{ height: 20 }} />
 
           <Surface
-            style={[styles.surfaceRight, { backgroundColor: "transparent" }]}
+            style={[styles.surfaceRight, { backgroundColor: "#fffbeae0", borderColor: "#C9A14A", borderWidth: 1.2 }]}
           >
-            <View style={[StyleSheet.absoluteFill, { top: -25, opacity: 0.3 }]}>
-              <Married color={colors.white} width={150} height={150} />
+            <View style={[StyleSheet.absoluteFill, { top: -10, left: -10, opacity: 0.28 }]}>
+              <Married color={'#C9A14A'} width={170} height={170} />
             </View>
             <LinearGradient
-              colors={["transparent", "#81411a3D", "#81411aE6", "#81411a"]}
+              colors={["#FFFBEA99", "#FAF7F299", "#F7E7B499"]}
               start={[0, 0]}
               end={[1, 0]}
               style={styles.gradientRight}
             >
               <View style={{ flex: 0.8 }} />
               <View style={{ flex: 1 }}>
-                <H7fontBoldWhite>
-                  {i18n.translate("sinastriePartener")}
-                </H7fontBoldWhite>
-                <H9fontMediumWhite>Lista Persoane</H9fontMediumWhite>
+                <Text style={{ color: '#C9A14A', fontFamily: 'LoraBold', fontSize: 18, marginBottom: 2 }}>{i18n.translate("sinastriePartener")}</Text>
+                <Text style={{ color: '#2D2A22', fontFamily: 'Lora', fontSize: 15 }}>Lista Persoane</Text>
                 <View style={{ flex: 1, justifyContent: "flex-end" }}>
                   <Button
                     mode="contained"
-                    // icon="lock-outline"
                     style={{ borderRadius: 25, marginTop: 5 }}
                     theme={{
                       colors: {
-                        primary: colors.gradientLogin1,
-                        text: "#FFFFFF",
+                        primary: '#C9A14A',
+                        text: "#2D2A22",
                       },
                     }}
                     labelStyle={{ fontSize: 12, letterSpacing: 0 }}
@@ -423,47 +421,44 @@ function LearnScreen({ navigation }) {
           <Surface
             style={[
               styles.surfaceLeft,
-              { backgroundColor: "transparent", height: 140 },
+              { backgroundColor: "#fffbeae0", height: 140, borderColor: "#C9A14A", borderWidth: 1.2 },
             ]}
           >
             <View
-              style={[StyleSheet.absoluteFill, { right: 150, opacity: 0.4 }]}
+              style={[StyleSheet.absoluteFill, { right: 120, opacity: 0.22 }]}
             >
               <ConstellationSimple
-                color={colors.gradientLogin2 + "3D"}
-                dotColor={colors.gradientLogin3}
-                width={200}
-                height={150}
+                color={'#C9A14A99'}
+                dotColor={'#C9A14A'}
+                width={220}
+                height={170}
               />
             </View>
             <LinearGradient
-              colors={["#4c4c4c" + "E6", "#4c4c4c" + "E6", "transparent"]}
+              colors={["#FFFBEA99", "#FAF7F299", "#F7E7B499"]}
               start={[0, 0]}
               end={[1, 0]}
               style={styles.gradientLeft}
             >
               <View style={{ flex: 1 }}>
-                {/* <H7fontBoldWhite>{"Sinastrie "}</H7fontBoldWhite> */}
-                <H9fontMediumWhite>
+                <Text style={{ color: '#2D2A22', fontFamily: 'Lora', fontSize: 15 }}>
                   {i18n.translate(
                     "updateYourInformationToReceiveTheMostAccurateAnalyses"
                   )}
-                </H9fontMediumWhite>
+                </Text>
                 <View style={{ flex: 1, justifyContent: "flex-start" }}>
                   <Button
                     mode="contained"
-                    // icon="lock-outline"
                     style={{ borderRadius: 25, marginTop: 5 }}
                     theme={{
                       colors: {
-                        primary: colors.gradientLogin1,
-                        text: "#FFFFFF",
+                        primary: '#C9A14A',
+                        text: "#2D2A22",
                       },
                     }}
                     labelStyle={{ fontSize: 12, letterSpacing: 0 }}
                     onPress={() => {
                       setModalVisible(true);
-
                       navigation.navigate("Learn");
                     }}
                   >

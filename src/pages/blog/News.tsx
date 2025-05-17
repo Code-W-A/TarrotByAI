@@ -8,6 +8,9 @@ import {
   StatusBar,
   useColorScheme,
   Platform,
+  Image,
+  ImageBackground,
+  StyleSheet,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
@@ -348,23 +351,14 @@ const News = () => {
   );
 
   return (
-    <View
-      style={[
-        styles.container,
-        { backgroundColor: colorScheme === "dark" ? "#000" : "#fff" },
-      ]}
+    <ImageBackground
+      source={require("../../../assets/dashboardbg.jpg")}
+      style={{ flex: 1, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 }}
+      imageStyle={{ opacity: 1 }}
     >
-      <LinearGradient
-        colors={[
-          colors.gradientLogin1,
-          colors.gradientLogin2,
-          colors.gradientLogin2,
-        ]} // Înlocuiește cu culorile gradientului tău
-        style={{
-          flex: 1,
-          paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
-        }}
-      >
+      <View style={{ ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(255,255,255,0.72)', zIndex: 1 }} pointerEvents="none" />
+      <View style={{ flex: 1, zIndex: 2 }}>
+        <StatusBar barStyle={colorScheme === "dark" ? "light-content" : "dark-content"} />
         <View
           style={{
             flexDirection: "row",
@@ -384,7 +378,7 @@ const News = () => {
             onPress={() => navigation.navigate("SavedNews")}
             style={{ width: "10%", alignItems: "flex-start" }}
           >
-            <FontAwesome name="heart" size={24} color={colors.gradientLogin3} />
+            <FontAwesome name="heart" size={24} color="#C9A14A" />
           </TouchableOpacity>
         </View>
         {!searchText?.trim() && (
@@ -426,8 +420,8 @@ const News = () => {
             saveArticle={saveArticle}
           />
         )}
-      </LinearGradient>
-    </View>
+      </View>
+    </ImageBackground>
   );
 };
 

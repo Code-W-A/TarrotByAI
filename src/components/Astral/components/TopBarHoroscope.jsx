@@ -12,7 +12,6 @@ import {
   H8fontMediumPrimary,
   H9fontMediumWhite,
 } from "../../commonText";
-import SpaceSky from "./space-sky";
 import i18n from "../../../../i18n"; // Import i18n to handle translations
 
 const screenWidth = Dimensions.get("window").width; // Get the width of the screen
@@ -29,7 +28,6 @@ const MyTopBarHoroscope = ({ onChangeTab }) => {
 
   return (
     <View style={styles.tabContainer}>
-      <SpaceSky />
       {tabNames.map((tab, index) => (
         <TouchableOpacity
           key={index}
@@ -39,9 +37,9 @@ const MyTopBarHoroscope = ({ onChangeTab }) => {
             onChangeTab(tab.key);
           }}
         >
-          <H9fontMediumWhite style={styles.tabText}>
+          <Text style={[styles.tabText, activeTab === tab.key && styles.activeTabText]}>
             {tab.label}
-          </H9fontMediumWhite>
+          </Text>
         </TouchableOpacity>
       ))}
     </View>
@@ -52,7 +50,10 @@ const styles = StyleSheet.create({
   tabContainer: {
     flexDirection: "row",
     paddingTop: 20,
-    backgroundColor: colors.primary3,
+    backgroundColor: 'transparent',
+    marginHorizontal: 0,
+    marginTop: 10,
+    borderRadius: 0,
   },
   tab: {
     flex: 1, // This ensures each tab takes equal space
@@ -63,12 +64,19 @@ const styles = StyleSheet.create({
   },
   activeTab: {
     borderBottomWidth: 2,
-    borderBottomColor: "white",
+    borderBottomColor: '#C9A14A',
   },
   tabText: {
     fontSize: 14,
-    color: colors.white,
-    textAlign: "center", // Ensures text is always centered
+    color: '#131523', // bleumarin închis pentru contrast
+    textAlign: "center",
+    fontFamily: 'Lora',
+    fontWeight: '500',
+    letterSpacing: 0.2,
+  },
+  activeTabText: {
+    color: '#C9A14A',
+    fontWeight: '700',
   },
 });
 

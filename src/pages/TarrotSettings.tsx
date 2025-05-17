@@ -249,11 +249,7 @@ const TarrotSettings: React.FC<Props> = ({ navigation }): JSX.Element => {
         <MainContainer>
           <CustomLoader isLoading={isLoading} />
           <LinearGradient
-            colors={[
-              colors.gradientLogin1,
-              colors.gradientLogin2,
-              colors.gradientLogin2,
-            ]} // Înlocuiește cu culorile gradientului tău
+            colors={["#FFFBEA", "#FAF7F2", "#F5E9D6"]}
             style={styles.gradient}
           >
             <ImageBackground
@@ -263,7 +259,7 @@ const TarrotSettings: React.FC<Props> = ({ navigation }): JSX.Element => {
                 flex: 1,
                 width: null,
                 height: null,
-                // alignItems: 'flex-end',
+                imageStyle: { opacity: 0.13 },
               }}
             >
               <KeyboardAvoidingView
@@ -747,7 +743,6 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     paddingBottom: 100,
-    // Alte stiluri necesare pentru a pozitiona gradientul după cum este necesar
   },
   subContainer: {
     flex: 1,
@@ -773,5 +768,69 @@ const styles = StyleSheet.create({
     width: 20,
     alignSelf: "center",
     justifyContent: "center",
+  },
+  inputWrapperNew: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderWidth: 1.5,
+    borderColor: '#C9A14A',
+    borderRadius: 22,
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    marginBottom: 18,
+    width: '100%',
+    shadowColor: '#C9A14A',
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  inputTextNew: {
+    color: '#C9A14A',
+    fontSize: 17,
+    fontFamily: 'Lora',
+    backgroundColor: 'transparent',
+    paddingVertical: 6,
+    paddingHorizontal: 2,
+  },
+  buttonGold: {
+    width: '100%',
+    borderRadius: 22,
+    marginBottom: 12,
+    backgroundColor: '#C9A14A',
+    borderColor: '#C9A14A',
+    borderWidth: 1.5,
+    shadowColor: '#C9A14A',
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 3,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  buttonCream: {
+    width: '100%',
+    borderRadius: 22,
+    marginBottom: 12,
+    backgroundColor: '#FFFBEA',
+    borderColor: '#C9A14A',
+    borderWidth: 1.5,
+    shadowColor: '#C9A14A',
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  buttonTextGold: {
+    color: '#fff',
+    fontSize: 18,
+    fontFamily: 'LoraBold',
+    letterSpacing: 0.1,
+  },
+  buttonTextCream: {
+    color: '#C9A14A',
+    fontSize: 18,
+    fontFamily: 'LoraBold',
+    letterSpacing: 0.1,
   },
 });

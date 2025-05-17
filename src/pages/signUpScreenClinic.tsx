@@ -8,6 +8,7 @@ import {
   ImageBackground,
   KeyboardAvoidingView,
   Text,
+  Platform,
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 
@@ -90,6 +91,10 @@ interface Props extends GeneralProps {
 }
 
 WebBrowser.maybeCompleteAuthSession();
+
+const GOLD = '#C9A14A';
+const CREAM = '#FAF7F2';
+const CREAM2 = '#F5E9D6';
 
 const SignUpScreenClinic: React.FC<Props> = ({ navigation }): JSX.Element => {
   const formKeys = {
@@ -234,106 +239,84 @@ const SignUpScreenClinic: React.FC<Props> = ({ navigation }): JSX.Element => {
         <MainContainer>
           <CustomLoader isLoading={isLoading} />
           <LinearGradient
-            colors={[
-              colors.gradientLogin1,
-              colors.gradientLogin2,
-              colors.gradientLogin3,
-            ]} // Înlocuiește cu culorile gradientului tău
+            colors={[CREAM, CREAM2, "#FEF495", "#FFFBEA"]}
             style={styles.gradient}
+            start={{ x: 0.5, y: 0 }}
+            end={{ x: 0.5, y: 1 }}
           >
             <KeyboardAvoidingView
-              style={{ flex: 1, marginTop: "25%" }}
-              keyboardVerticalOffset={65}
+              style={{ flex: 1 }}
+              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+              keyboardVerticalOffset={40}
             >
-              <View style={styles.subContainer}>
-                <View
-                  style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-
-                    height: 100,
-                  }}
-                >
-                  <H6fontBoldWhite>{i18n.translate("signUp")}</H6fontBoldWhite>
-
+              <ScrollView
+                contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-start', alignItems: 'center', paddingBottom: 60, paddingHorizontal: 20 }}
+                keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}
+              >
+                <View style={styles.headerContainerNew}>
                   <Image
-                    source={require("../../assets/headerIcon.png")}
-                    style={{ width: 300, height: 200 }}
-                    resizeMode="contain" // Aceasta va asigura că întreaga imagine se va încadra în spațiul disponibil, păstrând proporțiile.
+                    source={require('../../assets/headerIcon.png')}
+                    style={styles.logoCrownResponsive}
+                    resizeMode="contain"
                   />
+                  <View style={styles.goldLineNew} />
+                  <H6fontBoldPrimary style={styles.titleNew}>
+                    {i18n.translate('signUp')}
+                  </H6fontBoldPrimary>
                 </View>
-
-                <View>
-                  <View style={styles.row}>
-                    {registerType === "email" && (
+                <View style={styles.formContainerNew}>
                       <Controller
                         name={formKeys.firstName}
                         control={control}
                         render={({ field: { onChange, value } }) => (
                           <InputFields
-                            errorMessage={errors[
-                              formKeys.firstName
-                            ]?.message.toString()}
+                        errorMessage={errors[formKeys.firstName]?.message?.toString()}
                             value={value}
                             onChangeText={onChange}
-                            placeholder={i18n.translate("firstName")}
+                        placeholder={i18n.translate('firstName')}
                             image={"person"}
+                        containerStyle={styles.inputWrapperNew}
+                        textInputStyle={styles.inputTextNew}
                           />
                         )}
-                        rules={{
-                          required: requiredValidation(
-                            i18n.translate("firstName")
-                          ),
-                        }}
+                    rules={{ required: requiredValidation(i18n.translate('firstName')) }}
                       />
-                    )}
-                    {registerType === "email" && (
                       <Controller
                         name={formKeys.lastName}
                         control={control}
                         render={({ field: { onChange, value } }) => (
                           <InputFields
-                            errorMessage={errors[
-                              formKeys.lastName
-                            ]?.message.toString()}
+                        errorMessage={errors[formKeys.lastName]?.message?.toString()}
                             value={value}
                             onChangeText={onChange}
-                            placeholder={i18n.translate("lastName")}
+                        placeholder={i18n.translate('lastName')}
                             image={"person"}
+                        containerStyle={styles.inputWrapperNew}
+                        textInputStyle={styles.inputTextNew}
                           />
                         )}
-                        rules={{
-                          required: requiredValidation(
-                            i18n.translate("lastName")
-                          ),
-                        }}
+                    rules={{ required: requiredValidation(i18n.translate('lastName')) }}
                       />
-                    )}
-                  </View>
-                  {registerType === "email" && (
                     <Controller
                       name={formKeys.email}
                       control={control}
                       render={({ field: { onChange, value } }) => (
                         <InputFields
-                          errorMessage={errors[
-                            formKeys.email
-                          ]?.message.toString()}
+                        errorMessage={errors[formKeys.email]?.message?.toString()}
                           value={value}
                           onChangeText={onChange}
-                          placeholder={i18n.translate("email")}
+                        placeholder={i18n.translate('email')}
                           image={"email"}
+                        containerStyle={styles.inputWrapperNew}
+                        textInputStyle={styles.inputTextNew}
                         />
                       )}
                       rules={{
-                        required: requiredValidation(i18n.translate("email")),
+                      required: requiredValidation(i18n.translate('email')),
                         validate: emailValidation,
                       }}
                     />
-                  )}
-
-                  {registerType === "email" && (
                     <Controller
                       name={formKeys.password}
                       control={control}
@@ -343,25 +326,18 @@ const SignUpScreenClinic: React.FC<Props> = ({ navigation }): JSX.Element => {
                           value={value}
                           isSecure={true}
                           onChangeText={onChange}
-                          placeholder={i18n.translate("createPassword")}
-                          errorMessage={errors[
-                            formKeys.password
-                          ]?.message.toString()}
+                        placeholder={i18n.translate('createPassword')}
+                        errorMessage={errors[formKeys.password]?.message?.toString()}
                           image={"lock-outline"}
+                        containerStyle={styles.inputWrapperNew}
+                        textInputStyle={styles.inputTextNew}
                         />
                       )}
                       rules={{
-                        required: requiredValidation(
-                          i18n.translate("createPassword")
-                        ),
-                        minLength: minLengthValidation(
-                          validationSchema.password.minLength
-                        ),
+                      required: requiredValidation(i18n.translate('createPassword')),
+                      minLength: minLengthValidation(validationSchema.password.minLength),
                       }}
                     />
-                  )}
-
-                  {registerType === "email" && (
                     <Controller
                       name={formKeys.confirmPassword}
                       control={control}
@@ -371,128 +347,71 @@ const SignUpScreenClinic: React.FC<Props> = ({ navigation }): JSX.Element => {
                           value={value}
                           isSecure={true}
                           onChangeText={onChange}
-                          placeholder={i18n.translate("confirmPassword")}
-                          errorMessage={errors[
-                            formKeys.confirmPassword
-                          ]?.message.toString()}
+                        placeholder={i18n.translate('confirmPassword')}
+                        errorMessage={errors[formKeys.confirmPassword]?.message?.toString()}
                           image={"lock-outline"}
+                        containerStyle={styles.inputWrapperNew}
+                        textInputStyle={styles.inputTextNew}
                         />
                       )}
                       rules={{
-                        required: requiredValidation(
-                          i18n.translate("confirmPassword")
-                        ),
-                        validate: (value) =>
-                          value === pwd || i18n.translate("passDontMatch"),
+                      required: requiredValidation(i18n.translate('confirmPassword')),
+                      validate: (value) => value === pwd || i18n.translate('passDontMatch'),
                       }}
                     />
-                  )}
-                </View>
-                <View style={styles.infoTextViewStyle}>
+                  <View style={styles.checkboxRow}>
                   <Checkbox
                     status={isChecked ? "checked" : "unchecked"}
-                    onPress={() => {
-                      setChecked(!isChecked);
-                    }}
-                    color={"#6200ee"} // Optional: Customize the color
+                      onPress={() => setChecked(!isChecked)}
+                      color={GOLD}
                   />
-                  <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
-                    <Text>I agree to the </Text>
-                    <TouchableOpacity
-                      onPress={() =>
-                        navigation.navigate(
-                          screenName.termConditionsClinic as any
-                        )
-                      }
-                    >
-                      <Text style={{ textDecorationLine: "underline" }}>
-                        Terms of Service
+                    <Text style={styles.termsText}>
+                      {i18n.translate('agreeTerms1')}
+                      <Text style={styles.termsLink} onPress={() => navigation.navigate(screenName.termConditionsClinic)}>
+                        {i18n.translate('termsOfService')}
                       </Text>
-                    </TouchableOpacity>
-                    <Text> and </Text>
-                    <TouchableOpacity
-                      onPress={() =>
-                        navigation.navigate(
-                          screenName.termConditionsClinic as any
-                        )
-                      }
-                    >
-                      <Text style={{ textDecorationLine: "underline" }}>
-                        Privacy Policy
+                      {i18n.translate('and')}
+                      <Text style={styles.termsLink} onPress={() => navigation.navigate(screenName.termConditionsClinic)}>
+                        {i18n.translate('privacyPolicy')}
                       </Text>
-                    </TouchableOpacity>
-                    <Text>.</Text>
+                      .
+                    </Text>
                   </View>
-                </View>
-                <View
-                  style={{
-                    width: "100%",
-                    alignSelf: "center",
-
-                    flex: 1,
-                    justifyContent: "center",
-                    alignItems: "center",
-                    maxHeight: "10%",
-                  }}
-                >
-                  {isChecked ? (
-                    <Button
-                      disabled={false}
-                      funCallback={handleSubmit(onSubmit)}
-                      label={i18n.translate("register")}
-                      success={true}
-                      bgColor={colors.primary3}
-                      borderColor={colors.white}
-                      borderWidth={0.2}
-                      txtColor={colors.white}
-                    />
-                  ) : (
                     <Button
                       disabled={!isChecked}
                       funCallback={handleSubmit(onSubmit)}
-                      label={"Agree terms and policy to continue"}
+                    label={i18n.translate('register')}
                       success={true}
-                      bgColor={"transparent"}
-                      borderColor={colors.white}
+                    bgColor={GOLD}
+                    borderColor={GOLD}
                       borderWidth={0.2}
-                      txtColor={colors.black}
+                    txtColor={'#fff'}
+                    style={styles.loginButtonNew}
+                    txtStyle={styles.loginButtonTextNew}
                     />
-                  )}
-                </View>
-
                 <TouchableOpacity
-                  style={styles.googleButton}
-                  onPress={() => promptAsync()} // Acțiunea butonului rămâne aceeași
+                    style={styles.googleButtonNew}
+                    onPress={() => promptAsync()}
                   disabled={!request}
+                    activeOpacity={0.85}
                 >
-                  <Icon name="google" size={24} color="white" />
+                    <Icon name="google" size={22} color={GOLD} style={{ marginRight: 10 }} />
+                    <Text style={styles.googleButtonTextNew}>{i18n.translate('loginWithGoogle')}</Text>
                 </TouchableOpacity>
-
-                <View>
-                  <View style={styles.infoTextViewStyle}>
+                  <View style={styles.infoTextViewStyleNew}>
                     <H7fontMediumPrimary>
-                      {i18n.translate("alreadyAccount")}{" "}
+                      {i18n.translate('alreadyAccount')} {" "}
                     </H7fontMediumPrimary>
                     <TouchableOpacity
-                      onPress={() =>
-                        navigation.navigate(
-                          screenName.SignInScreenClinic as any
-                        )
-                      }
+                      onPress={() => navigation.navigate(screenName.SignInScreenClinic)}
                     >
-                      <H7fontMediumPrimary
-                        style={{ textDecorationLine: "underline" }}
-                      >
-                        {i18n.translate("registerLogin")}
+                      <H7fontMediumPrimary style={{ textDecorationLine: 'underline' }}>
+                        {i18n.translate('registerLogin')}
                       </H7fontMediumPrimary>
                     </TouchableOpacity>
                   </View>
                 </View>
-                <View style={styles.infoTextViewStyle}></View>
-                {/* <View style={styles.borderLineStyle}>
-                  <CommonLineView />
-                </View> */}
-              </View>
+              </ScrollView>
             </KeyboardAvoidingView>
             {showSnackback ? (
               <SnackBar
@@ -509,61 +428,129 @@ const SignUpScreenClinic: React.FC<Props> = ({ navigation }): JSX.Element => {
     </TouchableWithoutFeedback>
   );
 };
-export default SignUpScreenClinic;
 
 const styles = StyleSheet.create({
-  googleButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#4285F4", // Albastru Google
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 4,
-    marginTop: 15,
-    width: "80%", // Proporție relativă a lățimii ecranului
-    maxWidth: 400, // Dimensiune maximă pentru ecrane mari
-    justifyContent: "center", // Centrează iconul și textul
-    alignSelf: "center", // Centrează butonul pe orizontală
-  },
-
-  googleButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold", // Font bold pentru vizibilitate
-    marginLeft: 10, // Spațiere între icon și text
-  },
   gradient: {
     flex: 1,
-    width: "100%",
-    height: "100%",
-    paddingBottom: "5%",
-    // Alte stiluri necesare pentru a pozitiona gradientul după cum este necesar
+    width: '100%',
+    height: '100%',
   },
-  subContainer: {
+  headerContainerNew: {
+    alignItems: 'center',
+    marginBottom: 10,
+    width: '90%',
+    marginTop: 30,
+  },
+  logoCrownResponsive: {
+    width: 120,
+    height: 120,
+    marginBottom: 10,
+    alignSelf: 'center',
+  },
+  goldLineNew: {
+    width: 60,
+    height: 3,
+    backgroundColor: GOLD,
+    borderRadius: 2,
+    marginBottom: 12,
+  },
+  titleNew: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: GOLD,
+    fontFamily: 'LoraBold',
+    marginBottom: 4,
+  },
+  formContainerNew: {
+    width: '100%',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  inputWrapperNew: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderWidth: 1.5,
+    borderColor: GOLD,
+    borderRadius: 22,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    marginBottom: 16,
+    width: '100%',
+    shadowColor: GOLD,
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  inputTextNew: {
+    color: GOLD,
+    fontSize: 16,
+    fontFamily: 'Lora',
+  },
+  checkboxRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+    marginTop: 10,
+    width: '100%',
+  },
+  termsText: {
+    color: colors.primary3,
+    fontSize: 14,
+    fontFamily: 'Lora',
+    marginLeft: 8,
     flex: 1,
+    flexWrap: 'wrap',
+  },
+  termsLink: {
+    color: GOLD,
+    textDecorationLine: 'underline',
+    fontWeight: 'bold',
+  },
+  loginButtonNew: {
+    width: '100%',
+    borderRadius: 22,
+    marginBottom: 10,
+    backgroundColor: GOLD,
+    shadowColor: GOLD,
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  loginButtonTextNew: {
+    color: '#fff',
+    fontSize: 18,
+    fontFamily: 'LoraBold',
+  },
+  googleButtonNew: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderWidth: 1.5,
+    borderColor: GOLD,
+    borderRadius: 22,
+    paddingVertical: 10,
     paddingHorizontal: 20,
-    // paddingVertical: 15,
-    justifyContent: "center",
-
-    height: "100%",
+    marginTop: 8,
+    marginBottom: 8,
+    width: '100%',
+    justifyContent: 'center',
+    shadowColor: GOLD,
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
   },
-  infoTextViewStyle: {
-    paddingTop: 10,
-    justifyContent: "center",
-    alignItems: "center",
-    flexDirection: "row",
+  googleButtonTextNew: {
+    color: GOLD,
+    fontSize: 16,
+    fontFamily: 'LoraBold',
   },
-
-  socialMediaIconStyle: { height: 15, width: 22, alignSelf: "center" },
-
-  socialMediaFBIconStyle: { alignItems: "center", justifyContent: "center" },
-  borderLineStyle: { paddingTop: 10 },
-  footerComponentView: { paddingTop: 30 },
-  passwordIconStyle: { justifyContent: "center", alignItems: "center" },
-  userIconsStyle: {
-    height: 20,
-    width: 20,
-    alignSelf: "center",
-    justifyContent: "center",
+  infoTextViewStyleNew: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 10,
   },
 });
+
+export default SignUpScreenClinic;

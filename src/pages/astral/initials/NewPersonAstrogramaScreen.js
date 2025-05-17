@@ -6,11 +6,16 @@ import {
   Image,
   Dimensions,
   Alert,
+  SafeAreaView,
+  ScrollView,
+  KeyboardAvoidingView,
+  StyleSheet as StyleSheetRN,
 } from "react-native";
 import { Button, Headline, Menu, Provider, Text } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MainContainer } from "../../../components/commonViews";
 import { LinearGradient } from "expo-linear-gradient";
+import { Video } from 'expo-av';
 
 import { InputFields } from "../../../components/commonInputFields";
 import { DatePicker, TimePicker } from "../../../components/dateAndTimePicker";
@@ -782,42 +787,45 @@ function NewPersonAstrograma({ navigation, route }) {
   return (
     <Provider>
       <Fragment>
-        <MainContainer>
+        <MainContainer style={{ flex: 1, backgroundColor: '#fffbe6' }}>
+          <SafeAreaView style={{ flex: 1 }}>
           <LinearGradient
-            colors={[
-              colors.gradientLogin1,
-              colors.gradientLogin11,
-              colors.gradientLogin2,
-            ]}
-            style={{
-              flex: 1,
-              paddingTop:
-                Platform.OS === "android" ? StatusBar.currentHeight : 0,
-            }}
+              colors={["#fffbe6", "#f7e7ce", "#e7c585"]}
+              style={{ flex: 1 }}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
           >
-            <SpaceSky />
-            <Aquarius width={60} height={60} style={styles.aquarius} />
+              <View style={styles.overlay} />
             {!isLoading && (
               <View style={styles.textContainer}>
-                <Text style={styles.textText}>
-                  {i18n.translate("informatiiCalcule")}
-                </Text>
+                  <Text style={styles.titleText}>{i18n.translate("informatiiCalcule")}</Text>
               </View>
             )}
-
             {isLoading ? (
-              <View style={styles.container}>
-                <Image source={localGif} style={styles.image} />
-                <H8fontRegularWhite style={styles.text}>
-                  {loadingMessage}
-                </H8fontRegularWhite>
+              <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <Video
+                  source={require('../../../../assets/analizerscreen.mp4')}
+                  style={{ ...StyleSheet.absoluteFillObject, zIndex: 0 }}
+                  resizeMode="cover"
+                  shouldPlay
+                  isLooping
+                  muted
+                  ignoreSilentSwitch="obey"
+                />
+                <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', zIndex: 1, paddingHorizontal: 32 }}>
+                  <Text style={{ color: '#131523', fontSize: 18, fontFamily: 'LoraBold', textAlign: 'center', backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 16, padding: 16 }}>{loadingMessage}</Text>
+                </View>
               </View>
             ) : (
-              <View
-                style={[
-                  styles.inputContainer,
-                  { height: timeZoneData?.offset ? "92%" : "88%" },
-                ]}
+                <KeyboardAvoidingView
+                  style={{ flex: 1 }}
+                  behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                  keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}
+                >
+                  <ScrollView
+                    contentContainerStyle={[styles.inputContainer, { paddingTop: 40 }]}
+                    keyboardShouldPersistTaps="handled"
+                    showsVerticalScrollIndicator={false}
               >
                 <View>
                   <InputFields
@@ -864,18 +872,18 @@ function NewPersonAstrograma({ navigation, route }) {
                     paddingLeft: 10,
                   }}
                 >
-                  <H9fontMediumWhite>
+                      <Text style={styles.labelTextContrast}>
                     {i18n.translate("Adresa")}: {place || "-"}
-                  </H9fontMediumWhite>
+                      </Text>
                   {/* {timeZoneData?.offset && (
-                    <H9fontMediumWhite>
+                        <Text style={styles.labelTextContrast}>
                       {timeZoneData?.data?.timeZoneName}, UTC/GMT +
                       {timeZoneData?.offset} hours
-                    </H9fontMediumWhite>
+                        </Text>
                   )}
-                  <H9fontMediumWhite>
+                      <Text style={styles.labelTextContrast}>
                     Long/Lat: {long || "-"}/{lat || "-"}
-                  </H9fontMediumWhite> */}
+                      </Text> */}
                 </View>
 
                 {showDatePicker && (
@@ -914,9 +922,9 @@ function NewPersonAstrograma({ navigation, route }) {
                     alignItems: "center",
                   }}
                 >
-                  <H7fontBoldWhite>
+                      <Text style={styles.labelTextContrast}>
                     {i18n.translate("IntroduDataOraNasterii")}
-                  </H7fontBoldWhite>
+                      </Text>
                   <View
                     style={{
                       flexDirection: "row",
@@ -932,14 +940,14 @@ function NewPersonAstrograma({ navigation, route }) {
                       anchor={
                         <Button
                           mode="outlined"
-                          style={styles.timeButton}
-                          onPress={() => setDayMenuVisible(true)}
+                              style={styles.selectButton}
                           theme={{
                             colors: {
-                              primary: "white", // Folosește o culoare din gradient pentru selectare
-                              onSurface: "white", // O culoare închisă pentru text
+                                  primary: '#C9A14A',
+                                  onSurface: '#C9A14A',
                             },
                           }}
+                              onPress={() => setDayMenuVisible(true)}
                         >
                           {day}
                         </Button>
@@ -962,14 +970,14 @@ function NewPersonAstrograma({ navigation, route }) {
                       anchor={
                         <Button
                           mode="outlined"
-                          style={styles.timeButton}
-                          onPress={() => setMonthMenuVisible(true)}
+                              style={styles.selectButton}
                           theme={{
                             colors: {
-                              primary: "white", // Folosește o culoare din gradient pentru selectare
-                              onSurface: "white", // O culoare închisă pentru text
+                                  primary: '#C9A14A',
+                                  onSurface: '#C9A14A',
                             },
                           }}
+                              onPress={() => setMonthMenuVisible(true)}
                         >
                           {month}
                         </Button>
@@ -1005,11 +1013,11 @@ function NewPersonAstrograma({ navigation, route }) {
                       anchor={
                         <Button
                           mode="outlined"
-                          style={styles.timeButton}
+                              style={styles.selectButton}
                           theme={{
                             colors: {
-                              primary: "white", // Folosește o culoare din gradient pentru selectare
-                              onSurface: "white", // O culoare închisă pentru text
+                                  primary: '#C9A14A',
+                                  onSurface: '#C9A14A',
                             },
                           }}
                           onPress={() => setYearMenuVisible(true)}
@@ -1019,7 +1027,7 @@ function NewPersonAstrograma({ navigation, route }) {
                       }
                     >
                       {Array.from(
-                        { length: new Date().getFullYear() - 1500 + 1 },
+                            { length: new Date().getFullYear() - 1900 + 1 },
                         (_, i) => (
                           <Menu.Item
                             key={i}
@@ -1036,21 +1044,21 @@ function NewPersonAstrograma({ navigation, route }) {
                   <Button
                     mode="outlined"
                     onPress={() => setShowTimePicker(true)}
-                    style={styles.timeButton}
-                    color="white"
+                        style={styles.selectButton}
+                        color="#C9A14A"
                     theme={{
                       colors: {
-                        primary: colors.white,
-                        onSurface: "red",
+                            primary: '#C9A14A',
+                            onSurface: '#C9A14A',
                       },
                     }}
-                    labelStyle={{ fontSize: 18 }}
+                        labelStyle={styles.selectButtonLabel}
                   >
                     {selectedTime || i18n.translate("SelecteazaOraNasterii")}
                   </Button>
                 </View>
 
-                <GenderSelector setGender={setGender} gender={gender} />
+                    <GenderSelector setGender={setGender} gender={gender} style={styles.genderSelectorNew} />
                 {/* {currentStep === 5 && (
               <RelationshipScreen
                 setRelationshipStatus={setRelationshipStatus}
@@ -1079,18 +1087,21 @@ function NewPersonAstrograma({ navigation, route }) {
                   <CommonButton
                     disabled={false}
                     funCallback={handleContinue}
-                    borderWidth={0.2}
-                    bgColor={colors.gradientLogin1}
+                        borderWidth={0}
+                        bgColor={'#C9A14A'}
                     label={i18n.translate("clinicLoginRedirect")}
-                    borderColor={colors.white}
+                        borderColor={'#C9A14A'}
                     success={true}
-                    style={{ marginTop: "0%", width: "70%" }}
-                    txtColor={colors.white}
+                        style={styles.loginButtonNew}
+                        txtColor={'#fff'}
+                        txtStyle={styles.loginButtonTextNew}
                   />
                 </View>
-              </View>
+                  </ScrollView>
+                </KeyboardAvoidingView>
             )}
           </LinearGradient>
+          </SafeAreaView>
         </MainContainer>
       </Fragment>
     </Provider>
@@ -1138,8 +1149,8 @@ const styles = StyleSheet.create({
   textContainer: {
     alignSelf: "center",
     paddingHorizontal: 20,
-    paddingTop: "10%",
-    height: "12%",
+    paddingTop: 40,
+    marginBottom: 18,
   },
   textText: {
     textAlign: "center",
@@ -1149,7 +1160,6 @@ const styles = StyleSheet.create({
   inputContainer: {
     paddingHorizontal: 20,
     opacity: 0.9,
-    height: "94%",
     justifyContent: "flex-start",
   },
   buttonContainer: {
@@ -1158,6 +1168,75 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     paddingBottom: "35%",
+  },
+  overlay: {
+    ...StyleSheetRN.absoluteFillObject,
+    backgroundColor: 'rgba(255,255,255,0)',
+    zIndex: 2,
+    pointerEvents: 'none',
+  },
+  selectButton: {
+    backgroundColor: '#fff',
+    borderWidth: 1.5,
+    borderColor: '#C9A14A',
+    borderRadius: 22,
+    marginHorizontal: 4,
+    marginVertical: 4,
+    shadowColor: '#C9A14A',
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
+    minWidth: 60,
+    minHeight: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  selectButtonLabel: {
+    color: '#C9A14A',
+    fontFamily: 'Lora',
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  genderSelectorNew: {
+    borderColor: '#C9A14A',
+    backgroundColor: '#fff',
+    borderWidth: 1.5,
+    borderRadius: 22,
+    marginTop: 10,
+    marginBottom: 10,
+    zIndex: 3,
+  },
+  loginButtonNew: {
+    width: '100%',
+    borderRadius: 22,
+    marginBottom: 10,
+    backgroundColor: '#C9A14A',
+    shadowColor: '#C9A14A',
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 3,
+    zIndex: 3,
+  },
+  loginButtonTextNew: {
+    color: '#fff',
+    fontSize: 18,
+    fontFamily: 'LoraBold',
+  },
+  titleText: {
+    textAlign: 'center',
+    paddingVertical: 5,
+    color: '#C9A14A',
+    fontSize: 22,
+    fontWeight: '700',
+    fontFamily: 'LoraBold',
+    zIndex: 3,
+  },
+  labelTextContrast: {
+    color: '#131523',
+    fontFamily: 'Lora',
+    fontSize: 16,
+    fontWeight: '500',
+    marginBottom: 2,
   },
 });
 

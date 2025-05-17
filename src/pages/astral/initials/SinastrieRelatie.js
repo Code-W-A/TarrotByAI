@@ -11,6 +11,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   View,
+  ImageBackground,
 } from "react-native";
 import {
   Divider,
@@ -28,7 +29,6 @@ import ScrollViewFadeFirst from "../../../components/Astral/components/scroll-vi
 
 import { daily } from "../../../utils/daily";
 import AstroChart from "../../../components/Astral/components/AstroChart";
-import SpaceSky from "../../../components/Astral/components/space-sky";
 import {
   H18fontMediumBlack,
   H4fontBoldYellow,
@@ -932,237 +932,201 @@ function SinastrieRelatie({ navigation, route }) {
   return (
     <>
       <MainContainer>
-        <LinearGradient
-          colors={[
-            colors.gradientLogin1,
-            colors.gradientLogin1,
-            colors.gradientLogin1,
-            colors.gradientLogin1,
-            colors.gradientLogin1,
-            colors.gradientLogin1,
-            colors.gradientLogin1,
-            colors.gradientLogin1,
-            colors.gradientLogin11,
-          ]} // Înlocuiește cu culorile gradientului tău
-          style={{
-            flex: 1,
-            paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
-          }}
+        <ImageBackground
+          source={require('../../../../assets/dashboardbg.jpg')}
+          style={{ flex: 1, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 }}
+          imageStyle={{ opacity: 1 }}
         >
-          <SpaceSky />
-          <MyTopBar onChangeTab={setSelectedTab} />
-          {selectedTab === "natal" ? (
-            <ScrollView>
-              <View style={[styles.defaultContainer]}>
-                <View>
-                  {wheelImage && (
-                    <SvgComponent
-                      svgBase64={wheelImage.base64ImageP1}
-                      width="430"
-                      height="430"
-                    />
-                  )}
-                </View>
-                <Divider style={{ marginTop: "0%" }} />
-                <View style={{ flex: 1, flexDirection: "row" }}>
-                  <View style={{ flexDirection: "column", width: "55%" }}>
-                    <View style={styles.horoscopeTodayContainer}>
-                      <H8fontMediumWhite style={styles.textTitles}>
-                        {UData.full_name}
-                      </H8fontMediumWhite>
-                    </View>
-                    <View style={styles.horoscopeTodayContainer}>
-                      <H8fontMediumWhite
-                        style={[styles.textDescription, { marginTop: 0 }]}
-                      >
-                        {UData.day} - {UData.month} - {UData.year}
-                      </H8fontMediumWhite>
-                    </View>
-                    <View style={styles.horoscopeTodayContainer}>
-                      <H8fontMediumWhite
-                        style={[styles.textDescription, { marginTop: 0 }]}
-                      >
-                        {UData.hour}:{UData.min}
-                      </H8fontMediumWhite>
-                    </View>
-                    <View style={styles.horoscopeTodayContainer}>
-                      <H8fontMediumWhite
-                        style={[
-                          styles.textDescription,
-                          { marginTop: 0, maxWidth: "80%" },
-                        ]}
-                      >
-                        {UData.place}
-                      </H8fontMediumWhite>
-                    </View>
-                    <View style={styles.horoscopeTodayContainer}>
-                      <H8fontMediumWhite
-                        style={[styles.textDescription, { marginTop: 0 }]}
-                      >
-                        {UData.gender}
-                      </H8fontMediumWhite>
-                    </View>
-                  </View>
-                  <View style={{ flexDirection: "column", width: "55%" }}>
-                    <View style={styles.horoscopeTodayContainer}>
-                      <H7fontBoldWhite style={styles.textTitles}>
-                        {userD?.full_name}
-                      </H7fontBoldWhite>
-                    </View>
-                    <View style={styles.horoscopeTodayContainer}>
-                      <H8fontMediumWhite
-                        style={[styles.textDescription, { marginTop: 0 }]}
-                      >
-                        {userD?.day} - {userD?.month} - {userD?.year}
-                      </H8fontMediumWhite>
-                    </View>
-                    <View style={styles.horoscopeTodayContainer}>
-                      <H8fontMediumWhite
-                        style={[styles.textDescription, { marginTop: 0 }]}
-                      >
-                        {userD?.selectedTime}
-                      </H8fontMediumWhite>
-                    </View>
-                    <View style={styles.horoscopeTodayContainer}>
-                      <H8fontMediumWhite
-                        style={[
-                          styles.textDescription,
-                          { marginTop: 0, maxWidth: "80%" },
-                        ]}
-                      >
-                        {userD?.place}
-                      </H8fontMediumWhite>
-                    </View>
-                    <View style={styles.horoscopeTodayContainer}>
-                      <H8fontMediumWhite
-                        style={[styles.textDescription, { marginTop: 0 }]}
-                      >
-                        {userD?.gender}
-                      </H8fontMediumWhite>
-                    </View>
-                  </View>
-                </View>
-
-                {/* Interpretează următoarea diagramă natală: Născut pe 10 martie 1994, la 14:05, în București, România. Soarele în Pești, Luna în Capricorn, Mercur în Vărsător, Venus în Berbec, și Marte în Pești. Ascendentul este în Scorpion. Soarele formează o conjuncție cu Venus, Luna este în opoziție cu Marte, iar Mercur formează un trigon cu Saturn. */}
-                {/* Interpretează următoarea diagramă natală si sa fie pe categorii General, Personalitate, Dragoste, Cariera, Bani:  */}
-                {/* {aspectsData && (
-        <AstrologyAspectsView aspectsData={aspectsData} />
-      )} */}
-              </View>
-
-              {/* <ChatComponent /> */}
-
-              {/* <View style={{ paddingVertical: 10 }} /> */}
-            </ScrollView>
-          ) : selectedTab === "interpretation" ? (
-            <ScrollViewFadeFirst height={10}>
-              <ShowFromTop>
+          <View style={{ ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(255,255,255,0.72)', zIndex: 1 }} pointerEvents="none" />
+          <View style={{ flex: 1, zIndex: 2 }}>
+            <MyTopBar onChangeTab={setSelectedTab} />
+            {selectedTab === "natal" ? (
+              <ScrollView>
                 <View style={[styles.defaultContainer]}>
-                  <HorizontalTabSelector
-                    isLoading={isLoading}
-                    activeTab={activeTab}
-                    setActiveTab={setActiveTab}
-                  />
-                  <Divider style={{ marginTop: "5%" }} />
-                  {/* Interpretează următoarea diagramă natală: Născut pe 10 martie 1994, la 14:05, în București, România. Soarele în Pești, Luna în Capricorn, Mercur în Vărsător, Venus în Berbec, și Marte în Pești. Ascendentul este în Scorpion. Soarele formează o conjuncție cu Venus, Luna este în opoziție cu Marte, iar Mercur formează un trigon cu Saturn. */}
-                  <View
-                    style={[
-                      styles.horoscopeTodayContainer,
-                      {
-                        marginBottom: "10%",
-                        flexDirection: "column",
-                        justifyContent: "flex-start",
-                        alignItems: "flex-start",
-                      },
-                    ]}
-                  >
-                    <View>
-                      {isPaid ? (
-                        // Afișează conținutul complet dacă este achiziționat
-                        <>
-                          <Button
-                            disabled={false}
-                            funCallback={handleDownloadPDF}
-                            label={descarcaPdfText}
-                            success={true}
-                            bgColor={colors.gradientLogin11}
-                            borderColor={colors.white}
-                            borderWidth={0.2}
-                            txtColor={colors.white}
-                            style={{ marginTop: "10%" }}
-                          />
-                          {activeData.map((aspect, index) => (
-                            <View key={index}>
-                              {aspect.reading.map((read, readIndex) => (
-                                <View key={readIndex} style={{ marginTop: 20 }}>
-                                  <H7fontBoldWhite style={[styles.textTitles]}>
-                                    {read?.title}
-                                  </H7fontBoldWhite>
-                                  <H9fontMediumLightBlack
-                                    style={styles.textDescription}
-                                  >
-                                    {read?.description}
-                                  </H9fontMediumLightBlack>
-                                </View>
-                              ))}
-                            </View>
-                          ))}
-                        </>
-                      ) : (
-                        // Afișează conținut limitat dacă nu este achiziționat
-                        <>
-                          {activeData.length > 0 &&
-                            activeData[0]?.reading?.length > 0 && (
-                              <View>
-                                <H7fontBoldWhite style={[styles.textTitles]}>
-                                  {activeData[0].reading[0]?.title}
-                                </H7fontBoldWhite>
-                                <H9fontMediumLightBlack
-                                  style={styles.textDescription}
-                                >
-                                  {activeData[0].reading[0]?.description}
-                                </H9fontMediumLightBlack>
-                              </View>
-                            )}
-                          <Text style={styles.partialContent}>
-                            {achizitioneazaInterpretareCompletaText2}
-                          </Text>
-                          <Button
-                            disabled={false}
-                            funCallback={() => setModalVisible(true)}
-                            label={achizitioneazaInterpretareCompletaText}
-                            success={true}
-                            bgColor={colors.gradientLogin11}
-                            borderColor={colors.white}
-                            borderWidth={0.2}
-                            txtColor={colors.white}
-                            style={{ marginTop: "10%" }}
-                          />
-                        </>
-                      )}
+                  <View>
+                    {wheelImage && (
+                      <SvgComponent
+                        svgBase64={wheelImage.base64ImageP1}
+                        width="430"
+                        height="430"
+                      />
+                    )}
+                  </View>
+                  <Divider style={{ marginTop: "0%" }} />
+                  <View style={{ flex: 1, flexDirection: "row" }}>
+                    <View style={{ flexDirection: "column", width: "55%" }}>
+                      <View style={styles.horoscopeTodayContainer}>
+                        <Text style={{ color: '#131523', fontFamily: 'Lora', fontWeight: '700' }}>
+                          {UData.full_name}
+                        </Text>
+                      </View>
+                      <View style={styles.horoscopeTodayContainer}>
+                        <Text style={{ color: '#131523', fontFamily: 'Lora' }}>
+                          {UData.day} - {UData.month} - {UData.year}
+                        </Text>
+                      </View>
+                      <View style={styles.horoscopeTodayContainer}>
+                        <Text style={{ color: '#131523', fontFamily: 'Lora' }}>
+                          {UData.hour}:{UData.min}
+                        </Text>
+                      </View>
+                      <View style={styles.horoscopeTodayContainer}>
+                        <Text style={{ color: '#131523', fontFamily: 'Lora' }}>
+                          {UData.place}
+                        </Text>
+                      </View>
+                      <View style={styles.horoscopeTodayContainer}>
+                        <Text style={{ color: '#131523', fontFamily: 'Lora' }}>
+                          {UData.gender}
+                        </Text>
+                      </View>
+                    </View>
+                    <View style={{ flexDirection: "column", width: "55%" }}>
+                      <View style={styles.horoscopeTodayContainer}>
+                        <Text style={{ color: '#131523', fontFamily: 'Lora' }}>
+                          {userD?.full_name}
+                        </Text>
+                      </View>
+                      <View style={styles.horoscopeTodayContainer}>
+                        <Text style={{ color: '#131523', fontFamily: 'Lora' }}>
+                          {userD?.day} - {userD?.month} - {userD?.year}
+                        </Text>
+                      </View>
+                      <View style={styles.horoscopeTodayContainer}>
+                        <Text style={{ color: '#131523', fontFamily: 'Lora' }}>
+                          {userD?.selectedTime}
+                        </Text>
+                      </View>
+                      <View style={styles.horoscopeTodayContainer}>
+                        <Text style={{ color: '#131523', fontFamily: 'Lora' }}>
+                          {userD?.place}
+                        </Text>
+                      </View>
+                      <View style={styles.horoscopeTodayContainer}>
+                        <Text style={{ color: '#131523', fontFamily: 'Lora' }}>
+                          {userD?.gender}
+                        </Text>
+                      </View>
                     </View>
                   </View>
+
+                  {/* Interpretează următoarea diagramă natală: Născut pe 10 martie 1994, la 14:05, în București, România. Soarele în Pești, Luna în Capricorn, Mercur în Vărsător, Venus în Berbec, și Marte în Pești. Ascendentul este în Scorpion. Soarele formează o conjuncție cu Venus, Luna este în opoziție cu Marte, iar Mercur formează un trigon cu Saturn. */}
+                  {/* Interpretează următoarea diagramă natală si sa fie pe categorii General, Personalitate, Dragoste, Cariera, Bani:  */}
                   {/* {aspectsData && (
-      <AstrologyAspectsView aspectsData={aspectsData} />
-    )} */}
+          <AstrologyAspectsView aspectsData={aspectsData} />
+        )} */}
                 </View>
+
                 {/* <ChatComponent /> */}
 
-                <View style={{ paddingVertical: 10 }} />
+                {/* <View style={{ paddingVertical: 10 }} /> */}
+              </ScrollView>
+            ) : selectedTab === "interpretation" ? (
+              <ScrollViewFadeFirst height={10}>
+                <ShowFromTop>
+                  <View style={[styles.defaultContainer]}>
+                    <HorizontalTabSelector
+                      isLoading={isLoading}
+                      activeTab={activeTab}
+                      setActiveTab={setActiveTab}
+                    />
+                    <Divider style={{ marginTop: "5%" }} />
+                    {/* Interpretează următoarea diagramă natală: Născut pe 10 martie 1994, la 14:05, în București, România. Soarele în Pești, Luna în Capricorn, Mercur în Vărsător, Venus în Berbec, și Marte în Pești. Ascendentul este în Scorpion. Soarele formează o conjuncție cu Venus, Luna este în opoziție cu Marte, iar Mercur formează un trigon cu Saturn. */}
+                    <View
+                      style={[
+                        styles.horoscopeTodayContainer,
+                        {
+                          marginBottom: "10%",
+                          flexDirection: "column",
+                          justifyContent: "flex-start",
+                          alignItems: "flex-start",
+                        },
+                      ]}
+                    >
+                      <View>
+                        {isPaid ? (
+                          // Afișează conținutul complet dacă este achiziționat
+                          <>
+                            <Button
+                              disabled={false}
+                              funCallback={handleDownloadPDF}
+                              label={descarcaPdfText}
+                              success={true}
+                              bgColor={colors.gradientLogin11}
+                              borderColor={colors.white}
+                              borderWidth={0.2}
+                              txtColor={colors.white}
+                              style={{ marginTop: "10%" }}
+                            />
+                            {activeData.map((aspect, index) => (
+                              <View key={index}>
+                                {aspect.reading.map((read, readIndex) => (
+                                  <View key={readIndex} style={{ marginTop: 20 }}>
+                                    <Text style={{ color: '#131523', fontFamily: 'Lora' }}>
+                                      {read?.title}
+                                    </Text>
+                                    <Text style={{ color: '#131523', fontFamily: 'Lora' }}>
+                                      {read?.description}
+                                    </Text>
+                                  </View>
+                                ))}
+                              </View>
+                            ))}
+                          </>
+                        ) : (
+                          // Afișează conținut limitat dacă nu este achiziționat
+                          <>
+                            {activeData.length > 0 &&
+                              activeData[0]?.reading?.length > 0 && (
+                                <View>
+                                  <Text style={{ color: '#131523', fontFamily: 'Lora' }}>
+                                    {activeData[0].reading[0]?.title}
+                                  </Text>
+                                  <Text style={{ color: '#131523', fontFamily: 'Lora' }}>
+                                    {activeData[0].reading[0]?.description}
+                                  </Text>
+                                </View>
+                              )}
+                            <Text style={styles.partialContent}>
+                              {achizitioneazaInterpretareCompletaText2}
+                            </Text>
+                            <Button
+                              disabled={false}
+                              funCallback={() => setModalVisible(true)}
+                              label={achizitioneazaInterpretareCompletaText}
+                              success={true}
+                              bgColor={colors.gradientLogin11}
+                              borderColor={colors.white}
+                              borderWidth={0.2}
+                              txtColor={colors.white}
+                              style={{ marginTop: "10%" }}
+                            />
+                          </>
+                        )}
+                      </View>
+                    </View>
+                    {/* {aspectsData && (
+        <AstrologyAspectsView aspectsData={aspectsData} />
+      )} */}
+                  </View>
+                  {/* <ChatComponent /> */}
+
+                  <View style={{ paddingVertical: 10 }} />
+                </ShowFromTop>
+              </ScrollViewFadeFirst>
+            ) : (
+              <ShowFromTop>
+                <AspectTableSinastrie
+                  houseCusps={houseCusps}
+                  planetaryData={planetaryData}
+                  aspects={aspectsData}
+                  userD={userD}
+                  currentUserData={currentUserData}
+                />
               </ShowFromTop>
-            </ScrollViewFadeFirst>
-          ) : (
-            <ShowFromTop>
-              <AspectTableSinastrie
-                houseCusps={houseCusps}
-                planetaryData={planetaryData}
-                aspects={aspectsData}
-                userD={userD}
-                currentUserData={currentUserData}
-              />
-            </ShowFromTop>
-          )}
-        </LinearGradient>
+            )}
+          </View>
+        </ImageBackground>
       </MainContainer>
       <PurchaseModal
         visible={isModalVisible}
@@ -1210,7 +1174,7 @@ const styles = StyleSheet.create({
   // Stil pentru textul de conținut parțial
   partialContent: {
     fontSize: 14,
-    color: "#F0F0F0",
+    color: "black",
     textAlign: "center",
     marginVertical: 15,
     marginHorizontal: 20,

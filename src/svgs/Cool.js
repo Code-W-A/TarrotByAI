@@ -2,10 +2,14 @@ import PropTypes from "prop-types";
 import * as React from "react";
 import Svg, { Circle, Ellipse, G, Path } from "react-native-svg";
 
-function Cool({ height, width, style }) {
+function Cool({ height, width, style, color }) {
+  // color: main yellow (default #ffd93b)
+  // accent: main red (default #e24b4b)
+  const mainColor = color || "#ffd93b";
+  const accentColor = color || "#e24b4b";
   return (
     <Svg height={height} width={width} viewBox="0 0 512 512" style={style}>
-      <Circle cx={256} cy={256} r={256} fill="#ffd93b" />
+      <Circle cx={256} cy={256} r={256} fill={mainColor} />
       <Path
         d="M240.704 214.688c-8.48 44.24-54.32 77.28-102.4 73.664-48.256-3.632-80.32-42.544-71.84-86.784 8.496-44.384 54.32-77.28 102.56-73.648 48.08 3.616 80.176 42.384 71.68 86.768z"
         fill="#fff"
@@ -40,7 +44,7 @@ function Cool({ height, width, style }) {
       />
       <Path
         d="M489.936 213.904c-8.384-17.872-12.864-19.232-158.24 3.536A489.469 489.469 0 01256 223.344a489.469 489.469 0 01-75.696-5.904c-145.36-22.784-149.856-21.408-158.24-3.536-5.616 12.912-4.448 82.864-3.52 96.96 3.184 48.352-7.056 46.496 172.96 57.44 8.64-.16 16.16-5.12 20-12.64 7.952-15.168 14.8-31.168 20.608-47.104 3.632-9.936 13.296-16.384 23.888-16.384 10.592 0 20.256 6.448 23.888 16.384 5.808 15.936 12.672 31.936 20.608 47.104 3.84 7.52 11.36 12.48 20 12.64 180.016-10.944 169.776-9.072 172.96-57.44.928-14.096 2.096-84.048-3.52-96.96zM193.088 346.928c-47.136 0-118.864-9.856-151.44-16.16-3.824-22.992-.864-78.208 2.208-103.808 24.768 3.808 111.296 17.744 179.856 25.184.016 17.936-20.4 71.808-30.624 94.784zm277.264-16.16c-32.592 6.32-104.304 16.16-151.44 16.16-10.224-22.976-30.624-76.848-30.624-94.784 68.576-7.44 155.104-21.376 179.872-25.184 3.056 25.6 6.016 80.816 2.192 103.808z"
-        fill="#e24b4b"
+        fill={accentColor}
       />
       <Path
         d="M176.272 442.24c-2.368-.688-1.504-6.496 1.024-6.352 36.224.912 103.072-5.248 158.048-54.56 3.984-3.568 8.288-.304 8.112 6.24-.784 30.896-18.016 101.792-167.184 54.672z"
@@ -53,12 +57,14 @@ function Cool({ height, width, style }) {
 Cool.defaultProps = {
   height: 120,
   width: 120,
+  color: "#ffd93b",
 };
 
 Cool.propTypes = {
   height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
   width: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
   style: PropTypes.object,
+  color: PropTypes.string,
 };
 
 export default Cool;

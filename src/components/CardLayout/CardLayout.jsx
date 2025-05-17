@@ -28,11 +28,21 @@ const CardLayout = ({ shuffledCartiPersonalizate, title, children }) => {
 
   return (
     <View style={styles.container}>
-      <H6fontBoldYellow
-        style={{ color: shuffledCartiPersonalizate.length > 0 && "white" }}
+      <Text
+        style={{
+          fontSize: 24,
+          fontFamily: 'LoraBold',
+          color: '#bfa76a',
+          textAlign: 'center',
+          marginBottom: 10,
+          textShadowColor: '#fffbeae0',
+          textShadowOffset: { width: 0, height: 2 },
+          textShadowRadius: 6,
+          letterSpacing: 1.1,
+        }}
       >
         {title}
-      </H6fontBoldYellow>
+      </Text>
       {rows.map((row, rowIndex) => (
         <View key={rowIndex} style={styles.cardRow}>
           {row.map((card, cardIndex) => (
@@ -72,12 +82,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-around",
     width: "100%",
-    // marginBottom: 20,
     marginTop: 10,
   },
   cardColumn: {
-    width: Dimensions.get("window").width / 3.8, // Lățimea maximă a fiecărui cartonaș
-    maxWidth: Dimensions.get("window").width / 3.8, // Asigură că lățimea nu va depăși această valoare
+    width: Dimensions.get("window").width / 3.8,
+    maxWidth: Dimensions.get("window").width / 3.8,
     marginHorizontal: Dimensions.get("window").width * 0.02,
   },
   emptySpace: {

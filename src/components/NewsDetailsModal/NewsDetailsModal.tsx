@@ -8,6 +8,8 @@ import {
   TouchableOpacity,
   useColorScheme,
   View,
+  ImageBackground,
+  StyleSheet,
 } from "react-native";
 import styles from "./styles";
 import { Ionicons } from "@expo/vector-icons";
@@ -21,16 +23,7 @@ import { useLanguage } from "../../context/LanguageContext";
 
 export const NewsDetailsModal: React.FC<{
   visible: boolean;
-  article: {
-    author: string;
-    title: string;
-    urlToImage: string;
-    publishedAt: string;
-    url: string;
-    content: string;
-    documentId: string;
-    youtubeLinks: any;
-  };
+  article: any; // Accepts any article shape, including info and image fields
   articleIndex: number;
   onClose: () => void;
   saveArticle: Function;
@@ -48,7 +41,8 @@ export const NewsDetailsModal: React.FC<{
           font-size: 26px; /* Setează dimensiunea fontului pentru elementul body */
           padding-left:30px;
           padding-right:30px;
-          padding-bottom:30px
+          padding-bottom:30px;
+          background: transparent !important;
       }
       h1 {
           font-size: 54px; /* Dimensiunea fontului pentru titluri */
@@ -132,7 +126,19 @@ export const NewsDetailsModal: React.FC<{
       visible={visible}
       onRequestClose={onClose}
     >
-      <>
+      <ImageBackground
+        source={require("../../../assets/dashboardbg.jpg")}
+        resizeMode="cover"
+        style={{ flex: 1 }}
+      >
+        {/* Overlay for opacity effect */}
+        <View style={{
+          ...StyleSheet.absoluteFillObject,
+          backgroundColor: 'rgba(255,255,255,0.5)',
+          zIndex: 1,
+        }} />
+        {/* Modal content above overlay */}
+        <View style={{ flex: 1, zIndex: 2 }}>
         <TouchableOpacity style={[styles.crossContainer]} onPress={onClose}>
           <View style={[styles.backArrowContainer]}>
             <Ionicons
@@ -162,14 +168,11 @@ export const NewsDetailsModal: React.FC<{
         </TouchableOpacity>
 
         <View
-          // bounces={false}
-          // showsVerticalScrollIndicator={false}
           style={[
             styles.container,
             styles.contentContainer,
-            { backgroundColor },
+              { backgroundColor: 'transparent' },
           ]}
-          // contentContainerStyle={styles.contentContainer}
         >
           <Image
             style={styles.image}
@@ -193,7 +196,11 @@ export const NewsDetailsModal: React.FC<{
             {article?.info?.ro.content}
           </Text> */}
         </View>
-        <WebView originWhitelist={["*"]} source={{ html: fullHTMLContent }} />
+        <WebView originWhitelist={["*"]} source={{ html: fullHTMLContent }} 
+          style={{ backgroundColor: 'transparent' }}
+          containerStyle={{ backgroundColor: 'transparent' }}
+          injectedJavaScript={`document.body.style.background = 'transparent'; true;`}
+        />
 
         {/* <View
           style={[
@@ -208,7 +215,8 @@ export const NewsDetailsModal: React.FC<{
             </Text>
           </Text>
         </View> */}
-      </>
+        </View>
+      </ImageBackground>
     </Modal>
   );
 };

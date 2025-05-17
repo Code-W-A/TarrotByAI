@@ -16,6 +16,11 @@ import {
   ImageBackground,
   Text,
   Button,
+  TouchableWithoutFeedback,
+  StyleSheet,
+  Image,
+  Modal,
+  TouchableOpacity,
 } from "react-native";
 import { Provider as PaperProvider } from "react-native-paper";
 import { useSelector, useDispatch } from "react-redux";
@@ -24,6 +29,8 @@ import {
   useNavigation,
   useRoute,
 } from "@react-navigation/native";
+import { MaterialCommunityIcons, FontAwesome5, Feather, Ionicons } from '@expo/vector-icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import NavBarBottom from "../../components/Navbar";
 import FlipCard from "../../components/FlipCard/FlipCard";
@@ -38,6 +45,7 @@ import i18n from "../../../i18n";
 import { useLanguage } from "../../context/LanguageContext";
 import { useApiData } from "../../context/ApiContext";
 import { colors } from "../../utils/colors";
+import { handleLanguagei18n } from "../../utils/handleLanguageGeneral";
 
 //---ADS---
 import {
@@ -58,7 +66,9 @@ import RattingDialog from "../../components/RattingDialog/RattingDialog";
 import LongCard from "../../components/MenuCard/LongCard";
 import AutoScrollingFlatList from "../../components/MenuCard/AutoScrollingFlatList";
 import MoreInfoModal from "../../components/Astral/components/MoreInfoModal";
-import { doc, getFirestore, updateDoc } from "firebase/firestore";
+import { doc, getFirestore, updateDoc, collection, query, orderBy, limit, getDocs } from "firebase/firestore";
+import { db } from "../../../firebase";
+import { NewsDetailsModal } from "../../components/NewsDetailsModal/NewsDetailsModal";
 
 //---ADS---
 const adUnitId = __DEV__
@@ -79,6 +89,65 @@ interface UserDetails {
   phone: string;
 }
 
+const CATEGORIES = [
+  {
+    key: 'astrology',
+    label: i18n.translate('Astrologie'),
+    icon: <MaterialCommunityIcons name="star-outline" size={32} color="#bfa76a" />,
+    screen: screenName.PersonalReadingDashboard,
+    description: i18n.translate('Descoperă astrograma natală, sinastria și articole astrologice.'),
+  },
+  {
+    key: 'tarot',
+    label: i18n.translate('Tarot'),
+    icon: <MaterialCommunityIcons name="cards" size={32} color="#bfa76a" />,
+    screen: screenName.FutureReadingDashboard,
+    description: i18n.translate('Citiri de tarot personalizate pentru tine.'),
+  },
+  {
+    key: 'luck',
+    label: i18n.translate('Noroc'),
+    icon: <FontAwesome5 name="clover" size={28} color="#bfa76a" />,
+    screen: screenName.luckyNumber,
+    description: i18n.translate('Numere, culori și ore norocoase.'),
+  },
+  {
+    key: 'magic',
+    label: i18n.translate('Mesaje magice'),
+    icon: <MaterialCommunityIcons name="magic-staff" size={32} color="#bfa76a" />,
+    screen: screenName.motivationalQuotes,
+    description: i18n.translate('Afirmații pozitive și ghidare spirituală.'),
+  },
+  {
+    key: 'blog',
+    label: i18n.translate('Blog'),
+    icon: <Feather name="feather" size={32} color="#bfa76a" />,
+    screen: screenName.motivationalQuotes, // sau alt screen pentru blog
+    description: i18n.translate('Articole și previziuni astrologice.'),
+  },
+];
+
+const languages = [
+  { name: "Romanian", code: "ro", flag: require("../../../assets/flags/romania.png") },
+  { name: "English", code: "en", flag: require("../../../assets/flags/english.png") },
+  { name: "Spanish", code: "es", flag: require("../../../assets/flags/spanish.png") },
+  { name: "Bulgarian", code: "bg", flag: require("../../../assets/flags/bulgaria.png") },
+  { name: "Czech", code: "cs", flag: require("../../../assets/flags/czech.png") },
+  { name: "German", code: "de", flag: require("../../../assets/flags/germany.png") },
+  { name: "Greek", code: "el", flag: require("../../../assets/flags/greece.png") },
+  { name: "French", code: "fr", flag: require("../../../assets/flags/france.png") },
+  { name: "Croatian", code: "hr", flag: require("../../../assets/flags/croatia.png") },
+  { name: "Hindi", code: "hi", flag: require("../../../assets/flags/india.png") },
+  { name: "Italian", code: "it", flag: require("../../../assets/flags/italy.png") },
+  { name: "Polish", code: "pl", flag: require("../../../assets/flags/poland.png") },
+  { name: "Indonesian", code: "id", flag: require("../../../assets/flags/indonesia.png") },
+  { name: "Slovak", code: "sk", flag: require("../../../assets/flags/slovakia.png") },
+  { name: "Russian", code: "ru", flag: require("../../../assets/flags/russia.png") },
+  { name: "Turkey", code: "tr", flag: require("../../../assets/flags/turkey.png") },
+  { name: "Arab", code: "ar", flag: require("../../../assets/flags/arab.png") },
+  { name: "Albania", code: "sq", flag: require("../../../assets/flags/albania.png") },
+];
+
 const ClinicDashboard = () => {
   const [loaded, setLoaded] = useState(false);
   const [cardAnimations, setCardAnimations] = useState([]);
@@ -86,7 +155,7 @@ const ClinicDashboard = () => {
   const { language, changeLanguage } = useLanguage();
 
   const [visible, setVisible] = useState(false);
-  const navigation = useNavigation();
+  const navigation: any = useNavigation();
   const { expoPushToken } = usePushNotifications();
   const { currentUser, userData, isGuestUser, setUserData } = useAuth();
   // Stări pentru informațiile utilizatorului
@@ -95,6 +164,12 @@ const ClinicDashboard = () => {
   const [email, setEmail] = useState<string>("");
   const [phone, setPhone] = useState<string>("");
   const [isModalVisible, setModalVisible] = useState<boolean>(false);
+  const [langModalVisible, setLangModalVisible] = useState(false);
+  const [currentLanguage, setCurrentLanguage] = useState("Romanian");
+  const [latestArticles, setLatestArticles] = useState([]);
+  const [loadingArticles, setLoadingArticles] = useState(false);
+  const [articleModalVisible, setArticleModalVisible] = useState(false);
+  const [selectedArticle, setSelectedArticle] = useState(null);
 
   useEffect(() => {
     const checkAndLoadData = async () => {
@@ -428,87 +503,986 @@ const ClinicDashboard = () => {
   //   }, [])
   // );
 
+  const quickAccessCards = [
+    {
+      icon: <MaterialCommunityIcons name="account-circle-outline" size={36} color="#bfa76a" />,
+      title: i18n.translate('yourAstrogram'),
+      desc: i18n.translate('exploreTheNatalChartHoroscope'),
+    },
+    {
+      icon: <MaterialCommunityIcons name="calendar-star" size={32} color="#bfa76a" />,
+      title: i18n.translate('seeTheHoroscope'),
+      desc: i18n.translate('historyFuture'),
+    },
+    {
+      icon: <MaterialCommunityIcons name="account-group-outline" size={32} color="#bfa76a" />,
+      title: i18n.translate('analyzeSynastry'),
+      desc: i18n.translate('EnergiaDinRelație'),
+    },
+  ];
+  const screenWidth = Dimensions.get('window').width;
+  const scrollRef = useRef(null);
+
+  useEffect(() => {
+    const loadLanguage = async () => {
+      try {
+        const savedLanguage = await AsyncStorage.getItem("@userLanguage");
+        if (savedLanguage) {
+          const foundLanguage = languages.find((l) => l.code === savedLanguage);
+          setCurrentLanguage(foundLanguage ? foundLanguage.name : "English");
+        }
+      } catch (e) {
+        console.error("Failed to load the language from storage");
+      }
+    };
+    loadLanguage();
+  }, []);
+
+  const handleLanguageSelect = async (languageName) => {
+    const selectedLanguage = languages.find((l) => l.name === languageName);
+    const langCode = selectedLanguage ? selectedLanguage.code : "en";
+    setCurrentLanguage(languageName);
+    const newLangCode = await handleLanguagei18n(langCode);
+    changeLanguage(newLangCode);
+    AsyncStorage.setItem("@userLanguage", langCode);
+    setLangModalVisible(false);
+  };
+  const flagImageSource = languages.find((l) => l.name === currentLanguage)?.flag;
+
+  useEffect(() => {
+    const fetchLatestArticles = async () => {
+      setLoadingArticles(true);
+      try {
+        const articlesRef = collection(db, "BlogArticole");
+        const q = query(articlesRef, orderBy("firstUploadTimestamp", "desc"), limit(3));
+        const snapshot = await getDocs(q);
+        const articles = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setLatestArticles(articles);
+      } catch (e) {
+        console.error("Failed to fetch latest articles", e);
+      } finally {
+        setLoadingArticles(false);
+      }
+    };
+    fetchLatestArticles();
+  }, []);
+
+  const handlePressArticle = (article) => {
+    setSelectedArticle(article);
+    setArticleModalVisible(true);
+  };
+
   return (
     <Fragment>
-      <MainContainer>
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#fffbe6' }}>
         <LinearGradient
-          colors={[
-            colors.gradientLogin1,
-            colors.gradientLogin2,
-            colors.gradientLogin2,
-          ]} // Înlocuiește cu culorile gradientului tău
-          style={{
-            flex: 1,
-            paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
-          }}
+          colors={["#fffbe6", "#f7e7ce", "#e7c585"]}
+          style={{ flex: 1 }}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
         >
+          {/* Dashboard background image above gradient, but below content */}
           <ImageBackground
-            source={require("../../../assets/bg-horizontalLines.png")}
+            source={require("../../../assets/dashboardbg.jpg")}
             resizeMode="cover"
-            style={{
-              flex: 1,
-              width: null,
-              height: null,
-              // alignItems: 'flex-end',
-            }}
-          >
-            <GreetingBar />
+            style={[StyleSheet.absoluteFill, { zIndex: 1 }]}
+            imageStyle={{ opacity: 0.7 }}
+          />
+          {/* Overlay for opacity effect */}
+          <View style={{
+            ...StyleSheet.absoluteFillObject,
+            backgroundColor: 'rgba(255,255,255,0.72)',
+            zIndex: 2,
+            pointerEvents: 'none',
+          }} />
+          {/* Content with zIndex 3 to be above overlay */}
+          <View style={{ flex: 1, zIndex: 3 }}>
+            {/* Fixed Header */}
+            <View style={stylesNew.fixedHeader}>
+              <View style={stylesNew.headerRow}>
+                <Image source={require("../../../assets/LogoPngTransparent.png")} style={stylesNew.logo} resizeMode="contain" />
+                <View style={stylesNew.headerTextBlock}>
+                  <Text style={stylesNew.headerSalute}>{i18n.translate('welcomeTitle')}</Text>
+                  <Text style={stylesNew.headerUser}>{firstName ? `${i18n.translate('helloUser')}, ${firstName}` : ''}</Text>
+                </View>
+                {/* Flag language selector in top right */}
+                <TouchableOpacity onPress={() => setLangModalVisible(true)} style={stylesNew.headerFlagBtn}>
+                  <Image style={stylesNew.headerFlagImg} source={flagImageSource} />
+                </TouchableOpacity>
+              </View>
+              {/* Modal for language selection */}
+              <Modal
+                animationType="slide"
+                transparent={true}
+                visible={langModalVisible}
+                onRequestClose={() => setLangModalVisible(false)}
+              >
+                <TouchableOpacity
+                  style={stylesNew.modalOverlay}
+                  activeOpacity={1}
+                  onPressOut={() => setLangModalVisible(false)}
+                >
+                  <View style={stylesNew.modalLang}>
+                    <Text style={[stylesNew.modalText, { marginBottom: 15 }]}>{i18n.translate('selectLanguage')}</Text>
+                    <ScrollView style={{ width: '100%' }}>
+                      {languages.map((lang) => (
+                        <TouchableOpacity
+                          key={lang.code}
+                          style={stylesNew.modalItem}
+                          onPress={() => handleLanguageSelect(lang.name)}
+                        >
+                          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                            <Image source={lang.flag} style={{ width: 32, height: 22, borderRadius: 4, marginRight: 12 }} />
+                            <Text style={stylesNew.modalText}>{lang.name}</Text>
+                          </View>
+                        </TouchableOpacity>
+                      ))}
+                    </ScrollView>
+                    <TouchableOpacity
+                      style={stylesNew.modalItemCancel}
+                      onPress={() => setLangModalVisible(false)}
+                    >
+                      <Text style={stylesNew.modalTextCancel}>Cancel</Text>
+                    </TouchableOpacity>
+                  </View>
+                </TouchableOpacity>
+              </Modal>
+              {/* Visually integrate GreetingBar, but keep it compact */}
+              {/* <GreetingBar isGoBack={false} isPersonalGoBack={false} /> */}
+            </View>
             <ScrollView
-              style={
-                {
-                  // paddingTop: "3%",
-                }
-              }
-              contentContainerStyle={{
-                flexGrow: 1,
-                justifyContent: "flex-start",
-                alignItems: "center",
-                paddingBottom: "23%",
-              }}
+              contentContainerStyle={stylesNew.scrollContent}
+              showsVerticalScrollIndicator={false}
             >
-              {/* <View style={styles.cardRow}>
-                <Text>{expoPushToken?.data}</Text>
+              {/* Section: Acces rapid și istoric (carusel) */}
+              <View style={stylesNew.sectionContainer}>
+                <Text style={stylesNew.sectionTitle}>{i18n.translate('astroSectionTitle')}</Text>
+                {/* Card cu fundal imagine, aspect dreptunghiular, imagine complet vizibilă */}
+                <TouchableOpacity style={stylesNew.astroCardImageBgRect} onPress={() => navigation.navigate('Astral' as never)} activeOpacity={0.96}>
+                  <ImageBackground
+                    source={require('../../../assets/astrogramacard.jpg')}
+                    style={stylesNew.astroCardImageBgRectImg}
+                    imageStyle={{ borderRadius: 20 }}
+                    resizeMode="contain"
+                  >
+                    <View style={stylesNew.astroCardImageBgRectOverlay}>
+                      <Text style={stylesNew.astroCardImageBgRectDesc}>{i18n.translate('astroMysticCardDesc')}</Text>
+                    </View>
+                  </ImageBackground>
+                </TouchableOpacity>
+
+                {/* Subcategorii moderne sub cardul principal */}
+                {/* Tarot */}
+                <Text style={stylesNew.subSectionTitle}>Tarot</Text>
+                <View style={stylesNew.subSectionGrid}>
+                  {[
+                    { text: i18n.translate("personalReading"), screen: screenName.PersonalReadingDashboard, icon: <MaterialCommunityIcons name="cards-outline" size={32} color="#bfa76a" style={{ marginBottom: 6 }} /> },
+                    { text: i18n.translate("futureReading"), screen: screenName.FutureReadingDashboard, icon: <MaterialCommunityIcons name="crystal-ball" size={32} color="#bfa76a" style={{ marginBottom: 6 }} /> },
+                    { text: i18n.translate("carteaTa"), screen: "CarteaTa", icon: <MaterialCommunityIcons name="book-open-variant" size={32} color="#bfa76a" style={{ marginBottom: 6 }} /> },
+                    { text: i18n.translate("ceGandeste"), screen: "CeGandeste", icon: <MaterialCommunityIcons name="head-question-outline" size={32} color="#bfa76a" style={{ marginBottom: 6 }} /> },
+                    { text: i18n.translate("ceSimte"), screen: "CeSimte", icon: <MaterialCommunityIcons name="heart-outline" size={32} color="#bfa76a" style={{ marginBottom: 6 }} /> },
+                    { text: i18n.translate("EnergiaDinRelație"), screen: "EnergiaDinRelație", icon: <MaterialCommunityIcons name="infinity" size={32} color="#bfa76a" style={{ marginBottom: 6 }} /> },
+                    { text: i18n.translate("ViitorApropiat"), screen: "ViitorApropiat", icon: <MaterialCommunityIcons name="timeline-clock-outline" size={32} color="#bfa76a" style={{ marginBottom: 6 }} /> },
+                  ].map((card, index) => (
+                    <View key={index} style={stylesNew.subSectionCardBox}>
+                      <TouchableWithoutFeedback onPress={() => navigation.navigate(card.screen as never)}>
+                        <View style={stylesNew.functionalCardContent}>
+                          {card.icon}
+                          <Text style={stylesNew.functionalCardLabel}>{card.text}</Text>
+                        </View>
+                      </TouchableWithoutFeedback>
+                    </View>
+                  ))}
+                </View>
+
+                {/* Noroc */}
+                <Text style={stylesNew.subSectionTitle}>Noroc</Text>
+                <View style={stylesNew.subSectionGrid}>
+                  {[
+                    { text: i18n.translate("luckyNumber"), screen: screenName.luckyNumber, icon: <MaterialCommunityIcons name="dice-multiple-outline" size={32} color="#bfa76a" style={{ marginBottom: 6 }} /> },
+                    { text: i18n.translate("luckyColor"), screen: screenName.luckyColor, icon: <MaterialCommunityIcons name="palette-outline" size={32} color="#bfa76a" style={{ marginBottom: 6 }} /> },
+                    { text: i18n.translate("luckyHours"), screen: screenName.luckyHour, icon: <MaterialCommunityIcons name="clock-outline" size={32} color="#bfa76a" style={{ marginBottom: 6 }} /> },
+                  ].map((card, index) => (
+                    <View key={index} style={stylesNew.subSectionCardBox}>
+                      <TouchableWithoutFeedback onPress={() => navigation.navigate(card.screen as never)}>
+                        <View style={stylesNew.functionalCardContent}>
+                          {card.icon}
+                          <Text style={stylesNew.functionalCardLabel}>{card.text}</Text>
+                        </View>
+                      </TouchableWithoutFeedback>
+                    </View>
+                  ))}
+                </View>
+
+                {/* Mesaje magice */}
+                <Text style={stylesNew.subSectionTitle}>Mesaje magice</Text>
+                <View style={stylesNew.subSectionGrid}>
+                  {[
+                    { text: i18n.translate("motivationalQuotes"), screen: screenName.motivationalQuotes, icon: <MaterialCommunityIcons name="message-star-outline" size={32} color="#bfa76a" style={{ marginBottom: 6 }} /> },
+                    { text: i18n.translate("AfirmatiiPozitive"), screen: "AfirmatiiPozitive", icon: <MaterialCommunityIcons name="magic-staff" size={32} color="#bfa76a" style={{ marginBottom: 6 }} /> },
+                  ].map((card, index) => (
+                    <View key={index} style={stylesNew.subSectionCardBox}>
+                      <TouchableWithoutFeedback onPress={() => navigation.navigate(card.screen as never)}>
+                        <View style={stylesNew.functionalCardContent}>
+                          {card.icon}
+                          <Text style={stylesNew.functionalCardLabel}>{card.text}</Text>
+                        </View>
+                      </TouchableWithoutFeedback>
+                    </View>
+                  ))}
+                </View>
+              </View>
+              {/* Section: Functional Cards (horizontal scroll) */}
+              {/* <View style={stylesNew.sectionContainer}>
+                <Text style={stylesNew.sectionTitle}>{i18n.translate('personalReading')}</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={stylesNew.functionalCardsRow}>
+                  {cardDataFrist.map((card, index) => (
+                    <View key={index} style={stylesNew.functionalCardBox}>
+                      <TouchableWithoutFeedback onPress={() => navigation.navigate(card.screen as never)}>
+                        <View style={stylesNew.functionalCardContent}>
+                          <MaterialCommunityIcons name="star-outline" size={28} color="#bfa76a" style={{ marginBottom: 6 }} />
+                          <Text style={stylesNew.functionalCardLabel}>{card.text}</Text>
+                        </View>
+                      </TouchableWithoutFeedback>
+                    </View>
+                  ))}
+                </ScrollView>
               </View> */}
-              <AutoScrollingFlatList
-                interstitial={interstitial}
-                interstitialAdLoaded={loaded}
-              />
-              <View style={styles.cardRow}>
-                {cardDataFrist.map((card, index) =>
-                  renderCard(card, index, interstitial, loaded)
+              {/* <View style={stylesNew.sectionContainer}>
+                <Text style={stylesNew.sectionTitle}>{i18n.translate('carteaTa')}</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={stylesNew.functionalCardsRow}>
+                  {cardDataSecond.map((card, index) => (
+                    <View key={index} style={stylesNew.functionalCardBox}>
+                      <TouchableWithoutFeedback onPress={() => navigation.navigate(card.screen as never)}>
+                        <View style={stylesNew.functionalCardContent}>
+                          <MaterialCommunityIcons name="star-outline" size={28} color="#bfa76a" style={{ marginBottom: 6 }} />
+                          <Text style={stylesNew.functionalCardLabel}>{card.text}</Text>
+              </View>
+                      </TouchableWithoutFeedback>
+                    </View>
+                  ))}
+                </ScrollView>
+              </View> */}
+            
+
+              {/* Section: Appointments Navigation */}
+          
+              {/* Ultimele articole - Blog Section */}
+              <View style={stylesNew.sectionContainer}>
+                <Text style={stylesNew.sectionTitle}>{i18n.translate('latestArticles')}</Text>
+                {loadingArticles ? (
+                  <ActivityIndicator color="#bfa76a" style={{ marginVertical: 16 }} />
+                ) : (
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ flexDirection: 'row', gap: 12 }}>
+                    {latestArticles.map((article) => (
+                      <TouchableOpacity
+                        key={article.id}
+                        activeOpacity={0.93}
+                        onPress={() => handlePressArticle(article)}
+                        style={{ width: 220, height: 180, borderRadius: 20, overflow: 'hidden', marginRight: 12, backgroundColor: '#fff', shadowColor: '#bfa76a', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.13, shadowRadius: 16, elevation: 7 }}
+                      >
+                        <ImageBackground
+                          source={{ uri: article?.image?.finalUri ?? 'https://picsum.photos/800' }}
+                          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+                          imageStyle={{ borderRadius: 20 }}
+                          resizeMode="cover"
+                        >
+                          <View style={{
+                            position: 'absolute',
+                            top: 0, left: 0, right: 0, bottom: 0,
+                            backgroundColor: 'rgba(0,0,0,0.32)',
+                            justifyContent: 'center', alignItems: 'center',
+                            padding: 12,
+                          }}>
+                            <Text style={{ color: '#ffe6b0', fontWeight: '700', fontSize: 17, textAlign: 'center', textShadowColor: '#000', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 4 }} numberOfLines={3}>
+                              {language === "hi"
+                                ? article.info?.hu?.nume
+                                : language === "id"
+                                ? article.info?.ru?.nume
+                                : language === "ru"
+                                ? article.info?.rusa?.nume
+                                : article.info?.[language]?.nume}
+                            </Text>
+                          </View>
+                        </ImageBackground>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
                 )}
               </View>
-
-              <View style={styles.cardRow}>
-                {cardDataSecond.map((card, index) =>
-                  renderCard(card, index, interstitial, loaded)
-                )}
+              {/* Consultatii - categorie nouă */}
+              <View style={stylesNew.sectionContainer}>
+                <Text style={stylesNew.sectionTitle}>Consultatii</Text>
+                <TouchableOpacity
+                  style={[stylesNew.astroCardImageBgRect, { borderColor: '#bfa76a', borderWidth: 2 }]}
+                  activeOpacity={0.93}
+                  onPress={() => navigation.navigate('WebViewConsultatiiScreen')}
+                >
+                  <ImageBackground
+                    source={require('../../../assets/consultatii_placeholder.png')}
+                    style={stylesNew.astroCardImageBgRectImg}
+                    imageStyle={{ borderRadius: 20 }}
+                    resizeMode="cover"
+                  >
+                    {/* Fără overlay, fără text/link */}
+                  </ImageBackground>
+                </TouchableOpacity>
               </View>
             </ScrollView>
-          </ImageBackground>
-          {/* {visible && (
+            {/* RattingDialog dacă este activ */}
+            {visible && (
             <RattingDialog setVisible={setVisible} visible={visible} />
-          )} */}
-
-          {isModalVisible && (
-            <MoreInfoModal
-              visible={isModalVisible}
-              onDismiss={() => setModalVisible(false)}
-              onConfirm={handleConfirm}
-              email={email}
-              setEmail={setEmail}
-              phone={phone}
-              setPhone={setPhone}
-              firstName={firstName}
-              setFirstName={setFirstName}
-              lastName={lastName}
-              setLastName={setLastName}
+            )}
+            {/* NewsDetailsModal for article details */}
+            <NewsDetailsModal
+              visible={articleModalVisible}
+              article={selectedArticle}
+              articleIndex={0}
+              onClose={() => setArticleModalVisible(false)}
+              saveArticle={() => {}}
             />
-          )}
+          </View>
         </LinearGradient>
-      </MainContainer>
+      </SafeAreaView>
     </Fragment>
   );
 };
+
+const stylesNew = StyleSheet.create({
+  fixedHeader: {
+    backgroundColor: 'rgba(255,255,255,0.72)', // more transparent
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    paddingBottom: 4,
+    paddingTop: 6,
+    paddingHorizontal: 10,
+    shadowColor: '#bfa76a',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.10,
+    shadowRadius: 10,
+    elevation: 6,
+    zIndex: 10,
+    borderBottomWidth: 1,
+    borderColor: '#e7c585',
+    minHeight: 0,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start', // top align
+    marginBottom: 0,
+    justifyContent: 'space-between',
+    gap: 8,
+    width: '100%',
+  },
+  logo: {
+    width: 38,
+    height: 38,
+    marginRight: 8,
+    borderRadius: 12,
+    backgroundColor: '#fffbe6',
+    borderWidth: 1.5,
+    borderColor: '#e7c585',
+    shadowColor: '#bfa76a',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  headerTextBlock: {
+    flex: 1,
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    minHeight: 0,
+    paddingTop: 2,
+  },
+  headerSalute: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#bfa76a',
+    letterSpacing: 0.2,
+    marginBottom: 0,
+    textShadowColor: 'rgba(191,167,106,0.06)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 1,
+  },
+  headerUser: {
+    fontSize: 13,
+    color: '#7c6f57',
+    marginTop: 0,
+    fontWeight: '500',
+  },
+  // Add a style for the language selector in the header
+  headerFlagBtn: {
+    alignSelf: 'flex-start',
+    marginLeft: 8,
+    marginTop: 2,
+    paddingHorizontal: 2,
+    paddingVertical: 2,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.5)',
+    borderWidth: 1,
+    borderColor: '#e7c585',
+  },
+  headerFlagImg: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    objectFit: 'cover',
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0,0,0,0.25)',
+  },
+  modalLang: {
+    backgroundColor: '#fffbe6',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingVertical: 20,
+    paddingHorizontal: 24,
+    minHeight: 220,
+    maxHeight: 400,
+    width: '100%',
+    alignItems: 'flex-start',
+    shadowColor: '#bfa76a',
+    shadowOpacity: 0.10,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  modalItem: {
+    paddingVertical: 10,
+    alignItems: 'flex-start',
+    width: '100%',
+  },
+  modalItemCancel: {
+    paddingVertical: 10,
+    alignItems: 'flex-start',
+    width: '100%',
+  },
+  modalText: {
+    fontSize: 18,
+    color: '#bfa76a',
+    fontWeight: '600',
+  },
+  modalTextCancel: {
+    fontSize: 18,
+    color: '#7c6f57',
+    fontWeight: '500',
+  },
+  scrollContent: {
+    paddingBottom: 100,
+    paddingTop: 16,
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+  },
+  sectionContainer: {
+    width: '100%',
+    marginBottom: 6,
+    paddingHorizontal: 10,
+  },
+  sectionTitle: {
+    fontSize: 19,
+    fontWeight: 'bold',
+    color: '#bfa76a',
+    marginBottom: 6,
+    marginLeft: 4,
+  },
+  autoScrollContainer: {
+    width: '100%',
+    borderRadius: 18,
+    backgroundColor: 'rgba(255,255,255,0.85)',
+    shadowColor: '#bfa76a',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.10,
+    shadowRadius: 8,
+    elevation: 3,
+    padding: 8,
+  },
+  categoriesGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  categoryBox: {
+    width: '47%',
+    backgroundColor: 'rgba(255,255,255,0.92)',
+    borderRadius: 18,
+    alignItems: 'center',
+    marginBottom: 14,
+    paddingVertical: 20,
+    paddingHorizontal: 12,
+    shadowColor: '#bfa76a',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  iconCircle: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    backgroundColor: '#fffbe6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 10,
+    borderWidth: 2,
+    borderColor: '#bfa76a',
+    shadowColor: '#bfa76a',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.10,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  categoryLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#bfa76a',
+    marginBottom: 4,
+    textAlign: 'center',
+  },
+  categoryDesc: {
+    fontSize: 13,
+    color: '#7c6f57',
+    textAlign: 'center',
+    marginBottom: 2,
+  },
+  essentialsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingVertical: 4,
+    paddingHorizontal: 2,
+  },
+  essentialBox: {
+    width: 170,
+    backgroundColor: 'rgba(255,255,255,0.96)',
+    borderRadius: 16,
+    alignItems: 'center',
+    marginRight: 10,
+    paddingVertical: 16,
+    paddingHorizontal: 10,
+    shadowColor: '#bfa76a',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.10,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  essentialTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#bfa76a',
+    marginBottom: 2,
+    textAlign: 'center',
+  },
+  essentialText: {
+    fontSize: 13,
+    color: '#7c6f57',
+    textAlign: 'center',
+  },
+  functionalCardsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingVertical: 4,
+    paddingHorizontal: 2,
+  },
+  functionalCardBox: {
+    width: 140,
+    backgroundColor: 'rgba(255,255,255,0.92)',
+    borderRadius: 16,
+    alignItems: 'center',
+    marginRight: 10,
+    paddingVertical: 16,
+    paddingHorizontal: 8,
+    shadowColor: '#bfa76a',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.10,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  functionalCardContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  functionalCardLabel: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#bfa76a',
+    textAlign: 'center',
+  },
+  quickAccessCarouselRow: {
+    alignItems: 'center',
+    paddingVertical: 4,
+    paddingHorizontal: 0,
+    gap: 0,
+  },
+  quickAccessCarouselCard: {
+    backgroundColor: 'rgba(255,255,255,0.97)',
+    borderRadius: 22,
+    paddingVertical: 28,
+    paddingHorizontal: 18,
+    marginHorizontal: 8,
+    shadowColor: '#bfa76a',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.13,
+    shadowRadius: 16,
+    elevation: 7,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  quickAccessCardTitle: {
+    fontSize: 16,
+    color: '#bfa76a',
+    fontWeight: '700',
+    marginTop: 8,
+    marginBottom: 2,
+    textAlign: 'center',
+  },
+  quickAccessCardDesc: {
+    fontSize: 13,
+    color: '#7c6f57',
+    textAlign: 'center',
+  },
+  mysticCardBox: {
+    width: '100%',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderRadius: 18,
+    alignItems: 'center',
+    marginBottom: 14,
+    paddingVertical: 16,
+    paddingHorizontal: 12,
+    height:100
+  },
+  mysticCardContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  mysticIcon: {
+    position: 'absolute',
+    width: 48,
+    height: 48,
+  },
+  mysticCardDesc: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff',
+    textAlign: 'center',
+    marginTop: 10,
+  },
+  astroSurface: {
+    width: '100%',
+    height: 100,
+    borderRadius: 18,
+    overflow: 'hidden',
+    marginBottom: 14,
+  },
+  astroGradient: {
+    flex: 1,
+    borderRadius: 18,
+    padding: 16,
+  },
+  astroIconBg: {
+    position: 'absolute',
+    width: 90,
+    height: 90,
+  },
+  astroHeadline: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 10,
+  },
+  astroDesc: {
+    fontSize: 14,
+    color: '#fff',
+  },
+  astroButton: {
+    backgroundColor: '#fff',
+    borderRadius: 18,
+    padding: 12,
+    alignItems: 'center',
+  },
+  astroButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#bfa76a',
+  },
+  astroBrightCard: {
+    width: '100%',
+    height: 100,
+    borderRadius: 18,
+    overflow: 'hidden',
+    marginBottom: 14,
+  },
+  astroBrightContent: {
+    flex: 1,
+    padding: 16,
+  },
+  astroBrightIcon: {
+    position: 'absolute',
+    width: 38,
+    height: 38,
+    top: 16,
+    left: 16,
+  },
+  astroBrightHeadline: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#bfa76a',
+    marginBottom: 10,
+  },
+  astroBrightDesc: {
+    fontSize: 14,
+    color: '#7c6f57',
+  },
+  astroBrightButton: {
+    backgroundColor: '#fff',
+    borderRadius: 18,
+    padding: 12,
+    alignItems: 'center',
+  },
+  astroBrightButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#bfa76a',
+  },
+  astroSurfaceBright: {
+    width: '100%',
+    height: 100,
+    backgroundColor: '#fff',
+    borderRadius: 22,
+    borderWidth: 1.5,
+    borderColor: '#bfa76a',
+    shadowColor: '#bfa76a',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.10,
+    shadowRadius: 12,
+    elevation: 6,
+    overflow: 'hidden',
+    marginBottom: 18,
+  },
+  astroSurfaceContent: {
+    flex: 1,
+    padding: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  astroSurfaceIcon: {
+    position: 'absolute',
+    width: 32,
+    height: 32,
+    top: 16,
+    left: 16,
+    shadowColor: '#bfa76a',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  astroSurfaceHeadline: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#bfa76a',
+    marginBottom: 8,
+    textAlign: 'center',
+    letterSpacing: 0.1,
+  },
+  astroSurfaceDesc: {
+    fontSize: 14,
+    color: '#7c6f57',
+    textAlign: 'center',
+    marginBottom: 10,
+    letterSpacing: 0.05,
+  },
+  astroSurfaceButton: {
+    backgroundColor: '#bfa76a',
+    borderRadius: 18,
+    paddingVertical: 8,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+    marginTop: 4,
+    shadowColor: '#bfa76a',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.10,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  astroSurfaceButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',
+    letterSpacing: 0.2,
+  },
+  astroCardElegant: {
+    width: '100%',
+    height: 'auto',
+    backgroundColor: '#fff',
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: '#bfa76a',
+    shadowColor: '#bfa76a',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.10,
+    shadowRadius: 12,
+    elevation: 6,
+    overflow: 'hidden',
+    marginBottom: 18,
+  },
+  astroCardContent: {
+    flex: 1,
+    padding: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  astroCardIcon: {
+    position: 'absolute',
+    width: 28,
+    height: 28,
+    top: 16,
+    left: 16,
+    shadowColor: '#bfa76a',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  astroCardHeadline: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#bfa76a',
+    marginBottom: 8,
+    textAlign: 'center',
+    letterSpacing: 0.1,
+  },
+  astroCardDesc: {
+    fontSize: 14,
+    color: '#7c6f57',
+    textAlign: 'center',
+    marginBottom: 10,
+    letterSpacing: 0.05,
+  },
+  astroCardButton: {
+    backgroundColor: '#bfa76a',
+    borderRadius: 18,
+    paddingVertical: 8,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+    marginTop: 4,
+    shadowColor: '#bfa76a',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.10,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  astroCardButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',
+    letterSpacing: 0.2,
+  },
+  astroCardMinimal: {
+    width: '100%',
+    height: 'auto',
+    backgroundColor: '#fff',
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: '#bfa76a',
+    shadowColor: '#bfa76a',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.10,
+    shadowRadius: 12,
+    elevation: 6,
+    overflow: 'hidden',
+    marginBottom: 18,
+  },
+  astroCardMinimalDesc: {
+    fontSize: 14,
+    color: '#7c6f57',
+    textAlign: 'center',
+    marginBottom: 10,
+    letterSpacing: 0.05,
+  },
+  astroCardImageBg: {
+    width: '100%',
+    height: 'auto',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  astroCardImageBgImg: {
+    width: '100%',
+    height: '100%',
+  },
+  astroCardImageBgDesc: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff',
+    textAlign: 'center',
+    marginTop: 10,
+  },
+  astroCardImageBgRect: {
+    width: '100%',
+    height: 182,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  astroCardImageBgRectImg: {
+    width: '100%',
+    height: '100%',
+  },
+  astroCardImageBgRectOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 10,
+    borderRadius: 20,
+    backgroundColor: 'rgba(0,0,0,0.32)',
+  },
+  astroCardImageBgRectDesc: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#ffe6b0',
+    textAlign: 'center',
+  },
+  subSectionTitle: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#bfa76a',
+    marginTop: 8,
+    marginBottom: 4,
+    letterSpacing: 0.1,
+    textAlign: 'left',
+    paddingLeft: 4,
+  },
+  subSectionGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    gap: 10,
+    marginBottom: 8,
+  },
+  subSectionCardBox: {
+    width: '48%',
+    marginBottom: 12,
+    backgroundColor: 'rgba(255,255,255,0.92)',
+    borderRadius: 16,
+    alignItems: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 8,
+    shadowColor: '#bfa76a',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.10,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+});
 
 export default ClinicDashboard;

@@ -5,6 +5,8 @@ import PhoneInput, { ICountry } from "react-native-international-phone-number";
 import { colors } from "../../../utils/colors";
 import { useTranslation } from "../../../utils/translateUtil";
 import { useLanguage } from "../../../context/LanguageContext";
+import { LinearGradient } from 'expo-linear-gradient';
+import { MaterialCommunityIcons, Feather } from '@expo/vector-icons';
 
 interface MoreInfoModalProps {
   visible: boolean;
@@ -150,10 +152,18 @@ const MoreInfoModal: React.FC<MoreInfoModalProps> = ({
         // Nu facem nimic pentru a preveni închiderea la apăsarea butonului back
       }}
     >
+      <LinearGradient
+        colors={["#fffbe6", "#f7e7ce", "#e7c585"]}
+        style={styles.gradientBg}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+    >
       <View style={styles.overlay}>
         <View style={styles.modalContainer}>
           <Text style={styles.modalTitle}>{completeazaInfoText}:</Text>
 
+            <View style={styles.inputWrapper}>
+              <Feather name="user" size={20} color={colors.primary2} style={styles.inputIcon} />
           <TextInput
             style={[styles.input, nameError ? styles.errorInput : null]}
             placeholder={introduNumeleText}
@@ -162,7 +172,11 @@ const MoreInfoModal: React.FC<MoreInfoModalProps> = ({
               setFirstName(text);
               if (nameError) setNameError(false);
             }}
+                placeholderTextColor="#bfa76a"
           />
+            </View>
+            <View style={styles.inputWrapper}>
+              <Feather name="user-check" size={20} color={colors.primary2} style={styles.inputIcon} />
           <TextInput
             style={[styles.input, nameError ? styles.errorInput : null]}
             placeholder={introduPrenumeleText}
@@ -171,11 +185,15 @@ const MoreInfoModal: React.FC<MoreInfoModalProps> = ({
               setLastName(text);
               if (nameError) setNameError(false);
             }}
+                placeholderTextColor="#bfa76a"
           />
+            </View>
           {nameError && (
             <Text style={styles.errorText}>{completeazaInfoText2}</Text>
           )}
 
+            <View style={styles.inputWrapper}>
+              <MaterialCommunityIcons name="email-outline" size={20} color={colors.primary2} style={styles.inputIcon} />
           <TextInput
             style={[styles.input, emailError ? styles.errorInput : null]}
             placeholder={introduEmailText}
@@ -185,12 +203,16 @@ const MoreInfoModal: React.FC<MoreInfoModalProps> = ({
               setEmail(text);
               if (emailError) setEmailError(false);
             }}
+                placeholderTextColor="#bfa76a"
           />
+            </View>
           {emailError && (
             <Text style={styles.errorText}>{completeazaInfoText3}</Text>
           )}
 
-          <View style={styles.phoneInputContainer}>
+            <View style={styles.inputWrapper}>
+              <Feather name="phone" size={20} color={colors.primary2} style={styles.inputIcon} />
+              <View style={{ flex: 1 }}>
             <PhoneInput
               value={phone}
               onChangePhoneNumber={handlePhoneChange}
@@ -198,79 +220,121 @@ const MoreInfoModal: React.FC<MoreInfoModalProps> = ({
               onChangeSelectedCountry={handleSelectedCountry}
               defaultCountry="RO"
               placeholder={completeazaInfoText4}
-              containerStyle={[
-                styles.input,
-                phoneError ? styles.errorInput : null,
-              ]}
             />
+              </View>
+            </View>
             {phoneError && (
               <Text style={styles.errorText}>{completeazaInfoText5}</Text>
             )}
-          </View>
 
           <View style={styles.buttonContainer}>
+              <LinearGradient
+                colors={["#e7c585", "#bfa76a"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.buttonGradient}
+              >
             <Button
               disabled={false}
               funCallback={handleConfirm}
-              label={ActualizeazaInfoText} // Text modificat
+                  label={ActualizeazaInfoText}
               success={true}
-              bgColor={colors.primary3}
-              borderColor={colors.white}
-              borderWidth={0.2}
-              txtColor={colors.white}
+                  bgColor="transparent"
+                  borderColor={colors.primary2}
+                  borderWidth={0}
+                  txtColor={"#222"}
             />
+              </LinearGradient>
+            </View>
           </View>
         </View>
-      </View>
+      </LinearGradient>
     </Modal>
   );
 };
 
 const styles = StyleSheet.create({
+  gradientBg: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.15)',
   },
   modalContainer: {
-    flex: 1,
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
-    borderRadius: 0,
-    padding: 20,
-    elevation: 10,
-    justifyContent: "center",
+    width: '90%',
+    backgroundColor: 'rgba(255,255,255,0.95)',
+    borderRadius: 24,
+    padding: 24,
+    shadowColor: '#bfa76a',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.18,
+    shadowRadius: 24,
+    elevation: 12,
+    alignItems: 'center',
   },
   modalTitle: {
-    fontSize: 18,
-    marginBottom: 20,
-    textAlign: "center",
-    fontWeight: "bold",
+    fontSize: 22,
+    marginBottom: 18,
+    textAlign: 'center',
+    fontWeight: 'bold',
+    color: '#bfa76a',
+    letterSpacing: 0.5,
+  },
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.85)',
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: '#bfa76a',
+    marginVertical: 7,
+    paddingHorizontal: 10,
+    width: '100%',
+  },
+  inputIcon: {
+    marginRight: 8,
   },
   input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
-    padding: 10,
-    marginVertical: 10,
+    flex: 1,
+    borderWidth: 0,
+    borderColor: 'transparent',
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 4,
     fontSize: 16,
-    width: "100%",
+    color: colors.primary2,
+    backgroundColor: 'transparent',
   },
   phoneInputContainer: {
-    marginVertical: 10,
-    width: "100%",
+    width: '100%',
+    marginVertical: 7,
   },
   errorText: {
-    color: "red",
+    color: '#d9534f',
     fontSize: 12,
-    marginTop: 10,
-    marginBottom: 15,
+    marginTop: 2,
+    marginBottom: 8,
+    alignSelf: 'flex-start',
+    marginLeft: 8,
   },
   errorInput: {
-    borderColor: "red",
+    borderColor: '#d9534f',
   },
   buttonContainer: {
-    marginTop: 20,
-    flexDirection: "row",
-    justifyContent: "center",
+    marginTop: 24,
+    width: '100%',
+    alignItems: 'center',
+  },
+  buttonGradient: {
+    width: '100%',
+    borderRadius: 16,
+    overflow: 'hidden',
   },
 });
 

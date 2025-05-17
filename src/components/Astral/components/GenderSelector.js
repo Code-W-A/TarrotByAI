@@ -4,7 +4,7 @@ import { colors } from "../../../utils/colors";
 import i18n from "../../../../i18n";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
-const GenderSelector = ({ setGender, gender }) => {
+const GenderSelector = ({ setGender, gender, style }) => {
   const genderOptions = [
     { value: "male", label: i18n.translate("Masculin"), icon: "gender-male" },
     {
@@ -20,7 +20,7 @@ const GenderSelector = ({ setGender, gender }) => {
   ];
 
   return (
-    <View style={styles.genderContainer}>
+    <View style={[styles.genderContainer, style]}>
       <Text style={styles.genderLabel}>
         {i18n.translate("SelecteazaGenul")}:
       </Text>
@@ -37,7 +37,7 @@ const GenderSelector = ({ setGender, gender }) => {
             <MaterialCommunityIcons
               name={option.icon}
               size={24}
-              color={gender === option.value ? colors.primary3 : "white"}
+              color={gender === option.value ? '#C9A14A' : '#B0AFA6'}
               style={styles.icon}
             />
             <Text
@@ -57,17 +57,25 @@ const GenderSelector = ({ setGender, gender }) => {
 
 const styles = StyleSheet.create({
   genderContainer: {
-    marginTop: 20,
-    padding: 5,
-    backgroundColor: colors.primary3,
-    borderRadius: 10,
-    height: 100,
+    marginTop: 10,
+    marginBottom: 10,
+    padding: 8,
+    backgroundColor: '#fff',
+    borderRadius: 22,
+    borderWidth: 1.5,
+    borderColor: '#C9A14A',
+    width: '100%',
+    shadowColor: '#C9A14A',
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
   },
   genderLabel: {
     fontSize: 16,
     marginBottom: 0,
-    fontWeight: "bold",
-    color: "#FFF",
+    fontWeight: 'bold',
+    color: '#C9A14A',
+    fontFamily: 'Lora',
   },
   buttonContainer: {
     flexDirection: "row",
@@ -75,24 +83,27 @@ const styles = StyleSheet.create({
   },
   button: {
     flex: 1,
-    alignItems: "center",
+    alignItems: 'center',
     paddingVertical: 0,
     marginHorizontal: 5,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.5)",
-    backgroundColor: "transparent",
-    height: "auto",
+    borderColor: '#B0AFA6',
+    backgroundColor: 'transparent',
+    height: 'auto',
   },
   activeButton: {
-    backgroundColor: "white",
+    backgroundColor: '#fffbe6',
+    borderColor: '#C9A14A',
   },
   buttonText: {
     fontSize: 14,
-    color: "white",
+    color: '#C9A14A',
+    fontFamily: 'Lora',
   },
   activeButtonText: {
-    color: colors.primary3,
+    color: '#C9A14A',
+    fontWeight: 'bold',
   },
   icon: {
     marginBottom: 5,

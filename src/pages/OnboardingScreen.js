@@ -23,6 +23,7 @@ import {
 } from "../components/commonText";
 import ConsentModal from "../components/ImageConsentModal/ImageConsentModal";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Video } from 'expo-av';
 
 const { width, height } = Dimensions.get("window");
 const gold = "#C9A14A";
@@ -32,21 +33,21 @@ const cream2 = "#F5E9D6";
 const slides = [
   {
     id: "1",
-    image: require("../../assets/onboardImg.png"),
-    title: i18n.translate("onboardingIntroTitle"),
-    subtitle: i18n.translate("onboardingIntroSubtitle"),
+    image: require("../../assets/onboardone.png"),
+    title: i18n.translate("onboardingSlide1Title"),
+    subtitle: i18n.translate("onboardingSlide1Desc"),
   },
   {
     id: "2",
-    image: require("../../assets/Onboarding2.png"),
-    title: i18n.translate("onboardingPersonalizedTitle"),
-    subtitle: i18n.translate("onboardingPersonalizedSubtitle"),
+    image: require("../../assets/onboardtwo.png"),
+    title: i18n.translate("onboardingSlide2Title"),
+    subtitle: i18n.translate("onboardingSlide2Desc"),
   },
   {
     id: "3",
-    image: require("../../assets/bg-welcome.png"),
-    title: i18n.translate("onboardingAccessTitle"),
-    subtitle: i18n.translate("onboardingAccessSubtitle"),
+    image: require("../../assets/onboardthree.png"),
+    title: i18n.translate("onboardingSlide3Title"),
+    subtitle: i18n.translate("onboardingSlide3Desc"),
   },
 ];
 
@@ -60,15 +61,49 @@ const Slide = ({ item, isActive }) => {
     }).start();
   }, [isActive]);
   return (
-    <Animated.View style={[styles.slideContainer, { transform: [{ scale: scaleAnim }] }]}>  
+    <Animated.View style={[
+      styles.slideContainer,
+      {
+        paddingTop: height * 0.07,
+        paddingBottom: height * 0.03,
+        minHeight: height * 0.8,
+      },
+      { transform: [{ scale: scaleAnim }], position: 'relative' }
+    ]}>
       <Image
         source={item.image}
-        style={styles.slideImageLarge}
+        style={[
+          styles.slideImage,
+          {
+            width: Math.min(width * 0.7, 340),
+            height: Math.min(height * 0.32, 340),
+            marginBottom: height * 0.03,
+          },
+        ]}
         resizeMode="contain"
       />
-      <Text style={styles.slideTitleNoCard}>{item.title}</Text>
-      <View style={styles.separator} />
-      <Text style={styles.slideSubtitleNoCard}>{item.subtitle}</Text>
+      <Text
+        style={[
+          styles.slideTitleNoCard,
+          {
+            fontSize: Math.max(24, Math.min(width * 0.07, 32)),
+            marginBottom: height * 0.012,
+          },
+        ]}
+      >
+        {item.title}
+      </Text>
+      <Text
+        style={[
+          styles.slideSubtitleNoCard,
+          {
+            fontSize: Math.max(15, Math.min(width * 0.045, 19)),
+            marginBottom: height * 0.01,
+          },
+        ]}
+      >
+        {item.subtitle}
+      </Text>
     </Animated.View>
   );
 };
@@ -125,7 +160,7 @@ const OnboardingScreen = ({ navigation }) => {
   }, []);
 
   const Footer = () => (
-    <View style={styles.footerContainer}>
+    <View style={styles.footerCurveWrapper}>
       <View style={styles.indicatorRow}>
         {slides.map((_, index) => (
           <Animated.View
@@ -138,82 +173,68 @@ const OnboardingScreen = ({ navigation }) => {
           />
         ))}
       </View>
-      <View style={styles.footerButtons}>
-        {currentSlideIndex === slides.length - 1 ? (
-          <TouchableOpacity
-            style={styles.continueButton}
-            onPress={async () => {
+      <View style={styles.footerCurveContainer}>
+        <TouchableOpacity
+          style={styles.footerCurveButton}
+          onPress={async () => {
+            if (currentSlideIndex === slides.length - 1) {
               await AsyncStorage.setItem("hasSeenOnboarding", "true");
               navigation.replace(screenName.languageSelectScreen);
-            }}
-            activeOpacity={0.85}
-          >
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              <Text style={styles.continueButtonText}>{i18n.translate("clinicLoginRedirect")}</Text>
-              <MaterialCommunityIcons name="arrow-right" size={22} color={cream} />
-            </View>
-          </TouchableOpacity>
-        ) : (
-          <View style={styles.rowButtons}>
-            <TouchableOpacity
-              style={styles.skipButton}
-              onPress={skip}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.skipButtonText}>{i18n.translate("skip")}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.nextButton}
-              onPress={goToNextSlide}
-              activeOpacity={0.8}
-            >
-              <MaterialCommunityIcons name="arrow-right" size={20} color={gold} />
-            </TouchableOpacity>
-          </View>
-        )}
+            } else {
+              goToNextSlide();
+            }
+          }}
+          activeOpacity={0.85}
+        >
+          <Text style={styles.footerCurveText}>
+            {currentSlideIndex === slides.length - 1
+              ? i18n.translate("clinicLoginRedirect")
+              : "Next"}
+          </Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <LinearGradient
-        colors={[
-          '#F7E7B4', // Aurie pastel, foarte soft, sus
-          '#F9EFD6CC', // Crem-auriu luminos, semi-transparent
-          cream + '33', // Crem foarte deschis, aproape transparent
-          '#FFFBEA00' // Complet transparent jos
-        ]}
-        style={styles.gradient}
-        start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 1 }}
-      >
-        {/* Modern minimalist, no overlays */}
-        {visible ? (
-          <ConsentModal
-            hideModalAndSetConsent={hideModalAndSetConsent}
-            visible={visible}
+      {/* Video background absolut, sub toate elementele */}
+      <View style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 0 }} pointerEvents="none">
+        <Video
+          source={require('../../assets/onboardbg.mp4')}
+          style={{ width: '100%', height: '100%', opacity: 1 }}
+          resizeMode="cover"
+          isLooping
+          shouldPlay
+          isMuted
+          ignoreSilentSwitch="obey"
+        />
+      </View>
+      {/* Elimin LinearGradient, pun direct continutul peste video */}
+      {visible ? (
+        <ConsentModal
+          hideModalAndSetConsent={hideModalAndSetConsent}
+          visible={visible}
+        />
+      ) : (
+        <>
+          <FlatList
+            ref={ref}
+            onMomentumScrollEnd={updateCurrentSlideIndex}
+            contentContainerStyle={{ height: "100%", zIndex: 1 }}
+            showsHorizontalScrollIndicator={false}
+            horizontal
+            data={slides}
+            pagingEnabled
+            renderItem={({ item, index }) => (
+              <Slide item={item} isActive={currentSlideIndex === index} />
+            )}
+            keyExtractor={(item) => item.id}
+            extraData={currentSlideIndex}
           />
-        ) : (
-          <>
-            <FlatList
-              ref={ref}
-              onMomentumScrollEnd={updateCurrentSlideIndex}
-              contentContainerStyle={{ height: "100%", zIndex: 1 }}
-              showsHorizontalScrollIndicator={false}
-              horizontal
-              data={slides}
-              pagingEnabled
-              renderItem={({ item, index }) => (
-                <Slide item={item} isActive={currentSlideIndex === index} />
-              )}
-              keyExtractor={(item) => item.id}
-              extraData={currentSlideIndex}
-            />
-            <Footer />
-          </>
-        )}
-      </LinearGradient>
+          <Footer />
+        </>
+      )}
     </SafeAreaView>
   );
 };
@@ -234,28 +255,29 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === "android" ? 60 : 80,
     paddingBottom: 30,
     minHeight: height * 0.8,
+    backgroundColor: 'transparent',
+    position: 'relative',
   },
-  slideImageLarge: {
-    width: width * 0.75,
-    height: 260,
-    marginBottom: 18,
-    opacity: 0.97,
-    borderRadius: 24,
-    shadowColor: gold,
+  slideImage: {
+    width: 270,
+    height: 270,
+    borderRadius: 40,
+    marginBottom: 32,
+    shadowColor: '#C9A14A',
     shadowOpacity: 0.10,
-    shadowRadius: 16,
-    elevation: 8,
-    backgroundColor: '#fffbeae0',
+    shadowRadius: 12,
+    elevation: 4,
+    alignSelf: 'center',
   },
   slideTitleNoCard: {
-    color: gold,
+    color: 'white',
     fontSize: 28,
     fontWeight: "700",
     fontFamily: "LoraBold",
     textAlign: "center",
-    marginBottom: 4,
+    marginBottom: 8,
     letterSpacing: 1.2,
-    textShadowColor: gold + '44',
+    textShadowColor: 'black',
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 6,
   },
@@ -269,19 +291,54 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   slideSubtitleNoCard: {
-    color: colors.primary3,
+    color: 'white',
     fontSize: 17,
     fontFamily: "Lora",
     textAlign: "center",
     marginBottom: 0,
     maxWidth: width * 0.8,
-    opacity: 0.85,
+    opacity: 0.95,
     letterSpacing: 0.2,
+    textShadowColor: 'black',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
-  footerContainer: {
-    width: "100%",
-    alignItems: "center",
-    marginBottom: Platform.OS === "android" ? 24 : 10,
+  footerCurveWrapper: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+    paddingBottom: 0,
+  },
+  footerCurveContainer: {
+    width: '100%',
+    height: 100,
+    backgroundColor: '#FAF7F2',
+    borderTopLeftRadius: 60,
+    borderTopRightRadius: 60,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: gold,
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  footerCurveButton: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 18,
+  },
+  footerCurveText: {
+    color: gold,
+    fontSize: 20,
+    fontFamily: 'LoraBold',
+    letterSpacing: 1.1,
+    textAlign: 'center',
   },
   indicatorRow: {
     flexDirection: "row",
@@ -309,69 +366,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.7,
     shadowRadius: 8,
     elevation: 8,
-  },
-  footerButtons: {
-    width: "100%",
-    alignItems: "center",
-  },
-  continueButton: {
-    backgroundColor: gold,
-    borderRadius: 24,
-    paddingVertical: 14,
-    paddingHorizontal: 48,
-    marginTop: 10,
-    marginBottom: 10,
-    alignSelf: "center",
-    shadowColor: gold,
-    shadowOpacity: 0.18,
-    shadowRadius: 10,
-    elevation: 5,
-  },
-  continueButtonText: {
-    color: cream,
-    fontSize: 18,
-    fontWeight: "700",
-    fontFamily: "LoraBold",
-    letterSpacing: 0.5,
-  },
-  rowButtons: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    width: "100%",
-    gap: 12,
-  },
-  skipButton: {
-    backgroundColor: "transparent",
-    borderWidth: 0,
-    paddingVertical: 12,
-    paddingHorizontal: 18,
-    marginRight: 12,
-    shadowColor: "transparent",
-    elevation: 0,
-  },
-  skipButtonText: {
-    color: gold,
-    fontSize: 16,
-    fontFamily: "LoraBold",
-    opacity: 0.7,
-  },
-  nextButton: {
-    backgroundColor: "#fffbeae0",
-    borderRadius: 22,
-    paddingVertical: 10,
-    paddingHorizontal: 18,
-    shadowColor: gold,
-    shadowOpacity: 0.10,
-    shadowRadius: 6,
-    elevation: 2,
-    borderWidth: 1.2,
-    borderColor: gold + '33',
-  },
-  nextButtonText: {
-    color: gold,
-    fontSize: 16,
-    fontFamily: "LoraBold",
   },
 });
 

@@ -89,74 +89,63 @@ const LuckyHour = () => {
   }, []);
 
   return (
-    <View style={{ flex: 1 }}>
-      <MainContainer style={{ flex: 1 }}>
-        <LinearGradient
-          colors={[
-            colors.gradientLogin1,
-            colors.gradientLogin2,
-            colors.gradientLogin2,
-          ]}
-          style={styles.gradient}
+    <MainContainer secondary={false} style={{ flex: 1 }}>
+      <ImageBackground
+        source={require("../../../assets/dashboardbg.jpg")}
+        style={{ flex: 1, paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0 }}
+        imageStyle={{ opacity: 1 }}
+      >
+        <ImageBackground
+          source={require("../../../assets/shadowBg.png")}
+          resizeMode="cover"
+          style={{ flex: 1 }}
         >
-          <ImageBackground
-            source={require("../../../assets/shadowBg.png")}
-            resizeMode="cover"
-            style={{
-              flex: 1,
-              width: null,
-              height: null,
-              // alignItems: 'flex-end',
-            }}
-          >
-            <GreetingBar isGoBack={true} />
-            <View>
-              <View style={styles.overlay}>
-                <View>
-                  <View style={styles.numberContainer}>
-                    <Text style={styles.number}>
-                      {" "}
-                      {zilnicOreNorocoase.ora ? zilnicOreNorocoase.ora : ""}
-                    </Text>
-                  </View>
-                  <View style={styles.secondImageContainer}>
-                    <Image
-                      source={require("../../../assets/headerIcon.png")}
-                      style={styles.secondImage}
-                      resizeMode="contain"
-                    />
-                  </View>
+          <GreetingBar isGoBack={true} />
+          <View>
+            <View style={styles.overlay}>
+              <View>
+                <View style={[styles.numberContainer, { borderColor: '#C9A14A', borderWidth: 3, backgroundColor: '#FFFBEA', shadowOpacity: 0.08, shadowRadius: 8 }]}>
+                  <Text style={[styles.number, { color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700', fontSize: 38, textAlign: 'center', marginVertical: 16 }]}>
+                    {zilnicOreNorocoase.ora ? zilnicOreNorocoase.ora : ""}
+                  </Text>
+                </View>
+                <View style={styles.secondImageContainer}>
+                  <Image
+                    source={require("../../../assets/headerIcon.png")}
+                    style={[styles.secondImage, { tintColor: '#C9A14A' }]}
+                    resizeMode="contain"
+                  />
                 </View>
               </View>
-              <View
-                style={{
-                  height: "75%",
+            </View>
+            <View
+              style={{
+                height: "75%",
 
-                  padding: 10,
-                }}
-              >
-                {/* <H7fontBoldWhite style={{ alignSelf: "center" }}>
+                padding: 10,
+              }}
+            >
+              {/* <H7fontBoldWhite style={{ alignSelf: "center" }}>
                 {zilnicOreNorocoase.info[language].nume}
               </H7fontBoldWhite> */}
-                <ScrollView contentContainerStyle={styles.scrollViewContainer}>
-                  {zilnicOreNorocoase.info ? (
-                    <H7fontMediumPrimary style={{ textAlign: "justify" }}>
-                      {language === "hi"
-                        ? zilnicOreNorocoase.info.hu?.descriere
-                        : language === "id"
-                        ? zilnicOreNorocoase.info.ru?.descriere
-                        : language === "ru"
-                        ? zilnicOreNorocoase.info.rusa?.descriere
-                        : zilnicOreNorocoase.info[language]?.descriere}
-                    </H7fontMediumPrimary>
-                  ) : null}
-                </ScrollView>
-              </View>
+              <ScrollView contentContainerStyle={[styles.scrollViewContainer, {flexGrow: 1}]} style={{flex: 1}}>
+                {zilnicOreNorocoase.info ? (
+                  <H7fontMediumPrimary style={{ textAlign: "justify", color: '#131523', fontFamily: 'Lora', fontWeight: '400', fontSize: 19, lineHeight: 28, marginTop: 16, backgroundColor: 'transparent' }}>
+                    {language === "hi"
+                      ? zilnicOreNorocoase.info.hu?.descriere
+                      : language === "id"
+                      ? zilnicOreNorocoase.info.ru?.descriere
+                      : language === "ru"
+                      ? zilnicOreNorocoase.info.rusa?.descriere
+                      : zilnicOreNorocoase.info[language]?.descriere}
+                  </H7fontMediumPrimary>
+                ) : null}
+              </ScrollView>
             </View>
-          </ImageBackground>
-        </LinearGradient>
-      </MainContainer>
-    </View>
+          </View>
+        </ImageBackground>
+      </ImageBackground>
+    </MainContainer>
   );
 };
 

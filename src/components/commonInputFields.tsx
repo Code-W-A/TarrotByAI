@@ -55,10 +55,10 @@ export const InputFields: React.FC<InputFieldsProps> = ({
     <>
       <View
         style={[
-          styles.testBoxRowStyle,
+          styles.inputWrapperNew,
           containerStyle,
           style,
-          { borderColor: isFocused ? "white" : colors.primary3 },
+          isFocused && { borderColor: '#C9A14A', shadowColor: '#C9A14A', shadowOpacity: 0.12, elevation: 3 },
         ]}
       >
         <View style={{ marginRight: 15 }}>
@@ -66,7 +66,7 @@ export const InputFields: React.FC<InputFieldsProps> = ({
             <MaterialIcons
               name={image}
               size={24}
-              color={isFocused ? "white" : colors.grayText}
+              color={isFocused ? '#C9A14A' : '#B0AFA6'}
             />
           </View>
         </View>
@@ -74,18 +74,14 @@ export const InputFields: React.FC<InputFieldsProps> = ({
           onFocus={handleOnFocus}
           onBlur={handleOnBlur}
           style={[
-            {
-              flex: 1,
-              marginRight: isPassword ? 30 : 0,
-              color: isFocused ? "white" : "white",
-            },
+            styles.inputTextNew,
             textInputStyle,
           ]}
           placeholder={placeholder}
           value={value}
-          placeholderTextColor={isFocused ? "white" : colors.grayText}
+          placeholderTextColor={'#B0AFA6'}
           onChangeText={onChangeText}
-          keyboardType={isNumber ? "numeric" : "default"}
+          keyboardType={isNumber ? 'numeric' : 'default'}
           secureTextEntry={showPass}
         />
         {isPassword && (
@@ -94,9 +90,9 @@ export const InputFields: React.FC<InputFieldsProps> = ({
             style={styles.eyeIcon}
           >
             <Feather
-              name={showPass ? "eye-off" : "eye"}
+              name={showPass ? 'eye-off' : 'eye'}
               size={24}
-              color={isFocused ? "white" : colors.primary2}
+              color={isFocused ? '#C9A14A' : '#B0AFA6'}
             />
           </TouchableOpacity>
         )}
@@ -107,15 +103,26 @@ export const InputFields: React.FC<InputFieldsProps> = ({
 };
 
 const styles = StyleSheet.create({
-  testBoxRowStyle: {
-    flexDirection: "row",
-    borderRadius: 35,
-    borderWidth: 0.5,
-    backgroundColor: colors.primary3,
-    paddingHorizontal: 15,
-    marginTop: 12,
-    height: 55,
-    alignItems: "center",
+  inputWrapperNew: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderWidth: 1.5,
+    borderColor: '#C9A14A',
+    borderRadius: 22,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    marginBottom: 16,
+    width: '100%',
+    shadowColor: '#C9A14A',
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  inputTextNew: {
+    color: '#C9A14A',
+    fontSize: 16,
+    fontFamily: 'Lora',
   },
   eyeIcon: {
     position: "absolute",

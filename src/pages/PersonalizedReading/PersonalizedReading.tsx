@@ -199,11 +199,7 @@ const PersonalizedReading = ({ route }) => {
     <View style={{ flex: 1 }}>
       <MainContainer style={{ flex: 1 }}>
         <LinearGradient
-          colors={[
-            colors.gradientLogin1,
-            colors.gradientLogin2,
-            colors.gradientLogin2,
-          ]} // Înlocuiește cu culorile gradientului tău
+          colors={['#FFFBEA', '#FAF7F2', '#F7E7B4']}
           style={styles.gradient}
         >
           <ImageBackground
@@ -220,7 +216,7 @@ const PersonalizedReading = ({ route }) => {
 
             <View style={styles.imageContainer}>
               <Image
-                style={styles.image}
+                style={[styles.image, { borderWidth: 2, borderColor: '#C9A14A', borderRadius: 12, shadowColor: '#C9A14A', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.13, shadowRadius: 8 }]}
                 source={{ uri: item.carte.image.finalUri }}
                 resizeMode="stretch" // Folosiți "stretch" pentru a întinde imaginea
               />
@@ -267,15 +263,33 @@ const PersonalizedReading = ({ route }) => {
                   // bottom: "10%",
                 }}
               >
-                <H6fontBoldPrimary
-                  style={{ alignSelf: "center", marginBottom: "5%" }}
+                <Text
+                  style={{
+                    alignSelf: "center",
+                    marginBottom: "5%",
+                    color: '#C9A14A',
+                    fontFamily: 'LoraBold',
+                    fontSize: 22,
+                    letterSpacing: 1.1,
+                    textShadowColor: '#fffbeae0',
+                    textShadowOffset: { width: 0, height: 2 },
+                    textShadowRadius: 6,
+                  }}
                 >
                   {getName()}
-                </H6fontBoldPrimary>
+                </Text>
 
-                <H7fontBoldPrimary style={{ textAlign: "justify" }}>
+                <Text
+                  style={{
+                    textAlign: 'justify',
+                    color: '#7c6f57',
+                    fontFamily: 'LoraRegular',
+                    fontSize: 16,
+                    letterSpacing: 0.2,
+                  }}
+                >
                   {getDescription()}
-                </H7fontBoldPrimary>
+                </Text>
               </View>
             </ScrollView>
             {/* {videoEnded && (

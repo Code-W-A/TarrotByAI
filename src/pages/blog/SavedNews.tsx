@@ -5,6 +5,8 @@ import {
   View,
   FlatList,
   TouchableOpacity,
+  ImageBackground,
+  StyleSheet,
 } from "react-native";
 import styles from "./styles";
 import { RefreshControl } from "react-native";
@@ -187,18 +189,13 @@ const SavedNews: React.FC = () => {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor }]}>
-      <LinearGradient
-        colors={[
-          colors.gradientLogin1,
-          colors.gradientLogin2,
-          colors.gradientLogin2,
-        ]} // Înlocuiește cu culorile gradientului tău
-        style={{
-          flex: 1,
-          paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
-        }}
-      >
+    <ImageBackground
+      source={require("../../../assets/dashboardbg.jpg")}
+      style={{ flex: 1, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 }}
+      imageStyle={{ opacity: 1 }}
+    >
+      <View style={{ ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(255,255,255,0.72)', zIndex: 1 }} pointerEvents="none" />
+      <View style={{ flex: 1, zIndex: 2 }}>
         <View
           style={{
             flexDirection: "row",
@@ -210,7 +207,7 @@ const SavedNews: React.FC = () => {
             onPress={() => navigation.goBack()}
             style={{ width: "10%", alignItems: "flex-end" }}
           >
-            <FontAwesome name="chevron-left" size={24} color={colors.white} />
+            <FontAwesome name="chevron-left" size={24} color="#C9A14A" />
           </TouchableOpacity>
           <View style={{ width: "90%" }}>
             <SearchInput
@@ -243,8 +240,8 @@ const SavedNews: React.FC = () => {
           onClose={handleCloseModal}
           saveArticle={saveArticle}
         />
-      </LinearGradient>
-    </View>
+      </View>
+    </ImageBackground>
   );
 };
 

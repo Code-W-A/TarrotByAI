@@ -102,6 +102,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import i18n from "../../i18n";
 
 import { useAppSelector } from "../hooks/hooks";
+import { useNavBarVisibility } from '../context/NavbarVisibilityContext';
 
 // import AsyncStorage from '@react-native-community/async-storage';
 
@@ -115,6 +116,7 @@ const SignInScreenPatient: React.FC<Props> = ({
 }): JSX.Element => {
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
+  const { setIsNavBarVisible } = useNavBarVisibility();
 
   const patientInfoDB = useAppSelector((state) => state.patientInfoData);
   const { patientInformation } = patientInfoDB;
@@ -136,6 +138,8 @@ const SignInScreenPatient: React.FC<Props> = ({
 
   useEffect(() => {
     console.log("Sign In For Patient");
+    setIsNavBarVisible(false);
+    return () => setIsNavBarVisible(true);
   }, []);
 
   const auth = authentication;

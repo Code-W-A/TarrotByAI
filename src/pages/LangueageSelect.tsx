@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -22,6 +22,7 @@ import { useNavigation } from "@react-navigation/native";
 import { screenName } from "../utils/screenName";
 import { handleLanguagei18n } from "../utils/handleLanguageGeneral";
 import i18n from "../../i18n";
+import { useNavBarVisibility } from '../context/NavbarVisibilityContext';
 
 const gold = "#C9A14A"; // auriu cald pentru accente
 const cream = "#FAF7F2"; // fundal crem deschis
@@ -44,10 +45,16 @@ const languages = [
   { code: "sk", name: "Slovenčina", flag: require("../../assets/flags/slovakia.png") },
 ];
 
-const LanguageSelectScreen = () => {
+const LanguageSelectScreen = (props) => {
+  const { setIsNavBarVisible } = useNavBarVisibility();
   const [selectedLanguage, setSelectedLanguage] = useState(null);
   const navigation = useNavigation();
   const [pressed, setPressed] = useState(false);
+
+  useEffect(() => {
+    setIsNavBarVisible(false);
+    return () => setIsNavBarVisible(true);
+  }, []);
 
   const handleLanguageSelect = (language, name) => {
     setSelectedLanguage(name);
@@ -63,16 +70,16 @@ const LanguageSelectScreen = () => {
         end={{ x: 1, y: 1 }}
       >
         <View style={styles.container}>
-          <View style={styles.headerContainer}>
-            <Image
+        <View style={styles.headerContainer}>
+          <Image
               source={require("../../assets/LogoPngTransparent.png")}
-              style={styles.headerImage}
-              resizeMode="contain"
-            />
+            style={styles.headerImage}
+            resizeMode="contain"
+          />
             <View style={styles.goldLine} />
             <Text style={styles.headerTitle}>{i18n.translate("welcomeTitle")}</Text>
             <Text style={styles.headerSubtitle}>{i18n.translate("welcomeSubtitle")}</Text>
-          </View>
+        </View>
           <Text style={styles.sectionTitle}>{i18n.translate("selectLanguage")}</Text>
           <ScrollView
             contentContainerStyle={styles.languageList}
@@ -104,15 +111,15 @@ const LanguageSelectScreen = () => {
             })}
           </ScrollView>
           <View style={styles.bottomContainer}>
-            <TouchableOpacity
+        <TouchableOpacity
               style={[styles.continueButton, pressed && styles.continueButtonPressed]}
               onPressIn={() => setPressed(true)}
               onPressOut={() => setPressed(false)}
-              onPress={() => navigation.navigate(screenName.SignInScreenClinic)}
+          onPress={() => navigation.navigate(screenName.SignInScreenClinic)}
               activeOpacity={0.85}
-            >
+        >
               <Text style={styles.continueButtonText}>{i18n.translate("clinicLoginRedirect")}</Text>
-            </TouchableOpacity>
+        </TouchableOpacity>
           </View>
         </View>
       </LinearGradient>

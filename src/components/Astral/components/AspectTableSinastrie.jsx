@@ -37,7 +37,7 @@ const AspectTableSinastrie = ({
           marginTop: "0%",
         }}
       >
-        <H6fontBoldYellow> {currentUserData?.full_name}</H6fontBoldYellow>
+        <Text style={{ color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700', fontSize: 20, textAlign: 'center' }}> {currentUserData?.full_name}</Text>
       </View>
       <ScrollView
         contentContainerStyle={{
@@ -48,33 +48,23 @@ const AspectTableSinastrie = ({
         horizontal={true}
       >
         <View style={styles.tableHeader}>
-          <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
-            {i18n.translate("House")}
-          </H7fontBoldWhite>
-          <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
-            {i18n.translate("Sign")}
-          </H7fontBoldWhite>
-          <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
-            {i18n.translate("Degree")}
-          </H7fontBoldWhite>
+          <View style={styles.columnCell}><Text style={styles.headerCellText}>{i18n.translate("House")}</Text></View>
+          <View style={styles.columnCell}><Text style={styles.headerCellText}>{i18n.translate("Sign")}</Text></View>
+          <View style={styles.columnCell}><Text style={styles.headerCellText}>{i18n.translate("Degree")}</Text></View>
         </View>
         {houseCusps?.housesP1.houses &&
           houseCusps.housesP1.houses.map((aspect, index) => (
             <View key={index} style={styles.tableRow}>
-              <H8fontBoldWhite style={[styles.rowText, styles.columnLarge]}>
-                {aspect?.house}
-              </H8fontBoldWhite>
-              <View style={[styles.columnLarge, { flexDirection: "row" }]}>
+              <View style={styles.columnCell}><Text style={styles.cellText}>{aspect?.house}</Text></View>
+              <View style={[styles.columnCell, { flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }]}> 
                 <MaterialCommunityIcons
                   name={`zodiac-${aspect?.sign.toLowerCase()}`}
                   size={24}
                   color={colors.gradientLogin3}
                 />
-                <H8fontBoldWhite>{aspect?.sign}</H8fontBoldWhite>
+                <Text style={styles.cellText}>{aspect?.sign}</Text>
               </View>
-              <H8fontBoldWhite style={[styles.rowText, styles.columnLarge]}>
-                {decimalToSexagesimal(aspect?.full_degree)}
-              </H8fontBoldWhite>
+              <View style={styles.columnCell}><Text style={styles.cellText}>{decimalToSexagesimal(aspect?.full_degree)}</Text></View>
             </View>
           ))}
       </ScrollView>
@@ -86,7 +76,7 @@ const AspectTableSinastrie = ({
           marginTop: "5%",
         }}
       >
-        <H6fontBoldYellow> {userD?.full_name}</H6fontBoldYellow>
+        <Text style={{ color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700', fontSize: 20, textAlign: 'center' }}> {userD?.full_name}</Text>
       </View>
       <ScrollView
         contentContainerStyle={{
@@ -97,33 +87,23 @@ const AspectTableSinastrie = ({
         horizontal={true}
       >
         <View style={styles.tableHeader}>
-          <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
-            {i18n.translate("House")}
-          </H7fontBoldWhite>
-          <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
-            {i18n.translate("Sign")}
-          </H7fontBoldWhite>
-          <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
-            {i18n.translate("Degree")}
-          </H7fontBoldWhite>
+          <View style={styles.columnCell}><Text style={styles.headerCellText}>{i18n.translate("House")}</Text></View>
+          <View style={styles.columnCell}><Text style={styles.headerCellText}>{i18n.translate("Sign")}</Text></View>
+          <View style={styles.columnCell}><Text style={styles.headerCellText}>{i18n.translate("Degree")}</Text></View>
         </View>
         {houseCusps?.housesP2.houses &&
           houseCusps.housesP2.houses.map((aspect, index) => (
             <View key={index} style={styles.tableRow}>
-              <H8fontBoldWhite style={[styles.rowText, styles.columnLarge]}>
-                {aspect?.house}
-              </H8fontBoldWhite>
-              <View style={[styles.columnLarge, { flexDirection: "row" }]}>
+              <View style={styles.columnCell}><Text style={styles.cellText}>{aspect?.house}</Text></View>
+              <View style={[styles.columnCell, { flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }]}> 
                 <MaterialCommunityIcons
                   name={`zodiac-${aspect?.sign.toLowerCase()}`}
                   size={24}
                   color={colors.gradientLogin3}
                 />
-                <H8fontBoldWhite>{aspect?.sign}</H8fontBoldWhite>
+                <Text style={styles.cellText}>{aspect?.sign}</Text>
               </View>
-              <H8fontBoldWhite style={[styles.rowText, styles.columnLarge]}>
-                {decimalToSexagesimal(aspect?.full_degree)}
-              </H8fontBoldWhite>
+              <View style={styles.columnCell}><Text style={styles.cellText}>{decimalToSexagesimal(aspect?.full_degree)}</Text></View>
             </View>
           ))}
       </ScrollView>
@@ -136,7 +116,7 @@ const AspectTableSinastrie = ({
           marginTop: "10%",
         }}
       >
-        <H6fontBoldYellow> {i18n.translate("Natal")}</H6fontBoldYellow>
+        <Text style={{ color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700', fontSize: 20, textAlign: 'center' }}> {i18n.translate("Natal")}</Text>
       </View>
       <View
         style={{
@@ -146,10 +126,10 @@ const AspectTableSinastrie = ({
           marginTop: "0%",
         }}
       >
-        <H6fontBoldYellow style={{ fontSize: 20 }}>
+        <Text style={{ color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700', fontSize: 20, textAlign: 'center' }}>
           {" "}
           {currentUserData?.full_name}
-        </H6fontBoldYellow>
+        </Text>
       </View>
       <ScrollView
         contentContainerStyle={{
@@ -159,46 +139,28 @@ const AspectTableSinastrie = ({
         }}
         horizontal={true}
       >
-        <View style={[styles.tableHeader]}>
-          <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
-            {i18n.translate("Planet")}
-          </H7fontBoldWhite>
-          <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
-            {i18n.translate("Sign")}
-          </H7fontBoldWhite>
-          <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
-            {i18n.translate("Degree")}
-          </H7fontBoldWhite>
-          <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
-            {i18n.translate("House")}
-          </H7fontBoldWhite>
-          <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
-            {i18n.translate("Speed")}
-          </H7fontBoldWhite>
+        <View style={styles.tableHeader}>
+          <View style={styles.columnCell}><Text style={styles.headerCellText}>{i18n.translate("Planet")}</Text></View>
+          <View style={styles.columnCell}><Text style={styles.headerCellText}>{i18n.translate("Sign")}</Text></View>
+          <View style={styles.columnCell}><Text style={styles.headerCellText}>{i18n.translate("Degree")}</Text></View>
+          <View style={styles.columnCell}><Text style={styles.headerCellText}>{i18n.translate("House")}</Text></View>
+          <View style={styles.columnCell}><Text style={styles.headerCellText}>{i18n.translate("Speed")}</Text></View>
         </View>
         {planetaryData &&
           planetaryData.planetaryP1.map((aspect, index) => (
-            <View key={index} style={[styles.tableRow]}>
-              <H8fontBoldWhite style={[styles.rowText, styles.columnLarge]}>
-                {aspect?.name}
-              </H8fontBoldWhite>
-              <View style={[styles.columnLarge, { flexDirection: "row" }]}>
+            <View key={index} style={styles.tableRow}>
+              <View style={styles.columnCell}><Text style={styles.cellText}>{aspect?.name}</Text></View>
+              <View style={[styles.columnCell, { flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }]}> 
                 <MaterialCommunityIcons
                   name={`zodiac-${aspect?.sign.toLowerCase()}`}
                   size={24}
                   color={colors.gradientLogin3}
                 />
-                <H8fontBoldWhite>{aspect?.sign}</H8fontBoldWhite>
+                <Text style={styles.cellText}>{aspect?.sign}</Text>
               </View>
-              <H8fontBoldWhite style={[styles.rowText, styles.columnLarge]}>
-                {decimalToSexagesimal(aspect?.full_degree)}
-              </H8fontBoldWhite>
-              <H8fontBoldWhite style={[styles.rowText, styles.columnLarge]}>
-                {aspect?.house}
-              </H8fontBoldWhite>
-              <H8fontBoldWhite style={[styles.rowText, styles.columnLarge]}>
-                {convertSpeedToSexagesimal(aspect?.speed)}
-              </H8fontBoldWhite>
+              <View style={styles.columnCell}><Text style={styles.cellText}>{decimalToSexagesimal(aspect?.full_degree)}</Text></View>
+              <View style={styles.columnCell}><Text style={styles.cellText}>{aspect?.house}</Text></View>
+              <View style={styles.columnCell}><Text style={styles.cellText}>{convertSpeedToSexagesimal(aspect?.speed)}</Text></View>
             </View>
           ))}
       </ScrollView>
@@ -211,10 +173,10 @@ const AspectTableSinastrie = ({
           marginTop: "10%",
         }}
       >
-        <H6fontBoldYellow style={{ fontSize: 20 }}>
+        <Text style={{ color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700', fontSize: 20, textAlign: 'center' }}>
           {" "}
           {userD?.full_name}
-        </H6fontBoldYellow>
+        </Text>
       </View>
       <ScrollView
         contentContainerStyle={{
@@ -224,46 +186,28 @@ const AspectTableSinastrie = ({
         }}
         horizontal={true}
       >
-        <View style={[styles.tableHeader]}>
-          <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
-            {i18n.translate("Planet")}
-          </H7fontBoldWhite>
-          <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
-            {i18n.translate("Sign")}
-          </H7fontBoldWhite>
-          <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
-            {i18n.translate("Degree")}
-          </H7fontBoldWhite>
-          <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
-            {i18n.translate("House")}
-          </H7fontBoldWhite>
-          <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
-            {i18n.translate("Speed")}
-          </H7fontBoldWhite>
+        <View style={styles.tableHeader}>
+          <View style={styles.columnCell}><Text style={styles.headerCellText}>{i18n.translate("Planet")}</Text></View>
+          <View style={styles.columnCell}><Text style={styles.headerCellText}>{i18n.translate("Sign")}</Text></View>
+          <View style={styles.columnCell}><Text style={styles.headerCellText}>{i18n.translate("Degree")}</Text></View>
+          <View style={styles.columnCell}><Text style={styles.headerCellText}>{i18n.translate("House")}</Text></View>
+          <View style={styles.columnCell}><Text style={styles.headerCellText}>{i18n.translate("Speed")}</Text></View>
         </View>
         {planetaryData &&
           planetaryData.planetaryP2.map((aspect, index) => (
-            <View key={index} style={[styles.tableRow]}>
-              <H8fontBoldWhite style={[styles.rowText, styles.columnLarge]}>
-                {aspect?.name}
-              </H8fontBoldWhite>
-              <View style={[styles.columnLarge, { flexDirection: "row" }]}>
+            <View key={index} style={styles.tableRow}>
+              <View style={styles.columnCell}><Text style={styles.cellText}>{aspect?.name}</Text></View>
+              <View style={[styles.columnCell, { flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }]}> 
                 <MaterialCommunityIcons
                   name={`zodiac-${aspect?.sign.toLowerCase()}`}
                   size={24}
                   color={colors.gradientLogin3}
                 />
-                <H8fontBoldWhite>{aspect?.sign}</H8fontBoldWhite>
+                <Text style={styles.cellText}>{aspect?.sign}</Text>
               </View>
-              <H8fontBoldWhite style={[styles.rowText, styles.columnLarge]}>
-                {decimalToSexagesimal(aspect?.full_degree)}
-              </H8fontBoldWhite>
-              <H8fontBoldWhite style={[styles.rowText, styles.columnLarge]}>
-                {aspect?.house}
-              </H8fontBoldWhite>
-              <H8fontBoldWhite style={[styles.rowText, styles.columnLarge]}>
-                {convertSpeedToSexagesimal(aspect?.speed)}
-              </H8fontBoldWhite>
+              <View style={styles.columnCell}><Text style={styles.cellText}>{decimalToSexagesimal(aspect?.full_degree)}</Text></View>
+              <View style={styles.columnCell}><Text style={styles.cellText}>{aspect?.house}</Text></View>
+              <View style={styles.columnCell}><Text style={styles.cellText}>{convertSpeedToSexagesimal(aspect?.speed)}</Text></View>
             </View>
           ))}
       </ScrollView>
@@ -276,7 +220,7 @@ const AspectTableSinastrie = ({
           marginTop: "10%",
         }}
       >
-        <H6fontBoldYellow>Aspects</H6fontBoldYellow>
+        <Text style={{ color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700', fontSize: 20, textAlign: 'center' }}>Aspects</Text>
       </View>
       <View
         style={{
@@ -286,10 +230,10 @@ const AspectTableSinastrie = ({
           marginTop: "0%",
         }}
       >
-        <H6fontBoldYellow style={{ fontSize: 20 }}>
+        <Text style={{ color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700', fontSize: 20, textAlign: 'center' }}>
           {" "}
           {currentUserData?.full_name}
-        </H6fontBoldYellow>
+        </Text>
       </View>
       <ScrollView
         contentContainerStyle={{
@@ -300,40 +244,40 @@ const AspectTableSinastrie = ({
         horizontal={true}
       >
         <View style={[styles.tableHeader, { marginTop: "6%" }]}>
-          <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
+          <Text style={{ color: '#131523', fontFamily: 'Lora', fontWeight: '700', flex: 1, paddingHorizontal: 5 }}>
             {i18n.translate("Planet")}
-          </H7fontBoldWhite>
-          <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
+          </Text>
+          <Text style={{ color: '#131523', fontFamily: 'Lora', fontWeight: '700', flex: 1, paddingHorizontal: 5 }}>
             Aspect
-          </H7fontBoldWhite>
-          <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
+          </Text>
+          <Text style={{ color: '#131523', fontFamily: 'Lora', fontWeight: '700', flex: 1, paddingHorizontal: 5 }}>
             {i18n.translate("Planet")}
-          </H7fontBoldWhite>
-          <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
+          </Text>
+          <Text style={{ color: '#131523', fontFamily: 'Lora', fontWeight: '700', flex: 1, paddingHorizontal: 5 }}>
             {i18n.translate("Orb")}
-          </H7fontBoldWhite>
+          </Text>
         </View>
         {aspects &&
           aspects.aspectsP1.map((aspect, index) => (
             <View key={index} style={styles.tableRow}>
-              <H8fontBoldWhite style={[styles.rowText, styles.columnLarge]}>
+              <Text style={{ color: '#131523', fontFamily: 'Lora', fontWeight: '700', flex: 1, paddingHorizontal: 5 }}>
                 {aspect?.planetOne}
-              </H8fontBoldWhite>
+              </Text>
 
               <View style={[styles.columnLarge, { flexDirection: "row" }]}>
-                <H8fontBoldWhite>{aspect?.aspect}</H8fontBoldWhite>
+                <Text style={{ color: '#131523', fontFamily: 'Lora' }}>{aspect?.aspect}</Text>
                 <Text style={styles.degreeLabel}>
                   {getAspectAngle(aspect?.aspect)}°
                 </Text>
               </View>
 
-              <H8fontBoldWhite style={[styles.rowText, styles.columnLarge]}>
+              <Text style={{ color: '#131523', fontFamily: 'Lora', fontWeight: '700', flex: 1, paddingHorizontal: 5 }}>
                 {aspect?.planetTwo}
-              </H8fontBoldWhite>
+              </Text>
 
-              <H8fontBoldWhite style={[styles.rowText, styles.columnLarge]}>
+              <Text style={{ color: '#131523', fontFamily: 'Lora', fontWeight: '700', flex: 1, paddingHorizontal: 5 }}>
                 {aspect?.orb}
-              </H8fontBoldWhite>
+              </Text>
             </View>
           ))}
       </ScrollView>
@@ -346,10 +290,10 @@ const AspectTableSinastrie = ({
           marginTop: "10%",
         }}
       >
-        <H6fontBoldYellow style={{ fontSize: 20 }}>
+        <Text style={{ color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700', fontSize: 20, textAlign: 'center' }}>
           {" "}
           {userD?.full_name}
-        </H6fontBoldYellow>
+        </Text>
       </View>
       <ScrollView
         contentContainerStyle={{
@@ -360,40 +304,40 @@ const AspectTableSinastrie = ({
         horizontal={true}
       >
         <View style={[styles.tableHeader, { marginTop: "6%" }]}>
-          <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
+          <Text style={{ color: '#131523', fontFamily: 'Lora', fontWeight: '700', flex: 1, paddingHorizontal: 5 }}>
             {i18n.translate("Planet")}
-          </H7fontBoldWhite>
-          <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
+          </Text>
+          <Text style={{ color: '#131523', fontFamily: 'Lora', fontWeight: '700', flex: 1, paddingHorizontal: 5 }}>
             Aspect
-          </H7fontBoldWhite>
-          <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
+          </Text>
+          <Text style={{ color: '#131523', fontFamily: 'Lora', fontWeight: '700', flex: 1, paddingHorizontal: 5 }}>
             {i18n.translate("Planet")}
-          </H7fontBoldWhite>
-          <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
+          </Text>
+          <Text style={{ color: '#131523', fontFamily: 'Lora', fontWeight: '700', flex: 1, paddingHorizontal: 5 }}>
             {i18n.translate("Orb")}
-          </H7fontBoldWhite>
+          </Text>
         </View>
         {aspects &&
           aspects.aspectsP2.map((aspect, index) => (
             <View key={index} style={styles.tableRow}>
-              <H8fontBoldWhite style={[styles.columnLarge]}>
+              <Text style={{ color: '#131523', fontFamily: 'Lora', fontWeight: '700', flex: 1, paddingHorizontal: 5 }}>
                 {aspect?.planetOne}
-              </H8fontBoldWhite>
+              </Text>
 
               <View style={[styles.columnLarge, { flexDirection: "row" }]}>
-                <H8fontBoldWhite>{aspect?.aspect}</H8fontBoldWhite>
+                <Text style={{ color: '#131523', fontFamily: 'Lora' }}>{aspect?.aspect}</Text>
                 <Text style={styles.degreeLabel}>
                   {getAspectAngle(aspect?.aspect)}°
                 </Text>
               </View>
 
-              <H8fontBoldWhite style={[styles.columnLarge]}>
+              <Text style={{ color: '#131523', fontFamily: 'Lora', fontWeight: '700', flex: 1, paddingHorizontal: 5 }}>
                 {aspect?.planetTwo}
-              </H8fontBoldWhite>
+              </Text>
 
-              <H8fontBoldWhite style={[styles.columnLarge]}>
+              <Text style={{ color: '#131523', fontFamily: 'Lora', fontWeight: '700', flex: 1, paddingHorizontal: 5 }}>
                 {aspect?.orb}
-              </H8fontBoldWhite>
+              </Text>
             </View>
           ))}
       </ScrollView>
@@ -462,6 +406,27 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: "100%",
     marginTop: "10%",
+  },
+  columnCell: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    textAlign: 'center',
+    flexDirection: 'column',
+  },
+  headerCellText: {
+    color: '#131523',
+    fontFamily: 'Lora',
+    fontWeight: '700',
+    fontSize: 15,
+    textAlign: 'center',
+  },
+  cellText: {
+    color: '#131523',
+    fontFamily: 'Lora',
+    fontWeight: '700',
+    fontSize: 15,
+    textAlign: 'center',
   },
 });
 

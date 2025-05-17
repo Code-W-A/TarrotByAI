@@ -325,21 +325,6 @@ const FlipCard = ({
 
   return (
     <>
-      {/* Acest Image va crea efectul de overflow */}
-      <Animated.View
-        style={[
-          styles.shadowImage,
-          {
-            opacity: opacityAnim, // Aplică animația de opacitate
-          },
-        ]}
-      >
-        <Image
-          source={require("../../../assets/shadowBackground.png")} // Înlocuiește cu calea corectă a imaginii tale
-          resizeMode="cover"
-        />
-      </Animated.View>
-
       <TouchableWithoutFeedback onPress={flipCard}>
         <Animated.View style={[styles.container, style]}>
           <Animated.View style={[styles.flipCard, frontAnimatedStyle]}>

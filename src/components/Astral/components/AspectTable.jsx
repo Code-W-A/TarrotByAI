@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, ScrollView, StyleSheet } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Text as RNText } from 'react-native';
 import { colors } from "../../../utils/colors";
 import {
   H6fontBoldPrimary,
@@ -33,39 +34,39 @@ const AspectTable = ({ houseCusps, planetaryData, aspects }) => {
         horizontal={true}
       >
         <View style={styles.tableHeader}>
-          <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
+          <RNText style={[styles.headerText, styles.columnLarge, { color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700' }]}>
             {i18n.translate("House")}
-          </H7fontBoldWhite>
-          <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
+          </RNText>
+          <RNText style={[styles.headerText, styles.columnLarge, { color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700' }]}>
             {i18n.translate("Sign")}
-          </H7fontBoldWhite>
-          <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
+          </RNText>
+          <RNText style={[styles.headerText, styles.columnLarge, { color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700' }]}>
             {i18n.translate("Degree")}
-          </H7fontBoldWhite>
+          </RNText>
         </View>
         {houseCusps?.houses &&
           houseCusps.houses.map((aspect, index) => (
             <View key={index} style={styles.tableRow}>
-              <H8fontBoldWhite style={[styles.rowText, styles.columnLarge]}>
+              <RNText style={[styles.rowText, styles.columnLarge, { color: '#131523', fontFamily: 'Lora', fontWeight: '500' }]}>
                 {aspect?.house}
-              </H8fontBoldWhite>
+              </RNText>
               <View style={[styles.iconWithText, styles.columnLarge]}>
                 <MaterialCommunityIcons
                   name={`zodiac-${aspect?.sign.toLowerCase()}`}
                   size={24}
-                  color={colors.gradientLogin3}
+                  color={'#C9A14A'}
                 />
-                <H8fontBoldWhite>{aspect?.sign}</H8fontBoldWhite>
+                <RNText style={{ color: '#131523', fontFamily: 'Lora', fontWeight: '500', marginLeft: 4 }}>{aspect?.sign}</RNText>
               </View>
-              <H8fontBoldWhite style={[styles.rowText, styles.columnLarge]}>
+              <RNText style={[styles.rowText, styles.columnLarge, { color: '#131523', fontFamily: 'Lora', fontWeight: '500' }]}>
                 {decimalToSexagesimal(aspect?.full_degree)}
-              </H8fontBoldWhite>
+              </RNText>
             </View>
           ))}
       </ScrollView>
 
       <View style={styles.sectionTitle}>
-        <H6fontBoldYellow>{i18n.translate("Natal")}</H6fontBoldYellow>
+        <RNText style={{ color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700', fontSize: 18 }}>{i18n.translate("Natal")}</RNText>
       </View>
       <ScrollView
         contentContainerStyle={{
@@ -76,51 +77,51 @@ const AspectTable = ({ houseCusps, planetaryData, aspects }) => {
         horizontal={true}
       >
         <View style={[styles.tableHeader]}>
-          <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
+          <RNText style={[styles.headerText, styles.columnLarge, { color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700' }]}>
             {i18n.translate("Planet")}
-          </H7fontBoldWhite>
-          <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
+          </RNText>
+          <RNText style={[styles.headerText, styles.columnLarge, { color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700' }]}>
             {i18n.translate("Sign")}
-          </H7fontBoldWhite>
-          <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
+          </RNText>
+          <RNText style={[styles.headerText, styles.columnLarge, { color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700' }]}>
             {i18n.translate("Degree")}
-          </H7fontBoldWhite>
-          <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
+          </RNText>
+          <RNText style={[styles.headerText, styles.columnLarge, { color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700' }]}>
             {i18n.translate("House")}
-          </H7fontBoldWhite>
-          <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
+          </RNText>
+          <RNText style={[styles.headerText, styles.columnLarge, { color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700' }]}>
             {i18n.translate("Speed")}
-          </H7fontBoldWhite>
+          </RNText>
         </View>
         {planetaryData &&
           planetaryData.map((aspect, index) => (
             <View key={index} style={[styles.tableRow]}>
-              <H8fontBoldWhite style={[styles.rowText, styles.columnLarge]}>
+              <RNText style={[styles.rowText, styles.columnLarge, { color: '#131523', fontFamily: 'Lora', fontWeight: '500' }]}>
                 {aspect?.name}
-              </H8fontBoldWhite>
+              </RNText>
               <View style={[styles.iconWithText, styles.columnLarge]}>
                 <MaterialCommunityIcons
                   name={`zodiac-${aspect?.sign.toLowerCase()}`}
                   size={24}
-                  color={colors.gradientLogin3}
+                  color={'#C9A14A'}
                 />
-                <H8fontBoldWhite>{aspect?.sign}</H8fontBoldWhite>
+                <RNText style={{ color: '#131523', fontFamily: 'Lora', fontWeight: '500', marginLeft: 4 }}>{aspect?.sign}</RNText>
               </View>
-              <H8fontBoldWhite style={[styles.rowText, styles.columnLarge]}>
+              <RNText style={[styles.rowText, styles.columnLarge, { color: '#131523', fontFamily: 'Lora', fontWeight: '500' }]}>
                 {decimalToSexagesimal(aspect?.full_degree)}
-              </H8fontBoldWhite>
-              <H8fontBoldWhite style={[styles.rowText, styles.columnLarge]}>
+              </RNText>
+              <RNText style={[styles.rowText, styles.columnLarge, { color: '#131523', fontFamily: 'Lora', fontWeight: '500' }]}>
                 {aspect?.house}
-              </H8fontBoldWhite>
-              <H8fontBoldWhite style={[styles.rowText, styles.columnLarge]}>
+              </RNText>
+              <RNText style={[styles.rowText, styles.columnLarge, { color: '#131523', fontFamily: 'Lora', fontWeight: '500' }]}>
                 {convertSpeedToSexagesimal(aspect?.speed)}
-              </H8fontBoldWhite>
+              </RNText>
             </View>
           ))}
       </ScrollView>
 
       <View style={styles.sectionTitle}>
-        <H6fontBoldYellow>Aspects</H6fontBoldYellow>
+        <RNText style={{ color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700', fontSize: 18 }}>Aspects</RNText>
       </View>
       <ScrollView
         contentContainerStyle={{
@@ -131,37 +132,37 @@ const AspectTable = ({ houseCusps, planetaryData, aspects }) => {
         horizontal={true}
       >
         <View style={[styles.tableHeader, { marginTop: "6%" }]}>
-          <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
+          <RNText style={[styles.headerText, styles.columnLarge, { color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700' }]}>
             {i18n.translate("Planet")}
-          </H7fontBoldWhite>
-          <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
+          </RNText>
+          <RNText style={[styles.headerText, styles.columnLarge, { color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700' }]}>
             Aspect
-          </H7fontBoldWhite>
-          <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
+          </RNText>
+          <RNText style={[styles.headerText, styles.columnLarge, { color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700' }]}>
             {i18n.translate("Planet")}
-          </H7fontBoldWhite>
-          <H7fontBoldWhite style={[styles.headerText, styles.columnLarge]}>
+          </RNText>
+          <RNText style={[styles.headerText, styles.columnLarge, { color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700' }]}>
             {i18n.translate("Orb")}
-          </H7fontBoldWhite>
+          </RNText>
         </View>
         {aspects &&
           aspects.map((aspect, index) => (
             <View key={index} style={styles.tableRow}>
-              <H8fontBoldWhite style={[styles.rowText, styles.columnLarge]}>
+              <RNText style={[styles.rowText, styles.columnLarge, { color: '#131523', fontFamily: 'Lora', fontWeight: '500' }]}>
                 {aspect?.planetOne}
-              </H8fontBoldWhite>
+              </RNText>
               <View style={[styles.columnLarge, { flexDirection: "row" }]}>
-                <H8fontBoldWhite>{aspect?.aspect}</H8fontBoldWhite>
-                <Text style={styles.degreeLabel}>
+                <RNText style={{ color: '#131523', fontFamily: 'Lora', fontWeight: '500' }}>{aspect?.aspect}</RNText>
+                <RNText style={[styles.degreeLabel, { color: '#131523', fontFamily: 'Lora', fontWeight: '500' }]}>
                   {getAspectAngle(aspect?.aspect)}°
-                </Text>
+                </RNText>
               </View>
-              <H8fontBoldWhite style={[styles.rowText, styles.columnLarge]}>
+              <RNText style={[styles.rowText, styles.columnLarge, { color: '#131523', fontFamily: 'Lora', fontWeight: '500' }]}>
                 {aspect?.planetTwo}
-              </H8fontBoldWhite>
-              <H8fontBoldWhite style={[styles.rowText, styles.columnLarge]}>
+              </RNText>
+              <RNText style={[styles.rowText, styles.columnLarge, { color: '#131523', fontFamily: 'Lora', fontWeight: '500' }]}>
                 {aspect?.orb}
-              </H8fontBoldWhite>
+              </RNText>
             </View>
           ))}
       </ScrollView>

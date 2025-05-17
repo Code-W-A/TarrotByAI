@@ -14,32 +14,27 @@ import { colors } from "../../utils/colors";
 const ConsentModal = ({ hideModalAndSetConsent, visible }) => {
   return (
     <Provider>
-      <View style={styles.container}>
+      <View style={styles.centeredContainer}>
         <Portal>
           <Modal visible={visible} contentContainerStyle={styles.modal}>
-            <View style={styles.imageContainer}></View>
             <View style={styles.titleContainer}>
+              <Text style={styles.title}>Consentiment pentru imagini</Text>
               <Text style={styles.subTitle}>
-                Cristina Zurba - Tarot" collects/transmits/syncs/stores images
-                information to enable personalized tarot readings, enhancing
-                your experience by providing insights based on the images you
-                share.
+                Cristina Zurba - Tarot colectează și procesează imagini pentru a oferi experiențe personalizate de tarot. Acceptând, ești de acord cu utilizarea imaginilor tale pentru interpretări mai precise și o experiență îmbunătățită.
               </Text>
             </View>
-
             <View style={styles.actionContainer}>
               <Button
                 disabled={false}
                 funCallback={() => {
                   hideModalAndSetConsent();
                 }}
-                borderWidth={0.2}
-                bgColor={colors.primary3}
-                // txtColor={colors.primary2}
+                borderWidth={0}
+                bgColor={colors.gold || '#C9A14A'}
                 label={"Accept"}
-                borderColor={colors.white}
+                borderColor={colors.gold || '#C9A14A'}
                 success={true}
-                style={{ marginTop: "10%", width: "70%" }}
+                style={{ marginTop: 24, width: "80%", borderRadius: 28, alignSelf: 'center' }}
                 txtColor={colors.white}
               />
             </View>
@@ -77,16 +72,23 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
     alignItems: "center",
-    padding: 15,
+    marginBottom: 18,
   },
   title: {
-    fontSize: 20,
-    color: "white",
-    marginVertical: 10,
+    fontSize: 22,
+    color: '#C9A14A',
+    fontFamily: 'LoraBold',
+    textAlign: 'center',
+    marginBottom: 12,
+    letterSpacing: 0.2,
   },
   subTitle: {
-    fontSize: 15,
-    color: "#D3D3D3",
+    fontSize: 16,
+    color: '#131523',
+    fontFamily: 'Lora',
+    textAlign: 'center',
+    opacity: 0.92,
+    lineHeight: 22,
   },
   starsContainer: {
     flexDirection: "row",
@@ -94,26 +96,32 @@ const styles = StyleSheet.create({
     marginTop: 30,
   },
   actionContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
+    width: '100%',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  centeredContainer: {
+    flex: 1,
+    justifyContent: "center",
     alignItems: "center",
-    display: "flex",
+    backgroundColor: 'rgba(0,0,0,0.18)',
+    zIndex: 10,
   },
   modal: {
-    backgroundColor: "rgba(40, 49, 64, 0.9)",
-    paddingVertical: 20,
-    margin: 20,
+    backgroundColor: '#FFF9F3',
+    paddingVertical: 36,
+    paddingHorizontal: 28,
     borderWidth: 2,
-    borderColor: colors.purpleBlue,
-    borderRadius: 20,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-    zIndex: 10,
+    borderColor: colors.gold || '#C9A14A',
+    borderRadius: 28,
+    shadowColor: '#C9A14A',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.13,
+    shadowRadius: 18,
+    elevation: 10,
+    alignItems: 'center',
+    minWidth: 320,
+    maxWidth: 400,
+    alignSelf: 'center',
   },
 });

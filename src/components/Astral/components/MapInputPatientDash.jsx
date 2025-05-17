@@ -73,33 +73,40 @@ export default function MapInputPatientDash({
       styles={{
         textInput: {
           height: 55,
-          color: "#fff", // Text color
-          paddingHorizontal: 10,
-          fontSize: 15, // Adjust font size to match other inputs
-          borderWidth: 0.5,
-          borderColor: colors.primary3, // Border color
-          backgroundColor: colors.primary3, // Background color
-          borderRadius: 35, // Rounded corners
+          color: '#C9A14A',
+          paddingHorizontal: 16,
+          fontSize: 16,
+          fontFamily: 'Lora',
+          borderWidth: 1.5,
+          borderColor: '#C9A14A',
+          backgroundColor: '#fff',
+          borderRadius: 22,
+          shadowColor: '#C9A14A',
+          shadowOpacity: 0.08,
+          shadowRadius: 8,
+          elevation: 2,
         },
         textInputContainer: {
           paddingHorizontal: 0,
-          paddingTop: 12, // Padding top for container
-          backgroundColor: "transparent", // Make the container background transparent
-          borderBottomWidth: 0, // Remove bottom border if not needed
-          alignItems: "center",
+          paddingTop: 12,
+          backgroundColor: 'transparent',
+          borderBottomWidth: 0,
+          alignItems: 'center',
         },
         listView: {
-          backgroundColor: "white",
-          position: "absolute", // Confirm it's positioned absolutely
-          zIndex: 1000, // Increase zIndex to ensure it's on top
-          top: "90%", // Adjust the top position as necessary
-          width: "100%", // Make sure it spans the width
+          backgroundColor: 'white',
+          position: 'absolute',
+          zIndex: 1000,
+          top: '90%',
+          width: '100%',
         },
         description: {
-          fontWeight: "bold",
+          fontWeight: 'bold',
+          color: '#C9A14A',
+          fontFamily: 'Lora',
         },
         predefinedPlacesDescription: {
-          color: "#1faadb",
+          color: '#1faadb',
         },
       }}
     />

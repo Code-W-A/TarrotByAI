@@ -118,6 +118,7 @@ import { handleFirebaseAuthError } from "../utils/authUtils";
 import SnackBar from "../components/SnackBar";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import Icon from "react-native-vector-icons/FontAwesome";
+import { useNavBarVisibility } from '../context/NavbarVisibilityContext';
 
 interface Props extends GeneralProps {
   route: Route<string, object | undefined>;
@@ -137,6 +138,7 @@ const SignInScreenClinic: React.FC<Props> = ({
   const [loginType, setLoginType] = useState("email");
   const [message, setMessage] = useState("email");
   const [showSnackback, setShowSnackback] = useState(false);
+  const { setIsNavBarVisible } = useNavBarVisibility();
 
   const formKeys = {
     email: "email",
@@ -166,10 +168,9 @@ const SignInScreenClinic: React.FC<Props> = ({
   const handleLoginAsGuest = async () => {
     try {
       // Setează valoarea pentru a indica că utilizatorul este un guest user
-      await setAsGuestUser(true).then(() => {
-        navigation.navigate(screenName.ClinicDashBoard);
-      });
-
+      await setAsGuestUser(true);
+      setIsNavBarVisible(true);
+      navigation.replace(screenName.ClinicDashBoard);
       console.log("Utilizatorul este acum setat ca guest user.");
     } catch (error) {
       // Gestionează orice erori care pot apărea la scrierea în AsyncStorage
@@ -302,6 +303,11 @@ const SignInScreenClinic: React.FC<Props> = ({
     }
   }, [response]);
 
+  useEffect(() => {
+    setIsNavBarVisible(false);
+    return () => setIsNavBarVisible(true);
+  }, []);
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <Fragment>
@@ -318,13 +324,13 @@ const SignInScreenClinic: React.FC<Props> = ({
             keyboardVerticalOffset={40}
           >
             <ScrollView
-              contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-start' }}
+              contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-start', paddingBottom: 60 }}
               keyboardShouldPersistTaps="handled"
               showsVerticalScrollIndicator={false}
             >
               <View style={[styles.subContainerNew, { paddingTop: 10 }]}>
                 <View style={styles.headerContainerNew}>
-                  <Image
+                <Image
                     source={require('../../assets/headerIcon.png')}
                     style={styles.logoCrownResponsive}
                     resizeMode="contain"
@@ -333,7 +339,7 @@ const SignInScreenClinic: React.FC<Props> = ({
                   <H6fontBoldPrimary>
                     {i18n.translate('login')}
                   </H6fontBoldPrimary>
-                </View>
+              </View>
                 <View style={styles.formContainerNew}>
                   <Controller
                     name={formKeys.email}
@@ -379,49 +385,49 @@ const SignInScreenClinic: React.FC<Props> = ({
                   />
                   <RowView style={styles.forgotRowNew} height={undefined}>
                     {loginType === 'email' && (
-                      <TouchableOpacity
+                    <TouchableOpacity
                         onPress={() => navigation.navigate(screenName.ForgotPasswordClinic as any)}
-                      >
-                        <H7fontBoldPrimary>
+                    >
+                      <H7fontBoldPrimary>
                           {i18n.translate('forgotPassword')}
-                        </H7fontBoldPrimary>
-                      </TouchableOpacity>
-                    )}
-                  </RowView>
+                      </H7fontBoldPrimary>
+                    </TouchableOpacity>
+                  )}
+                </RowView>
                   <View style={styles.buttonGroupNew}>
-                    <Button
-                      disabled={false}
-                      funCallback={handleLoginAsGuest}
+                  <Button
+                    disabled={false}
+                    funCallback={handleLoginAsGuest}
                       borderWidth={2}
                       bgColor={'#fff'}
                       txtColor={'#000'}
                       label={i18n.translate('loginNowNoAccount')}
                       borderColor={'#C9A14A'}
-                      success={true}
+                    success={true}
                       style={styles.guestButtonNew}
                       txtStyle={styles.guestButtonTextNew}
-                    />
-                    <Button
-                      disabled={false}
-                      funCallback={handleSubmit(onsubmit)}
+                  />
+                  <Button
+                    disabled={false}
+                    funCallback={handleSubmit(onsubmit)}
                       borderWidth={0}
                       bgColor={'#C9A14A'}
                       style={styles.loginButtonNew}
                       label={i18n.translate('loginNow')}
                       borderColor={'#C9A14A'}
-                      success={true}
+                    success={true}
                       txtColor={'#fff'}
                       txtStyle={styles.loginButtonTextNew}
-                    />
-                    <TouchableOpacity
+                  />
+                <TouchableOpacity
                       style={styles.googleButtonNew}
                       onPress={() => promptAsync()}
-                      disabled={!request}
+                  disabled={!request}
                       activeOpacity={0.85}
-                    >
+                >
                       <Icon name="google" size={22} color="#C9A14A" style={{ marginRight: 10 }} />
                       <Text style={styles.googleButtonTextNew}>{i18n.translate('loginWithGoogle')}</Text>
-                    </TouchableOpacity>
+                </TouchableOpacity>
                   </View>
                   <View style={styles.infoTextViewStyleNew}>
                     <H7fontBoldPrimary>

@@ -8,6 +8,8 @@ import {
   StatusBar,
   ImageBackground,
   ScrollView,
+  Button,
+  Alert,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { MainContainer } from "../../components/commonViews";
@@ -86,8 +88,8 @@ const EcranAfirmatii = () => {
   }, []);
 
   React.useEffect(() => {
-    setIsNavBarVisible(false);
-    return () => setIsNavBarVisible(true); // Restabilește vizibilitatea la ieșirea din componentă
+    setIsNavBarVisible();
+    return () => setIsNavBarVisible(); // Restabilește vizibilitatea la ieșirea din componentă
   }, []);
 
   // Generăm array-ul automat
@@ -172,7 +174,7 @@ const EcranAfirmatii = () => {
 
   return (
     <View style={{ flex: 1 }}>
-      <MainContainer style={{ flex: 1 }}>
+      <MainContainer secondary={false} style={{ flex: 1 }}>
         <ImageBackground
           source={randomImage}
           resizeMode="cover"
@@ -181,7 +183,7 @@ const EcranAfirmatii = () => {
           {/* Overlay negru transparent */}
           <View style={styles.overlay}>
             {/* Bara de salut și buton de back */}
-            <GreetingBar isGoBack={true} />
+            <GreetingBar isGoBack={true} isPersonalGoBack={true} />
 
             {/* Logo din header */}
             <View style={styles.secondImageContainer}>
@@ -196,7 +198,6 @@ const EcranAfirmatii = () => {
             <View style={styles.contentContainer}>
               {/* Afișăm titlul (din route params) */}
               <H3fontBoldWhite style={styles.title}>{title}</H3fontBoldWhite>
-
               {/* Zona scrollabilă pentru body (și, dacă vrei, citatul) */}
               <ScrollView
                 style={styles.scrollArea}
@@ -206,7 +207,6 @@ const EcranAfirmatii = () => {
                 <H6fontMediumWhite style={styles.description}>
                   {body}
                 </H6fontMediumWhite>
-
                 {/* Dacă vrei să afișezi și citatul random sub body */}
                 {zilnicCitateMotivationale?.citat && (
                   <H6fontMediumWhite style={styles.quote}>
@@ -214,7 +214,6 @@ const EcranAfirmatii = () => {
                   </H6fontMediumWhite>
                 )}
               </ScrollView>
-
               {/* Mențiune sub scroll */}
               <H7fontBoldWhite style={styles.mention}>
                 @cristinazurba

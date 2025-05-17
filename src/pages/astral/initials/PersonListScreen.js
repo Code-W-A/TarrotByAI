@@ -9,6 +9,7 @@ import {
   Text,
   TouchableOpacity,
   Modal,
+  Linking,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
@@ -220,22 +221,17 @@ const PersonListScreen = ({ navigation }) => {
 
       return (
         <Surface
-          style={[styles.surfaceRight, { backgroundColor: "transparent" }]}
+          style={[styles.surfaceRight, { backgroundColor: "#fffbeae0", borderColor: "#C9A14A", borderWidth: 1.2 }]}
         >
-          <View style={[StyleSheet.absoluteFill, { top: -25, opacity: 0.3 }]}>
+          <View style={[StyleSheet.absoluteFill, { top: -10, left: -10, opacity: 0.28 }]}> 
             <Constellation
-              color={colors.gradientLogin2 + "3D"}
-              dotColor={colors.gradientLogin2}
+              color={'#C9A14A99'}
+              dotColor={'#C9A14A'}
               width={250}
               height={300}
             />
           </View>
-          <LinearGradient
-            colors={["transparent", "#4c4c4c" + "E6", "#4c4c4c" + "E6"]}
-            start={[0, 0]}
-            end={[1, 0]}
-            style={styles.gradientRight}
-          >
+          <View style={styles.gradientRight}>
             <View style={{ flex: 1 }}>
               <View
                 style={[
@@ -250,7 +246,7 @@ const PersonListScreen = ({ navigation }) => {
                 </Text>
               </View>
               {hasFullName && (
-                <Title style={styles.nameText}>{item?.full_name}</Title>
+                <Text style={styles.nameText}>{item?.full_name}</Text>
               )}
 
               {hasDateOfBirth && (
@@ -274,6 +270,8 @@ const PersonListScreen = ({ navigation }) => {
                     console.log("item...", item.synastry)
                   }
                   }
+                  theme={{ colors: { primary: '#C9A14A', text: '#fff' } }}
+                  labelStyle={{ fontFamily: 'LoraBold', fontSize: 14 }}
                 >
                   {veziAnalizaText}
                 </Button>
@@ -287,7 +285,7 @@ const PersonListScreen = ({ navigation }) => {
                 </Button> */}
               </View>
             </View>
-          </LinearGradient>
+          </View>
         </Surface>
       );
     }
@@ -297,22 +295,17 @@ const PersonListScreen = ({ navigation }) => {
       // console.log("other person...", item);
       return (
         <Surface
-          style={[styles.surfaceRight, { backgroundColor: "transparent" }]}
+          style={[styles.surfaceRight, { backgroundColor: "#fffbeae0", borderColor: "#C9A14A", borderWidth: 1.2 }]}
         >
-          <View style={[StyleSheet.absoluteFill, { top: -25, opacity: 0.3 }]}>
+          <View style={[StyleSheet.absoluteFill, { top: -10, left: -10, opacity: 0.28 }]}> 
             <Constellation
-              color={colors.gradientLogin2 + "3D"}
-              dotColor={colors.gradientLogin2}
+              color={'#C9A14A99'}
+              dotColor={'#C9A14A'}
               width={250}
               height={300}
             />
           </View>
-          <LinearGradient
-            colors={["transparent", "#4c4c4c" + "E6", "#4c4c4c" + "E6"]}
-            start={[0, 0]}
-            end={[1, 0]}
-            style={styles.gradientRight}
-          >
+          <View style={styles.gradientRight}>
             <View style={{ flex: 1 }}>
               <View
                 style={[
@@ -326,9 +319,9 @@ const PersonListScreen = ({ navigation }) => {
                   {item?.isPaid ? AchiziționatText : NeachiziționatText}
                 </Text>
               </View>
-              <Title style={styles.nameText}>
+              <Text style={styles.nameText}>
                 {item?.person1?.full_name} & {item?.person2?.full_name}
-              </Title>
+              </Text>
               <View style={styles.buttonRow}>
                 <Button
                   mode="contained"
@@ -341,6 +334,8 @@ const PersonListScreen = ({ navigation }) => {
                     });
                
                   }}
+                  theme={{ colors: { primary: '#C9A14A', text: '#fff' } }}
+                  labelStyle={{ fontFamily: 'LoraBold', fontSize: 14 }}
                 >
                   {veziAnalizaText}
                 </Button>
@@ -354,7 +349,7 @@ const PersonListScreen = ({ navigation }) => {
                 </Button> */}
               </View>
             </View>
-          </LinearGradient>
+          </View>
         </Surface>
       );
     }
@@ -365,26 +360,36 @@ const PersonListScreen = ({ navigation }) => {
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <View style={{ flex: 1 }}>
       <LinearGradient
-        colors={[colors.gradientLogin1, colors.gradientLogin11]}
-        style={styles.container}
-      >
-        <SpaceSky />
-
-        <View style={styles.listContainer}>
-        <View style={styles.helpContainer}>
-        <Text style={styles.helpText}>{helpText}</Text>
-      </View>
+        colors={[
+          '#F7E7B4',
+          '#F9EFD6CC',
+          '#FAF7F2',
+          '#FFFBEA00'
+        ]}
+        style={{ ...StyleSheet.absoluteFillObject, zIndex: 0 }}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
+      />
+      <SpaceSky style={{ ...StyleSheet.absoluteFillObject, zIndex: 1 }} />
+      <View style={{ flex: 1, zIndex: 2 }}>
+        <View style={[styles.listContainer, { paddingTop: 40, backgroundColor: 'transparent', flex: 1 }]}> 
+          <View style={styles.helpContainer}>
+            <Text style={styles.helpText}>
+              {helpText.split('webdynamicx@gmail.com')[0]}
+              <TouchableOpacity onPress={() => Linking.openURL('mailto:webdynamicx@gmail.com')}>
+                <Text style={{ fontWeight: 'bold', color: '#C9A14A', textDecorationLine: 'underline' }}>webdynamicx@gmail.com</Text>
+              </TouchableOpacity>
+            </Text>
+          </View>
           <FlatList
             data={unifiedData}
-            keyExtractor={(item, index) =>
-              `${item.listType}-${item.id || index}`
-            }
+            keyExtractor={(item, index) => `${item.listType}-${item.id || index}`}
             renderItem={renderItem}
-            contentContainerStyle={styles.flatListContent}
+            ListEmptyComponent={<Text style={styles.emptyText}>Nu există persoane adăugate încă.</Text>}
+            contentContainerStyle={{ flexGrow: 1, paddingVertical: 20, paddingHorizontal: 10, paddingBottom:100 }}
           />
-
           <FloatingActionButton
             handleAddYourSinastrie={handleAddPerson}
             handleAddOtherSinastrie={handleAddPersonForOthers}
@@ -426,8 +431,8 @@ const PersonListScreen = ({ navigation }) => {
             </View>
           </View>
         </Modal>
-      </LinearGradient>
-    </SafeAreaView>
+      </View>
+    </View>
   );
 };
 
@@ -438,7 +443,7 @@ const styles = StyleSheet.create({
   },
   helpText: {
     fontSize: 14,
-    color: 'white',
+    color: '#C9A14A',
     textAlign: 'center',
   },
   statusBadge: {
@@ -449,17 +454,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 20,
     zIndex: 10,
+    backgroundColor: '#fffbe6',
+    borderWidth: 1.5,
+    borderColor: '#C9A14A',
   },
   statusBadgePaid: {
-    backgroundColor: "#4CAF50", // Verde pentru achiziționat
+    backgroundColor: "#fffbe6",
   },
   statusBadgeUnpaid: {
-    backgroundColor: "#F44336", // Roșu pentru neachiziționat
+    backgroundColor: "#fffbe6",
   },
   statusBadgeText: {
-    color: "#FFFFFF",
+    color: "#C9A14A",
     fontSize: 12,
-    fontWeight: "bold",
+    fontFamily: 'LoraBold',
   },
 
   navbar: {
@@ -527,6 +535,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginVertical: 10,
     overflow: "hidden",
+    backgroundColor: '#fff',
+    borderWidth: 1.5,
+    borderColor: '#C9A14A',
   },
   gradientRight: {
     padding: 15,
@@ -534,15 +545,18 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 25,
     flex: 1,
     flexDirection: "column",
+    backgroundColor: '#fff',
   },
   nameText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: colors.gradientLogin2,
+    fontSize: 20,
+    fontFamily: 'LoraBold',
+    color: '#C9A14A',
+    marginBottom: 2,
   },
   detailsText: {
-    fontSize: 14,
-    color: "#FFFFFF",
+    fontSize: 15,
+    color: '#131523',
+    fontFamily: 'Lora',
     marginVertical: 5,
   },
   buttonRow: {
@@ -551,8 +565,10 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   sinButton: {
-    backgroundColor: colors.gradientLogin11,
+    backgroundColor: '#C9A14A',
     marginRight: 10,
+    borderRadius: 22,
+    minWidth: 120,
   },
   updateButton: {
     borderColor: colors.gradientLogin2,
@@ -562,7 +578,8 @@ const styles = StyleSheet.create({
   emptyText: {
     textAlign: "center",
     fontSize: 16,
-    color: "white",
+    color: '#C9A14A',
+    fontFamily: 'LoraBold',
     marginTop: 20,
   },
   buttonContainer: {

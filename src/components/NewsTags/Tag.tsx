@@ -8,21 +8,24 @@ export const Tag: React.FC<{
   setSelectedCategory: Function;
   toSelectCat: String;
 }> = ({ category, toSelectCat, selectedCategory, setSelectedCategory }) => {
-  const textColor = useColorScheme() === "dark" ? "#fff" : "#000";
   const handlePress = useCallback(() => {
     setSelectedCategory(toSelectCat);
   }, [category, setSelectedCategory]);
+  const isSelected = selectedCategory === toSelectCat;
   return (
     <TouchableOpacity
       style={[
         styles.container,
-        selectedCategory === toSelectCat && styles.selected,
+        isSelected && styles.selected,
       ]}
       onPress={handlePress}
     >
-      <Text style={[styles.text, { color: textColor }]}>{`${
-        category.charAt(0).toUpperCase() + category.slice(1)
-      }`}</Text>
+      <Text style={[
+        styles.text,
+        isSelected && styles.selectedText,
+      ]}>
+        {category.charAt(0).toUpperCase() + category.slice(1)}
+      </Text>
     </TouchableOpacity>
   );
 };

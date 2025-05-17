@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, TouchableOpacity, StyleSheet, Animated } from "react-native";
+import { View, TouchableOpacity, StyleSheet, Animated, Text } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { screenName } from "../utils/screenName";
@@ -14,6 +14,17 @@ import i18n from "../../i18n";
 import { useApiData } from "../context/ApiContext";
 import { useNumberContext } from "../context/NumberContext";
 import { FontAwesome } from "@expo/vector-icons";
+
+const GOLD = '#C9A14A';
+const CREAM = 'rgba(250,247,242,0.95)';
+const GRAY = '#B0B0B0';
+const TAB_ICONS = [
+  { lib: Ionicons, icon: 'star', screen: screenName.ClinicDashBoard },
+  { lib: Ionicons, icon: 'bookmark', screen: "Astral" },
+  { lib: MaterialCommunityIcons, icon: 'cards-outline', screen: screenName.PersonalReadingDashboard },
+  { lib: Ionicons, icon: 'newspaper-outline', screen: 'News' },
+  { lib: Ionicons, icon: 'person', screen: 'TarrotSettings' },
+];
 
 const NavBarBottom = () => {
   const navigation = useNavigation();
@@ -47,7 +58,7 @@ const NavBarBottom = () => {
     setShuffledCartiPersonalizate,
   } = useApiData();
 
-  const animatedValues = useRef(
+  const animatedValues = useRef<Animated.Value[]>(
     Array.from({ length: 5 }, () => new Animated.Value(0))
   ).current;
   const chevronAnimation = useRef(new Animated.Value(0)).current;
@@ -175,7 +186,7 @@ const NavBarBottom = () => {
 
   return (
     <>
-      {selected === 1 &&
+      {selected === 2 &&
         shuffledCartiViitor.length === 0 &&
         firstVisit &&
         !loading &&
@@ -194,115 +205,77 @@ const NavBarBottom = () => {
           </View>
         )}
       <View
-        style={[
-          styles.navbar,
-          {
-            backgroundColor:
-              selected === 1 || selected === 3 || selected === 0
-                ? "rgba(252, 246, 198, 0.8)"
-                : "transparent",
-          },
-        ]}
+        style={{
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          bottom: 0,
+          width: '100%',
+          alignItems: 'center',
+          zIndex: 20,
+        }}
       >
-        {[
-          screenName.ClinicDashBoard,
-          screenName.PersonalReadingDashboard,
-          "TarrotSettings",
-          "News", // Ensure "News" is included in your navigation options array
-          "Astral",
-        ].map((screen, index) => (
-          <Animated.View
-            key={screen}
-            style={[
-              selected != index && styles.iconWrapBase,
-              selected === index && styles.iconWrap,
-              animatedStyle(index),
-            ]}
-          >
+        <View style={styles.navbarModern}>
+          {TAB_ICONS.map((tab, index) => {
+            const IconLib = tab.lib;
+            return (
             <TouchableOpacity
-              onPress={() => handlePress(screen, index)}
-              style={{ zIndex: 1 }}
-            >
-              {screen === "News" ? (
-                // Condition to check if the current screen is "News" and render the newspaper-outline icon
-                <Ionicons
-                  name="newspaper-outline"
-                  size={selected === index ? 34 : 24}
-                  color={
-                    selected === index ? colors.gradientLogin2 : colors.primary3
-                  }
+                key={tab.screen + '-' + index}
+                style={styles.tabButtonModern}
+                onPress={() => handlePress(tab.screen, index)}
+                activeOpacity={0.85}
+              >
+                <IconLib
+                  name={tab.icon as any}
+                  size={selected === index ? 36 : 28}
+                  color={selected === index ? GOLD : GRAY}
+                  style={selected === index ? styles.iconActiveModern : styles.iconInactiveModern}
                 />
-              ) : screen === "Astral" ? (
-                // Condition to check if the current screen is "News" and render the newspaper-outline icon
-                <Ionicons
-                  name="moon-sharp"
-                  size={selected === index ? 34 : 24}
-                  color={
-                    selected === index ? colors.gradientLogin2 : colors.primary3
-                  }
-                />
-              ) : screen === screenName.PersonalReadingDashboard ? (
-                // Condition to check if the current screen is "News" and render the newspaper-outline icon
-                <MaterialCommunityIcons
-                  name="cards-outline"
-                  size={selected === index ? 34 : 24}
-                  color={
-                    selected === index ? colors.gradientLogin2 : colors.primary3
-                  }
-                />
-              ) : (
-                // Existing code to render icons for other navigation options
-                <Ionicons
-                  name={
-                    index === 0 ? "star" : index === 1 ? "bookmark" : "person"
-                  }
-                  size={selected === index ? 34 : 24}
-                  color={
-                    selected === index ? colors.gradientLogin2 : colors.primary3
-                  }
-                />
-              )}
             </TouchableOpacity>
-          </Animated.View>
-        ))}
+            );
+          })}
+        </View>
       </View>
     </>
   );
 };
 
 const styles = StyleSheet.create({
-  navbar: {
-    flexDirection: "row",
-    justifyContent: "space-evenly",
-    alignItems: "center",
-    height: 60,
-    backgroundColor: "transparent",
-    position: "absolute",
-    bottom: 0,
-    width: "100%",
-    zIndex: 1,
+  navbarModern: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    height: 74,
+    backgroundColor: CREAM,
+    borderTopWidth: 2,
+    borderTopColor: GOLD,
+    borderRadius: 28,
+    marginBottom: 16,
+    shadowColor: GOLD,
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 12,
+    width: '92%',
   },
-  iconWrapBase: {
-    justifyContent: "center",
-    alignItems: "center",
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    zIndex: 1,
-    top: "1%",
+  tabButtonModern: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    minWidth: 60,
   },
-  iconWrap: {
-    justifyContent: "center",
-    alignItems: "center",
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    marginBottom: 10,
-    zIndex: 1,
+  iconActiveModern: {
+    marginBottom: 0,
+    shadowColor: GOLD,
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  iconInactiveModern: {
+    marginBottom: 0,
   },
   shuffleTextContainer: {
     alignItems: "center",
-
     backgroundColor: "transparent",
     position: "relative",
     bottom: "12%",

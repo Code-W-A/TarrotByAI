@@ -113,65 +113,55 @@ const LuckyNumber = () => {
   // }, []);
 
   return (
-    <View style={{ flex: 1 }}>
-      <MainContainer style={{ flex: 1 }}>
-        <LinearGradient
-          colors={[
-            colors.gradientLogin1,
-            colors.gradientLogin2,
-            colors.gradientLogin2,
-          ]}
-          style={styles.gradient}
+    <MainContainer secondary={false} style={{ flex: 1 }}>
+      <ImageBackground
+        source={require("../../../assets/dashboardbg.jpg")}
+        style={{ flex: 1, paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0 }}
+        imageStyle={{ opacity: 1 }}
+      >
+        <ImageBackground
+          source={require("../../../assets/shadowBg.png")}
+          resizeMode="cover"
+          style={{ flex: 1 }}
         >
-          <ImageBackground
-            source={require("../../../assets/shadowBg.png")}
-            resizeMode="cover"
-            style={{
-              flex: 1,
-              width: null,
-              height: null,
-              // alignItems: 'flex-end',
-            }}
-          >
-            <GreetingBar isGoBack={true} />
-            <View style={styles.overlay}>
-              <View style={styles.numberContainer}>
-                <Text style={styles.number}>
-                  {zilnicNumereNorocoase.number
-                    ? zilnicNumereNorocoase.number
-                    : ""}
-                </Text>
-              </View>
-              <View style={styles.secondImageContainer}>
-                <Image
-                  source={require("../../../assets/headerIcon.png")}
-                  style={styles.secondImage}
-                  resizeMode="contain"
-                />
-              </View>
+          <GreetingBar isGoBack={true} />
+          <View style={styles.overlay}>
+            <View style={[styles.numberContainer, { borderColor: '#C9A14A', borderWidth: 3, backgroundColor: '#FFFBEA', shadowOpacity: 0.08, shadowRadius: 8 }]}>
+              <Text style={[styles.number, { color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700', fontSize: 42, textAlign: 'center', marginVertical: 18 }]}>
+                {zilnicNumereNorocoase.number
+                  ? zilnicNumereNorocoase.number
+                  : ""}
+              </Text>
             </View>
-            <View style={{ height: "auto", padding: 10 }}>
-              <ScrollView contentContainerStyle={styles.scrollViewContainer}>
-                {/* <H7fontBoldWhite style={{ alignSelf: "center" }}>
-                {zilnicNumereNorocoase.info[language].nume}
-              </H7fontBoldWhite> */}
-                {zilnicNumereNorocoase.info ? (
-                  <H7fontMediumPrimary style={{ textAlign: "justify" }}>
-                    {language === "hi"
-                      ? zilnicNumereNorocoase.info.hu?.descriere
-                      : language === "id"
-                      ? zilnicNumereNorocoase.info.ru?.descriere
-                      : language === "ru"
-                      ? zilnicNumereNorocoase.info.rusa?.descriere
-                      : zilnicNumereNorocoase.info[language]?.descriere}
-                  </H7fontMediumPrimary>
-                ) : null}
-              </ScrollView>
+            <View style={styles.secondImageContainer}>
+              <Image
+                source={require("../../../assets/headerIcon.png")}
+                style={[styles.secondImage, { tintColor: '#C9A14A' }]}
+                resizeMode="contain"
+              />
             </View>
-          </ImageBackground>
-        </LinearGradient>
-      </MainContainer>
-    </View>
+          </View>
+          <View style={{ flex: 1, padding: 10 }}>
+            <ScrollView contentContainerStyle={[styles.scrollViewContainer, {flexGrow: 1}]} style={{flex: 1}}>
+              {/* <H7fontBoldWhite style={{ alignSelf: "center" }}>
+              {zilnicNumereNorocoase.info[language].nume}
+            </H7fontBoldWhite> */}
+              {zilnicNumereNorocoase.info ? (
+                <H7fontMediumPrimary style={{ textAlign: "justify", color: '#131523', fontFamily: 'Lora', fontWeight: '400', fontSize: 19, lineHeight: 28, marginTop: 18, backgroundColor: 'transparent' }}>
+                  {language === "hi"
+                    ? zilnicNumereNorocoase.info.hu?.descriere
+                    : language === "id"
+                    ? zilnicNumereNorocoase.info.ru?.descriere
+                    : language === "ru"
+                    ? zilnicNumereNorocoase.info.rusa?.descriere
+                    : zilnicNumereNorocoase.info[language]?.descriere}
+                </H7fontMediumPrimary>
+              ) : null}
+            </ScrollView>
+          </View>
+        </ImageBackground>
+      </ImageBackground>
+    </MainContainer>
   );
 };
 

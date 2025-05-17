@@ -122,6 +122,7 @@ import NewPersonAstrograma from "./src/pages/astral/initials/NewPersonAstrograma
 import AstrogramaNatalaOtherPerson from "./src/pages/astral/initials/AstrogramaNatalaOtherPerson";
 import NewTwoSyanstryPersons from "./src/pages/astral/initials/NewTwoSynastryPersons";
 import SinastrieRelatieOthers from "./src/pages/astral/initials/SinastrieRelatieOthers";
+import WebViewConsultatiiScreen from "./src/pages/doctors/WebViewConsultatiiScreen";
 // import BirthDateScreen from "./src/pages/astral/initials/birth-date.screen";
 // import RelationshipScreen from "./src/pages/astral/initials/relationship.screen";
 // import SexScreen from "./src/pages/astral/initials/sex.screen";
@@ -320,6 +321,11 @@ const HomeNavigation = (props: NavigationProps) => {
         <Stack.Screen
           name="PersonsListAstrograma"
           component={PersonListScreenAstrograma}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="WebViewConsultatiiScreen"
+          component={WebViewConsultatiiScreen}
           options={{ headerShown: false }}
         />
         {/* <Stack.Screen

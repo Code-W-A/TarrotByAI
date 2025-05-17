@@ -32,26 +32,32 @@ const FutureReading = ({ route }) => {
   const { language, changeLanguage } = useLanguage();
   const { item } = route.params;
 
-  const onPressHandler = () => {
-    console.log("Pressed");
-  };
-
   const { setIsNavBarVisible } = useNavBarVisibility();
 
   React.useEffect(() => {
-    setIsNavBarVisible(false);
-    return () => setIsNavBarVisible(true); // Restabilește vizibilitatea la ieșirea din componentă
+    setIsNavBarVisible();
+    return () => setIsNavBarVisible(); // Restabilește vizibilitatea la ieșirea din componentă
   }, []);
+
+  // Funcții pentru titlu și descriere, ca în PersonalizedReading
+  const getName = () => {
+    if (language === "hi") return item.info.hu?.nume;
+    if (language === "id") return item.info.ru?.nume;
+    if (language === "ru") return item.info.rusa?.nume;
+    return item.info[language]?.nume;
+  };
+  const getDescription = () => {
+    if (language === "hi") return item.info.hu?.descriere;
+    if (language === "id") return item.info.ru?.descriere;
+    if (language === "ru") return item.info.rusa?.descriere;
+    return item.info[language]?.descriere;
+  };
 
   return (
     <View style={{ flex: 1 }}>
-      <MainContainer>
+      <MainContainer secondary={false} style={{ flex: 1 }}>
         <LinearGradient
-          colors={[
-            colors.gradientLogin1,
-            colors.gradientLogin2,
-            colors.gradientLogin2,
-          ]}
+          colors={['#FFFBEA', '#FAF7F2', '#F7E7B4']}
           style={styles.gradient}
         >
           <ImageBackground
@@ -63,58 +69,64 @@ const FutureReading = ({ route }) => {
               height: null,
             }}
           >
-            <GreetingBar isGoBack={true} />
+            <GreetingBar isGoBack={true} isPersonalGoBack={true} />
 
-            <View style={styles.overlay}>
               <View style={styles.imageContainer}>
                 <Image
-                  style={styles.image}
+                style={{
+                  width: 141,
+                  height: 200,
+                  resizeMode: 'stretch',
+                  borderWidth: 2,
+                  borderColor: '#C9A14A',
+                  borderRadius: 12,
+                  shadowColor: '#C9A14A',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.13,
+                  shadowRadius: 8,
+                }}
                   source={{ uri: item.image.finalUri }}
                 />
               </View>
 
+            <ScrollView contentContainerStyle={styles.scrollViewContainer}>
               <View
                 style={{
                   display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  height: "auto", // rămâne la fel
+                  justifyContent: "space-around",
+                  height: "auto",
+                  paddingHorizontal: "5%",
                 }}
               >
-                <H6fontBoldPrimary
-                  style={{ alignSelf: "center", marginBottom: 10 }}
-                >
-                  {language === "hi"
-                    ? item.info.hu?.nume
-                    : language === "id"
-                    ? item.info.ru?.nume
-                    : language === "ru"
-                    ? item.info.rusa?.nume
-                    : item.info[language]?.nume}
-                </H6fontBoldPrimary>
-
-                {/** Aici folosim ScrollView cu o înălțime maximă pentru a permite scroll */}
-                <ScrollView
+                <Text
                   style={{
-                    maxHeight: 400,
-                    paddingBottom: "50%",
-                    marginTop: "5%",
+                    alignSelf: "center",
+                    marginBottom: "5%",
+                    color: '#C9A14A',
+                    fontFamily: 'LoraBold',
+                    fontSize: 22,
+                    letterSpacing: 1.1,
+                    textShadowColor: '#fffbeae0',
+                    textShadowOffset: { width: 0, height: 2 },
+                    textShadowRadius: 6,
                   }}
                 >
-                  <H7fontMediumPrimary style={{ textAlign: "center" }}>
-                    {language === "hi"
-                      ? item.info.hu?.descriere
-                      : language === "id"
-                      ? item.info.ru?.descriere
-                      : language === "ru"
-                      ? item.info.rusa?.descriere
-                      : item.info[language]?.descriere}
+                  {getName()}
+                </Text>
 
-                    {/** Continuă textul lung aici */}
-                  </H7fontMediumPrimary>
-                </ScrollView>
+                <Text
+                  style={{
+                    textAlign: 'justify',
+                    color: '#7c6f57',
+                    fontFamily: 'LoraRegular',
+                    fontSize: 16,
+                    letterSpacing: 0.2,
+                  }}
+                >
+                  {getDescription()}
+                </Text>
               </View>
-            </View>
+            </ScrollView>
           </ImageBackground>
         </LinearGradient>
       </MainContainer>
@@ -193,6 +205,9 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 18,
     textAlign: "center",
+  },
+  scrollViewContainer: {
+    padding: 20,
   },
 });
 

@@ -10,16 +10,13 @@ export const SearchInput: React.FC<{
   setIsLoading: Function;
   handleSearchData: Function;
 }> = ({ searchText, setSearchText, setIsLoading, handleSearchData }) => {
-  const backgroundColor = useColorScheme() === "dark" ? "#333" : "#ddd";
-  const placeholderColor = useColorScheme() === "dark" ? "#eee" : "#111";
-  const color = useColorScheme() === "dark" ? "#fff" : "#000";
   const dispatch = useDispatch();
 
   return (
     <TextInput
       placeholder={"Search"}
-      placeholderTextColor={placeholderColor}
-      style={[styles.container, { backgroundColor, color }]}
+      placeholderTextColor={'rgba(201,161,74,0.7)'}
+      style={styles.container}
       value={searchText}
       onChangeText={(text: string) => {
         setSearchText(text);
