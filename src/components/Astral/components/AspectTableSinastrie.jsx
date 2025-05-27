@@ -37,7 +37,7 @@ const AspectTableSinastrie = ({
           marginTop: "0%",
         }}
       >
-        <Text style={{ color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700', fontSize: 20, textAlign: 'center' }}> {currentUserData?.full_name}</Text>
+        <Text style={{ color: '#FFD700', fontFamily: 'Lora', fontWeight: '700', fontSize: 20, textAlign: 'center' }}> {currentUserData?.full_name}</Text>
       </View>
       <ScrollView
         contentContainerStyle={{
@@ -76,7 +76,7 @@ const AspectTableSinastrie = ({
           marginTop: "5%",
         }}
       >
-        <Text style={{ color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700', fontSize: 20, textAlign: 'center' }}> {userD?.full_name}</Text>
+        <Text style={{ color: '#FFD700', fontFamily: 'Lora', fontWeight: '700', fontSize: 20, textAlign: 'center' }}> {userD?.full_name}</Text>
       </View>
       <ScrollView
         contentContainerStyle={{
@@ -116,7 +116,7 @@ const AspectTableSinastrie = ({
           marginTop: "10%",
         }}
       >
-        <Text style={{ color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700', fontSize: 20, textAlign: 'center' }}> {i18n.translate("Natal")}</Text>
+        <Text style={{ color: '#FFD700', fontFamily: 'Lora', fontWeight: '700', fontSize: 20, textAlign: 'center' }}> {i18n.translate("Natal")}</Text>
       </View>
       <View
         style={{
@@ -126,7 +126,7 @@ const AspectTableSinastrie = ({
           marginTop: "0%",
         }}
       >
-        <Text style={{ color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700', fontSize: 20, textAlign: 'center' }}>
+        <Text style={{ color: '#FFD700', fontFamily: 'Lora', fontWeight: '700', fontSize: 20, textAlign: 'center' }}>
           {" "}
           {currentUserData?.full_name}
         </Text>
@@ -173,7 +173,7 @@ const AspectTableSinastrie = ({
           marginTop: "10%",
         }}
       >
-        <Text style={{ color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700', fontSize: 20, textAlign: 'center' }}>
+        <Text style={{ color: '#FFD700', fontFamily: 'Lora', fontWeight: '700', fontSize: 20, textAlign: 'center' }}>
           {" "}
           {userD?.full_name}
         </Text>
@@ -220,7 +220,7 @@ const AspectTableSinastrie = ({
           marginTop: "10%",
         }}
       >
-        <Text style={{ color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700', fontSize: 20, textAlign: 'center' }}>Aspects</Text>
+        <Text style={{ color: '#FFD700', fontFamily: 'Lora', fontWeight: '700', fontSize: 20, textAlign: 'center' }}>Aspects</Text>
       </View>
       <View
         style={{
@@ -230,7 +230,7 @@ const AspectTableSinastrie = ({
           marginTop: "0%",
         }}
       >
-        <Text style={{ color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700', fontSize: 20, textAlign: 'center' }}>
+        <Text style={{ color: '#FFD700', fontFamily: 'Lora', fontWeight: '700', fontSize: 20, textAlign: 'center' }}>
           {" "}
           {currentUserData?.full_name}
         </Text>
@@ -290,7 +290,7 @@ const AspectTableSinastrie = ({
           marginTop: "10%",
         }}
       >
-        <Text style={{ color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700', fontSize: 20, textAlign: 'center' }}>
+        <Text style={{ color: '#FFD700', fontFamily: 'Lora', fontWeight: '700', fontSize: 20, textAlign: 'center' }}>
           {" "}
           {userD?.full_name}
         </Text>

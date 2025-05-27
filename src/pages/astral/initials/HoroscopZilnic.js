@@ -21,7 +21,7 @@ import {
   H15fontMediumWhite,
   H8fontRegularWhite,
 } from "../../../components/commonText";
-import { colors } from "../../../utils/colors";
+import { colors, textStyles } from "../../../utils/colors";
 import { daily } from "../../../utils/daily";
 import { MainContainer } from "../../../components/commonViews";
 import { StatusBar } from "expo-status-bar";
@@ -40,6 +40,7 @@ import {
   fetchHoroscopeDataYear,
 } from "../../../utils/AstralUtils/fetchNatalWheelChart";
 import localGif from "../../../../assets/constelatii.gif";
+import ShareScreenshot from '../../../components/common/ShareScreenshot';
 
 /**
  * @param number {number}
@@ -598,697 +599,704 @@ function HoroscopZilnic({ navigation }) {
     // });
   }, []);
 
+  const getShareText = (language) => {
+    if (language === 'ro') {
+      return `Descarcă aplicația Cristina Zurba Tarot:\nAndroid: https://play.google.com/store/apps/details?id=com.cristina.zurba.tarot&hl=ro\niOS: https://apps.apple.com/ro/app/cristina-zurba-tarot/id6475713937`;
+    }
+    return `Download the Cristina Zurba Tarot app:\nAndroid: https://play.google.com/store/apps/details?id=com.cristina.zurba.tarot&hl=ro\niOS: https://apps.apple.com/ro/app/cristina-zurba-tarot/id6475713937`;
+  };
+
   if (isLoading) {
     return <LoadingOverlay />;
   }
 
   return (
-    <>
-      <MainContainer>
-        <View style={{ flex: 1, paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0 }}>
-          <ImageBackground
-            source={require("../../../../assets/dashboardbg.jpg")}
-            resizeMode="cover"
-            style={[StyleSheet.absoluteFill, { zIndex: 1 }]}
-            imageStyle={{ opacity: 1 }}
-          />
-          <View style={{ ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(255,255,255,0.72)', zIndex: 2, pointerEvents: 'none' }} />
-          <View style={{ flex: 1, zIndex: 3 }}>
-            <View style={{ flex: 1 }}>
-              <View style={{ flex: 1, zIndex: 2 }}>
-                {isReloadingH ? (
-                  <View style={styles.container}>
-                    <Image source={localGif} style={styles.image} />
-                  </View>
-                ) : (
-                  <>
-                    <MyTopBarHoroscope onChangeTab={setSelectedTab} />
-                    <ScrollViewFadeFirst element={Header} height={200}>
-                      <View style={{ height: 20 }} />
-                      {selectedTab === "zilnic" ? (
-                        <ShowFromTop>
-                          <View
-                            style={[
-                              styles.defaultContainer,
-                              {
-                                flexDirection: "row",
-                                justifyContent: "center",
-                                alignItems: "center",
-                              },
-                            ]}
-                          >
-                            <Text style={[styles.textTitles, { color: '#C9A14A', fontSize: 23 }]}>
-                              {i18n.translate("hAstazi")}
-                            </Text>
-                          </View>
-                          <View style={styles.defaultContainer}>
-                            <Text style={styles.textTitles}>
-                              {i18n.translate("hNumbers")}
-                            </Text>
-                          </View>
-                          <View
-                            style={[
-                              styles.defaultContainer,
-                              {
-                                flexDirection: "row",
-                                justifyContent: "space-evenly",
-                              },
-                            ]}
-                          >
-                            {userD?.horoscopeResultsDaily?.data?.prediction
-                              ?.luck[1] &&
-                              userD?.horoscopeResultsDaily.data.prediction.luck[1]
-                                .match(/\d+/g)
-                                ?.map((numberStr, i) => (
-                                  <LuckyNumber
-                                    key={i}
-                                    number={parseInt(numberStr, 10)}
-                                  />
-                                ))}
-                          </View>
-                          <View style={styles.defaultContainer}>
-                            <Text style={[styles.textTitles, { color: '#131523' }]}>
-                              {
-                                userD?.horoscopeResultsDaily?.data?.prediction
-                                  ?.luck[0]
-                              }
-                            </Text>
-                          </View>
-                          <View style={styles.defaultContainer}>
-                            <Text style={[styles.textTitles, { color: '#131523' }]}>
-                              {
-                                userD?.horoscopeResultsDaily?.data?.prediction
-                                  ?.luck[2]
-                              }
-                            </Text>
-                          </View>
-                          <View style={styles.defaultContainer}>
-                            <Text style={[styles.textTitles, { color: '#131523' }]}>
-                              {
-                                userD?.horoscopeResultsDaily?.data?.prediction
-                                  ?.luck[3]
-                              }
-                            </Text>
-                          </View>
-                          <View style={styles.defaultContainer}>
-                            <Text style={[styles.textTitles, { color: '#131523' }]}>
-                              {
-                                userD?.horoscopeResultsDaily?.data?.prediction
-                                  ?.luck[4]
-                              }
-                            </Text>
-                          </View>
-                          <View style={styles.defaultContainer}>
-                            <Text style={[styles.textTitles, { color: '#131523' }]}>
-                              {
-                                userD?.horoscopeResultsDaily?.data?.prediction
-                                  ?.luck[5]
-                              }
-                            </Text>
-                          </View>
-                          <Divider style={{ marginTop: 20 }} />
-                          <View style={[styles.defaultContainer]}>
-                            <View style={styles.horoscopeTodayContainer}>
-                              <Text style={[styles.textTitles, { fontSize: 20, color: '#C9A14A' }]}>
-                                {i18n.translate("hPredictions")}
+    <MainContainer>
+      <ShareScreenshot fabPosition={{ bottom: 120, right: 24 }}>
+        <ImageBackground
+          source={require('../../../../assets/dashboardbg.jpg')}
+          style={{ flex: 1, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 }}
+          imageStyle={{ opacity: 1 }}
+        >
+          <View style={{ flex: 1, paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0 }}>
+            <View style={{ ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(255,255,255,0.72)', zIndex: 2, pointerEvents: 'none' }} />
+            <View style={{ flex: 1, zIndex: 3 }}>
+              <View style={{ flex: 1 }}>
+                <View style={{ flex: 1, zIndex: 2 }}>
+                  {isReloadingH ? (
+                    <View style={styles.container}>
+                      <Image source={localGif} style={styles.image} />
+                    </View>
+                  ) : (
+                    <>
+                      <MyTopBarHoroscope onChangeTab={setSelectedTab} />
+                      <ScrollViewFadeFirst element={Header} height={200}>
+                        <View style={{ height: 20 }} />
+                        {selectedTab === "zilnic" ? (
+                          <ShowFromTop>
+                            <View
+                              style={[
+                                styles.defaultContainer,
+                                {
+                                  flexDirection: "row",
+                                  justifyContent: "center",
+                                  alignItems: "center",
+                                },
+                              ]}
+                            >
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 23 }]}>
+                                {i18n.translate("hAstazi")}
                               </Text>
-                              <View style={styles.iconsHoroscopeToday}>
-                                <MaterialCommunityIcons
-                                  name="heart"
-                                  size={20}
-                                  color={colors.gradientLogin2}
-                                  style={{ marginLeft: 5 }}
-                                />
-                                <MaterialCommunityIcons
-                                  name="briefcase"
-                                  size={20}
-                                  color={colors.gradientLogin2}
-                                  style={{ marginLeft: 5 }}
-                                />
-                                <MaterialCommunityIcons
-                                  name="food-apple"
-                                  size={20}
-                                  color={colors.gradientLogin2}
-                                  style={{ marginLeft: 5 }}
-                                />
+                            </View>
+                            <View style={styles.defaultContainer}>
+                              <Text style={styles.textTitles}>
+                                {i18n.translate("hNumbers")}
+                              </Text>
+                            </View>
+                            <View
+                              style={[
+                                styles.defaultContainer,
+                                {
+                                  flexDirection: "row",
+                                  justifyContent: "space-evenly",
+                                },
+                              ]}
+                            >
+                              {userD?.horoscopeResultsDaily?.data?.prediction
+                                ?.luck[1] &&
+                                userD?.horoscopeResultsDaily.data.prediction.luck[1]
+                                  .match(/\d+/g)
+                                  ?.map((numberStr, i) => (
+                                    <LuckyNumber
+                                      key={i}
+                                      number={parseInt(numberStr, 10)}
+                                    />
+                                  ))}
+                            </View>
+                            <View style={styles.defaultContainer}>
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold]}>
+                                {
+                                  userD?.horoscopeResultsDaily?.data?.prediction
+                                    ?.luck[0]
+                                }
+                              </Text>
+                            </View>
+                            <View style={styles.defaultContainer}>
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold]}>
+                                {
+                                  userD?.horoscopeResultsDaily?.data?.prediction
+                                    ?.luck[2]
+                                }
+                              </Text>
+                            </View>
+                            <View style={styles.defaultContainer}>
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold]}>
+                                {
+                                  userD?.horoscopeResultsDaily?.data?.prediction
+                                    ?.luck[3]
+                                }
+                              </Text>
+                            </View>
+                            <View style={styles.defaultContainer}>
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold]}>
+                                {
+                                  userD?.horoscopeResultsDaily?.data?.prediction
+                                    ?.luck[4]
+                                }
+                              </Text>
+                            </View>
+                            <View style={styles.defaultContainer}>
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold]}>
+                                {
+                                  userD?.horoscopeResultsDaily?.data?.prediction
+                                    ?.luck[5]
+                                }
+                              </Text>
+                            </View>
+                            <Divider style={{ marginTop: 20 }} />
+                            <View style={[styles.defaultContainer]}>
+                              <View style={styles.horoscopeTodayContainer}>
+                                <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 20 }]}>
+                                  {i18n.translate("hPredictions")}
+                                </Text>
+                                <View style={styles.iconsHoroscopeToday}>
+                                  <MaterialCommunityIcons
+                                    name="heart"
+                                    size={20}
+                                    color={colors.gradientLogin2}
+                                    style={{ marginLeft: 5 }}
+                                  />
+                                  <MaterialCommunityIcons
+                                    name="briefcase"
+                                    size={20}
+                                    color={colors.gradientLogin2}
+                                    style={{ marginLeft: 5 }}
+                                  />
+                                  <MaterialCommunityIcons
+                                    name="food-apple"
+                                    size={20}
+                                    color={colors.gradientLogin2}
+                                    style={{ marginLeft: 5 }}
+                                  />
+                                </View>
                               </View>
                             </View>
-                          </View>
-                          <View style={styles.defaultContainer}>
-                            <Text style={[styles.textTitles, { color: '#131523' }]}>
-                              {i18n.translate("hEmotions")}
-                            </Text>
-                            <Text style={{ marginTop: 15 }}>
-                              {
-                                userD?.horoscopeResultsDaily?.data?.prediction
-                                  ?.emotions
-                              }
-                            </Text>
-                          </View>
-                          <View style={styles.defaultContainer}>
-                            <Text style={[styles.textTitles, { color: '#131523' }]}>
-                              {i18n.translate("hHealth")}
-                            </Text>
-                            <Text style={{ marginTop: 15 }}>
-                              {userD?.horoscopeResultsDaily?.data?.prediction?.health}
-                            </Text>
-                          </View>
-                          <View style={styles.defaultContainer}>
-                            <Text style={[styles.textTitles, { color: '#131523' }]}>
-                              {i18n.translate("hPersonal")}
-                            </Text>
-                            <Text style={{ marginTop: 15 }}>
-                              {
-                                userD?.horoscopeResultsDaily?.data?.prediction
-                                  ?.personal
-                              }
-                            </Text>
-                          </View>
-                          <View style={styles.defaultContainer}>
-                            <Text style={[styles.textTitles, { color: '#131523' }]}>
-                              {i18n.translate("hProfession")}
-                            </Text>
-                            <Text style={{ marginTop: 15 }}>
-                              {
-                                userD?.horoscopeResultsDaily?.data?.prediction
-                                  ?.profession
-                              }
-                            </Text>
-                          </View>
-                          <View style={styles.defaultContainer}>
-                            <Text style={[styles.textTitles, { color: '#131523' }]}>
-                              {i18n.translate("hTravel")}
-                            </Text>
-                            <Text style={{ marginTop: 15 }}>
-                              {userD?.horoscopeResultsDaily?.data?.prediction?.travel}
-                            </Text>
-                          </View>
-                        </ShowFromTop>
-                      ) : selectedTab === "saptamanal" ? (
-                        <ShowFromTop>
-                          <View
-                            style={[
-                              styles.defaultContainer,
-                              {
-                                flexDirection: "row",
-                                justifyContent: "center",
-                                alignItems: "center",
-                              },
-                            ]}
-                          >
-                            <Text style={[styles.textTitles, { color: '#C9A14A', fontSize: 23 }]}>
-                              {i18n.translate("hSaptamana")}{" "}
-                            </Text>
-                          </View>
-                          <View style={styles.defaultContainer}>
-                            <Text style={styles.textTitles}>
-                              {i18n.translate("hNumbers")}{" "}
-                            </Text>
-                          </View>
-                          <View
-                            style={[
-                              styles.defaultContainer,
-                              {
-                                flexDirection: "row",
-                                justifyContent: "space-evenly",
-                              },
-                            ]}
-                          >
-                            {userD?.horoscopeResultsWeekly?.data?.weekly_horoscope
-                              ?.luck[1] &&
-                              userD?.horoscopeResultsWeekly.data.weekly_horoscope.luck[1]
-                                .match(/\d+/g)
-                                ?.map((numberStr, i) => (
-                                  <LuckyNumber
-                                    key={i}
-                                    number={parseInt(numberStr, 10)}
-                                  />
-                                ))}
-                          </View>
-                          <View style={styles.defaultContainer}>
-                            <Text style={[styles.textTitles, { color: '#131523' }]}>
-                              {
-                                userD?.horoscopeResultsWeekly?.data?.weekly_horoscope
-                                  ?.luck[0]
-                              }
-                            </Text>
-                          </View>
-                          <View style={styles.defaultContainer}>
-                            <Text style={[styles.textTitles, { color: '#131523' }]}>
-                              {
-                                userD?.horoscopeResultsWeekly?.data?.weekly_horoscope
-                                  ?.luck[2]
-                              }
-                            </Text>
-                          </View>
-                          <View style={styles.defaultContainer}>
-                            <Text style={[styles.textTitles, { color: '#131523' }]}>
-                              {
-                                userD?.horoscopeResultsWeekly?.data?.weekly_horoscope
-                                  ?.luck[3]
-                              }
-                            </Text>
-                          </View>
-                          <View style={styles.defaultContainer}>
-                            <Text style={[styles.textTitles, { color: '#131523' }]}>
-                              {
-                                userD?.horoscopeResultsWeekly?.data?.weekly_horoscope
-                                  ?.luck[4]
-                              }
-                            </Text>
-                          </View>
-                          <View style={styles.defaultContainer}>
-                            <Text style={[styles.textTitles, { color: '#131523' }]}>
-                              {
-                                userD?.horoscopeResultsWeekly?.data?.weekly_horoscope
-                                  ?.luck[5]
-                              }
-                            </Text>
-                          </View>
-                          <Divider style={{ marginTop: 20 }} />
-                          <View style={[styles.defaultContainer]}>
-                            <View style={styles.horoscopeTodayContainer}>
-                              <Text style={[styles.textTitles, { fontSize: 20, color: '#C9A14A' }]}>
-                                {i18n.translate("hPredictions")}
+                            <View style={styles.defaultContainer}>
+                              <Text style={[styles.textTitles, textStyles.goldenText]}>
+                                {i18n.translate("hEmotions")}
                               </Text>
-                              <View style={styles.iconsHoroscopeToday}>
-                                <MaterialCommunityIcons
-                                  name="heart"
-                                  size={20}
-                                  color={colors.gradientLogin2}
-                                  style={{ marginLeft: 5 }}
-                                />
-                                <MaterialCommunityIcons
-                                  name="briefcase"
-                                  size={20}
-                                  color={colors.gradientLogin2}
-                                  style={{ marginLeft: 5 }}
-                                />
-                                <MaterialCommunityIcons
-                                  name="food-apple"
-                                  size={20}
-                                  color={colors.gradientLogin2}
-                                  style={{ marginLeft: 5 }}
-                                />
+                              <Text style={{ marginTop: 15 }}>
+                                {
+                                  userD?.horoscopeResultsDaily?.data?.prediction
+                                    ?.emotions
+                                }
+                              </Text>
+                            </View>
+                            <View style={styles.defaultContainer}>
+                              <Text style={[styles.textTitles, textStyles.goldenText]}>
+                                {i18n.translate("hHealth")}
+                              </Text>
+                              <Text style={{ marginTop: 15 }}>
+                                {userD?.horoscopeResultsDaily?.data?.prediction?.health}
+                              </Text>
+                            </View>
+                            <View style={styles.defaultContainer}>
+                              <Text style={[styles.textTitles, textStyles.goldenText]}>
+                                {i18n.translate("hPersonal")}
+                              </Text>
+                              <Text style={{ marginTop: 15 }}>
+                                {
+                                  userD?.horoscopeResultsDaily?.data?.prediction
+                                    ?.personal
+                                }
+                              </Text>
+                            </View>
+                            <View style={styles.defaultContainer}>
+                              <Text style={[styles.textTitles, textStyles.goldenText]}>
+                                {i18n.translate("hProfession")}
+                              </Text>
+                              <Text style={{ marginTop: 15 }}>
+                                {
+                                  userD?.horoscopeResultsDaily?.data?.prediction
+                                    ?.profession
+                                }
+                              </Text>
+                            </View>
+                            <View style={styles.defaultContainer}>
+                              <Text style={[styles.textTitles, textStyles.goldenText]}>
+                                {i18n.translate("hTravel")}
+                              </Text>
+                              <Text style={{ marginTop: 15 }}>
+                                {userD?.horoscopeResultsDaily?.data?.prediction?.travel}
+                              </Text>
+                            </View>
+                          </ShowFromTop>
+                        ) : selectedTab === "saptamanal" ? (
+                          <ShowFromTop>
+                            <View
+                              style={[
+                                styles.defaultContainer,
+                                {
+                                  flexDirection: "row",
+                                  justifyContent: "center",
+                                  alignItems: "center",
+                                },
+                              ]}
+                            >
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 23 }]}>
+                                {i18n.translate("hSaptamana")}{" "}
+                              </Text>
+                            </View>
+                            <View style={styles.defaultContainer}>
+                              <Text style={styles.textTitles}>
+                                {i18n.translate("hNumbers")}{" "}
+                              </Text>
+                            </View>
+                            <View
+                              style={[
+                                styles.defaultContainer,
+                                {
+                                  flexDirection: "row",
+                                  justifyContent: "space-evenly",
+                                },
+                              ]}
+                            >
+                              {userD?.horoscopeResultsWeekly?.data?.weekly_horoscope
+                                ?.luck[1] &&
+                                userD?.horoscopeResultsWeekly.data.weekly_horoscope.luck[1]
+                                  .match(/\d+/g)
+                                  ?.map((numberStr, i) => (
+                                    <LuckyNumber
+                                      key={i}
+                                      number={parseInt(numberStr, 10)}
+                                    />
+                                  ))}
+                            </View>
+                            <View style={styles.defaultContainer}>
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold]}>
+                                {
+                                  userD?.horoscopeResultsWeekly?.data?.weekly_horoscope
+                                    ?.luck[0]
+                              }
+                              </Text>
+                            </View>
+                            <View style={styles.defaultContainer}>
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold]}>
+                                {
+                                  userD?.horoscopeResultsWeekly?.data?.weekly_horoscope
+                                    ?.luck[2]
+                              }
+                              </Text>
+                            </View>
+                            <View style={styles.defaultContainer}>
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold]}>
+                                {
+                                  userD?.horoscopeResultsWeekly?.data?.weekly_horoscope
+                                    ?.luck[3]
+                              }
+                              </Text>
+                            </View>
+                            <View style={styles.defaultContainer}>
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold]}>
+                                {
+                                  userD?.horoscopeResultsWeekly?.data?.weekly_horoscope
+                                    ?.luck[4]
+                              }
+                              </Text>
+                            </View>
+                            <View style={styles.defaultContainer}>
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold]}>
+                                {
+                                  userD?.horoscopeResultsWeekly?.data?.weekly_horoscope
+                                    ?.luck[5]
+                              }
+                              </Text>
+                            </View>
+                            <Divider style={{ marginTop: 20 }} />
+                            <View style={[styles.defaultContainer]}>
+                              <View style={styles.horoscopeTodayContainer}>
+                                <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 20 }]}>
+                                  {i18n.translate("hPredictions")}
+                                </Text>
+                                <View style={styles.iconsHoroscopeToday}>
+                                  <MaterialCommunityIcons
+                                    name="heart"
+                                    size={20}
+                                    color={colors.gradientLogin2}
+                                    style={{ marginLeft: 5 }}
+                                  />
+                                  <MaterialCommunityIcons
+                                    name="briefcase"
+                                    size={20}
+                                    color={colors.gradientLogin2}
+                                    style={{ marginLeft: 5 }}
+                                  />
+                                  <MaterialCommunityIcons
+                                    name="food-apple"
+                                    size={20}
+                                    color={colors.gradientLogin2}
+                                    style={{ marginLeft: 5 }}
+                                  />
+                                </View>
                               </View>
                             </View>
-                          </View>
-                          <View style={styles.defaultContainer}>
-                            <Text style={[styles.textTitles, { color: '#131523' }]}>
-                              {i18n.translate("hEmotions")}
-                            </Text>
-                            <Text style={{ marginTop: 15 }}>
-                              {
-                                userD?.horoscopeResultsWeekly?.data?.weekly_horoscope
-                                  ?.emotions
-                              }
-                            </Text>
-                          </View>
-                          <View style={styles.defaultContainer}>
-                            <Text style={[styles.textTitles, { color: '#131523' }]}>
-                              {i18n.translate("hHealth")}
-                            </Text>
-                            <Text style={{ marginTop: 15 }}>
-                              {
-                                userD?.horoscopeResultsWeekly?.data?.weekly_horoscope
-                                  ?.health
-                              }
-                            </Text>
-                          </View>
-                          <View style={styles.defaultContainer}>
-                            <Text style={[styles.textTitles, { color: '#131523' }]}>
-                              {i18n.translate("hPersonal")}
-                            </Text>
-                            <Text style={{ marginTop: 15 }}>
-                              {
-                                userD?.horoscopeResultsWeekly?.data?.weekly_horoscope
-                                  ?.personal
-                              }
-                            </Text>
-                          </View>
-                          <View style={styles.defaultContainer}>
-                            <Text style={[styles.textTitles, { color: '#131523' }]}>
-                              {i18n.translate("hProfession")}
-                            </Text>
-                            <Text style={{ marginTop: 15 }}>
-                              {
-                                userD?.horoscopeResultsWeekly?.data?.weekly_horoscope
-                                  ?.profession
-                              }
-                            </Text>
-                          </View>
-                          <View style={styles.defaultContainer}>
-                            <Text style={[styles.textTitles, { color: '#131523' }]}>
-                              {i18n.translate("hTravel")}
-                            </Text>
-                            <Text style={{ marginTop: 15 }}>
-                              {
-                                userD?.horoscopeResultsWeekly?.data?.weekly_horoscope
-                                  ?.travel
-                              }
-                            </Text>
-                          </View>
-                        </ShowFromTop>
-                      ) : selectedTab === "lunar" ? (
-                        <ShowFromTop>
-                          <View
-                            style={[
-                              styles.defaultContainer,
-                              {
-                                flexDirection: "row",
-                                justifyContent: "center",
-                                alignItems: "center",
-                              },
-                            ]}
-                          >
-                            <Text style={[styles.textTitles, { color: '#C9A14A', fontSize: 23 }]}>
-                              {i18n.translate("hMonth")}{" "}
-                            </Text>
-                          </View>
-                          <View style={styles.defaultContainer}>
-                            <Text style={styles.textTitles}>
-                              {i18n.translate("hNumbers")}{" "}
-                            </Text>
-                          </View>
-                          <View
-                            style={[
-                              styles.defaultContainer,
-                              {
-                                flexDirection: "row",
-                                justifyContent: "space-evenly",
-                              },
-                            ]}
-                          >
-                            {userD?.horoscopeResultsMonthly?.data?.monthly_horoscope
-                              ?.luck[1] &&
-                              userD?.horoscopeResultsMonthly.data.monthly_horoscope.luck[1]
-                                .match(/\d+/g)
-                                ?.map((numberStr, i) => (
-                                  <LuckyNumber
-                                    key={i}
-                                    number={parseInt(numberStr, 10)}
-                                  />
-                                ))}
-                          </View>
-                          <View style={styles.defaultContainer}>
-                            <Text style={[styles.textTitles, { color: '#131523' }]}>
-                              {
-                                userD?.horoscopeResultsMonthly?.data
-                                  ?.monthly_horoscope?.luck[0]
-                              }
-                            </Text>
-                          </View>
-                          <View style={styles.defaultContainer}>
-                            <Text style={[styles.textTitles, { color: '#131523' }]}>
-                              {
-                                userD?.horoscopeResultsMonthly?.data
-                                  ?.monthly_horoscope?.luck[2]
-                              }
-                            </Text>
-                          </View>
-                          <View style={styles.defaultContainer}>
-                            <Text style={[styles.textTitles, { color: '#131523' }]}>
-                              {
-                                userD?.horoscopeResultsMonthly?.data
-                                  ?.monthly_horoscope?.luck[3]
-                              }
-                            </Text>
-                          </View>
-                          <View style={styles.defaultContainer}>
-                            <Text style={[styles.textTitles, { color: '#131523' }]}>
-                              {
-                                userD?.horoscopeResultsMonthly?.data
-                                  ?.monthly_horoscope?.luck[4]
-                              }
-                            </Text>
-                          </View>
-                          <View style={styles.defaultContainer}>
-                            <Text style={[styles.textTitles, { color: '#131523' }]}>
-                              {
-                                userD?.horoscopeResultsMonthly?.data
-                                  ?.monthly_horoscope?.luck[5]
-                              }
-                            </Text>
-                          </View>
-                          <Divider style={{ marginTop: 20 }} />
-                          <View style={[styles.defaultContainer]}>
-                            <View style={styles.horoscopeTodayContainer}>
-                              <Text style={[styles.textTitles, { fontSize: 20, color: '#C9A14A' }]}>
-                                {i18n.translate("hPredictions")}
+                            <View style={styles.defaultContainer}>
+                              <Text style={[styles.textTitles, textStyles.goldenText]}>
+                                {i18n.translate("hEmotions")}
                               </Text>
-                              <View style={styles.iconsHoroscopeToday}>
-                                <MaterialCommunityIcons
-                                  name="heart"
-                                  size={20}
-                                  color={colors.gradientLogin2}
-                                  style={{ marginLeft: 5 }}
-                                />
-                                <MaterialCommunityIcons
-                                  name="briefcase"
-                                  size={20}
-                                  color={colors.gradientLogin2}
-                                  style={{ marginLeft: 5 }}
-                                />
-                                <MaterialCommunityIcons
-                                  name="food-apple"
-                                  size={20}
-                                  color={colors.gradientLogin2}
-                                  style={{ marginLeft: 5 }}
-                                />
+                              <Text style={{ marginTop: 15 }}>
+                                {
+                                  userD?.horoscopeResultsWeekly?.data?.weekly_horoscope
+                                    ?.emotions
+                              }
+                              </Text>
+                            </View>
+                            <View style={styles.defaultContainer}>
+                              <Text style={[styles.textTitles, textStyles.goldenText]}>
+                                {i18n.translate("hHealth")}
+                              </Text>
+                              <Text style={{ marginTop: 15 }}>
+                                {
+                                  userD?.horoscopeResultsWeekly?.data?.weekly_horoscope
+                                    ?.health
+                              }
+                              </Text>
+                            </View>
+                            <View style={styles.defaultContainer}>
+                              <Text style={[styles.textTitles, textStyles.goldenText]}>
+                                {i18n.translate("hPersonal")}
+                              </Text>
+                              <Text style={{ marginTop: 15 }}>
+                                {
+                                  userD?.horoscopeResultsWeekly?.data?.weekly_horoscope
+                                    ?.personal
+                              }
+                              </Text>
+                            </View>
+                            <View style={styles.defaultContainer}>
+                              <Text style={[styles.textTitles, textStyles.goldenText]}>
+                                {i18n.translate("hProfession")}
+                              </Text>
+                              <Text style={{ marginTop: 15 }}>
+                                {
+                                  userD?.horoscopeResultsWeekly?.data?.weekly_horoscope
+                                    ?.profession
+                              }
+                              </Text>
+                            </View>
+                            <View style={styles.defaultContainer}>
+                              <Text style={[styles.textTitles, textStyles.goldenText]}>
+                                {i18n.translate("hTravel")}
+                              </Text>
+                              <Text style={{ marginTop: 15 }}>
+                                {
+                                  userD?.horoscopeResultsWeekly?.data?.weekly_horoscope
+                                    ?.travel
+                              }
+                              </Text>
+                            </View>
+                          </ShowFromTop>
+                        ) : selectedTab === "lunar" ? (
+                          <ShowFromTop>
+                            <View
+                              style={[
+                                styles.defaultContainer,
+                                {
+                                  flexDirection: "row",
+                                  justifyContent: "center",
+                                  alignItems: "center",
+                                },
+                              ]}
+                            >
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 23 }]}>
+                                {i18n.translate("hMonth")}{" "}
+                              </Text>
+                            </View>
+                            <View style={styles.defaultContainer}>
+                              <Text style={styles.textTitles}>
+                                {i18n.translate("hNumbers")}{" "}
+                              </Text>
+                            </View>
+                            <View
+                              style={[
+                                styles.defaultContainer,
+                                {
+                                  flexDirection: "row",
+                                  justifyContent: "space-evenly",
+                                },
+                              ]}
+                            >
+                              {userD?.horoscopeResultsMonthly?.data?.monthly_horoscope
+                                ?.luck[1] &&
+                                userD?.horoscopeResultsMonthly.data.monthly_horoscope.luck[1]
+                                  .match(/\d+/g)
+                                  ?.map((numberStr, i) => (
+                                    <LuckyNumber
+                                      key={i}
+                                      number={parseInt(numberStr, 10)}
+                                    />
+                                  ))}
+                            </View>
+                            <View style={styles.defaultContainer}>
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold]}>
+                                {
+                                  userD?.horoscopeResultsMonthly?.data
+                                    ?.monthly_horoscope?.luck[0]
+                              }
+                              </Text>
+                            </View>
+                            <View style={styles.defaultContainer}>
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold]}>
+                                {
+                                  userD?.horoscopeResultsMonthly?.data
+                                    ?.monthly_horoscope?.luck[2]
+                              }
+                              </Text>
+                            </View>
+                            <View style={styles.defaultContainer}>
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold]}>
+                                {
+                                  userD?.horoscopeResultsMonthly?.data
+                                    ?.monthly_horoscope?.luck[3]
+                              }
+                              </Text>
+                            </View>
+                            <View style={styles.defaultContainer}>
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold]}>
+                                {
+                                  userD?.horoscopeResultsMonthly?.data
+                                    ?.monthly_horoscope?.luck[4]
+                              }
+                              </Text>
+                            </View>
+                            <View style={styles.defaultContainer}>
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold]}>
+                                {
+                                  userD?.horoscopeResultsMonthly?.data
+                                    ?.monthly_horoscope?.luck[5]
+                              }
+                              </Text>
+                            </View>
+                            <Divider style={{ marginTop: 20 }} />
+                            <View style={[styles.defaultContainer]}>
+                              <View style={styles.horoscopeTodayContainer}>
+                                <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 20 }]}>
+                                  {i18n.translate("hPredictions")}
+                                </Text>
+                                <View style={styles.iconsHoroscopeToday}>
+                                  <MaterialCommunityIcons
+                                    name="heart"
+                                    size={20}
+                                    color={colors.gradientLogin2}
+                                    style={{ marginLeft: 5 }}
+                                  />
+                                  <MaterialCommunityIcons
+                                    name="briefcase"
+                                    size={20}
+                                    color={colors.gradientLogin2}
+                                    style={{ marginLeft: 5 }}
+                                  />
+                                  <MaterialCommunityIcons
+                                    name="food-apple"
+                                    size={20}
+                                    color={colors.gradientLogin2}
+                                    style={{ marginLeft: 5 }}
+                                  />
+                                </View>
                               </View>
                             </View>
-                          </View>
-                          <View style={styles.defaultContainer}>
-                            <Text style={styles.textTitles}>
-                              {i18n.translate("hEmotions")}
-                            </Text>
-                            <Text style={{ marginTop: 15 }}>
-                              {
-                                userD?.horoscopeResultsMonthly?.data
-                                  ?.monthly_horoscope?.emotions
-                              }
-                            </Text>
-                          </View>
-                          <View style={styles.defaultContainer}>
-                            <Text style={styles.textTitles}>
-                              {i18n.translate("hHealth")}
-                            </Text>
-                            <Text style={{ marginTop: 15 }}>
-                              {
-                                userD?.horoscopeResultsMonthly?.data
-                                  ?.monthly_horoscope?.health
-                              }
-                            </Text>
-                          </View>
-                          <View style={styles.defaultContainer}>
-                            <Text style={styles.textTitles}>
-                              {i18n.translate("hPersonal")}
-                            </Text>
-                            <Text style={{ marginTop: 15 }}>
-                              {
-                                userD?.horoscopeResultsMonthly?.data
-                                  ?.monthly_horoscope?.personal
-                              }
-                            </Text>
-                          </View>
-                          <View style={styles.defaultContainer}>
-                            <Text style={styles.textTitles}>
-                              {i18n.translate("hProfession")}
-                            </Text>
-                            <Text style={{ marginTop: 15 }}>
-                              {
-                                userD?.horoscopeResultsMonthly?.data
-                                  ?.monthly_horoscope?.profession
-                              }
-                            </Text>
-                          </View>
-                          <View style={styles.defaultContainer}>
-                            <Text style={styles.textTitles}>
-                              {i18n.translate("hTravel")}
-                            </Text>
-                            <Text style={{ marginTop: 15 }}>
-                              {
-                                userD?.horoscopeResultsMonthly?.data
-                                  ?.monthly_horoscope?.travel
-                              }
-                            </Text>
-                          </View>
-                        </ShowFromTop>
-                      ) : selectedTab === "anual" ? (
-                        <ShowFromTop>
-                          <View
-                            style={[
-                              styles.defaultContainer,
-                              {
-                                flexDirection: "row",
-                                justifyContent: "center",
-                                alignItems: "center",
-                              },
-                            ]}
-                          >
-                            <Text style={[styles.textTitles, { color: '#C9A14A', fontSize: 23 }]}>
-                              Anul acesta{" "}
-                            </Text>
-                          </View>
-                          <View style={styles.defaultContainer}>
-                            <Text style={styles.textTitles}>
-                              {i18n.translate("hNumbers")}{" "}
-                            </Text>
-                          </View>
-                          <View
-                            style={[
-                              styles.defaultContainer,
-                              {
-                                flexDirection: "row",
-                                justifyContent: "space-evenly",
-                              },
-                            ]}
-                          >
-                            {userD?.horoscopeResultsYearly?.data?.yearly_horoscope
-                              ?.luck[1] &&
-                              userD?.horoscopeResultsYearly.data.yearly_horoscope.luck[1]
-                                .match(/\d+/g)
-                                ?.map((numberStr, i) => (
-                                  <LuckyNumber
-                                    key={i}
-                                    number={parseInt(numberStr, 10)}
-                                  />
-                                ))}
-                          </View>
-                          <View style={styles.defaultContainer}>
-                            <Text style={styles.textTitles}>
-                              {
-                                userD?.horoscopeResultsYearly?.data?.yearly_horoscope
-                                  ?.luck[0]
-                              }
-                            </Text>
-                          </View>
-                          <View style={styles.defaultContainer}>
-                            <Text style={styles.textTitles}>
-                              {
-                                userD?.horoscopeResultsYearly?.data?.yearly_horoscope
-                                  ?.luck[2]
-                              }
-                            </Text>
-                          </View>
-                          <View style={styles.defaultContainer}>
-                            <Text style={styles.textTitles}>
-                              {
-                                userD?.horoscopeResultsYearly?.data?.yearly_horoscope
-                                  ?.luck[3]
-                              }
-                            </Text>
-                          </View>
-                          <View style={styles.defaultContainer}>
-                            <Text style={styles.textTitles}>
-                              {
-                                userD?.horoscopeResultsYearly?.data?.yearly_horoscope
-                                  ?.luck[4]
-                              }
-                            </Text>
-                          </View>
-                          <View style={styles.defaultContainer}>
-                            <Text style={styles.textTitles}>
-                              {
-                                userD?.horoscopeResultsYearly?.data?.yearly_horoscope
-                                  ?.luck[5]
-                              }
-                            </Text>
-                          </View>
-                          <Divider style={{ marginTop: 20 }} />
-                          <View style={[styles.defaultContainer]}>
-                            <View style={styles.horoscopeTodayContainer}>
-                              <Text style={[styles.textTitles, { fontSize: 20, color: '#C9A14A' }]}>
-                                {i18n.translate("hPredictions")}
+                            <View style={styles.defaultContainer}>
+                              <Text style={[styles.textTitles, textStyles.goldenText]}>
+                                {i18n.translate("hEmotions")}
                               </Text>
-                              <View style={styles.iconsHoroscopeToday}>
-                                <MaterialCommunityIcons
-                                  name="heart"
-                                  size={20}
-                                  color={colors.gradientLogin2}
-                                  style={{ marginLeft: 5 }}
-                                />
-                                <MaterialCommunityIcons
-                                  name="briefcase"
-                                  size={20}
-                                  color={colors.gradientLogin2}
-                                  style={{ marginLeft: 5 }}
-                                />
-                                <MaterialCommunityIcons
-                                  name="food-apple"
-                                  size={20}
-                                  color={colors.gradientLogin2}
-                                  style={{ marginLeft: 5 }}
-                                />
+                              <Text style={{ marginTop: 15 }}>
+                                {
+                                  userD?.horoscopeResultsMonthly?.data
+                                    ?.monthly_horoscope?.emotions
+                              }
+                              </Text>
+                            </View>
+                            <View style={styles.defaultContainer}>
+                              <Text style={[styles.textTitles, textStyles.goldenText]}>
+                                {i18n.translate("hHealth")}
+                              </Text>
+                              <Text style={{ marginTop: 15 }}>
+                                {
+                                  userD?.horoscopeResultsMonthly?.data
+                                    ?.monthly_horoscope?.health
+                              }
+                              </Text>
+                            </View>
+                            <View style={styles.defaultContainer}>
+                              <Text style={[styles.textTitles, textStyles.goldenText]}>
+                                {i18n.translate("hPersonal")}
+                              </Text>
+                              <Text style={{ marginTop: 15 }}>
+                                {
+                                  userD?.horoscopeResultsMonthly?.data
+                                    ?.monthly_horoscope?.personal
+                              }
+                              </Text>
+                            </View>
+                            <View style={styles.defaultContainer}>
+                              <Text style={[styles.textTitles, textStyles.goldenText]}>
+                                {i18n.translate("hProfession")}
+                              </Text>
+                              <Text style={{ marginTop: 15 }}>
+                                {
+                                  userD?.horoscopeResultsMonthly?.data
+                                    ?.monthly_horoscope?.profession
+                              }
+                              </Text>
+                            </View>
+                            <View style={styles.defaultContainer}>
+                              <Text style={[styles.textTitles, textStyles.goldenText]}>
+                                {i18n.translate("hTravel")}
+                              </Text>
+                              <Text style={{ marginTop: 15 }}>
+                                {
+                                  userD?.horoscopeResultsMonthly?.data
+                                    ?.monthly_horoscope?.travel
+                              }
+                              </Text>
+                            </View>
+                          </ShowFromTop>
+                        ) : selectedTab === "anual" ? (
+                          <ShowFromTop>
+                            <View
+                              style={[
+                                styles.defaultContainer,
+                                {
+                                  flexDirection: "row",
+                                  justifyContent: "center",
+                                  alignItems: "center",
+                                },
+                              ]}
+                            >
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 23 }]}>
+                                Anul acesta{" "}
+                              </Text>
+                            </View>
+                            <View style={styles.defaultContainer}>
+                              <Text style={styles.textTitles}>
+                                {i18n.translate("hNumbers")}{" "}
+                              </Text>
+                            </View>
+                            <View
+                              style={[
+                                styles.defaultContainer,
+                                {
+                                  flexDirection: "row",
+                                  justifyContent: "space-evenly",
+                                },
+                              ]}
+                            >
+                              {userD?.horoscopeResultsYearly?.data?.yearly_horoscope
+                                ?.luck[1] &&
+                                userD?.horoscopeResultsYearly.data.yearly_horoscope.luck[1]
+                                  .match(/\d+/g)
+                                  ?.map((numberStr, i) => (
+                                    <LuckyNumber
+                                      key={i}
+                                      number={parseInt(numberStr, 10)}
+                                    />
+                                  ))}
+                            </View>
+                            <View style={styles.defaultContainer}>
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold]}>
+                                {
+                                  userD?.horoscopeResultsYearly?.data?.yearly_horoscope
+                                    ?.luck[0]
+                              }
+                              </Text>
+                            </View>
+                            <View style={styles.defaultContainer}>
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold]}>
+                                {
+                                  userD?.horoscopeResultsYearly?.data?.yearly_horoscope
+                                    ?.luck[2]
+                              }
+                              </Text>
+                            </View>
+                            <View style={styles.defaultContainer}>
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold]}>
+                                {
+                                  userD?.horoscopeResultsYearly?.data?.yearly_horoscope
+                                    ?.luck[3]
+                              }
+                              </Text>
+                            </View>
+                            <View style={styles.defaultContainer}>
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold]}>
+                                {
+                                  userD?.horoscopeResultsYearly?.data?.yearly_horoscope
+                                    ?.luck[4]
+                              }
+                              </Text>
+                            </View>
+                            <View style={styles.defaultContainer}>
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold]}>
+                                {
+                                  userD?.horoscopeResultsYearly?.data?.yearly_horoscope
+                                    ?.luck[5]
+                              }
+                              </Text>
+                            </View>
+                            <Divider style={{ marginTop: 20 }} />
+                            <View style={[styles.defaultContainer]}>
+                              <View style={styles.horoscopeTodayContainer}>
+                                <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 20 }]}>
+                                  {i18n.translate("hPredictions")}
+                                </Text>
+                                <View style={styles.iconsHoroscopeToday}>
+                                  <MaterialCommunityIcons
+                                    name="heart"
+                                    size={20}
+                                    color={colors.gradientLogin2}
+                                    style={{ marginLeft: 5 }}
+                                  />
+                                  <MaterialCommunityIcons
+                                    name="briefcase"
+                                    size={20}
+                                    color={colors.gradientLogin2}
+                                    style={{ marginLeft: 5 }}
+                                  />
+                                  <MaterialCommunityIcons
+                                    name="food-apple"
+                                    size={20}
+                                    color={colors.gradientLogin2}
+                                    style={{ marginLeft: 5 }}
+                                  />
+                                </View>
                               </View>
                             </View>
-                          </View>
-                          <View style={styles.defaultContainer}>
-                            <Text style={styles.textTitles}>
-                              {i18n.translate("hEmotions")}
-                            </Text>
-                            <Text style={{ marginTop: 15 }}>
-                              {
-                                userD?.horoscopeResultsYearly?.data?.yearly_horoscope
-                                  ?.emotions
+                            <View style={styles.defaultContainer}>
+                              <Text style={[styles.textTitles, textStyles.goldenText]}>
+                                {i18n.translate("hEmotions")}
+                              </Text>
+                              <Text style={{ marginTop: 15 }}>
+                                {
+                                  userD?.horoscopeResultsYearly?.data?.yearly_horoscope
+                                    ?.emotions
                               }
-                            </Text>
-                          </View>
-                          <View style={styles.defaultContainer}>
-                            <Text style={styles.textTitles}>
-                              {i18n.translate("hHealth")}
-                            </Text>
-                            <Text style={{ marginTop: 15 }}>
-                              {
-                                userD?.horoscopeResultsYearly?.data?.yearly_horoscope
-                                  ?.health
+                              </Text>
+                            </View>
+                            <View style={styles.defaultContainer}>
+                              <Text style={[styles.textTitles, textStyles.goldenText]}>
+                                {i18n.translate("hHealth")}
+                              </Text>
+                              <Text style={{ marginTop: 15 }}>
+                                {
+                                  userD?.horoscopeResultsYearly?.data?.yearly_horoscope
+                                    ?.health
                               }
-                            </Text>
-                          </View>
-                          <View style={styles.defaultContainer}>
-                            <Text style={styles.textTitles}>
-                              {i18n.translate("hPersonal")}
-                            </Text>
-                            <Text style={{ marginTop: 15 }}>
-                              {
-                                userD?.horoscopeResultsYearly?.data?.yearly_horoscope
-                                  ?.personal
+                              </Text>
+                            </View>
+                            <View style={styles.defaultContainer}>
+                              <Text style={[styles.textTitles, textStyles.goldenText]}>
+                                {i18n.translate("hPersonal")}
+                              </Text>
+                              <Text style={{ marginTop: 15 }}>
+                                {
+                                  userD?.horoscopeResultsYearly?.data?.yearly_horoscope
+                                    ?.personal
                               }
-                            </Text>
-                          </View>
-                          <View style={styles.defaultContainer}>
-                            <Text style={styles.textTitles}>
-                              {i18n.translate("hProfession")}
-                            </Text>
-                            <Text style={{ marginTop: 15 }}>
-                              {
-                                userD?.horoscopeResultsYearly?.data?.yearly_horoscope
-                                  ?.profession
+                              </Text>
+                            </View>
+                            <View style={styles.defaultContainer}>
+                              <Text style={[styles.textTitles, textStyles.goldenText]}>
+                                {i18n.translate("hProfession")}
+                              </Text>
+                              <Text style={{ marginTop: 15 }}>
+                                {
+                                  userD?.horoscopeResultsYearly?.data?.yearly_horoscope
+                                    ?.profession
                               }
-                            </Text>
-                          </View>
-                          <View style={styles.defaultContainer}>
-                            <Text style={styles.textTitles}>
-                              {i18n.translate("hTravel")}
-                            </Text>
-                            <Text style={{ marginTop: 15 }}>
-                              {
-                                userD?.horoscopeResultsYearly?.data?.yearly_horoscope
-                                  ?.travel
+                              </Text>
+                            </View>
+                            <View style={styles.defaultContainer}>
+                              <Text style={[styles.textTitles, textStyles.goldenText]}>
+                                {i18n.translate("hTravel")}
+                              </Text>
+                              <Text style={{ marginTop: 15 }}>
+                                {
+                                  userD?.horoscopeResultsYearly?.data?.yearly_horoscope
+                                    ?.travel
                               }
-                            </Text>
-                          </View>
-                        </ShowFromTop>
-                      ) : null}
-                    </ScrollViewFadeFirst>
-                  </>
-                )}
+                              </Text>
+                            </View>
+                          </ShowFromTop>
+                        ) : null}
+                      </ScrollViewFadeFirst>
+                    </>
+                  )}
+                </View>
               </View>
             </View>
           </View>
-        </View>
-      </MainContainer>
-    </>
+        </ImageBackground>
+      </ShareScreenshot>
+    </MainContainer>
   );
 }
 
@@ -1323,7 +1331,7 @@ const styles = StyleSheet.create({
     fontSize: 30,
     lineHeight: 34,
     marginTop: 20,
-    color: "#C9A14A",
+    color: "#FFD700",
     textAlign: 'center',
   },
   defaultContainer: {

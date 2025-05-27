@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
-import { colors } from "../../utils/colors";
+import { colors, textStyles } from "../../utils/colors";
 import { FontAwesome } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 
@@ -378,7 +378,7 @@ const News = () => {
             onPress={() => navigation.navigate("SavedNews")}
             style={{ width: "10%", alignItems: "flex-start" }}
           >
-            <FontAwesome name="heart" size={24} color="#C9A14A" />
+            <FontAwesome name="heart" size={24} color={colors.gold} />
           </TouchableOpacity>
         </View>
         {!searchText?.trim() && (

@@ -6,7 +6,7 @@ export default StyleSheet.create({
     flex: 1,
   },
   contentContainer: {
-    paddingBottom: 90,
+    paddingBottom: 0,
   },
   image: {
     height: 250,
@@ -35,7 +35,7 @@ export default StyleSheet.create({
     fontWeight: "600",
     lineHeight: 30,
     paddingHorizontal: 24,
-    marginVertical: 18,
+    marginVertical: 6,
   },
   content: {
     fontSize: 16,

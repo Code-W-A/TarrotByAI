@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Text,
   Platform,
+  Keyboard,
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 
@@ -92,7 +93,7 @@ interface Props extends GeneralProps {
 
 WebBrowser.maybeCompleteAuthSession();
 
-const GOLD = '#C9A14A';
+const GOLD = '#FFD700';
 const CREAM = '#FAF7F2';
 const CREAM2 = '#F5E9D6';
 
@@ -234,197 +235,194 @@ const SignUpScreenClinic: React.FC<Props> = ({ navigation }): JSX.Element => {
   }, [response]);
 
   return (
-    <TouchableWithoutFeedback onPress={() => console.log("ass")}>
-      <Fragment>
-        <MainContainer>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <MainContainer secondary={false} style={{ flex: 1 }}>
+        <ImageBackground
+          source={require("../../assets/dashboardbg.jpg")}
+          style={{ flex: 1, width: '100%', height: '100%' }}
+          imageStyle={{ opacity: 1 }}
+        >
           <CustomLoader isLoading={isLoading} />
-          <LinearGradient
-            colors={[CREAM, CREAM2, "#FEF495", "#FFFBEA"]}
-            style={styles.gradient}
-            start={{ x: 0.5, y: 0 }}
-            end={{ x: 0.5, y: 1 }}
+          <KeyboardAvoidingView
+            style={{ flex: 1 }}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            keyboardVerticalOffset={40}
           >
-            <KeyboardAvoidingView
-              style={{ flex: 1 }}
-              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-              keyboardVerticalOffset={40}
+            <ScrollView
+              contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-start', alignItems: 'center', paddingBottom: 60, paddingHorizontal: 20 }}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
             >
-              <ScrollView
-                contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-start', alignItems: 'center', paddingBottom: 60, paddingHorizontal: 20 }}
-                keyboardShouldPersistTaps="handled"
-                showsVerticalScrollIndicator={false}
-              >
-                <View style={styles.headerContainerNew}>
-                  <Image
-                    source={require('../../assets/headerIcon.png')}
-                    style={styles.logoCrownResponsive}
-                    resizeMode="contain"
-                  />
-                  <View style={styles.goldLineNew} />
-                  <H6fontBoldPrimary style={styles.titleNew}>
-                    {i18n.translate('signUp')}
-                  </H6fontBoldPrimary>
-                </View>
-                <View style={styles.formContainerNew}>
-                      <Controller
-                        name={formKeys.firstName}
-                        control={control}
-                        render={({ field: { onChange, value } }) => (
-                          <InputFields
-                        errorMessage={errors[formKeys.firstName]?.message?.toString()}
-                            value={value}
-                            onChangeText={onChange}
-                        placeholder={i18n.translate('firstName')}
-                            image={"person"}
-                        containerStyle={styles.inputWrapperNew}
-                        textInputStyle={styles.inputTextNew}
-                          />
-                        )}
-                    rules={{ required: requiredValidation(i18n.translate('firstName')) }}
-                      />
-                      <Controller
-                        name={formKeys.lastName}
-                        control={control}
-                        render={({ field: { onChange, value } }) => (
-                          <InputFields
-                        errorMessage={errors[formKeys.lastName]?.message?.toString()}
-                            value={value}
-                            onChangeText={onChange}
-                        placeholder={i18n.translate('lastName')}
-                            image={"person"}
-                        containerStyle={styles.inputWrapperNew}
-                        textInputStyle={styles.inputTextNew}
-                          />
-                        )}
-                    rules={{ required: requiredValidation(i18n.translate('lastName')) }}
-                      />
+              <View style={styles.headerContainerNew}>
+                <Image
+                  source={require('../../assets/headerIcon.png')}
+                  style={styles.logoCrownResponsive}
+                  resizeMode="contain"
+                />
+                <View style={styles.goldLineNew} />
+                <H6fontBoldPrimary style={styles.titleNew}>
+                  {i18n.translate('signUp')}
+                </H6fontBoldPrimary>
+              </View>
+              <View style={styles.formContainerNew}>
                     <Controller
-                      name={formKeys.email}
+                      name={formKeys.firstName}
                       control={control}
                       render={({ field: { onChange, value } }) => (
                         <InputFields
-                        errorMessage={errors[formKeys.email]?.message?.toString()}
+                      errorMessage={errors[formKeys.firstName]?.message?.toString()}
                           value={value}
                           onChangeText={onChange}
-                        placeholder={i18n.translate('email')}
-                          image={"email"}
-                        containerStyle={styles.inputWrapperNew}
-                        textInputStyle={styles.inputTextNew}
+                      placeholder={i18n.translate('firstName')}
+                          image={"person"}
+                      containerStyle={styles.inputWrapperNew}
+                      textInputStyle={styles.inputTextNew}
                         />
                       )}
-                      rules={{
-                      required: requiredValidation(i18n.translate('email')),
-                        validate: emailValidation,
-                      }}
+                  rules={{ required: requiredValidation(i18n.translate('firstName')) }}
                     />
                     <Controller
-                      name={formKeys.password}
+                      name={formKeys.lastName}
                       control={control}
                       render={({ field: { onChange, value } }) => (
                         <InputFields
-                          isPassword={true}
+                      errorMessage={errors[formKeys.lastName]?.message?.toString()}
                           value={value}
-                          isSecure={true}
                           onChangeText={onChange}
-                        placeholder={i18n.translate('createPassword')}
-                        errorMessage={errors[formKeys.password]?.message?.toString()}
-                          image={"lock-outline"}
-                        containerStyle={styles.inputWrapperNew}
-                        textInputStyle={styles.inputTextNew}
+                      placeholder={i18n.translate('lastName')}
+                          image={"person"}
+                      containerStyle={styles.inputWrapperNew}
+                      textInputStyle={styles.inputTextNew}
                         />
                       )}
-                      rules={{
-                      required: requiredValidation(i18n.translate('createPassword')),
-                      minLength: minLengthValidation(validationSchema.password.minLength),
-                      }}
+                  rules={{ required: requiredValidation(i18n.translate('lastName')) }}
                     />
-                    <Controller
-                      name={formKeys.confirmPassword}
-                      control={control}
-                      render={({ field: { onChange, value } }) => (
-                        <InputFields
-                          isPassword={true}
-                          value={value}
-                          isSecure={true}
-                          onChangeText={onChange}
-                        placeholder={i18n.translate('confirmPassword')}
-                        errorMessage={errors[formKeys.confirmPassword]?.message?.toString()}
-                          image={"lock-outline"}
-                        containerStyle={styles.inputWrapperNew}
-                        textInputStyle={styles.inputTextNew}
-                        />
-                      )}
-                      rules={{
-                      required: requiredValidation(i18n.translate('confirmPassword')),
-                      validate: (value) => value === pwd || i18n.translate('passDontMatch'),
-                      }}
+                  <Controller
+                    name={formKeys.email}
+                    control={control}
+                    render={({ field: { onChange, value } }) => (
+                      <InputFields
+                    errorMessage={errors[formKeys.email]?.message?.toString()}
+                      value={value}
+                      onChangeText={onChange}
+                    placeholder={i18n.translate('email')}
+                      image={"email"}
+                    containerStyle={styles.inputWrapperNew}
+                    textInputStyle={styles.inputTextNew}
                     />
-                  <View style={styles.checkboxRow}>
-                  <Checkbox
-                    status={isChecked ? "checked" : "unchecked"}
-                      onPress={() => setChecked(!isChecked)}
-                      color={GOLD}
-                  />
-                    <Text style={styles.termsText}>
-                      {i18n.translate('agreeTerms1')}
-                      <Text style={styles.termsLink} onPress={() => navigation.navigate(screenName.termConditionsClinic)}>
-                        {i18n.translate('termsOfService')}
-                      </Text>
-                      {i18n.translate('and')}
-                      <Text style={styles.termsLink} onPress={() => navigation.navigate(screenName.termConditionsClinic)}>
-                        {i18n.translate('privacyPolicy')}
-                      </Text>
-                      .
-                    </Text>
-                  </View>
-                    <Button
-                      disabled={!isChecked}
-                      funCallback={handleSubmit(onSubmit)}
-                    label={i18n.translate('register')}
-                      success={true}
-                    bgColor={GOLD}
-                    borderColor={GOLD}
-                      borderWidth={0.2}
-                    txtColor={'#fff'}
-                    style={styles.loginButtonNew}
-                    txtStyle={styles.loginButtonTextNew}
+                  )}
+                  rules={{
+                  required: requiredValidation(i18n.translate('email')),
+                    validate: emailValidation,
+                  }}
+                />
+                <Controller
+                  name={formKeys.password}
+                  control={control}
+                  render={({ field: { onChange, value } }) => (
+                    <InputFields
+                      isPassword={true}
+                      value={value}
+                      isSecure={true}
+                      onChangeText={onChange}
+                    placeholder={i18n.translate('createPassword')}
+                    errorMessage={errors[formKeys.password]?.message?.toString()}
+                      image={"lock-outline"}
+                    containerStyle={styles.inputWrapperNew}
+                    textInputStyle={styles.inputTextNew}
                     />
-                <TouchableOpacity
-                    style={styles.googleButtonNew}
-                    onPress={() => promptAsync()}
-                  disabled={!request}
-                    activeOpacity={0.85}
-                >
-                    <Icon name="google" size={22} color={GOLD} style={{ marginRight: 10 }} />
-                    <Text style={styles.googleButtonTextNew}>{i18n.translate('loginWithGoogle')}</Text>
-                </TouchableOpacity>
-                  <View style={styles.infoTextViewStyleNew}>
-                    <H7fontMediumPrimary>
-                      {i18n.translate('alreadyAccount')} {" "}
-                    </H7fontMediumPrimary>
-                    <TouchableOpacity
-                      onPress={() => navigation.navigate(screenName.SignInScreenClinic)}
-                    >
-                      <H7fontMediumPrimary style={{ textDecorationLine: 'underline' }}>
-                        {i18n.translate('registerLogin')}
-                      </H7fontMediumPrimary>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </ScrollView>
-            </KeyboardAvoidingView>
-            {showSnackback ? (
-              <SnackBar
-                showSnackBar={showSnackback}
-                setShowSnackback={setShowSnackback}
-                message={message}
-                bottom={2}
-                screen={screenName.SignInScreenClinic}
+                  )}
+                  rules={{
+                  required: requiredValidation(i18n.translate('createPassword')),
+                  minLength: minLengthValidation(validationSchema.password.minLength),
+                  }}
+                />
+                <Controller
+                  name={formKeys.confirmPassword}
+                  control={control}
+                  render={({ field: { onChange, value } }) => (
+                    <InputFields
+                      isPassword={true}
+                      value={value}
+                      isSecure={true}
+                      onChangeText={onChange}
+                    placeholder={i18n.translate('confirmPassword')}
+                    errorMessage={errors[formKeys.confirmPassword]?.message?.toString()}
+                      image={"lock-outline"}
+                    containerStyle={styles.inputWrapperNew}
+                    textInputStyle={styles.inputTextNew}
+                    />
+                  )}
+                  rules={{
+                  required: requiredValidation(i18n.translate('confirmPassword')),
+                  validate: (value) => value === pwd || i18n.translate('passDontMatch'),
+                  }}
+                />
+              <View style={styles.checkboxRow}>
+              <Checkbox
+                status={isChecked ? "checked" : "unchecked"}
+                  onPress={() => setChecked(!isChecked)}
+                  color={GOLD}
               />
-            ) : null}
-          </LinearGradient>
-        </MainContainer>
-      </Fragment>
+                <Text style={styles.termsText}>
+                  {i18n.translate('agreeTerms1')}
+                  <Text style={styles.termsLink} onPress={() => navigation.navigate(screenName.termConditionsClinic)}>
+                    {i18n.translate('termsOfService')}
+                  </Text>
+                  {i18n.translate('and')}
+                  <Text style={styles.termsLink} onPress={() => navigation.navigate(screenName.termConditionsClinic)}>
+                    {i18n.translate('privacyPolicy')}
+                  </Text>
+                  .
+                </Text>
+              </View>
+                <Button
+                  disabled={!isChecked}
+                  funCallback={handleSubmit(onSubmit)}
+                label={i18n.translate('register')}
+                  success={true}
+                bgColor={GOLD}
+                borderColor={GOLD}
+                  borderWidth={0.2}
+                txtColor={'#fff'}
+                style={styles.loginButtonNew}
+                txtStyle={styles.loginButtonTextNew}
+                />
+              <TouchableOpacity
+                  style={styles.googleButtonNew}
+                  onPress={() => promptAsync()}
+                disabled={!request}
+                  activeOpacity={0.85}
+              >
+                  <Icon name="google" size={22} color={GOLD} style={{ marginRight: 10 }} />
+                  <Text style={styles.googleButtonTextNew}>{i18n.translate('loginWithGoogle')}</Text>
+              </TouchableOpacity>
+                <View style={styles.infoTextViewStyleNew}>
+                  <H7fontMediumPrimary>
+                    {i18n.translate('alreadyAccount')} {" "}
+                  </H7fontMediumPrimary>
+                  <TouchableOpacity
+                    onPress={() => navigation.navigate(screenName.SignInScreenClinic)}
+                  >
+                    <H7fontMediumPrimary style={{ textDecorationLine: 'underline' }}>
+                      {i18n.translate('registerLogin')}
+                    </H7fontMediumPrimary>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </ScrollView>
+          </KeyboardAvoidingView>
+          {showSnackback ? (
+            <SnackBar
+              showSnackBar={showSnackback}
+              setShowSnackback={setShowSnackback}
+              message={message}
+              bottom={2}
+              screen={screenName.SignInScreenClinic}
+            />
+          ) : null}
+        </ImageBackground>
+      </MainContainer>
     </TouchableWithoutFeedback>
   );
 };

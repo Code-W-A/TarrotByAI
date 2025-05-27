@@ -31,6 +31,7 @@ import CardLayoutViitor from "../../components/CardLayout/CardLayoutViitor";
 import DoubleCardLayoutViitor from "../../components/CardLayout/DoubleCardLayoutViitor";
 import { getRandomElements } from "../../utils/commonUtils";
 import DoubleFlipCard from "../../components/FlipCard/DoubleFlipCard";
+import ShareScreenshot from '../../components/common/ShareScreenshot';
 
 const ViitorulApropiat = () => {
   const [cardAnimations, setCardAnimations] = useState([]);
@@ -229,41 +230,43 @@ const ViitorulApropiat = () => {
   };
 
   return (
-    <Fragment>
-      <MainContainer secondary={false} style={{ flex: 1 }}>
-        <ImageBackground
-          source={require("../../../assets/dashboardbg.jpg")}
-          style={{ flex: 1, paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0 }}
-          imageStyle={{ opacity: 1 }}
-        >
-          {/* <GreetingBar isGoBack={true} /> */}
-          {loading ? (
-            <CustomSpinner size={74} color={colors.primary3} />
-          ) : (
-            <ScrollView
-              contentContainerStyle={{
-                paddingBottom: 20,
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                backgroundColor: "transparent",
-                minHeight: Dimensions.get("window").height,
-              }}
-            >
-              <DoubleCardLayoutViitor
-                shuffledCartiViitor={shuffledCartiViitor}
-                title={i18n.translate("ViitorApropiat")}
+    <ShareScreenshot>
+      <Fragment>
+        <MainContainer secondary={false} style={{ flex: 1 }}>
+          <ImageBackground
+            source={require("../../../assets/dashboardbg.jpg")}
+            style={{ flex: 1, paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0 }}
+            imageStyle={{ opacity: 1 }}
+          >
+            {/* <GreetingBar isGoBack={true} /> */}
+            {loading ? (
+              <CustomSpinner size={74} color={colors.primary3} />
+            ) : (
+              <ScrollView
+                contentContainerStyle={{
+                  paddingBottom: 20,
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  backgroundColor: "transparent",
+                  minHeight: Dimensions.get("window").height,
+                }}
               >
-                {categoriiViitor &&
-                  getRandomElements(categoriiViitor, 2).map((category, index) =>
-                    renderFlipCard(category, index)
-                  )}
-              </DoubleCardLayoutViitor>
-            </ScrollView>
-          )}
-        </ImageBackground>
-      </MainContainer>
-    </Fragment>
+                <DoubleCardLayoutViitor
+                  shuffledCartiViitor={shuffledCartiViitor}
+                  title={i18n.translate("ViitorApropiat")}
+                >
+                  {categoriiViitor &&
+                    getRandomElements(categoriiViitor, 2).map((category, index) =>
+                      renderFlipCard(category, index)
+                    )}
+                </DoubleCardLayoutViitor>
+              </ScrollView>
+            )}
+          </ImageBackground>
+        </MainContainer>
+      </Fragment>
+    </ShareScreenshot>
   );
 };
 

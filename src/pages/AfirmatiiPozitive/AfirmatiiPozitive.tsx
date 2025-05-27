@@ -9,6 +9,7 @@ import {
   ImageBackground,
   ScrollView,
   ActivityIndicator,
+  TouchableOpacity,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { MainContainer } from "../../components/commonViews";
@@ -39,6 +40,11 @@ import { collection, getCountFromServer } from "firebase/firestore";
 import { db } from "../../../firebase";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { Positions } from "react-native-calendars/src/expandableCalendar";
+import { captureRef } from 'react-native-view-shot';
+import * as Sharing from 'expo-sharing';
+import * as FileSystem from 'expo-file-system';
+import { MaterialIcons } from '@expo/vector-icons';
+import * as MediaLibrary from 'expo-media-library';
 
 const AfirmatiiPozitive = () => {
   const {
@@ -155,12 +161,53 @@ const AfirmatiiPozitive = () => {
     require("../../../assets/afirmatiipoze/73.png"),
   ];
 
-  // Alegere aleatorie
-  const randomImage = images[Math.floor(Math.random() * images.length)];
-
+  // Fix: imaginea random să fie aleasă o singură dată
+  const [randomImage, setRandomImage] = React.useState(null);
   React.useEffect(() => {
-    getRandomDocumentFirestore();
+    setRandomImage(images[Math.floor(Math.random() * images.length)]);
   }, []);
+
+  const viewRef = React.useRef(null);
+
+  const [fabOpen, setFabOpen] = React.useState(false);
+  const [hideFab, setHideFab] = React.useState(false);
+
+  // Funcție pentru captură screenshot
+  const handleCapture = async (share = false) => {
+    try {
+      setHideFab(true);
+      await new Promise(resolve => setTimeout(resolve, 100));
+      if (!viewRef.current) {
+        alert('Eroare: view-ul nu este disponibil pentru captură!');
+        setHideFab(false);
+        return;
+      }
+      const uri = await captureRef(viewRef, {
+        format: 'png',
+        quality: 1,
+      });
+      setHideFab(false);
+      if (share) {
+        await Sharing.shareAsync(uri, {
+          dialogTitle: 'Distribuie afirmația pozitivă',
+          mimeType: 'image/png',
+          UTI: 'image/png',
+        });
+      } else {
+        const { status } = await MediaLibrary.requestPermissionsAsync();
+        if (status !== 'granted') {
+          alert('Permisiunea de acces la galerie este necesară!');
+          return;
+        }
+        await MediaLibrary.saveToLibraryAsync(uri);
+        alert('Imaginea a fost salvată în galeria telefonului!');
+      }
+    } catch (e) {
+      setHideFab(false);
+      console.log('Eroare la captură/share:', e);
+      alert('Eroare la captură sau share! ' + (e?.message || ''));
+    }
+  };
 
   if (!afirmatiiPozitive) {
     return (
@@ -206,45 +253,81 @@ const AfirmatiiPozitive = () => {
 
   return (
     <View style={{ flex: 1 }}>
-      <MainContainer style={{ flex: 1 }}>
-        <ImageBackground
-          source={randomImage}
-          resizeMode="cover"
-          style={styles.imageBackground}
-        >
-          {/* Overlay negru transparent */}
-          <View style={styles.overlay}>
-            <GreetingBar isGoBack={true} />
-            <View style={styles.secondImageContainer}>
-              <Image
-                source={require("../../../assets/headerIcon.png")}
-                style={styles.secondImage}
-                resizeMode="contain"
-              />
+      <MainContainer style={{ flex: 1 }} secondary={false}>
+        <View ref={viewRef} collapsable={false} style={{ flex: 1 }}>
+          <ImageBackground
+            source={randomImage || images[0]}
+            resizeMode="cover"
+            style={styles.imageBackground}
+          >
+            <View style={styles.overlay}>
+              <View style={{ flex: 1 }}>
+                <View style={styles.secondImageContainer}>
+                  <Image
+                    source={require("../../../assets/headerIcon.png")}
+                    style={styles.secondImage}
+                    resizeMode="contain"
+                  />
+                </View>
+                <View style={styles.contentContainer}>
+                  <H3fontBoldWhite style={styles.title}>{title}</H3fontBoldWhite>
+                  <ScrollView
+                    style={styles.scrollArea}
+                    contentContainerStyle={styles.scrollContentContainer}
+                  >
+                    <H6fontMediumWhite style={styles.description}>
+                      {description} {" "}
+                    </H6fontMediumWhite>
+                  </ScrollView>
+                  <View style={{ alignItems: 'center' }}>
+                    <H7fontBoldWhite>@cristinazurba</H7fontBoldWhite>
+                  </View>
+                </View>
+              </View>
+              {!hideFab && (
+                <View style={styles.fabContainer} pointerEvents="box-none">
+                  {fabOpen && (
+                    <View style={styles.fabActions}>
+                      <TouchableOpacity
+                        onPress={() => { 
+                          setFabOpen(false); 
+                          console.log('FAB: Download apăsat');
+                          handleCapture(false); 
+                        }}
+                        style={[styles.fabActionBtn, { marginBottom: 16 }]}
+                      >
+                        <MaterialIcons name="file-download" size={28} color="#fff" />
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() => { 
+                          setFabOpen(false); 
+                          console.log('FAB: Share apăsat');
+                          handleCapture(true); 
+                        }}
+                        style={styles.fabActionBtn}
+                      >
+                        <MaterialIcons name="share" size={28} color="#fff" />
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                  <TouchableOpacity
+                    onPress={() => {
+                      setFabOpen((v) => {
+                        const newState = !v;
+                        console.log(newState ? 'FAB deschis' : 'FAB închis');
+                        return newState;
+                      });
+                    }}
+                    style={styles.fabMain}
+                    activeOpacity={0.8}
+                  >
+                    <MaterialIcons name={fabOpen ? "close" : "add"} size={32} color="#fff" />
+                  </TouchableOpacity>
+                </View>
+              )}
             </View>
-
-            {/* Container cu layout vertical simplu (fără space-between) */}
-            <View style={styles.contentContainer}>
-              {/* Titlul */}
-              <H3fontBoldWhite style={styles.title}>{title}</H3fontBoldWhite>
-
-              {/* Zona de descriere cu maxHeight - dacă textul e mare, apare scroll */}
-              <ScrollView
-                style={styles.scrollArea}
-                contentContainerStyle={styles.scrollContentContainer}
-              >
-                <H6fontMediumWhite style={styles.description}>
-                  {description}{" "}
-                </H6fontMediumWhite>
-              </ScrollView>
-
-              {/* Mențiunea, mai aproape de ScrollView, cu marginTop */}
-              <H7fontBoldWhite style={styles.mention}>
-                @cristinazurba
-              </H7fontBoldWhite>
-            </View>
-          </View>
-        </ImageBackground>
+          </ImageBackground>
+        </View>
       </MainContainer>
     </View>
   );
@@ -302,6 +385,44 @@ const styles = StyleSheet.create({
   mention: {
     textAlign: "center",
     color: "white",
+  },
+  fabContainer: {
+    position: 'absolute',
+    right: 24,
+    bottom: 104, // mai sus de bara de navigație
+    alignItems: 'center',
+    zIndex: 100,
+  },
+  fabMain: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#FFD700',
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  fabActions: {
+    marginBottom: 8,
+    alignItems: 'center',
+  },
+  fabActionBtn: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#FFD700',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 4,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 1 },
   },
 });
 export default AfirmatiiPozitive;

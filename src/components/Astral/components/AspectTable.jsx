@@ -34,13 +34,13 @@ const AspectTable = ({ houseCusps, planetaryData, aspects }) => {
         horizontal={true}
       >
         <View style={styles.tableHeader}>
-          <RNText style={[styles.headerText, styles.columnLarge, { color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700' }]}>
+          <RNText style={[styles.headerText, styles.columnLarge, { color: '#FFD700', fontFamily: 'Lora', fontWeight: '700' }]}>
             {i18n.translate("House")}
           </RNText>
-          <RNText style={[styles.headerText, styles.columnLarge, { color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700' }]}>
+          <RNText style={[styles.headerText, styles.columnLarge, { color: '#FFD700', fontFamily: 'Lora', fontWeight: '700' }]}>
             {i18n.translate("Sign")}
           </RNText>
-          <RNText style={[styles.headerText, styles.columnLarge, { color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700' }]}>
+          <RNText style={[styles.headerText, styles.columnLarge, { color: '#FFD700', fontFamily: 'Lora', fontWeight: '700' }]}>
             {i18n.translate("Degree")}
           </RNText>
         </View>
@@ -54,7 +54,7 @@ const AspectTable = ({ houseCusps, planetaryData, aspects }) => {
                 <MaterialCommunityIcons
                   name={`zodiac-${aspect?.sign.toLowerCase()}`}
                   size={24}
-                  color={'#C9A14A'}
+                  color={'#FFD700'}
                 />
                 <RNText style={{ color: '#131523', fontFamily: 'Lora', fontWeight: '500', marginLeft: 4 }}>{aspect?.sign}</RNText>
               </View>
@@ -66,7 +66,7 @@ const AspectTable = ({ houseCusps, planetaryData, aspects }) => {
       </ScrollView>
 
       <View style={styles.sectionTitle}>
-        <RNText style={{ color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700', fontSize: 18 }}>{i18n.translate("Natal")}</RNText>
+        <RNText style={{ color: '#FFD700', fontFamily: 'Lora', fontWeight: '700', fontSize: 18 }}>{i18n.translate("Natal")}</RNText>
       </View>
       <ScrollView
         contentContainerStyle={{
@@ -77,19 +77,19 @@ const AspectTable = ({ houseCusps, planetaryData, aspects }) => {
         horizontal={true}
       >
         <View style={[styles.tableHeader]}>
-          <RNText style={[styles.headerText, styles.columnLarge, { color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700' }]}>
+          <RNText style={[styles.headerText, styles.columnLarge, { color: '#FFD700', fontFamily: 'Lora', fontWeight: '700' }]}>
             {i18n.translate("Planet")}
           </RNText>
-          <RNText style={[styles.headerText, styles.columnLarge, { color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700' }]}>
+          <RNText style={[styles.headerText, styles.columnLarge, { color: '#FFD700', fontFamily: 'Lora', fontWeight: '700' }]}>
             {i18n.translate("Sign")}
           </RNText>
-          <RNText style={[styles.headerText, styles.columnLarge, { color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700' }]}>
+          <RNText style={[styles.headerText, styles.columnLarge, { color: '#FFD700', fontFamily: 'Lora', fontWeight: '700' }]}>
             {i18n.translate("Degree")}
           </RNText>
-          <RNText style={[styles.headerText, styles.columnLarge, { color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700' }]}>
+          <RNText style={[styles.headerText, styles.columnLarge, { color: '#FFD700', fontFamily: 'Lora', fontWeight: '700' }]}>
             {i18n.translate("House")}
           </RNText>
-          <RNText style={[styles.headerText, styles.columnLarge, { color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700' }]}>
+          <RNText style={[styles.headerText, styles.columnLarge, { color: '#FFD700', fontFamily: 'Lora', fontWeight: '700' }]}>
             {i18n.translate("Speed")}
           </RNText>
         </View>
@@ -103,7 +103,7 @@ const AspectTable = ({ houseCusps, planetaryData, aspects }) => {
                 <MaterialCommunityIcons
                   name={`zodiac-${aspect?.sign.toLowerCase()}`}
                   size={24}
-                  color={'#C9A14A'}
+                  color={'#FFD700'}
                 />
                 <RNText style={{ color: '#131523', fontFamily: 'Lora', fontWeight: '500', marginLeft: 4 }}>{aspect?.sign}</RNText>
               </View>
@@ -121,7 +121,7 @@ const AspectTable = ({ houseCusps, planetaryData, aspects }) => {
       </ScrollView>
 
       <View style={styles.sectionTitle}>
-        <RNText style={{ color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700', fontSize: 18 }}>Aspects</RNText>
+        <RNText style={{ color: '#FFD700', fontFamily: 'Lora', fontWeight: '700', fontSize: 18 }}>Aspects</RNText>
       </View>
       <ScrollView
         contentContainerStyle={{
@@ -132,16 +132,16 @@ const AspectTable = ({ houseCusps, planetaryData, aspects }) => {
         horizontal={true}
       >
         <View style={[styles.tableHeader, { marginTop: "6%" }]}>
-          <RNText style={[styles.headerText, styles.columnLarge, { color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700' }]}>
+          <RNText style={[styles.headerText, styles.columnLarge, { color: '#FFD700', fontFamily: 'Lora', fontWeight: '700' }]}>
             {i18n.translate("Planet")}
           </RNText>
-          <RNText style={[styles.headerText, styles.columnLarge, { color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700' }]}>
+          <RNText style={[styles.headerText, styles.columnLarge, { color: '#FFD700', fontFamily: 'Lora', fontWeight: '700' }]}>
             Aspect
           </RNText>
-          <RNText style={[styles.headerText, styles.columnLarge, { color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700' }]}>
+          <RNText style={[styles.headerText, styles.columnLarge, { color: '#FFD700', fontFamily: 'Lora', fontWeight: '700' }]}>
             {i18n.translate("Planet")}
           </RNText>
-          <RNText style={[styles.headerText, styles.columnLarge, { color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700' }]}>
+          <RNText style={[styles.headerText, styles.columnLarge, { color: '#FFD700', fontFamily: 'Lora', fontWeight: '700' }]}>
             {i18n.translate("Orb")}
           </RNText>
         </View>

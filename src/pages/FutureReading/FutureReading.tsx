@@ -16,6 +16,7 @@ import GreetingBar from "../../components/UpperGreetingBar/GreetingBar";
 import { colors } from "../../utils/colors";
 import { TouchableWithoutFeedback } from "react-native";
 import { Video } from "expo-av";
+import ShareScreenshot from '../../components/common/ShareScreenshot';
 
 import {
   H6fontBoldPrimary,
@@ -54,83 +55,71 @@ const FutureReading = ({ route }) => {
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <ShareScreenshot fabPosition={{ bottom: 24, right: 24 }}>
       <MainContainer secondary={false} style={{ flex: 1 }}>
-        <LinearGradient
-          colors={['#FFFBEA', '#FAF7F2', '#F7E7B4']}
-          style={styles.gradient}
+        <ImageBackground
+          source={require("../../../assets/dashboardbg.jpg")}
+          style={{ flex: 1, paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0 }}
+          imageStyle={{ opacity: 1 }}
         >
-          <ImageBackground
-            source={require("../../../assets/shadowBg.png")}
-            resizeMode="cover"
-            style={{
-              flex: 1,
-              width: null,
-              height: null,
-            }}
-          >
-            <GreetingBar isGoBack={true} isPersonalGoBack={true} />
-
-              <View style={styles.imageContainer}>
-                <Image
+          <GreetingBar isGoBack={true} isPersonalGoBack={true} />
+          <View style={styles.imageContainer}>
+            <Image
+              style={{
+                width: 141,
+                height: 200,
+                resizeMode: 'stretch',
+                borderWidth: 2,
+                borderColor: '#FFD700',
+                borderRadius: 12,
+                shadowColor: '#FFD700',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.13,
+                shadowRadius: 8,
+              }}
+              source={{ uri: item.image.finalUri }}
+            />
+          </View>
+          <ScrollView contentContainerStyle={styles.scrollViewContainer}>
+            <View
+              style={{
+                display: "flex",
+                justifyContent: "space-around",
+                height: "auto",
+                paddingHorizontal: "5%",
+              }}
+            >
+              <Text
                 style={{
-                  width: 141,
-                  height: 200,
-                  resizeMode: 'stretch',
-                  borderWidth: 2,
-                  borderColor: '#C9A14A',
-                  borderRadius: 12,
-                  shadowColor: '#C9A14A',
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.13,
-                  shadowRadius: 8,
-                }}
-                  source={{ uri: item.image.finalUri }}
-                />
-              </View>
-
-            <ScrollView contentContainerStyle={styles.scrollViewContainer}>
-              <View
-                style={{
-                  display: "flex",
-                  justifyContent: "space-around",
-                  height: "auto",
-                  paddingHorizontal: "5%",
+                  alignSelf: "center",
+                  marginBottom: "5%",
+                  color: '#FFD700',
+                  fontFamily: 'LoraBold',
+                  fontSize: 22,
+                  letterSpacing: 1.1,
+                  textShadowColor: '#fffbeae0',
+                  textShadowOffset: { width: 0, height: 2 },
+                  textShadowRadius: 6,
                 }}
               >
-                <Text
-                  style={{
-                    alignSelf: "center",
-                    marginBottom: "5%",
-                    color: '#C9A14A',
-                    fontFamily: 'LoraBold',
-                    fontSize: 22,
-                    letterSpacing: 1.1,
-                    textShadowColor: '#fffbeae0',
-                    textShadowOffset: { width: 0, height: 2 },
-                    textShadowRadius: 6,
-                  }}
-                >
-                  {getName()}
-                </Text>
-
-                <Text
-                  style={{
-                    textAlign: 'justify',
-                    color: '#7c6f57',
-                    fontFamily: 'LoraRegular',
-                    fontSize: 16,
-                    letterSpacing: 0.2,
-                  }}
-                >
-                  {getDescription()}
-                </Text>
-              </View>
-            </ScrollView>
-          </ImageBackground>
-        </LinearGradient>
+                {getName()}
+              </Text>
+              <Text
+                style={{
+                  textAlign: 'justify',
+                  color: '#7c6f57',
+                  fontFamily: 'LoraRegular',
+                  fontSize: 16,
+                  letterSpacing: 0.2,
+                }}
+              >
+                {getDescription()}
+              </Text>
+            </View>
+          </ScrollView>
+        </ImageBackground>
       </MainContainer>
-    </View>
+    </ShareScreenshot>
   );
 };
 

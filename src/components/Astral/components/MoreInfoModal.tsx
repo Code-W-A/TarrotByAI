@@ -163,7 +163,7 @@ const MoreInfoModal: React.FC<MoreInfoModalProps> = ({
           <Text style={styles.modalTitle}>{completeazaInfoText}:</Text>
 
             <View style={styles.inputWrapper}>
-              <Feather name="user" size={20} color={colors.primary2} style={styles.inputIcon} />
+              <Feather name="user" size={20} color={colors.gold} style={styles.inputIcon} />
           <TextInput
             style={[styles.input, nameError ? styles.errorInput : null]}
             placeholder={introduNumeleText}
@@ -176,7 +176,7 @@ const MoreInfoModal: React.FC<MoreInfoModalProps> = ({
           />
             </View>
             <View style={styles.inputWrapper}>
-              <Feather name="user-check" size={20} color={colors.primary2} style={styles.inputIcon} />
+              <Feather name="user-check" size={20} color={colors.gold} style={styles.inputIcon} />
           <TextInput
             style={[styles.input, nameError ? styles.errorInput : null]}
             placeholder={introduPrenumeleText}
@@ -193,7 +193,7 @@ const MoreInfoModal: React.FC<MoreInfoModalProps> = ({
           )}
 
             <View style={styles.inputWrapper}>
-              <MaterialCommunityIcons name="email-outline" size={20} color={colors.primary2} style={styles.inputIcon} />
+              <MaterialCommunityIcons name="email-outline" size={20} color={colors.gold} style={styles.inputIcon} />
           <TextInput
             style={[styles.input, emailError ? styles.errorInput : null]}
             placeholder={introduEmailText}
@@ -210,26 +210,26 @@ const MoreInfoModal: React.FC<MoreInfoModalProps> = ({
             <Text style={styles.errorText}>{completeazaInfoText3}</Text>
           )}
 
-            <View style={styles.inputWrapper}>
-              <Feather name="phone" size={20} color={colors.primary2} style={styles.inputIcon} />
-              <View style={{ flex: 1 }}>
-            <PhoneInput
-              value={phone}
-              onChangePhoneNumber={handlePhoneChange}
-              selectedCountry={selectedCountry}
-              onChangeSelectedCountry={handleSelectedCountry}
-              defaultCountry="RO"
-              placeholder={completeazaInfoText4}
-            />
+              <View style={styles.phoneInputContainer}>
+                <PhoneInput
+                  value={phone}
+                  onChangePhoneNumber={handlePhoneChange}
+                  selectedCountry={selectedCountry}
+                  onChangeSelectedCountry={handleSelectedCountry}
+                  defaultCountry="RO"
+                  placeholder={completeazaInfoText4}
+                  style={{ width: '100%' }}
+                  containerStyle={{ width: '100%' }}
+                />
               </View>
-            </View>
+      
             {phoneError && (
               <Text style={styles.errorText}>{completeazaInfoText5}</Text>
             )}
 
           <View style={styles.buttonContainer}>
               <LinearGradient
-                colors={["#e7c585", "#bfa76a"]}
+                colors={[colors.gold, colors.gold]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.buttonGradient}
@@ -240,7 +240,7 @@ const MoreInfoModal: React.FC<MoreInfoModalProps> = ({
                   label={ActualizeazaInfoText}
               success={true}
                   bgColor="transparent"
-                  borderColor={colors.primary2}
+                  borderColor={colors.gold}
                   borderWidth={0}
                   txtColor={"#222"}
             />
@@ -271,7 +271,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.95)',
     borderRadius: 24,
     padding: 24,
-    shadowColor: '#bfa76a',
+    shadowColor: colors.gold,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.18,
     shadowRadius: 24,
@@ -283,7 +283,7 @@ const styles = StyleSheet.create({
     marginBottom: 18,
     textAlign: 'center',
     fontWeight: 'bold',
-    color: '#bfa76a',
+    color: colors.gold,
     letterSpacing: 0.5,
   },
   inputWrapper: {
@@ -292,7 +292,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.85)',
     borderRadius: 12,
     borderWidth: 1.5,
-    borderColor: '#bfa76a',
+    borderColor: colors.gold,
     marginVertical: 7,
     paddingHorizontal: 10,
     width: '100%',
@@ -308,12 +308,14 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 4,
     fontSize: 16,
-    color: colors.primary2,
+    color: colors.gold,
     backgroundColor: 'transparent',
   },
   phoneInputContainer: {
     width: '100%',
     marginVertical: 7,
+    flex: 1,
+    marginBottom: 60,
   },
   errorText: {
     color: '#d9534f',

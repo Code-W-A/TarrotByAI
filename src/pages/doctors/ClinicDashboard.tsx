@@ -21,6 +21,7 @@ import {
   Image,
   Modal,
   TouchableOpacity,
+  TextInput,
 } from "react-native";
 import { Provider as PaperProvider } from "react-native-paper";
 import { useSelector, useDispatch } from "react-redux";
@@ -31,6 +32,7 @@ import {
 } from "@react-navigation/native";
 import { MaterialCommunityIcons, FontAwesome5, Feather, Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { SvgUri } from 'react-native-svg';
 
 import NavBarBottom from "../../components/Navbar";
 import FlipCard from "../../components/FlipCard/FlipCard";
@@ -44,7 +46,7 @@ import { useNavigationState } from "../../context/NavigationContext";
 import i18n from "../../../i18n";
 import { useLanguage } from "../../context/LanguageContext";
 import { useApiData } from "../../context/ApiContext";
-import { colors } from "../../utils/colors";
+import { colors, textStyles } from "../../utils/colors";
 import { handleLanguagei18n } from "../../utils/handleLanguageGeneral";
 
 //---ADS---
@@ -92,38 +94,35 @@ interface UserDetails {
 const CATEGORIES = [
   {
     key: 'astrology',
-    label: i18n.translate('Astrologie'),
-    icon: <MaterialCommunityIcons name="star-outline" size={32} color="#bfa76a" />,
-    screen: screenName.PersonalReadingDashboard,
+    label: i18n.translate('astroSectionTitle'),
+    icon: <Image source={require('../../../assets/clinicdashboard/astrology.png')} style={{ width: 55, height: 55 }} />,
+    screen: "Learn",
     description: i18n.translate('Descoperă astrograma natală, sinastria și articole astrologice.'),
+    image: require('../../../assets/astrogramacard.jpg'),
   },
   {
     key: 'tarot',
     label: i18n.translate('Tarot'),
-    icon: <MaterialCommunityIcons name="cards" size={32} color="#bfa76a" />,
-    screen: screenName.FutureReadingDashboard,
+    icon: <Image source={require('../../../assets/clinicdashboard/Tarot.png')} style={{ width: 38, height: 38 }} />,
+    screen: 'TarotMaineScreen',
     description: i18n.translate('Citiri de tarot personalizate pentru tine.'),
+    image: require('../../../assets/tarotbg.jpg'),
   },
   {
     key: 'luck',
     label: i18n.translate('Noroc'),
-    icon: <FontAwesome5 name="clover" size={28} color="#bfa76a" />,
-    screen: screenName.luckyNumber,
+    icon: <Image source={require('../../../assets/clinicdashboard/Noroc.png')} style={{ width: 38, height: 38 }} />,
+    screen: 'NorocMaineScreen',
     description: i18n.translate('Numere, culori și ore norocoase.'),
+    image: require('../../../assets/norocbg.jpg'),
   },
   {
     key: 'magic',
-    label: i18n.translate('Mesaje magice'),
-    icon: <MaterialCommunityIcons name="magic-staff" size={32} color="#bfa76a" />,
-    screen: screenName.motivationalQuotes,
+    label: i18n.translate('MesajeMagice'),
+    icon: <Image source={require('../../../assets/clinicdashboard/Mesajemagice.png')} style={{ width: 38, height: 38 }} />,
+    screen: 'MesajeMagiceMainScreen',
     description: i18n.translate('Afirmații pozitive și ghidare spirituală.'),
-  },
-  {
-    key: 'blog',
-    label: i18n.translate('Blog'),
-    icon: <Feather name="feather" size={32} color="#bfa76a" />,
-    screen: screenName.motivationalQuotes, // sau alt screen pentru blog
-    description: i18n.translate('Articole și previziuni astrologice.'),
+    image: require('../../../assets/mesajemagicebg.jpg'),
   },
 ];
 
@@ -176,68 +175,23 @@ const ClinicDashboard = () => {
       try {
         const storedData = await AsyncStorage.getItem("userDetails");
         const parsedData = storedData ? JSON.parse(storedData) : null;
-        console.log("parsedData.....", parsedData);
-
-        const areDataEqual = (data1, data2) => {
-          console.log(data1.email);
-          console.log(data2.email);
-          console.log(data1.phone);
-          console.log(data2.phone);
-          if (!data1 || !data2) return false;
-          return data1.email === data2.email && data1.phone === data2.phone;
-        };
-
-        const hasUserData = userData?.owner_uid; // Verifică dacă există un UID
-
-        if (parsedData && hasUserData) {
-          // Dacă există ambele seturi de date
-          console.log("here...one...");
-          const combinedData = {
-            firstName: userData?.first_name || parsedData.firstName || "",
-            lastName: userData?.last_name || parsedData.lastName || "",
-            email: userData?.email || parsedData.email || "",
-            phone: userData?.phone || parsedData.phone || "",
-          };
-
-          setFirstName(combinedData.firstName);
-          setLastName(combinedData.lastName);
-          setEmail(combinedData.email);
-          setPhone(combinedData.phone);
-
-          // Afișează modalul doar dacă datele nu sunt egale
-          if (!areDataEqual(parsedData, userData)) {
-            console.log("here...one...two");
-            setModalVisible(true);
-          }
-        } else if (hasUserData) {
-          console.log("here...two...");
-          // Dacă există doar `userData`
-          setFirstName(userData?.first_name || "");
-          setLastName(userData?.last_name || "");
-          setEmail(userData?.email || "");
-          setPhone(userData?.phone || "");
+        // Show modal if any field is missing, regardless of guest
+        if (!parsedData || !parsedData.firstName || !parsedData.lastName || !parsedData.email || !parsedData.phone) {
           setModalVisible(true);
-        } else if (parsedData) {
-          console.log("here...three...");
-          // Dacă există doar `parsedData`
-          setFirstName(parsedData.firstName || "");
-          setLastName(parsedData.lastName || "");
-          setEmail(parsedData.email || "");
-          setPhone(parsedData.phone || "");
-        } else {
-          // Dacă nu există nici `parsedData`, nici `userData`
-          setFirstName("");
-          setLastName("");
-          setEmail("");
-          setPhone("");
-          setModalVisible(true);
+          setFirstName(parsedData?.firstName || "");
+          setLastName(parsedData?.lastName || "");
+          setEmail(parsedData?.email || "");
+          setPhone(parsedData?.phone || "");
+          return;
         }
+        setFirstName(parsedData.firstName);
+        setLastName(parsedData.lastName);
+        setEmail(parsedData.email);
+        setPhone(parsedData.phone);
       } catch (error) {
-        console.error("Eroare la încărcarea datelor din AsyncStorage:", error);
-        setModalVisible(true); // În caz de eroare, afișează modalul
+        setModalVisible(true);
       }
     };
-
     checkAndLoadData();
   }, [userData]);
 
@@ -586,7 +540,7 @@ const ClinicDashboard = () => {
             source={require("../../../assets/dashboardbg.jpg")}
             resizeMode="cover"
             style={[StyleSheet.absoluteFill, { zIndex: 1 }]}
-            imageStyle={{ opacity: 0.7 }}
+            imageStyle={{ opacity: 1 }}
           />
           {/* Overlay for opacity effect */}
           <View style={{
@@ -656,79 +610,21 @@ const ClinicDashboard = () => {
             >
               {/* Section: Acces rapid și istoric (carusel) */}
               <View style={stylesNew.sectionContainer}>
-                <Text style={stylesNew.sectionTitle}>{i18n.translate('astroSectionTitle')}</Text>
-                {/* Card cu fundal imagine, aspect dreptunghiular, imagine complet vizibilă */}
-                <TouchableOpacity style={stylesNew.astroCardImageBgRect} onPress={() => navigation.navigate('Astral' as never)} activeOpacity={0.96}>
-                  <ImageBackground
-                    source={require('../../../assets/astrogramacard.jpg')}
-                    style={stylesNew.astroCardImageBgRectImg}
-                    imageStyle={{ borderRadius: 20 }}
-                    resizeMode="contain"
-                  >
-                    <View style={stylesNew.astroCardImageBgRectOverlay}>
-                      <Text style={stylesNew.astroCardImageBgRectDesc}>{i18n.translate('astroMysticCardDesc')}</Text>
-                    </View>
-                  </ImageBackground>
-                </TouchableOpacity>
-
-                {/* Subcategorii moderne sub cardul principal */}
-                {/* Tarot */}
-                <Text style={stylesNew.subSectionTitle}>Tarot</Text>
-                <View style={stylesNew.subSectionGrid}>
-                  {[
-                    { text: i18n.translate("personalReading"), screen: screenName.PersonalReadingDashboard, icon: <MaterialCommunityIcons name="cards-outline" size={32} color="#bfa76a" style={{ marginBottom: 6 }} /> },
-                    { text: i18n.translate("futureReading"), screen: screenName.FutureReadingDashboard, icon: <MaterialCommunityIcons name="crystal-ball" size={32} color="#bfa76a" style={{ marginBottom: 6 }} /> },
-                    { text: i18n.translate("carteaTa"), screen: "CarteaTa", icon: <MaterialCommunityIcons name="book-open-variant" size={32} color="#bfa76a" style={{ marginBottom: 6 }} /> },
-                    { text: i18n.translate("ceGandeste"), screen: "CeGandeste", icon: <MaterialCommunityIcons name="head-question-outline" size={32} color="#bfa76a" style={{ marginBottom: 6 }} /> },
-                    { text: i18n.translate("ceSimte"), screen: "CeSimte", icon: <MaterialCommunityIcons name="heart-outline" size={32} color="#bfa76a" style={{ marginBottom: 6 }} /> },
-                    { text: i18n.translate("EnergiaDinRelație"), screen: "EnergiaDinRelație", icon: <MaterialCommunityIcons name="infinity" size={32} color="#bfa76a" style={{ marginBottom: 6 }} /> },
-                    { text: i18n.translate("ViitorApropiat"), screen: "ViitorApropiat", icon: <MaterialCommunityIcons name="timeline-clock-outline" size={32} color="#bfa76a" style={{ marginBottom: 6 }} /> },
-                  ].map((card, index) => (
-                    <View key={index} style={stylesNew.subSectionCardBox}>
-                      <TouchableWithoutFeedback onPress={() => navigation.navigate(card.screen as never)}>
-                        <View style={stylesNew.functionalCardContent}>
-                          {card.icon}
-                          <Text style={stylesNew.functionalCardLabel}>{card.text}</Text>
+                <View style={stylesNew.categoriesContainer}>
+                  {CATEGORIES.map((category, index) => (
+                    <TouchableOpacity
+                      key={category.key}
+                      style={stylesNew.categoryCard}
+                      onPress={() => navigation.navigate(category.screen as never)}
+                      activeOpacity={0.96}
+                    >
+                      <View style={stylesNew.categoryContent}>
+                        <Text style={stylesNew.categoryCardTitle}>{category.label}</Text>
+                        <View style={stylesNew.categoryIcon}>
+                          {category.icon}
                         </View>
-                      </TouchableWithoutFeedback>
-                    </View>
-                  ))}
-                </View>
-
-                {/* Noroc */}
-                <Text style={stylesNew.subSectionTitle}>Noroc</Text>
-                <View style={stylesNew.subSectionGrid}>
-                  {[
-                    { text: i18n.translate("luckyNumber"), screen: screenName.luckyNumber, icon: <MaterialCommunityIcons name="dice-multiple-outline" size={32} color="#bfa76a" style={{ marginBottom: 6 }} /> },
-                    { text: i18n.translate("luckyColor"), screen: screenName.luckyColor, icon: <MaterialCommunityIcons name="palette-outline" size={32} color="#bfa76a" style={{ marginBottom: 6 }} /> },
-                    { text: i18n.translate("luckyHours"), screen: screenName.luckyHour, icon: <MaterialCommunityIcons name="clock-outline" size={32} color="#bfa76a" style={{ marginBottom: 6 }} /> },
-                  ].map((card, index) => (
-                    <View key={index} style={stylesNew.subSectionCardBox}>
-                      <TouchableWithoutFeedback onPress={() => navigation.navigate(card.screen as never)}>
-                        <View style={stylesNew.functionalCardContent}>
-                          {card.icon}
-                          <Text style={stylesNew.functionalCardLabel}>{card.text}</Text>
-                        </View>
-                      </TouchableWithoutFeedback>
-                    </View>
-                  ))}
-                </View>
-
-                {/* Mesaje magice */}
-                <Text style={stylesNew.subSectionTitle}>Mesaje magice</Text>
-                <View style={stylesNew.subSectionGrid}>
-                  {[
-                    { text: i18n.translate("motivationalQuotes"), screen: screenName.motivationalQuotes, icon: <MaterialCommunityIcons name="message-star-outline" size={32} color="#bfa76a" style={{ marginBottom: 6 }} /> },
-                    { text: i18n.translate("AfirmatiiPozitive"), screen: "AfirmatiiPozitive", icon: <MaterialCommunityIcons name="magic-staff" size={32} color="#bfa76a" style={{ marginBottom: 6 }} /> },
-                  ].map((card, index) => (
-                    <View key={index} style={stylesNew.subSectionCardBox}>
-                      <TouchableWithoutFeedback onPress={() => navigation.navigate(card.screen as never)}>
-                        <View style={stylesNew.functionalCardContent}>
-                          {card.icon}
-                          <Text style={stylesNew.functionalCardLabel}>{card.text}</Text>
-                        </View>
-                      </TouchableWithoutFeedback>
-                    </View>
+                      </View>
+                    </TouchableOpacity>
                   ))}
                 </View>
               </View>
@@ -769,50 +665,68 @@ const ClinicDashboard = () => {
           
               {/* Ultimele articole - Blog Section */}
               <View style={stylesNew.sectionContainer}>
-                <Text style={stylesNew.sectionTitle}>{i18n.translate('latestArticles')}</Text>
+                <View style={stylesNew.sectionTitleContainer}>
+                  <Text style={stylesNew.sectionTitle}>{i18n.translate('latestArticles')}</Text>
+                  <View style={stylesNew.iconBackground}>
+                    <Image source={require('../../../assets/clinicdashboard/Articole.png')} style={{ width: 32, height: 32 }} />
+                  </View>
+                </View>
                 {loadingArticles ? (
                   <ActivityIndicator color="#bfa76a" style={{ marginVertical: 16 }} />
                 ) : (
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ flexDirection: 'row', gap: 12 }}>
-                    {latestArticles.map((article) => (
-                      <TouchableOpacity
-                        key={article.id}
-                        activeOpacity={0.93}
-                        onPress={() => handlePressArticle(article)}
-                        style={{ width: 220, height: 180, borderRadius: 20, overflow: 'hidden', marginRight: 12, backgroundColor: '#fff', shadowColor: '#bfa76a', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.13, shadowRadius: 16, elevation: 7 }}
-                      >
-                        <ImageBackground
-                          source={{ uri: article?.image?.finalUri ?? 'https://picsum.photos/800' }}
-                          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
-                          imageStyle={{ borderRadius: 20 }}
-                          resizeMode="cover"
+                  <>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ flexDirection: 'row', gap: 12 }}>
+                      {latestArticles.map((article) => (
+                        <TouchableOpacity
+                          key={article.id}
+                          activeOpacity={0.93}
+                          onPress={() => handlePressArticle(article)}
+                          style={{ width: 220, height: 180, borderRadius: 20, overflow: 'hidden', marginRight: 12, backgroundColor: '#fff', shadowColor: '#bfa76a', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.13, shadowRadius: 16, elevation: 7 }}
                         >
-                          <View style={{
-                            position: 'absolute',
-                            top: 0, left: 0, right: 0, bottom: 0,
-                            backgroundColor: 'rgba(0,0,0,0.32)',
-                            justifyContent: 'center', alignItems: 'center',
-                            padding: 12,
-                          }}>
-                            <Text style={{ color: '#ffe6b0', fontWeight: '700', fontSize: 17, textAlign: 'center', textShadowColor: '#000', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 4 }} numberOfLines={3}>
-                              {language === "hi"
-                                ? article.info?.hu?.nume
-                                : language === "id"
-                                ? article.info?.ru?.nume
-                                : language === "ru"
-                                ? article.info?.rusa?.nume
-                                : article.info?.[language]?.nume}
-                            </Text>
-                          </View>
-                        </ImageBackground>
-                      </TouchableOpacity>
-                    ))}
-                  </ScrollView>
+                          <ImageBackground
+                            source={{ uri: article?.image?.finalUri ?? 'https://picsum.photos/800' }}
+                            style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+                            imageStyle={{ borderRadius: 20 }}
+                            resizeMode="cover"
+                          >
+                            <View style={{
+                              position: 'absolute',
+                              top: 0, left: 0, right: 0, bottom: 0,
+                              backgroundColor: 'rgba(0,0,0,0.32)',
+                              justifyContent: 'center', alignItems: 'center',
+                              padding: 12,
+                            }}>
+                              <Text style={{ color: '#ffe6b0', fontWeight: '700', fontSize: 17, textAlign: 'center', textShadowColor: '#000', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 1 }} numberOfLines={3}>
+                                {language === "hi"
+                                  ? article.info?.hu?.nume
+                                  : language === "id"
+                                  ? article.info?.ru?.nume
+                                  : language === "ru"
+                                  ? article.info?.rusa?.nume
+                                  : article.info?.[language]?.nume}
+                              </Text>
+                            </View>
+                          </ImageBackground>
+                        </TouchableOpacity>
+                      ))}
+                    </ScrollView>
+                    <TouchableOpacity 
+                      style={stylesNew.seeAllButton}
+                      onPress={() => navigation.navigate('News')}
+                    >
+                      <Text style={stylesNew.seeAllButtonText}>{i18n.translate('seeAllArticles')}</Text>
+                    </TouchableOpacity>
+                  </>
                 )}
               </View>
               {/* Consultatii - categorie nouă */}
               <View style={stylesNew.sectionContainer}>
-                <Text style={stylesNew.sectionTitle}>Consultatii</Text>
+                <View style={stylesNew.sectionTitleContainer}>
+                  <Text style={stylesNew.sectionTitle}>Consultatii</Text>
+                  <View style={stylesNew.iconBackground}>
+                    <Image source={require('../../../assets/clinicdashboard/Consultatii.png')} style={{ width: 32, height: 32 }} />
+                  </View>
+                </View>
                 <TouchableOpacity
                   style={[stylesNew.astroCardImageBgRect, { borderColor: '#bfa76a', borderWidth: 2 }]}
                   activeOpacity={0.93}
@@ -840,6 +754,20 @@ const ClinicDashboard = () => {
               articleIndex={0}
               onClose={() => setArticleModalVisible(false)}
               saveArticle={() => {}}
+            />
+            {/* Modal completare date utilizator pentru guest sau user incomplet */}
+            <MoreInfoModal
+              visible={isModalVisible}
+              onDismiss={() => setModalVisible(false)}
+              onConfirm={handleConfirm}
+              email={email}
+              setEmail={setEmail}
+              phone={phone}
+              setPhone={setPhone}
+              firstName={firstName}
+              setFirstName={setFirstName}
+              lastName={lastName}
+              setLastName={setLastName}
             />
           </View>
         </LinearGradient>
@@ -897,19 +825,14 @@ const stylesNew = StyleSheet.create({
   },
   headerSalute: {
     fontSize: 15,
-    fontWeight: 'bold',
-    color: '#bfa76a',
     letterSpacing: 0.2,
     marginBottom: 0,
-    textShadowColor: 'rgba(191,167,106,0.06)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 1,
+    ...textStyles.goldenTextBold,
   },
   headerUser: {
     fontSize: 13,
-    color: '#7c6f57',
     marginTop: 0,
-    fontWeight: '500',
+    ...textStyles.goldenText,
   },
   // Add a style for the language selector in the header
   headerFlagBtn: {
@@ -961,8 +884,7 @@ const stylesNew = StyleSheet.create({
   },
   modalText: {
     fontSize: 18,
-    color: '#bfa76a',
-    fontWeight: '600',
+    ...textStyles.goldenTextBold,
   },
   modalTextCancel: {
     fontSize: 18,
@@ -982,10 +904,9 @@ const stylesNew = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 19,
-    fontWeight: 'bold',
-    color: '#bfa76a',
     marginBottom: 6,
     marginLeft: 4,
+    ...textStyles.goldenTextBold,
   },
   autoScrollContainer: {
     width: '100%',
@@ -998,54 +919,64 @@ const stylesNew = StyleSheet.create({
     elevation: 3,
     padding: 8,
   },
-  categoriesGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    gap: 8,
+  categoriesContainer: {
+    width: '100%',
+    gap: 12,
+    paddingHorizontal: 4,
   },
-  categoryBox: {
-    width: '47%',
-    backgroundColor: 'rgba(255,255,255,0.92)',
-    borderRadius: 18,
-    alignItems: 'center',
-    marginBottom: 14,
-    paddingVertical: 20,
-    paddingHorizontal: 12,
+  categoryCard: {
+    width: '100%',
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 16,
+    marginBottom: 16,
     shadowColor: '#bfa76a',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.12,
     shadowRadius: 12,
     elevation: 6,
+    borderWidth: 1,
+    borderColor: '#e7c585',
   },
-  iconCircle: {
-    width: 54,
-    height: 54,
-    borderRadius: 27,
-    backgroundColor: '#fffbe6',
+  categoryContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+  },
+  categoryIcon: {
+    width: 24,
+    height: 24,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 10,
+    marginLeft: 18,
+  },
+  categoryIconSunMoon: {
+    width: 24,
+    height: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 18,
+  },
+  categoryCardTitle: {
+    fontSize: 18,
+    color: '#7c6f57',
+    maxWidth: '80%',
+    ...textStyles.goldenTextBold,
+  },
+  iconBackground: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(0,0,0,0.25)',
+    alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 2,
-    borderColor: '#bfa76a',
+    borderColor: '#FFD700',
     shadowColor: '#bfa76a',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.10,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  categoryLabel: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#bfa76a',
-    marginBottom: 4,
-    textAlign: 'center',
-  },
-  categoryDesc: {
-    fontSize: 13,
-    color: '#7c6f57',
-    textAlign: 'center',
-    marginBottom: 2,
+    shadowOpacity: 0.12,
+    shadowRadius: 4,
+    elevation: 2,
   },
   essentialsRow: {
     flexDirection: 'row',
@@ -1070,15 +1001,14 @@ const stylesNew = StyleSheet.create({
   },
   essentialTitle: {
     fontSize: 15,
-    fontWeight: '600',
-    color: '#bfa76a',
     marginBottom: 2,
     textAlign: 'center',
+    ...textStyles.goldenTextBold,
   },
   essentialText: {
     fontSize: 13,
-    color: '#7c6f57',
     textAlign: 'center',
+    ...textStyles.goldenText,
   },
   functionalCardsRow: {
     flexDirection: 'row',
@@ -1107,9 +1037,8 @@ const stylesNew = StyleSheet.create({
   },
   functionalCardLabel: {
     fontSize: 15,
-    fontWeight: '600',
-    color: '#bfa76a',
     textAlign: 'center',
+    ...textStyles.goldenTextBold,
   },
   quickAccessCarouselRow: {
     alignItems: 'center',
@@ -1133,16 +1062,15 @@ const stylesNew = StyleSheet.create({
   },
   quickAccessCardTitle: {
     fontSize: 16,
-    color: '#bfa76a',
-    fontWeight: '700',
     marginTop: 8,
     marginBottom: 2,
     textAlign: 'center',
+    ...textStyles.goldenTextBold,
   },
   quickAccessCardDesc: {
     fontSize: 13,
-    color: '#7c6f57',
     textAlign: 'center',
+    ...textStyles.goldenText,
   },
   mysticCardBox: {
     width: '100%',
@@ -1165,7 +1093,7 @@ const stylesNew = StyleSheet.create({
   },
   mysticCardDesc: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
     color: '#fff',
     textAlign: 'center',
     marginTop: 10,
@@ -1229,8 +1157,11 @@ const stylesNew = StyleSheet.create({
   astroBrightHeadline: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#bfa76a',
+    color: '#FFD700',
     marginBottom: 10,
+    textShadowColor: '#B8860B',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 1,
   },
   astroBrightDesc: {
     fontSize: 14,
@@ -1245,7 +1176,10 @@ const stylesNew = StyleSheet.create({
   astroBrightButtonText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#bfa76a',
+    color: '#FFD700',
+    textShadowColor: '#B8860B',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 1,
   },
   astroSurfaceBright: {
     width: '100%',
@@ -1283,10 +1217,13 @@ const stylesNew = StyleSheet.create({
   astroSurfaceHeadline: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#bfa76a',
+    color: '#FFD700',
     marginBottom: 8,
     textAlign: 'center',
     letterSpacing: 0.1,
+    textShadowColor: '#B8860B',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 1,
   },
   astroSurfaceDesc: {
     fontSize: 14,
@@ -1350,10 +1287,13 @@ const stylesNew = StyleSheet.create({
   astroCardHeadline: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#bfa76a',
+    color: '#FFD700',
     marginBottom: 8,
     textAlign: 'center',
     letterSpacing: 0.1,
+    textShadowColor: '#B8860B',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 1,
   },
   astroCardDesc: {
     fontSize: 14,
@@ -1417,7 +1357,7 @@ const stylesNew = StyleSheet.create({
   },
   astroCardImageBgDesc: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
     color: '#fff',
     textAlign: 'center',
     marginTop: 10,
@@ -1448,19 +1388,18 @@ const stylesNew = StyleSheet.create({
   },
   astroCardImageBgRectDesc: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
     color: '#ffe6b0',
     textAlign: 'center',
   },
   subSectionTitle: {
     fontSize: 17,
-    fontWeight: '700',
-    color: '#bfa76a',
     marginTop: 8,
     marginBottom: 4,
     letterSpacing: 0.1,
     textAlign: 'left',
     paddingLeft: 4,
+    ...textStyles.goldenTextBold,
   },
   subSectionGrid: {
     flexDirection: 'row',
@@ -1482,6 +1421,45 @@ const stylesNew = StyleSheet.create({
     shadowOpacity: 0.10,
     shadowRadius: 8,
     elevation: 3,
+  },
+  goldenText: {
+    color: '#FFD700',
+    textShadowColor: '#B8860B',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 1,
+  },
+  goldenTextBold: {
+    color: '#FFD700',
+    fontWeight: '700',
+    textShadowColor: '#B8860B',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 1,
+  },
+  sectionTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+    marginLeft: 4,
+    gap: 8,
+  },
+  seeAllButton: {
+    backgroundColor: 'rgba(0,0,0,0.25)',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    alignSelf: 'center',
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: '#FFD700',
+  },
+  seeAllButtonText: {
+    color: '#FFD700',
+    fontSize: 15,
+    fontWeight: '700',
+    textAlign: 'center',
+    textShadowColor: '#B8860B',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 1,
   },
 });
 

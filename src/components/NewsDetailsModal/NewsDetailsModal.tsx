@@ -10,6 +10,7 @@ import {
   View,
   ImageBackground,
   StyleSheet,
+  Share,
 } from "react-native";
 import styles from "./styles";
 import { Ionicons } from "@expo/vector-icons";
@@ -119,6 +120,35 @@ export const NewsDetailsModal: React.FC<{
     saveArticle(article);
   };
 
+  // Linkuri aplicație
+  const ANDROID_LINK = "https://play.google.com/store/apps/details?id=com.cristinazurba.tarot";
+  const IOS_LINK = "https://apps.apple.com/app/id6476755632";
+
+  // FAB share handler
+  const handleShare = async () => {
+    const title =
+      language === "hi"
+        ? article?.info?.hu?.nume
+        : language === "id"
+        ? article?.info?.ru?.nume
+        : language === "ru"
+        ? article?.info?.rusa?.nume
+        : article?.info[language]?.nume;
+    const readMoreText = language === "ro"
+      ? `Citește mai multe în aplicația Tarot by Cristina Zurba:\nAndroid: ${ANDROID_LINK}\niOS: ${IOS_LINK}`
+      : `Read more in the Tarot by Cristina Zurba app:\nAndroid: ${ANDROID_LINK}\niOS: ${IOS_LINK}`;
+    const message = `${title}\n\n${readMoreText}`;
+    try {
+      await Share.share({
+        message,
+        title,
+      });
+    } catch (error) {
+      // Poți adăuga un toast sau alertă dacă vrei
+      console.error("Share error", error);
+    }
+  };
+
   return (
     <Modal
       animationType="slide"
@@ -197,7 +227,7 @@ export const NewsDetailsModal: React.FC<{
           </Text> */}
         </View>
         <WebView originWhitelist={["*"]} source={{ html: fullHTMLContent }} 
-          style={{ backgroundColor: 'transparent' }}
+          style={{ backgroundColor: 'transparent', marginTop: 0 }}
           containerStyle={{ backgroundColor: 'transparent' }}
           injectedJavaScript={`document.body.style.background = 'transparent'; true;`}
         />
@@ -215,6 +245,30 @@ export const NewsDetailsModal: React.FC<{
             </Text>
           </Text>
         </View> */}
+
+        {/* FAB Share Button */}
+        <TouchableOpacity
+          onPress={handleShare}
+          style={{
+            position: 'absolute',
+            bottom: 32,
+            right: 24,
+            backgroundColor: '#FFD700',
+            borderRadius: 32,
+            width: 56,
+            height: 56,
+            justifyContent: 'center',
+            alignItems: 'center',
+            elevation: 6,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.2,
+            shadowRadius: 4,
+            zIndex: 20,
+          }}
+        >
+          <Ionicons name="share-social" size={28} color="#2D2A22" />
+        </TouchableOpacity>
         </View>
       </ImageBackground>
     </Modal>

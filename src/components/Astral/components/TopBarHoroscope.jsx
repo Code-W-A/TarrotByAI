@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
   },
   activeTab: {
     borderBottomWidth: 2,
-    borderBottomColor: '#C9A14A',
+    borderBottomColor: '#FFD700',
   },
   tabText: {
     fontSize: 14,
@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
   },
   activeTabText: {
-    color: '#C9A14A',
+    color: '#FFD700',
     fontWeight: '700',
   },
 });

@@ -73,15 +73,15 @@ export default function MapInputPatientDash({
       styles={{
         textInput: {
           height: 55,
-          color: '#C9A14A',
+          color: '#FFD700',
           paddingHorizontal: 16,
           fontSize: 16,
           fontFamily: 'Lora',
           borderWidth: 1.5,
-          borderColor: '#C9A14A',
+          borderColor: '#FFD700',
           backgroundColor: '#fff',
           borderRadius: 22,
-          shadowColor: '#C9A14A',
+          shadowColor: '#FFD700',
           shadowOpacity: 0.08,
           shadowRadius: 8,
           elevation: 2,
@@ -102,7 +102,7 @@ export default function MapInputPatientDash({
         },
         description: {
           fontWeight: 'bold',
-          color: '#C9A14A',
+          color: '#FFD700',
           fontFamily: 'Lora',
         },
         predefinedPlacesDescription: {

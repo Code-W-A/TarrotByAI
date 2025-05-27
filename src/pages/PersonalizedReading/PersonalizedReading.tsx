@@ -15,6 +15,7 @@ import GreetingBar from "../../components/UpperGreetingBar/GreetingBar";
 import { colors } from "../../utils/colors";
 import { TouchableWithoutFeedback } from "react-native";
 import { Video } from "expo-av";
+import ShareScreenshot from '../../components/common/ShareScreenshot';
 
 import {
   H15fontMediumWhite,
@@ -42,7 +43,7 @@ import {
 
 const PersonalizedReading = ({ route }) => {
   const [isVideoLoading, setIsVideoLoading] = useState(!!videoUrl);
-
+  const [showVideo, setShowVideo] = useState(!!videoUrl);
   const [videoEnded, setVideoEnded] = useState(false);
   const navigation = useNavigation();
   const { currentNumber, updateNumber } = useNumberContext();
@@ -196,155 +197,106 @@ const PersonalizedReading = ({ route }) => {
   }, [videoUrl]); // Adaugă `videoUrl` în dependențe
 
   return (
-    <View style={{ flex: 1 }}>
+    <ShareScreenshot fabPosition={{ bottom: 24, right: 24 }}>
       <MainContainer style={{ flex: 1 }}>
-        <LinearGradient
-          colors={['#FFFBEA', '#FAF7F2', '#F7E7B4']}
-          style={styles.gradient}
+        <ImageBackground
+          source={require("../../../assets/dashboardbg.jpg")}
+          style={{ flex: 1, paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0 }}
+          imageStyle={{ opacity: 1 }}
         >
-          <ImageBackground
-            source={require("../../../assets/shadowBg.png")}
-            resizeMode="cover"
-            style={{
-              flex: 1,
-              width: null,
-              height: null,
-              // alignItems: 'flex-end',
-            }}
-          >
-            <GreetingBar isGoBack={true} isPersonalGoBack={true} />
-
-            <View style={styles.imageContainer}>
-              <Image
-                style={[styles.image, { borderWidth: 2, borderColor: '#C9A14A', borderRadius: 12, shadowColor: '#C9A14A', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.13, shadowRadius: 8 }]}
-                source={{ uri: item.carte.image.finalUri }}
-                resizeMode="stretch" // Folosiți "stretch" pentru a întinde imaginea
-              />
-            </View>
-
-            <View
-              style={[
-                styles.secondImageContainer,
-                { height: videoUrl ? 250 : 0 },
-              ]}
-            >
+          <GreetingBar isGoBack={true} isPersonalGoBack={true} />
+          <View style={styles.imageContainer}>
+            <Image
+              style={[styles.image, { borderWidth: 2, borderColor: '#FFD700', borderRadius: 12, shadowColor: '#FFD700', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.13, shadowRadius: 8 }]}
+              source={{ uri: item.carte.image.finalUri }}
+              resizeMode="stretch"
+            />
+          </View>
+          {showVideo && videoUrl && (
+            <View style={styles.secondImageContainer}>
               {isVideoLoading && (
                 <ActivityIndicator
                   size="large"
                   color={colors.primary2}
                   style={{ position: "relative", top: "40%" }}
-                /> // Spinner de încărcare
-              )}
-
-              {videoUrl ? ( // Dacă videoUrl este valid
-                <Video
-                  source={{ uri: videoUrl }}
-                  resizeMode="cover"
-                  style={[
-                    styles.secondImage,
-                    { height: isVideoLoading ? 0 : 250 },
-                  ]}
-                  shouldPlay={true}
-                  useNativeControls
-                  onLoadStart={() => setIsVideoLoading(true)} // Începe afișarea spinner-ului
-                  onLoad={() => setIsVideoLoading(false)} // Ascunde spinner-ul când videoclipul este încărcat
-                  onPlaybackStatusUpdate={onPlaybackStatusUpdate}
                 />
-              ) : null}
+              )}
+              <Video
+                source={{ uri: videoUrl }}
+                resizeMode="cover"
+                style={[styles.secondImage, { height: isVideoLoading ? 0 : 250 }]}
+                shouldPlay={true}
+                useNativeControls
+                onLoadStart={() => setIsVideoLoading(true)}
+                onLoad={() => setIsVideoLoading(false)}
+                onError={() => setShowVideo(false)}
+                onPlaybackStatusUpdate={onPlaybackStatusUpdate}
+              />
             </View>
-            <ScrollView contentContainerStyle={styles.scrollViewContainer}>
-              <View
+          )}
+          <ScrollView contentContainerStyle={styles.scrollViewContainer}>
+            <View
+              style={{
+                display: "flex",
+                justifyContent: "space-around",
+                height: "auto",
+                paddingHorizontal: "5%",
+              }}
+            >
+              <Text
                 style={{
-                  display: "flex",
-                  justifyContent: "space-around",
-                  height: "auto",
-                  // marginTop: "10%",
-                  paddingHorizontal: "5%",
-                  // bottom: "10%",
+                  alignSelf: "center",
+                  marginBottom: "5%",
+                  color: '#FFD700',
+                  fontFamily: 'LoraBold',
+                  fontSize: 22,
+                  letterSpacing: 1.1,
+                  textShadowColor: '#fffbeae0',
+                  textShadowOffset: { width: 0, height: 2 },
+                  textShadowRadius: 6,
                 }}
               >
-                <Text
-                  style={{
-                    alignSelf: "center",
-                    marginBottom: "5%",
-                    color: '#C9A14A',
-                    fontFamily: 'LoraBold',
-                    fontSize: 22,
-                    letterSpacing: 1.1,
-                    textShadowColor: '#fffbeae0',
-                    textShadowOffset: { width: 0, height: 2 },
-                    textShadowRadius: 6,
-                  }}
-                >
-                  {getName()}
-                </Text>
-
-                <Text
-                  style={{
-                    textAlign: 'justify',
-                    color: '#7c6f57',
-                    fontFamily: 'LoraRegular',
-                    fontSize: 16,
-                    letterSpacing: 0.2,
-                  }}
-                >
-                  {getDescription()}
-                </Text>
-              </View>
-            </ScrollView>
-            {/* {videoEnded && (
-              <Button
-                disabled={false}
-                funCallback={
-                  () => navigation.navigate(screenName.PersonalReadingDashboard)
-                  // console.log(currentNumber)
-                }
-                borderWidth={2}
-                bgColor={colors.primary3}
-                label={"next"}
-                borderColor={colors.primary3}
-                success={true}
-                txtColor={colors.white}
-                style={{ width: "70%", alignSelf: "center" }}
-              />
-            )} */}
-          </ImageBackground>
-        </LinearGradient>
+                {getName()}
+              </Text>
+              <Text
+                style={{
+                  textAlign: 'justify',
+                  color: '#7c6f57',
+                  fontFamily: 'LoraRegular',
+                  fontSize: 16,
+                  letterSpacing: 0.2,
+                }}
+              >
+                {getDescription()}
+              </Text>
+            </View>
+          </ScrollView>
+        </ImageBackground>
       </MainContainer>
-    </View>
+    </ShareScreenshot>
   );
 };
 
 const styles = StyleSheet.create({
   imageContainer: {
     alignSelf: "center",
-    // marginTop: 20,
     marginBottom: 20,
     width: "auto",
     height: "auto",
   },
   scrollViewContainer: {
-    // flexGrow: 1, // Asigură că ScrollView se extinde pe tot spațiul disponibil
     justifyContent: "flex-start",
     alignItems: "center",
-    // backgroundColor: "red",
     paddingTop: "5%",
     paddingBottom: "5%",
-    // paddingBottom: 20, // Ajustați această valoare după cum este necesar
   },
   image: {
     width: 125,
     height: 170,
-    // resizeMode: "contain",
-    // borderWidth: 3,
-    // borderColor: colors.primary2,
-    // borderRadius: 10,
   },
   secondImageContainer: {
     alignSelf: "center",
-
     position: "relative",
-
     height: 250,
     width: "auto",
   },
@@ -352,14 +304,11 @@ const styles = StyleSheet.create({
     width: 350,
     height: 250,
   },
-
   gradient: {
     flex: 1,
     width: "100%",
     height: "100%",
-    // paddingBottom: 100,
     paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
-    // Alte stiluri necesare pentru a pozitiona gradientul după cum este necesar
   },
   container: {
     flex: 1,
@@ -367,27 +316,27 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   overlay: {
-    backgroundColor: "100%", // Adaugă un overlay pentru a spori lizibilitatea textului
-    borderRadius: 10, // Rotunjirea colțurilor
-    padding: 20, // Spațiu în interiorul containerului
+    backgroundColor: "100%",
+    borderRadius: 10,
+    padding: 20,
     height: "100%",
   },
   title: {
     color: "white",
     fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 10, // Spațiu sub titlu
+    marginBottom: 10,
   },
   colorName: {
     color: "white",
     fontSize: 30,
     fontWeight: "bold",
-    marginBottom: 10, // Spațiu sub numele culorii
+    marginBottom: 10,
   },
   description: {
     color: "white",
     fontSize: 18,
-    textAlign: "center", // Aliniere text la centru
+    textAlign: "center",
   },
 });
 

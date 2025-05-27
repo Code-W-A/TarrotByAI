@@ -26,14 +26,14 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Video } from 'expo-av';
 
 const { width, height } = Dimensions.get("window");
-const gold = "#C9A14A";
+const gold = "#FFD700";
 const cream = "#FAF7F2";
 const cream2 = "#F5E9D6";
 
 const slides = [
   {
     id: "1",
-    image: require("../../assets/onboardone.png"),
+    image: require("../../assets/clinicdashboard/Tarot.png"),
     title: i18n.translate("onboardingSlide1Title"),
     subtitle: i18n.translate("onboardingSlide1Desc"),
   },
@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
     height: 270,
     borderRadius: 40,
     marginBottom: 32,
-    shadowColor: '#C9A14A',
+    shadowColor: '#FFD700',
     shadowOpacity: 0.10,
     shadowRadius: 12,
     elevation: 4,

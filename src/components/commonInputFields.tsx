@@ -58,7 +58,7 @@ export const InputFields: React.FC<InputFieldsProps> = ({
           styles.inputWrapperNew,
           containerStyle,
           style,
-          isFocused && { borderColor: '#C9A14A', shadowColor: '#C9A14A', shadowOpacity: 0.12, elevation: 3 },
+          isFocused && { borderColor: '#FFD700', shadowColor: '#FFD700', shadowOpacity: 0.12, elevation: 3 },
         ]}
       >
         <View style={{ marginRight: 15 }}>
@@ -66,7 +66,7 @@ export const InputFields: React.FC<InputFieldsProps> = ({
             <MaterialIcons
               name={image}
               size={24}
-              color={isFocused ? '#C9A14A' : '#B0AFA6'}
+              color={isFocused ? '#FFD700' : '#B0AFA6'}
             />
           </View>
         </View>
@@ -92,7 +92,7 @@ export const InputFields: React.FC<InputFieldsProps> = ({
             <Feather
               name={showPass ? 'eye-off' : 'eye'}
               size={24}
-              color={isFocused ? '#C9A14A' : '#B0AFA6'}
+              color={isFocused ? '#FFD700' : '#B0AFA6'}
             />
           </TouchableOpacity>
         )}
@@ -108,19 +108,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#fff',
     borderWidth: 1.5,
-    borderColor: '#C9A14A',
+    borderColor: '#FFD700',
     borderRadius: 22,
     paddingVertical: 8,
     paddingHorizontal: 16,
     marginBottom: 16,
     width: '100%',
-    shadowColor: '#C9A14A',
+    shadowColor: '#FFD700',
     shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 2,
   },
   inputTextNew: {
-    color: '#C9A14A',
+    color: '#FFD700',
     fontSize: 16,
     fontFamily: 'Lora',
   },

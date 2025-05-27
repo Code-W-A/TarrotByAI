@@ -13,7 +13,7 @@ import { RefreshControl } from "react-native";
 import { NewsCategory } from "../../utils/constant";
 import { NewsTags } from "../../components/NewsTags/NewsTags";
 import { LinearGradient } from "expo-linear-gradient";
-import { colors } from "../../utils/colors";
+import { colors, textStyles } from "../../utils/colors";
 import { Platform } from "react-native";
 import { StatusBar } from "react-native";
 import { SearchInput } from "../../components/SearchInput/SearchInput";
@@ -207,7 +207,7 @@ const SavedNews: React.FC = () => {
             onPress={() => navigation.goBack()}
             style={{ width: "10%", alignItems: "flex-end" }}
           >
-            <FontAwesome name="chevron-left" size={24} color="#C9A14A" />
+            <FontAwesome name="chevron-left" size={24} color={colors.gold} />
           </TouchableOpacity>
           <View style={{ width: "90%" }}>
             <SearchInput

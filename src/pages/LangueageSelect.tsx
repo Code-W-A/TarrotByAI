@@ -24,8 +24,8 @@ import { handleLanguagei18n } from "../utils/handleLanguageGeneral";
 import i18n from "../../i18n";
 import { useNavBarVisibility } from '../context/NavbarVisibilityContext';
 
-const gold = "#C9A14A"; // auriu cald pentru accente
-const cream = "#FAF7F2"; // fundal crem deschis
+const gold = "#FFD700"; // auriu cald pentru accente
+const cream = "white"; // fundal crem deschis
 const cream2 = "#F5E9D6";
 
 const languages = [
@@ -64,7 +64,7 @@ const LanguageSelectScreen = (props) => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <LinearGradient
-        colors={[cream, cream2, "#FFFBEA"]}
+        colors={[cream, cream, cream]}
         style={styles.gradient}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}

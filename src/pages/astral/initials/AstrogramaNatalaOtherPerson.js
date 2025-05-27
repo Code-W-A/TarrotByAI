@@ -31,7 +31,6 @@ import * as FileSystem from "expo-file-system";
 import { StorageAccessFramework } from "expo-file-system";
 import { daily } from "../../../utils/daily";
 import AstroChart from "../../../components/Astral/components/AstroChart";
-import SpaceSky from "../../../components/Astral/components/space-sky";
 import {
   H18fontMediumBlack,
   H6fontBoldPrimary,
@@ -1166,7 +1165,7 @@ function AstrogramaNatalaOtherPerson({ navigation }) {
                 <ShowFromTop>
                   <View style={[styles.defaultContainer]}>
                     <View style={styles.horoscopeTodayContainer}>
-                      <Text style={{ color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700' }}>
+                      <Text style={{ color: '#FFD700', fontFamily: 'Lora', fontWeight: '700' }}>
                         {isLoading ? (
                           <ActivityIndicator />
                         ) : (
@@ -1187,7 +1186,7 @@ function AstrogramaNatalaOtherPerson({ navigation }) {
                         },
                       ]}
                     >
-                      <Text style={{ color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700' }}>
+                      <Text style={{ color: '#FFD700', fontFamily: 'Lora', fontWeight: '700' }}>
                         {personalitateText}
                       </Text>
                       {!isPaid ? (
@@ -1228,7 +1227,7 @@ function AstrogramaNatalaOtherPerson({ navigation }) {
 
                       {isPaid && (
                         <View>
-                          <Text style={{ color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700' }}>
+                          <Text style={{ color: '#FFD700', fontFamily: 'Lora', fontWeight: '700' }}>
                             {signReportText}
                           </Text>
                           {Object.keys(userD.generalSignTextData).map((key) => {
@@ -1237,11 +1236,11 @@ function AstrogramaNatalaOtherPerson({ navigation }) {
                             return (
                               <View key={key} style={{ marginBottom: 20 }}>
                                 {/* Titlul planetă + semn zodiacal */}
-                                <Text style={{ color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700' }}>
+                                <Text style={{ color: '#FFD700', fontFamily: 'Lora', fontWeight: '700' }}>
                                   {`${planetData.planet_name} is in ${planetData.sign_name}`}
                                 </Text>
                                 {/* Text descriptiv */}
-                                <Text style={{ color: '#131523', fontFamily: 'Lora' }}>
+                                <Text style={{ color: '#131523', fontFamily: 'Lora', fontSize: 18, lineHeight: 26 }}>
                                   {planetData.report}
                                 </Text>
                               </View>
@@ -1252,7 +1251,7 @@ function AstrogramaNatalaOtherPerson({ navigation }) {
 
                       {isPaid && (
                         <View>
-                          <Text style={{ color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700' }}>
+                          <Text style={{ color: '#FFD700', fontFamily: 'Lora', fontWeight: '700' }}>
                             {houseReportText}
                           </Text>
                           {Object.keys(userD.generalHouseTextData).map((key) => {
@@ -1261,11 +1260,11 @@ function AstrogramaNatalaOtherPerson({ navigation }) {
                             return (
                               <View key={key} style={{ marginBottom: 20 }}>
                                 {/* Titlul planetă + casă astrologică */}
-                                <Text style={{ color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700' }}>
+                                <Text style={{ color: '#FFD700', fontFamily: 'Lora', fontWeight: '700' }}>
                                   {`${houseData.planet_name} is in the ${houseData.house}th house`}
                                 </Text>
                                 {/* Text descriptiv */}
-                                <Text style={{ color: '#131523', fontFamily: 'Lora' }}>
+                                <Text style={{ color: '#131523', fontFamily: 'Lora', fontSize: 18, lineHeight: 26 }}>
                                   {houseData.report}
                                 </Text>
                               </View>

@@ -310,14 +310,13 @@ const SignInScreenClinic: React.FC<Props> = ({
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-      <Fragment>
-        <CustomLoader isLoading={isLoading} />
-        <LinearGradient
-          colors={['#FAF7F2', '#F5E9D6', '#FEF495', '#FFFBEA']}
-          style={styles.gradient}
-          start={{ x: 0.5, y: 0 }}
-          end={{ x: 0.5, y: 1 }}
+      <MainContainer secondary={false} style={{ flex: 1 }}>
+        <ImageBackground
+          source={require("../../assets/dashboardbg.jpg")}
+          style={{ flex: 1, width: '100%', height: '100%' }}
+          imageStyle={{ opacity: 1 }}
         >
+          <CustomLoader isLoading={isLoading} />
           <KeyboardAvoidingView
             style={{ flex: 1 }}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -399,10 +398,10 @@ const SignInScreenClinic: React.FC<Props> = ({
                     disabled={false}
                     funCallback={handleLoginAsGuest}
                       borderWidth={2}
-                      bgColor={'#fff'}
+                      bgColor={'#FFD700'}
                       txtColor={'#000'}
                       label={i18n.translate('loginNowNoAccount')}
-                      borderColor={'#C9A14A'}
+                      borderColor={'#FFD700'}
                     success={true}
                       style={styles.guestButtonNew}
                       txtStyle={styles.guestButtonTextNew}
@@ -411,10 +410,10 @@ const SignInScreenClinic: React.FC<Props> = ({
                     disabled={false}
                     funCallback={handleSubmit(onsubmit)}
                       borderWidth={0}
-                      bgColor={'#C9A14A'}
+                      bgColor={'#FFD700'}
                       style={styles.loginButtonNew}
                       label={i18n.translate('loginNow')}
-                      borderColor={'#C9A14A'}
+                      borderColor={'#FFD700'}
                     success={true}
                       txtColor={'#fff'}
                       txtStyle={styles.loginButtonTextNew}
@@ -425,7 +424,7 @@ const SignInScreenClinic: React.FC<Props> = ({
                   disabled={!request}
                       activeOpacity={0.85}
                 >
-                      <Icon name="google" size={22} color="#C9A14A" style={{ marginRight: 10 }} />
+                      <Icon name="google" size={22} color="#FFD700" style={{ marginRight: 10 }} />
                       <Text style={styles.googleButtonTextNew}>{i18n.translate('loginWithGoogle')}</Text>
                 </TouchableOpacity>
                   </View>
@@ -452,8 +451,8 @@ const SignInScreenClinic: React.FC<Props> = ({
             bottom={2}
             screen={screenName.SignInScreenClinic}
           />
-        </LinearGradient>
-      </Fragment>
+        </ImageBackground>
+      </MainContainer>
     </TouchableWithoutFeedback>
   );
 };
@@ -558,13 +557,13 @@ const styles = StyleSheet.create({
   goldLineNew: {
     width: 60,
     height: 3,
-    backgroundColor: '#C9A14A',
+    backgroundColor: '#FFD700',
     borderRadius: 2,
     marginBottom: 12,
   },
   titleNew: {
     fontSize: 28,
-    color: '#C9A14A',
+    color: '#FFD700',
     fontFamily: 'LoraBold',
     marginBottom: 8,
     textAlign: 'center',
@@ -579,13 +578,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#fff',
     borderWidth: 1.5,
-    borderColor: '#C9A14A',
+    borderColor: '#FFD700',
     borderRadius: 22,
     paddingVertical: 8,
     paddingHorizontal: 16,
     marginBottom: 16,
     width: '100%',
-    shadowColor: '#C9A14A',
+    shadowColor: '#FFD700',
     shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 2,
@@ -597,12 +596,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'transparent',
     borderWidth: 0,
-    color: '#C9A14A',
+    color: '#FFD700',
     fontSize: 16,
     fontFamily: 'Lora',
   },
   inputTextNew: {
-    color: '#C9A14A',
+    color: '#FFD700',
     fontSize: 16,
     fontFamily: 'Lora',
   },
@@ -613,7 +612,7 @@ const styles = StyleSheet.create({
     paddingRight: 8,
   },
   forgotTextNew: {
-    color: '#C9A14A',
+    color: '#FFD700',
     textDecorationLine: 'underline',
     fontSize: 14,
     fontFamily: 'Lora',
@@ -628,9 +627,9 @@ const styles = StyleSheet.create({
     width: '100%',
     borderRadius: 22,
     marginBottom: 10,
-    borderColor: '#C9A14A',
+    borderColor: '#FFD700',
     backgroundColor: '#fff',
-    shadowColor: '#C9A14A',
+    shadowColor: '#FFD700',
     shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 2,
@@ -644,8 +643,8 @@ const styles = StyleSheet.create({
     width: '100%',
     borderRadius: 22,
     marginBottom: 10,
-    backgroundColor: '#C9A14A',
-    shadowColor: '#C9A14A',
+    backgroundColor: '#FFD700',
+    shadowColor: '#FFD700',
     shadowOpacity: 0.12,
     shadowRadius: 8,
     elevation: 3,
@@ -660,7 +659,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#fff',
     borderWidth: 1.5,
-    borderColor: '#C9A14A',
+    borderColor: '#FFD700',
     borderRadius: 22,
     paddingVertical: 10,
     paddingHorizontal: 20,
@@ -668,13 +667,13 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     width: '100%',
     justifyContent: 'center',
-    shadowColor: '#C9A14A',
+    shadowColor: '#FFD700',
     shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 2,
   },
   googleButtonTextNew: {
-    color: '#C9A14A',
+    color: '#FFD700',
     fontSize: 16,
     fontFamily: 'LoraBold',
   },
@@ -685,12 +684,12 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   signupPromptNew: {
-    color: '#C9A14A',
+    color: '#FFD700',
     fontSize: 15,
     fontFamily: 'Lora',
   },
   signupLinkNew: {
-    color: '#C9A14A',
+    color: '#FFD700',
     textDecorationLine: 'underline',
     fontSize: 15,
     fontFamily: 'LoraBold',

@@ -28,7 +28,6 @@ import ScrollViewFadeFirst from "../../../components/Astral/components/scroll-vi
 
 import { daily } from "../../../utils/daily";
 import AstroChart from "../../../components/Astral/components/AstroChart";
-import SpaceSky from "../../../components/Astral/components/space-sky";
 import {
   H18fontMediumBlack,
   H4fontBoldYellow,

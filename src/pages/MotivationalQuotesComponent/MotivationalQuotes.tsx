@@ -8,6 +8,7 @@ import {
   StatusBar,
   ImageBackground,
   ScrollView,
+  TouchableOpacity,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { MainContainer } from "../../components/commonViews";
@@ -33,6 +34,10 @@ import i18n from "../../../i18n";
 import { handleQueryRandom } from "../../utils/firestoreUtils";
 import { collection, getCountFromServer } from "firebase/firestore";
 import { db } from "../../../firebase";
+import { captureRef } from 'react-native-view-shot';
+import * as Sharing from 'expo-sharing';
+import * as MediaLibrary from 'expo-media-library';
+import { MaterialIcons } from '@expo/vector-icons';
 
 const MotivationalQuotes = () => {
   const {
@@ -165,8 +170,11 @@ const MotivationalQuotes = () => {
     require("../../../assets/afirmatiipoze/73.png"),
   ];
 
-  // Alegere aleatorie
-  const randomImage = images[Math.floor(Math.random() * images.length)];
+  // Fix: imaginea random să fie aleasă o singură dată
+  const [randomImage, setRandomImage] = React.useState(null);
+  React.useEffect(() => {
+    setRandomImage(images[Math.floor(Math.random() * images.length)]);
+  }, []);
 
   // Determină textul citatului în funcție de limbă
   const quoteText = zilnicCitateMotivationale.info
@@ -179,53 +187,132 @@ const MotivationalQuotes = () => {
       : zilnicCitateMotivationale.info[language]?.descriere
     : "";
 
+  const viewRef = React.useRef(null);
+  const [fabOpen, setFabOpen] = React.useState(false);
+  const [hideFab, setHideFab] = React.useState(false);
+
+  const handleCapture = async (share = false) => {
+    try {
+      setHideFab(true);
+      await new Promise(resolve => setTimeout(resolve, 100));
+      if (!viewRef.current) {
+        alert('Eroare: view-ul nu este disponibil pentru captură!');
+        setHideFab(false);
+        return;
+      }
+      const uri = await captureRef(viewRef, {
+        format: 'png',
+        quality: 1,
+      });
+      setHideFab(false);
+      if (share) {
+        await Sharing.shareAsync(uri, {
+          dialogTitle: 'Distribuie citatul motivațional',
+          mimeType: 'image/png',
+          UTI: 'image/png',
+        });
+      } else {
+        const { status } = await MediaLibrary.requestPermissionsAsync();
+        if (status !== 'granted') {
+          alert('Permisiunea de acces la galerie este necesară!');
+          return;
+        }
+        await MediaLibrary.saveToLibraryAsync(uri);
+        alert('Imaginea a fost salvată în galeria telefonului!');
+      }
+    } catch (e) {
+      setHideFab(false);
+      console.log('Eroare la captură/share:', e);
+      alert('Eroare la captură sau share! ' + (e?.message || ''));
+    }
+  };
+
   return (
     <View style={{ flex: 1 }}>
       <MainContainer secondary={false} style={{ flex: 1 }}>
-        <ImageBackground
-          source={randomImage}
-          resizeMode="cover"
-          style={{ flex: 1 }}
-        >
-          <GreetingBar isGoBack={true} />
+        <View ref={viewRef} collapsable={false} style={{ flex: 1 }}>
+          <ImageBackground
+            source={randomImage}
+            resizeMode="cover"
+            style={{ flex: 1 }}
+          >
+            <GreetingBar isGoBack={true} />
 
-          {/* Imaginea header */}
-          <View style={styles.secondImageContainer}>
-            <Image
-              source={require("../../../assets/headerIcon.png")}
-              style={styles.secondImage}
-              resizeMode="contain"
-            />
-          </View>
+            {/* Imaginea header */}
+            <View style={styles.secondImageContainer}>
+              <Image
+                source={require("../../../assets/headerIcon.png")}
+                style={styles.secondImage}
+                resizeMode="contain"
+              />
+            </View>
 
-          <View style={styles.contentContainer}>
-            {/* Titlul (dacă avem citat) */}
-            {zilnicCitateMotivationale.info && (
-              <H3fontBoldWhite style={styles.title}>
-                {i18n.translate("motivationalQuoteOfTheDay")}
-              </H3fontBoldWhite>
-            )}
-
-            {/* ScrollView cu textul citatului */}
-            <ScrollView
-              style={styles.scrollArea}
-              contentContainerStyle={styles.scrollContentContainer}
-            >
-              {!!quoteText && (
-                <H6fontMediumWhite style={styles.description}>
-                  {quoteText}
-                </H6fontMediumWhite>
+            <View style={styles.contentContainer}>
+              {/* Titlul (dacă avem citat) */}
+              {zilnicCitateMotivationale.info && (
+                <H3fontBoldWhite style={styles.title}>
+                  {i18n.translate("motivationalQuoteOfTheDay")}
+                </H3fontBoldWhite>
               )}
-            </ScrollView>
 
-            {/* Mențiune sub zona scrollabilă */}
-            {zilnicCitateMotivationale.info && (
-              <H7fontBoldWhite style={styles.mention}>
-                @cristinazurba
-              </H7fontBoldWhite>
+              {/* ScrollView cu textul citatului */}
+              <ScrollView
+                style={styles.scrollArea}
+                contentContainerStyle={styles.scrollContentContainer}
+              >
+                {!!quoteText && (
+                  <H6fontMediumWhite style={styles.description}>
+                    {quoteText}
+                  </H6fontMediumWhite>
+                )}
+              </ScrollView>
+
+              {/* Mențiune sub zona scrollabilă */}
+              {zilnicCitateMotivationale.info && (
+                <View style={{ alignItems: 'center' }}>
+                  <H7fontBoldWhite>@cristinazurba</H7fontBoldWhite>
+                </View>
+              )}
+            </View>
+
+            {/* FAB pentru download/share */}
+            {!hideFab && (
+              <View style={fabStyles.fabContainer} pointerEvents="box-none">
+                {fabOpen && (
+                  <View style={fabStyles.fabActions}>
+                    <TouchableOpacity
+                      onPress={() => { 
+                        setFabOpen(false); 
+                        handleCapture(false); 
+                      }}
+                      style={[fabStyles.fabActionBtn, { marginBottom: 16 }]}
+                    >
+                      <MaterialIcons name="file-download" size={28} color="#fff" />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => { 
+                        setFabOpen(false); 
+                        handleCapture(true); 
+                      }}
+                      style={fabStyles.fabActionBtn}
+                    >
+                      <MaterialIcons name="share" size={28} color="#fff" />
+                    </TouchableOpacity>
+                  </View>
+                )}
+                <TouchableOpacity
+                  onPress={() => {
+                    setFabOpen((v) => !v);
+                  }}
+                  style={fabStyles.fabMain}
+                  activeOpacity={0.8}
+                >
+                  <MaterialIcons name={fabOpen ? "close" : "add"} size={32} color="#fff" />
+                </TouchableOpacity>
+              </View>
             )}
-          </View>
-        </ImageBackground>
+          </ImageBackground>
+        </View>
       </MainContainer>
     </View>
   );
@@ -282,6 +369,48 @@ const styles = StyleSheet.create({
   mention: {
     textAlign: "center",
     color: "white",
+  },
+});
+
+// Adaug stiluri pentru FAB
+const fabStyles = StyleSheet.create({
+  fabContainer: {
+    position: 'absolute',
+    right: 24,
+    bottom: 104, // mai sus de bara de navigație
+    alignItems: 'center',
+    zIndex: 100,
+  },
+  fabMain: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#FFD700',
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  fabActions: {
+    marginBottom: 8,
+    alignItems: 'center',
+  },
+  fabActionBtn: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#FFD700',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 4,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 1 },
   },
 });
 

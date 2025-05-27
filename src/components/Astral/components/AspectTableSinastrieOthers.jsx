@@ -30,7 +30,7 @@ const AspectTableSinastrieOthers = ({
       contentContainerStyle={{ paddingBottom: "30%", paddingTop: "5%" }}
     >
       <View style={{ justifyContent: "center", alignItems: "center", width: "100%", marginTop: "0%" }}>
-        <Text style={{ color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700', fontSize: 20, textAlign: 'center' }}>{currentUserData?.full_name}</Text>
+        <Text style={{ color: '#FFD700', fontFamily: 'Lora', fontWeight: '700', fontSize: 20, textAlign: 'center' }}>{currentUserData?.full_name}</Text>
       </View>
       <ScrollView
         contentContainerStyle={{ width: 380, flexDirection: "column", marginTop: "6%" }}
@@ -49,7 +49,7 @@ const AspectTableSinastrieOthers = ({
                 <MaterialCommunityIcons
                   name={`zodiac-${aspect?.sign.toLowerCase()}`}
                   size={24}
-                  color="#C9A14A"
+                  color="#FFD700"
                 />
                 <Text style={styles.cellText}>{aspect?.sign}</Text>
               </View>
@@ -58,7 +58,7 @@ const AspectTableSinastrieOthers = ({
           ))}
       </ScrollView>
       <View style={{ justifyContent: "center", alignItems: "center", width: "100%", marginTop: "5%" }}>
-        <Text style={{ color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700', fontSize: 20, textAlign: 'center' }}>{userD?.full_name}</Text>
+        <Text style={{ color: '#FFD700', fontFamily: 'Lora', fontWeight: '700', fontSize: 20, textAlign: 'center' }}>{userD?.full_name}</Text>
       </View>
       <ScrollView
         contentContainerStyle={{ width: 380, flexDirection: "column", marginTop: "6%" }}
@@ -77,7 +77,7 @@ const AspectTableSinastrieOthers = ({
                 <MaterialCommunityIcons
                   name={`zodiac-${aspect?.sign.toLowerCase()}`}
                   size={24}
-                  color="#C9A14A"
+                  color="#FFD700"
                 />
                 <Text style={styles.cellText}>{aspect?.sign}</Text>
               </View>
@@ -86,10 +86,10 @@ const AspectTableSinastrieOthers = ({
           ))}
       </ScrollView>
       <View style={{ justifyContent: "center", alignItems: "center", width: "100%", marginTop: "10%" }}>
-        <Text style={{ color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700', fontSize: 20, textAlign: 'center' }}>{i18n.translate("Natal")}</Text>
+        <Text style={{ color: '#FFD700', fontFamily: 'Lora', fontWeight: '700', fontSize: 20, textAlign: 'center' }}>{i18n.translate("Natal")}</Text>
       </View>
       <View style={{ justifyContent: "center", alignItems: "center", width: "100%", marginTop: "0%" }}>
-        <Text style={{ color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700', fontSize: 20, textAlign: 'center' }}>{currentUserData?.full_name}</Text>
+        <Text style={{ color: '#FFD700', fontFamily: 'Lora', fontWeight: '700', fontSize: 20, textAlign: 'center' }}>{currentUserData?.full_name}</Text>
       </View>
       <ScrollView
         contentContainerStyle={{ width: 720, flexDirection: "column", marginTop: "6%" }}
@@ -110,7 +110,7 @@ const AspectTableSinastrieOthers = ({
                 <MaterialCommunityIcons
                   name={`zodiac-${aspect?.sign.toLowerCase()}`}
                   size={24}
-                  color="#C9A14A"
+                  color="#FFD700"
                 />
                 <Text style={styles.cellText}>{aspect?.sign}</Text>
               </View>
@@ -121,7 +121,7 @@ const AspectTableSinastrieOthers = ({
           ))}
       </ScrollView>
       <View style={{ justifyContent: "center", alignItems: "center", width: "100%", marginTop: "10%" }}>
-        <Text style={{ color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700', fontSize: 20, textAlign: 'center' }}>{userD?.full_name}</Text>
+        <Text style={{ color: '#FFD700', fontFamily: 'Lora', fontWeight: '700', fontSize: 20, textAlign: 'center' }}>{userD?.full_name}</Text>
       </View>
       <ScrollView
         contentContainerStyle={{ width: 720, flexDirection: "column", marginTop: "6%" }}
@@ -142,7 +142,7 @@ const AspectTableSinastrieOthers = ({
                 <MaterialCommunityIcons
                   name={`zodiac-${aspect?.sign.toLowerCase()}`}
                   size={24}
-                  color="#C9A14A"
+                  color="#FFD700"
                 />
                 <Text style={styles.cellText}>{aspect?.sign}</Text>
               </View>
@@ -153,10 +153,10 @@ const AspectTableSinastrieOthers = ({
           ))}
       </ScrollView>
       <View style={{ justifyContent: "center", alignItems: "center", width: "100%", marginTop: "10%" }}>
-        <Text style={{ color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700', fontSize: 20, textAlign: 'center' }}>Aspects</Text>
+        <Text style={{ color: '#FFD700', fontFamily: 'Lora', fontWeight: '700', fontSize: 20, textAlign: 'center' }}>Aspects</Text>
       </View>
       <View style={{ justifyContent: "center", alignItems: "center", width: "100%", marginTop: "0%" }}>
-        <Text style={{ color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700', fontSize: 20, textAlign: 'center' }}>{currentUserData?.full_name}</Text>
+        <Text style={{ color: '#FFD700', fontFamily: 'Lora', fontWeight: '700', fontSize: 20, textAlign: 'center' }}>{currentUserData?.full_name}</Text>
       </View>
       <ScrollView
         contentContainerStyle={{ width: 550, flexDirection: "column", marginTop: "0%" }}
@@ -182,7 +182,7 @@ const AspectTableSinastrieOthers = ({
           ))}
       </ScrollView>
       <View style={{ justifyContent: "center", alignItems: "center", width: "100%", marginTop: "10%" }}>
-        <Text style={{ color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700', fontSize: 20, textAlign: 'center' }}>{userD?.full_name}</Text>
+        <Text style={{ color: '#FFD700', fontFamily: 'Lora', fontWeight: '700', fontSize: 20, textAlign: 'center' }}>{userD?.full_name}</Text>
       </View>
       <ScrollView
         contentContainerStyle={{ width: 550, flexDirection: "column", marginTop: "0%" }}

@@ -42,7 +42,7 @@ import {
 } from "../../../components/commonText";
 import { LinearGradient } from "expo-linear-gradient";
 
-import { colors } from "../../../utils/colors";
+import { colors, textStyles } from "../../../utils/colors";
 import { MainContainer } from "../../../components/commonViews";
 import ChatComponent from "../../../components/Astral/components/ChatBox";
 
@@ -85,6 +85,8 @@ import {
   useTranslation,
 } from "../../../utils/translateUtil";
 import { capturePaymentIntentTest, createInvoiceAfterPaymentTest, createPaymentIntentTest, sendPdfEmail } from "../../../utils/constant";
+import ViewShot from "react-native-view-shot";
+import ShareScreenshot from '../../../components/common/ShareScreenshot';
 
 // const LuckyNumber = ({ number }) => {
 //   return (
@@ -191,6 +193,9 @@ function AstrogramaNatala({ navigation, route }) {
   const [city, setCity] = useState("");
   const [postalCode, setPostalCode] = useState("");
   const [country, setCountry] = useState(""); // sau un dropdown
+
+  const [showFab, setShowFab] = useState(true);
+  const viewShotRef = React.useRef();
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -900,6 +905,29 @@ function AstrogramaNatala({ navigation, route }) {
 
   //Traducere inline text
 
+  const handleShareScreenshot = async () => {
+    try {
+      setShowFab(false);
+      await new Promise((resolve) => setTimeout(resolve, 200)); // ascunde FAB-ul vizual
+      const uri = await viewShotRef.current.capture();
+      setShowFab(true);
+      await Sharing.shareAsync(uri, {
+        mimeType: 'image/png',
+        dialogTitle: 'Distribuie interpretarea astrogramă',
+      });
+    } catch (e) {
+      setShowFab(true);
+      Alert.alert('Eroare', 'Nu s-a putut distribui imaginea.');
+    }
+  };
+
+  const getShareText = (language) => {
+    if (language === 'ro') {
+      return `Descarcă aplicația Cristina Zurba Tarot:\nAndroid: https://play.google.com/store/apps/details?id=com.cristina.zurba.tarot&hl=ro\niOS: https://apps.apple.com/ro/app/cristina-zurba-tarot/id6475713937`;
+    }
+    return `Download the Cristina Zurba Tarot app:\nAndroid: https://play.google.com/store/apps/details?id=com.cristina.zurba.tarot&hl=ro\niOS: https://apps.apple.com/ro/app/cristina-zurba-tarot/id6475713937`;
+  };
+
   if (isLoading) {
     return <LoadingOverlay />;
   }
@@ -911,177 +939,181 @@ function AstrogramaNatala({ navigation, route }) {
   return (
     <>
       <MainContainer>
-        <ImageBackground
-          source={require('../../../../assets/dashboardbg.jpg')}
-          style={{ flex: 1, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 }}
-          imageStyle={{ opacity: 1 }}
-        >
-          <View style={{ ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(255,255,255,0.72)', zIndex: 1 }} pointerEvents="none" />
-          <View style={{ flex: 1, zIndex: 2 }}>
-            <MyTopBar onChangeTab={setSelectedTab} />
-            {selectedTab === "natal" ? (
-              <ScrollViewFadeFirst element={Header} height={400}>
-                <ShowFromTop>
-                  <View style={[styles.defaultContainer]}>
-                    <Divider style={{ marginTop: "5%" }} />
-                    <View style={styles.horoscopeTodayContainer}>
-                      <Text style={[styles.textTitles, { color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700', fontSize: 22 }]}>
-                        {userD.full_name}
-                      </Text>
+        <MyTopBar onChangeTab={setSelectedTab} />
+        {selectedTab === "natal" ? (
+          <ShareScreenshot fabPosition={{ bottom: 120, right: 24 }}>
+            <ImageBackground
+              source={require('../../../../assets/dashboardbg.jpg')}
+              style={{ flex: 1, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 }}
+              imageStyle={{ opacity: 1 }}
+            >
+              <View style={{ ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(255,255,255,0.82)', zIndex: 1 }} pointerEvents="none" />
+              <View style={{ flex: 1, zIndex: 2 }}>
+                <ScrollViewFadeFirst element={Header} height={400}>
+                  <ShowFromTop>
+                    <View style={[styles.defaultContainer]}>
+                      <Divider style={{ marginTop: "5%" }} />
+                      <View style={styles.horoscopeTodayContainer}>
+                        <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 22 }]}>
+                          {userD.full_name}
+                        </Text>
+                      </View>
+                      <View style={styles.horoscopeTodayContainer}>
+                        <Text style={[styles.textDescription, textStyles.goldenText, { marginTop: 0 }]}>
+                          {userD.day} - {userD.month} - {userD.year}
+                        </Text>
+                      </View>
+                      <View style={styles.horoscopeTodayContainer}>
+                        <Text style={[styles.textDescription, textStyles.goldenText, { marginTop: 0 }]}>
+                          {userD.selectedTime}
+                        </Text>
+                      </View>
+                      <View style={styles.horoscopeTodayContainer}>
+                        <Text style={[styles.textDescription, textStyles.goldenText, { marginTop: 0, maxWidth: "80%" }]}>
+                          {userD.place}
+                        </Text>
+                      </View>
+                      <View style={styles.horoscopeTodayContainer}>
+                        <Text style={[styles.textDescription, textStyles.goldenText, { marginTop: 0 }]}>
+                          {userD.gender}
+                        </Text>
+                      </View>
                     </View>
-                    <View style={styles.horoscopeTodayContainer}>
-                      <Text style={[styles.textDescription, { marginTop: 0, color: '#131523', fontFamily: 'Lora', fontWeight: '500' }]}>
-                        {userD.day} - {userD.month} - {userD.year}
-                      </Text>
-                    </View>
-                    <View style={styles.horoscopeTodayContainer}>
-                      <Text style={[styles.textDescription, { marginTop: 0, color: '#131523', fontFamily: 'Lora', fontWeight: '500' }]}>
-                        {userD.selectedTime}
-                      </Text>
-                    </View>
-                    <View style={styles.horoscopeTodayContainer}>
-                      <Text style={[styles.textDescription, { marginTop: 0, maxWidth: "80%", color: '#131523', fontFamily: 'Lora', fontWeight: '500' }]}>
-                        {userD.place}
-                      </Text>
-                    </View>
-                    <View style={styles.horoscopeTodayContainer}>
-                      <Text style={[styles.textDescription, { marginTop: 0, color: '#131523', fontFamily: 'Lora', fontWeight: '500' }]}>
-                        {userD.gender}
-                      </Text>
-                    </View>
-                  </View>
 
-                  <View style={{ paddingVertical: 10 }} />
-                </ShowFromTop>
-              </ScrollViewFadeFirst>
-            ) : selectedTab === "interpretation" ? (
-              <ScrollViewFadeFirst height={10}>
-                <ShowFromTop>
-                  <View style={[styles.defaultContainer]}>
-                    <View style={styles.horoscopeTodayContainer}>
-                      <Text style={[styles.textTitles, { color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700', fontSize: 20 }]}>
-                        {isLoading ? (
-                          <ActivityIndicator />
-                        ) : (
-                          i18n.translate("InterpretareAstrograma")
-                        )}
-                      </Text>
-                    </View>
-                    <Divider style={{ marginTop: "5%" }} />
-                    {/* Interpretează următoarea diagramă natală: Născut pe 10 martie 1994, la 14:05, în București, România. Soarele în Pești, Luna în Capricorn, Mercur în Vărsător, Venus în Berbec, și Marte în Pești. Ascendentul este în Scorpion. Soarele formează o conjuncție cu Venus, Luna este în opoziție cu Marte, iar Mercur formează un trigon cu Saturn. */}
-                    <View
-                      style={[
-                        styles.horoscopeTodayContainer,
-                        {
-                          marginBottom: "10%",
-                          flexDirection: "column",
-                          justifyContent: "flex-start",
-                          alignItems: "flex-start",
-                        },
-                      ]}
-                    >
-                      <Text style={[styles.textTitles, { color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700', fontSize: 18, marginTop: '7%' }]}>
-                        {personalitateText}
-                      </Text>
-                      {!isPaid ? (
-                        <>
-                          <Text style={styles.partialContent}>
-                            {achizitioneazaInterpretareCompletaText2}
-                          </Text>
-                          <Button
-                            disabled={false}
-                            funCallback={() => setModalVisible(true)}
-                            label={achizitioneazaInterpretareCompletaText}
-                            success={true}
-                            bgColor={colors.gradientLogin11}
-                            borderColor={colors.white}
-                            borderWidth={0.2}
-                            txtColor={colors.white}
-                            style={{ marginTop: "10%", marginBottom: "10%" }}
-                          />
-                        </>
-                      ) : (
-                        <>
-                          <Button
-                            disabled={false}
-                            funCallback={handleDownloadPDF}
-                            label={descarcaPdfText}
-                            success={true}
-                            bgColor={colors.gradientLogin11}
-                            borderColor={colors.white}
-                            borderWidth={0.2}
-                            txtColor={colors.white}
-                            style={{ marginTop: "10%", marginBottom: "10%" }}
-                          />
-                        </>
-                      )}
-                      <Text style={[styles.textDescription, { color: '#131523', fontFamily: 'Lora', fontWeight: '400' }]}>
-                        {userD.ascendantData.data.result}
-                      </Text>
-
-                      {isPaid && (
-                        <View>
-                          <Text style={[styles.textTitles, { color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700', fontSize: 18, marginTop: '7%' }]}>
-                            {signReportText}
-                          </Text>
-                          {Object.keys(userD.generalSignTextData).map((key) => {
-                            const planetData =
-                              userD.generalSignTextData[key].data; // Accesăm obiectul "data"
-                            return (
-                              <View key={key} style={{ marginBottom: 20 }}>
-                                {/* Titlul planetă + semn zodiacal */}
-                                <Text style={[styles.textTitles, { color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700', fontSize: 16, marginTop: '7%' }]}>
-                                  {`${planetData.planet_name} is in ${planetData.sign_name}`}
-                                </Text>
-                                {/* Text descriptiv */}
-                                <Text style={[styles.textDescription, { color: '#131523', fontFamily: 'Lora', fontWeight: '400' }]}>
-                                  {planetData.report}
-                                </Text>
-                              </View>
-                            );
-                          })}
-                        </View>
-                      )}
-                      {isPaid && (
-                        <View>
-                          <Text style={[styles.textTitles, { color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700', fontSize: 18, marginTop: '7%' }]}>
-                            {houseReportText}
-                          </Text>
-                          {Object.keys(userD.generalHouseTextData).map((key) => {
-                            const houseData =
-                              userD.generalHouseTextData[key].data; // Accesăm obiectul "data"
-                            return (
-                              <View key={key} style={{ marginBottom: 20 }}>
-                                {/* Titlul planetă + casă astrologică */}
-                                <Text style={[styles.textTitles, { color: '#C9A14A', fontFamily: 'Lora', fontWeight: '700', fontSize: 16, marginTop: '7%' }]}>
-                                  {`${houseData.planet_name} is in the ${houseData.house}th house`}
-                                </Text>
-                                {/* Text descriptiv */}
-                                <Text style={[styles.textDescription, { color: '#131523', fontFamily: 'Lora', fontWeight: '400' }]}>
-                                  {houseData.report}
-                                </Text>
-                              </View>
-                            );
-                          })}
-                        </View>
-                      )}
-                    </View>
-                  </View>
-
-                  <View style={{ paddingVertical: 10 }} />
-                </ShowFromTop>
-              </ScrollViewFadeFirst>
-            ) : (
+                    <View style={{ paddingVertical: 10 }} />
+                  </ShowFromTop>
+                </ScrollViewFadeFirst>
+              </View>
+            </ImageBackground>
+          </ShareScreenshot>
+        ) : selectedTab === "interpretation" ? (
+          <ViewShot ref={viewShotRef} options={{ format: 'png', quality: 1 }} style={{ flex: 1 }}>
+            <ScrollViewFadeFirst height={10}>
               <ShowFromTop>
-                <AspectTable
-                  houseCusps={houseCusps}
-                  planetaryData={planetaryData}
-                  aspects={aspectsData}
-                />
+                <View style={[styles.defaultContainer]}>
+                  <View style={styles.horoscopeTodayContainer}>
+                    <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 20 }]}>
+                      {isLoading ? (
+                        <ActivityIndicator />
+                      ) : (
+                        i18n.translate("InterpretareAstrograma")
+                      )}
+                    </Text>
+                  </View>
+                  <Divider style={{ marginTop: "5%" }} />
+                  {/* Interpretează următoarea diagramă natală: Născut pe 10 martie 1994, la 14:05, în București, România. Soarele în Pești, Luna în Capricorn, Mercur în Vărsător, Venus în Berbec, și Marte în Pești. Ascendentul este în Scorpion. Soarele formează o conjuncție cu Venus, Luna este în opoziție cu Marte, iar Mercur formează un trigon cu Saturn. */}
+                  <View
+                    style={[
+                      styles.horoscopeTodayContainer,
+                      {
+                        marginBottom: "10%",
+                        flexDirection: "column",
+                        justifyContent: "flex-start",
+                        alignItems: "flex-start",
+                      },
+                    ]}
+                  >
+                    <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 18, marginTop: '7%' }]}>
+                      {personalitateText}
+                    </Text>
+                    {!isPaid ? (
+                      <>
+                        <Text style={styles.partialContent}>
+                          {achizitioneazaInterpretareCompletaText2}
+                        </Text>
+                        <Button
+                          disabled={false}
+                          funCallback={() => setModalVisible(true)}
+                          label={achizitioneazaInterpretareCompletaText}
+                          success={true}
+                          bgColor={colors.gradientLogin11}
+                          borderColor={colors.white}
+                          borderWidth={0.2}
+                          txtColor={colors.white}
+                          style={{ marginTop: "10%", marginBottom: "10%" }}
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <Button
+                          disabled={false}
+                          funCallback={handleDownloadPDF}
+                          label={descarcaPdfText}
+                          success={true}
+                          bgColor={colors.gradientLogin11}
+                          borderColor={colors.white}
+                          borderWidth={0.2}
+                          txtColor={colors.white}
+                          style={{ marginTop: "10%", marginBottom: "10%" }}
+                        />
+                      </>
+                    )}
+                    <Text style={[styles.textDescription, textStyles.goldenText]}>
+                      {userD.ascendantData.data.result}
+                    </Text>
+
+                    {isPaid && (
+                      <View>
+                        <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 18, marginTop: '7%' }]}>
+                          {signReportText}
+                        </Text>
+                        {Object.keys(userD.generalSignTextData).map((key) => {
+                          const planetData =
+                            userD.generalSignTextData[key].data; // Accesăm obiectul "data"
+                          return (
+                            <View key={key} style={{ marginBottom: 20 }}>
+                              {/* Titlul planetă + semn zodiacal */}
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 16, marginTop: '7%' }]}>
+                                {`${planetData.planet_name} is in ${planetData.sign_name}`}
+                              </Text>
+                              {/* Text descriptiv */}
+                              <Text style={[styles.textDescription, textStyles.goldenText]}>
+                                {planetData.report}
+                              </Text>
+                            </View>
+                          );
+                        })}
+                      </View>
+                    )}
+                    {isPaid && (
+                      <View>
+                        <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 18, marginTop: '7%' }]}>
+                          {houseReportText}
+                        </Text>
+                        {Object.keys(userD.generalHouseTextData).map((key) => {
+                          const houseData =
+                            userD.generalHouseTextData[key].data; // Accesăm obiectul "data"
+                          return (
+                            <View key={key} style={{ marginBottom: 20 }}>
+                              {/* Titlul planetă + casă astrologică */}
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 16, marginTop: '7%' }]}>
+                                {`${houseData.planet_name} is in the ${houseData.house}th house`}
+                              </Text>
+                              {/* Text descriptiv */}
+                              <Text style={[styles.textDescription, textStyles.goldenText]}>
+                                {houseData.report}
+                              </Text>
+                            </View>
+                          );
+                        })}
+                      </View>
+                    )}
+                  </View>
+                </View>
+
+                <View style={{ paddingVertical: 10 }} />
               </ShowFromTop>
-            )}
-          </View>
-        </ImageBackground>
+            </ScrollViewFadeFirst>
+          </ViewShot>
+        ) : (
+          <ShowFromTop>
+            <AspectTable
+              houseCusps={houseCusps}
+              planetaryData={planetaryData}
+              aspects={aspectsData}
+            />
+          </ShowFromTop>
+        )}
       </MainContainer>
       {/* Modal pentru selecția limbii */}
       <PurchaseModal
@@ -1223,7 +1255,8 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   textDescription: {
-    fontSize: 14,
+    fontSize: 18,
+    lineHeight: 26,
     color: "#F0F0F0",
     marginTop: "5%",
     marginLeft: "3%",

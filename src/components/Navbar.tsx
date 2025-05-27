@@ -15,14 +15,14 @@ import { useApiData } from "../context/ApiContext";
 import { useNumberContext } from "../context/NumberContext";
 import { FontAwesome } from "@expo/vector-icons";
 
-const GOLD = '#C9A14A';
+const GOLD = '#FFD700';
 const CREAM = 'rgba(250,247,242,0.95)';
 const GRAY = '#B0B0B0';
 const TAB_ICONS = [
   { lib: Ionicons, icon: 'star', screen: screenName.ClinicDashBoard },
-  { lib: Ionicons, icon: 'bookmark', screen: "Astral" },
-  { lib: MaterialCommunityIcons, icon: 'cards-outline', screen: screenName.PersonalReadingDashboard },
-  { lib: Ionicons, icon: 'newspaper-outline', screen: 'News' },
+  // { lib: Ionicons, icon: 'bookmark', screen: "Astral" },
+  // { lib: MaterialCommunityIcons, icon: 'cards-outline', screen: screenName.PersonalReadingDashboard },
+  // { lib: Ionicons, icon: 'newspaper-outline', screen: 'News' },
   { lib: Ionicons, icon: 'person', screen: 'TarrotSettings' },
 ];
 
@@ -58,50 +58,42 @@ const NavBarBottom = () => {
     setShuffledCartiPersonalizate,
   } = useApiData();
 
-  const animatedValues = useRef<Animated.Value[]>(
-    Array.from({ length: 5 }, () => new Animated.Value(0))
-  ).current;
+  // Animation values for each tab
+  const scaleAnims = useRef(TAB_ICONS.map(() => new Animated.Value(1))).current;
+  const opacityAnims = useRef(TAB_ICONS.map(() => new Animated.Value(1))).current;
   const chevronAnimation = useRef(new Animated.Value(0)).current;
 
-  useEffect(() => {
-    animatedValues.forEach((value, i) => {
-      Animated.spring(value, {
-        toValue: i === selected ? 1 : 0,
-        friction: 5,
+  const handlePressIn = (index) => {
+    Animated.parallel([
+      Animated.spring(scaleAnims[index], {
+        toValue: 0.95,
+        friction: 8,
+        tension: 40,
         useNativeDriver: true,
-      }).start();
-    });
+      }),
+      Animated.timing(opacityAnims[index], {
+        toValue: 0.8,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
 
-    // Pornirea animației cu repetiții
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(chevronAnimation, {
-          toValue: 1,
-          duration: 500,
-          useNativeDriver: true,
-        }),
-        Animated.timing(chevronAnimation, {
-          toValue: 0,
-          duration: 500,
-          useNativeDriver: true,
-        }),
-      ]),
-      {
-        iterations: 3,
-      }
-    ).start();
-
-    if (
-      currentScreen === "Dashboard2" ||
-      currentScreen === "PersonalReadingDashboard" ||
-      currentScreen === "CeSimte" ||
-      currentScreen === "CarteaTa" ||
-      currentScreen === "CeGandeste" ||
-      currentScreen === "FutureReadingDashboard"
-    ) {
-      setSelected(1);
-    }
-  }, [selected, animatedValues, chevronAnimation, currentScreen]);
+  const handlePressOut = (index) => {
+    Animated.parallel([
+      Animated.spring(scaleAnims[index], {
+        toValue: selected === index ? 1.1 : 1,
+        friction: 8,
+        tension: 40,
+        useNativeDriver: true,
+      }),
+      Animated.timing(opacityAnims[index], {
+        toValue: 1,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
 
   const handlePress = (screen, index) => {
     if (loading) {
@@ -137,13 +129,28 @@ const NavBarBottom = () => {
           updateNumber(1);
           setSendToHistory([]);
         }
-        // startExitAnimation();
         setCurrentScreen(screen);
-        setFirstVisit(false); // Adăugat aici
+        setFirstVisit(false);
       } else {
         updateNumber(1);
         setSendToHistory([]);
         setSelected(index);
+        // Animate the new selection
+        Animated.spring(scaleAnims[index], {
+          toValue: 1.1,
+          friction: 8,
+          tension: 40,
+          useNativeDriver: true,
+        }).start();
+        // Reset previous selection
+        if (selected !== index) {
+          Animated.spring(scaleAnims[selected], {
+            toValue: 1,
+            friction: 8,
+            tension: 40,
+            useNativeDriver: true,
+          }).start();
+        }
         navigation.navigate(screen);
         setCurrentScreen(screen);
         resetExitAnimation();
@@ -152,36 +159,6 @@ const NavBarBottom = () => {
         setFirstVisit(true);
       }
     }
-  };
-  const animatedStyle = (index) => ({
-    transform: [
-      {
-        translateY: animatedValues[index].interpolate({
-          inputRange: [0, 1],
-          outputRange: [0, -10],
-        }),
-      },
-      {
-        scale: animatedValues[index].interpolate({
-          inputRange: [0, 1],
-          outputRange: [1, 1.1],
-        }),
-      },
-    ],
-    backgroundColor: selected === index ? colors.primary3 : "transparent",
-    borderRadius: 20,
-    marginBottom: 10,
-  });
-
-  const chevronStyle = {
-    transform: [
-      {
-        translateY: chevronAnimation.interpolate({
-          inputRange: [0, 1],
-          outputRange: [0, -10],
-        }),
-      },
-    ],
   };
 
   return (
@@ -195,7 +172,14 @@ const NavBarBottom = () => {
             <H7fontBoldPrimary>
               {i18n.translate("touchToShuffle")}
             </H7fontBoldPrimary>
-            <Animated.View style={chevronStyle}>
+            <Animated.View style={[styles.chevronStyle, {
+              transform: [{
+                translateY: chevronAnimation.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, -10],
+                }),
+              }],
+            }]}>
               <MaterialCommunityIcons
                 name="chevron-down"
                 size={34}
@@ -203,35 +187,37 @@ const NavBarBottom = () => {
               />
             </Animated.View>
           </View>
-        )}
-      <View
-        style={{
-          position: 'absolute',
-          left: 0,
-          right: 0,
-          bottom: 0,
-          width: '100%',
-          alignItems: 'center',
-          zIndex: 20,
-        }}
-      >
+      )}
+      <View style={styles.navbarContainer}>
         <View style={styles.navbarModern}>
           {TAB_ICONS.map((tab, index) => {
             const IconLib = tab.lib;
             return (
-            <TouchableOpacity
+              <Animated.View
                 key={tab.screen + '-' + index}
-                style={styles.tabButtonModern}
-                onPress={() => handlePress(tab.screen, index)}
-                activeOpacity={0.85}
+                style={[
+                  styles.tabButtonModern,
+                  {
+                    transform: [{ scale: scaleAnims[index] }],
+                    opacity: opacityAnims[index],
+                  },
+                ]}
               >
-                <IconLib
-                  name={tab.icon as any}
-                  size={selected === index ? 36 : 28}
-                  color={selected === index ? GOLD : GRAY}
-                  style={selected === index ? styles.iconActiveModern : styles.iconInactiveModern}
-                />
-            </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => handlePress(tab.screen, index)}
+                  onPressIn={() => handlePressIn(index)}
+                  onPressOut={() => handlePressOut(index)}
+                  activeOpacity={0.85}
+                  style={styles.tabButtonInner}
+                >
+                  <IconLib
+                    name={tab.icon as any}
+                    size={selected === index ? 42 : 34}
+                    color={selected === index ? colors.gold : GRAY}
+                    style={selected === index ? styles.iconActiveModern : styles.iconInactiveModern}
+                  />
+                </TouchableOpacity>
+              </Animated.View>
             );
           })}
         </View>
@@ -241,6 +227,18 @@ const NavBarBottom = () => {
 };
 
 const styles = StyleSheet.create({
+  navbarContainer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    width: '100%',
+    alignItems: 'center',
+    zIndex: 20,
+    textShadowColor: 'rgba(184,134,11,0.7)',   // #B8860B cu transparență
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,    
+  },
   navbarModern: {
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -263,13 +261,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 8,
     minWidth: 60,
+    backgroundColor: 'transparent',
+  },
+  tabButtonInner: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    height: '100%',
   },
   iconActiveModern: {
     marginBottom: 0,
-    shadowColor: GOLD,
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 6,
   },
   iconInactiveModern: {
     marginBottom: 0,
@@ -280,11 +281,9 @@ const styles = StyleSheet.create({
     position: "relative",
     bottom: "12%",
   },
-  shuffleText: {
-    color: colors.primary2,
-    fontSize: 16,
-    fontWeight: "bold",
-    backgroundColor: "transparent",
+  chevronStyle: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 

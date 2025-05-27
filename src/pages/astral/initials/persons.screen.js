@@ -1,4 +1,5 @@
 import { LinearGradient } from "expo-linear-gradient";
+import { ImageBackground } from "react-native";
 
 import React, { useEffect, useState } from "react";
 import { Platform, SafeAreaView, StyleSheet, View } from "react-native";
@@ -15,7 +16,6 @@ import {
 import Leo from "../../../svgs/Leo";
 import Constellation from "../../../svgs/backgrounds/Constellation";
 import ConstellationSimple from "../../../svgs/backgrounds/ConstellationSimple";
-import SpaceSky from "../../../components/Astral/components/space-sky";
 import ShadowHeadline from "../../../components/Astral/components/shadow-headline";
 import ScrollViewFadeFirst from "../../../components/Astral/components/scroll-view-fade-first";
 import { colors } from "../../../utils/colors";
@@ -166,26 +166,12 @@ function PersonsScreen({ navigation }) {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <LinearGradient
-        colors={[
-          colors.gradientLogin1,
-          colors.gradientLogin1,
-          colors.gradientLogin1,
-          colors.gradientLogin1,
-          colors.gradientLogin1,
-          colors.gradientLogin1,
-          colors.gradientLogin1,
-          colors.gradientLogin1,
-          colors.gradientLogin1,
-          colors.gradientLogin11,
-        ]} // Înlocuiește cu culorile gradientului tău
-        style={{
-          flex: 1,
-          paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
-        }}
-      >
-        <SpaceSky />
+    <ImageBackground
+      source={require('../../../../assets/dashboardbg.jpg')}
+      style={{ flex: 1, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 }}
+      imageStyle={{ opacity: 1 }}
+    >
+      <SafeAreaView style={{ flex: 1 }}>
         <View style={{ marginBottom: 10 }}>
           <View style={styles.headerContainer}>
             <ShadowHeadline>{""}</ShadowHeadline>
@@ -285,8 +271,8 @@ function PersonsScreen({ navigation }) {
           </Surface>
           <View style={{ height: 20 }} />
         </ScrollViewFadeFirst>
-      </LinearGradient>
-    </SafeAreaView>
+      </SafeAreaView>
+    </ImageBackground>
   );
 }
 

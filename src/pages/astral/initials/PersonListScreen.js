@@ -10,12 +10,12 @@ import {
   TouchableOpacity,
   Modal,
   Linking,
+  ImageBackground,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { Button, Surface, Title } from "react-native-paper";
 import { colors } from "../../../utils/colors";
-import SpaceSky from "../../../components/Astral/components/space-sky";
 import Constellation from "../../../svgs/backgrounds/Constellation";
 import FloatingActionButton from "../../../components/Astral/components/FloatingActionButton ";
 import { db } from "../../../../firebase";
@@ -221,12 +221,12 @@ const PersonListScreen = ({ navigation }) => {
 
       return (
         <Surface
-          style={[styles.surfaceRight, { backgroundColor: "#fffbeae0", borderColor: "#C9A14A", borderWidth: 1.2 }]}
+          style={[styles.surfaceRight, { backgroundColor: "#fffbeae0", borderColor: "#FFD700", borderWidth: 1.2 }]}
         >
           <View style={[StyleSheet.absoluteFill, { top: -10, left: -10, opacity: 0.28 }]}> 
             <Constellation
-              color={'#C9A14A99'}
-              dotColor={'#C9A14A'}
+              color={'#FFD70099'}
+              dotColor={'#FFD700'}
               width={250}
               height={300}
             />
@@ -270,7 +270,7 @@ const PersonListScreen = ({ navigation }) => {
                     console.log("item...", item.synastry)
                   }
                   }
-                  theme={{ colors: { primary: '#C9A14A', text: '#fff' } }}
+                  theme={{ colors: { primary: '#FFD700', text: '#fff' } }}
                   labelStyle={{ fontFamily: 'LoraBold', fontSize: 14 }}
                 >
                   {veziAnalizaText}
@@ -295,12 +295,12 @@ const PersonListScreen = ({ navigation }) => {
       // console.log("other person...", item);
       return (
         <Surface
-          style={[styles.surfaceRight, { backgroundColor: "#fffbeae0", borderColor: "#C9A14A", borderWidth: 1.2 }]}
+          style={[styles.surfaceRight, { backgroundColor: "#fffbeae0", borderColor: "#FFD700", borderWidth: 1.2 }]}
         >
           <View style={[StyleSheet.absoluteFill, { top: -10, left: -10, opacity: 0.28 }]}> 
             <Constellation
-              color={'#C9A14A99'}
-              dotColor={'#C9A14A'}
+              color={'#FFD70099'}
+              dotColor={'#FFD700'}
               width={250}
               height={300}
             />
@@ -334,7 +334,7 @@ const PersonListScreen = ({ navigation }) => {
                     });
                
                   }}
-                  theme={{ colors: { primary: '#C9A14A', text: '#fff' } }}
+                  theme={{ colors: { primary: '#FFD700', text: '#fff' } }}
                   labelStyle={{ fontFamily: 'LoraBold', fontSize: 14 }}
                 >
                   {veziAnalizaText}
@@ -360,26 +360,18 @@ const PersonListScreen = ({ navigation }) => {
   }
 
   return (
-    <View style={{ flex: 1 }}>
-      <LinearGradient
-        colors={[
-          '#F7E7B4',
-          '#F9EFD6CC',
-          '#FAF7F2',
-          '#FFFBEA00'
-        ]}
-        style={{ ...StyleSheet.absoluteFillObject, zIndex: 0 }}
-        start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 1 }}
-      />
-      <SpaceSky style={{ ...StyleSheet.absoluteFillObject, zIndex: 1 }} />
+    <ImageBackground
+      source={require('../../../../assets/dashboardbg.jpg')}
+      style={{ flex: 1 }}
+      imageStyle={{ opacity: 1 }}
+    >
       <View style={{ flex: 1, zIndex: 2 }}>
         <View style={[styles.listContainer, { paddingTop: 40, backgroundColor: 'transparent', flex: 1 }]}> 
           <View style={styles.helpContainer}>
             <Text style={styles.helpText}>
               {helpText.split('webdynamicx@gmail.com')[0]}
               <TouchableOpacity onPress={() => Linking.openURL('mailto:webdynamicx@gmail.com')}>
-                <Text style={{ fontWeight: 'bold', color: '#C9A14A', textDecorationLine: 'underline' }}>webdynamicx@gmail.com</Text>
+                <Text style={{ fontWeight: 'bold', color: 'black', textDecorationLine: 'underline' }}>webdynamicx@gmail.com</Text>
               </TouchableOpacity>
             </Text>
           </View>
@@ -432,7 +424,7 @@ const PersonListScreen = ({ navigation }) => {
           </View>
         </Modal>
       </View>
-    </View>
+    </ImageBackground>
   );
 };
 
@@ -443,7 +435,7 @@ const styles = StyleSheet.create({
   },
   helpText: {
     fontSize: 14,
-    color: '#C9A14A',
+    color: 'black',
     textAlign: 'center',
   },
   statusBadge: {
@@ -456,7 +448,7 @@ const styles = StyleSheet.create({
     zIndex: 10,
     backgroundColor: '#fffbe6',
     borderWidth: 1.5,
-    borderColor: '#C9A14A',
+    borderColor: '#FFD700',
   },
   statusBadgePaid: {
     backgroundColor: "#fffbe6",
@@ -465,7 +457,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fffbe6",
   },
   statusBadgeText: {
-    color: "#C9A14A",
+    color: "#FFD700",
     fontSize: 12,
     fontFamily: 'LoraBold',
   },
@@ -537,7 +529,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     backgroundColor: '#fff',
     borderWidth: 1.5,
-    borderColor: '#C9A14A',
+    borderColor: '#FFD700',
   },
   gradientRight: {
     padding: 15,
@@ -550,7 +542,7 @@ const styles = StyleSheet.create({
   nameText: {
     fontSize: 20,
     fontFamily: 'LoraBold',
-    color: '#C9A14A',
+    color: '#FFD700',
     marginBottom: 2,
   },
   detailsText: {
@@ -565,7 +557,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   sinButton: {
-    backgroundColor: '#C9A14A',
+    backgroundColor: '#FFD700',
     marginRight: 10,
     borderRadius: 22,
     minWidth: 120,
@@ -578,7 +570,7 @@ const styles = StyleSheet.create({
   emptyText: {
     textAlign: "center",
     fontSize: 16,
-    color: '#C9A14A',
+    color: '#FFD700',
     fontFamily: 'LoraBold',
     marginTop: 20,
   },

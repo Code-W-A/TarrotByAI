@@ -37,7 +37,7 @@ const GenderSelector = ({ setGender, gender, style }) => {
             <MaterialCommunityIcons
               name={option.icon}
               size={24}
-              color={gender === option.value ? '#C9A14A' : '#B0AFA6'}
+              color={gender === option.value ? '#FFD700' : '#B0AFA6'}
               style={styles.icon}
             />
             <Text
@@ -63,9 +63,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 22,
     borderWidth: 1.5,
-    borderColor: '#C9A14A',
+    borderColor: '#FFD700',
     width: '100%',
-    shadowColor: '#C9A14A',
+    shadowColor: '#FFD700',
     shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 2,
@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 0,
     fontWeight: 'bold',
-    color: '#C9A14A',
+    color: '#FFD700',
     fontFamily: 'Lora',
   },
   buttonContainer: {
@@ -94,15 +94,15 @@ const styles = StyleSheet.create({
   },
   activeButton: {
     backgroundColor: '#fffbe6',
-    borderColor: '#C9A14A',
+    borderColor: '#FFD700',
   },
   buttonText: {
     fontSize: 14,
-    color: '#C9A14A',
+    color: '#FFD700',
     fontFamily: 'Lora',
   },
   activeButtonText: {
-    color: '#C9A14A',
+    color: '#FFD700',
     fontWeight: 'bold',
   },
   icon: {

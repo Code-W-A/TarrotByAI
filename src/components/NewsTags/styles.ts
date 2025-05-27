@@ -11,7 +11,7 @@ export default StyleSheet.create({
   },
   container: {
     borderWidth: 2,
-    borderColor: '#C9A14A', // gold
+    borderColor: '#FFD700', // gold
     borderRadius: 22,
     height: 38,
     paddingHorizontal: 22,
@@ -19,7 +19,7 @@ export default StyleSheet.create({
     alignItems: "center",
     marginRight: 14,
     backgroundColor: 'rgba(255,255,255,0.92)', // soft cream/white
-    shadowColor: '#C9A14A',
+    shadowColor: '#FFD700',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.10,
     shadowRadius: 6,
@@ -31,7 +31,7 @@ export default StyleSheet.create({
   text: {
     fontFamily: 'Lora',
     fontSize: 16,
-    color: '#C9A14A', // gold text
+    color: '#FFD700', // gold text
     letterSpacing: 0.2,
     fontWeight: '700',
     textAlign: 'center',
@@ -41,8 +41,8 @@ export default StyleSheet.create({
     marginVertical: 0,
   },
   selected: {
-    backgroundColor: '#C9A14A', // gold solid
-    borderColor: '#C9A14A',
+    backgroundColor: '#FFD700', // gold solid
+    borderColor: '#FFD700',
     borderWidth: 2.5,
     shadowOpacity: 0.18,
     color: '#fff',

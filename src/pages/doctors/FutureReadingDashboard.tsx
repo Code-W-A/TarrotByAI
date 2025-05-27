@@ -28,6 +28,7 @@ import {
 } from "../../components/commonText";
 import { useLanguage } from "../../context/LanguageContext";
 import CardLayoutViitor from "../../components/CardLayout/CardLayoutViitor";
+import ShareScreenshot from '../../components/common/ShareScreenshot';
 
 const FutureReadingDashboard = () => {
   const [cardAnimations, setCardAnimations] = useState([]);
@@ -224,41 +225,43 @@ const FutureReadingDashboard = () => {
   };
 
   return (
-    <Fragment>
-      <MainContainer secondary={false} style={{ flex: 1 }}>
-        <ImageBackground
-          source={require("../../../assets/dashboardbg.jpg")}
-          style={{ flex: 1, paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0 }}
-          imageStyle={{ opacity: 1 }}
-        >
-          {/* <GreetingBar isGoBack={true} /> */}
-          {loading ? (
-            <CustomSpinner size={74} color={colors.primary3} />
-          ) : (
-            <ScrollView
-              contentContainerStyle={{
-                paddingBottom: 20,
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                backgroundColor: "transparent",
-                minHeight: Dimensions.get("window").height,
-              }}
-            >
-              <CardLayoutViitor
-                shuffledCartiViitor={shuffledCartiViitor}
-                title={i18n.translate("futureReading")}
+    <ShareScreenshot>
+      <Fragment>
+        <MainContainer secondary={false} style={{ flex: 1 }}>
+          <ImageBackground
+            source={require("../../../assets/dashboardbg.jpg")}
+            style={{ flex: 1, paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0 }}
+            imageStyle={{ opacity: 1 }}
+          >
+            {/* <GreetingBar isGoBack={true} /> */}
+            {loading ? (
+              <CustomSpinner size={74} color={colors.primary3} />
+            ) : (
+              <ScrollView
+                contentContainerStyle={{
+                  paddingBottom: 20,
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  backgroundColor: "transparent",
+                  minHeight: Dimensions.get("window").height,
+                }}
               >
-                {categoriiViitor &&
-                  categoriiViitor.map((category, index) =>
-                    renderFlipCard(category, index)
-                  )}
-              </CardLayoutViitor>
-            </ScrollView>
-          )}
-        </ImageBackground>
-      </MainContainer>
-    </Fragment>
+                <CardLayoutViitor
+                  shuffledCartiViitor={shuffledCartiViitor}
+                  title={i18n.translate("futureReading")}
+                >
+                  {categoriiViitor &&
+                    categoriiViitor.map((category, index) =>
+                      renderFlipCard(category, index)
+                    )}
+                </CardLayoutViitor>
+              </ScrollView>
+            )}
+          </ImageBackground>
+        </MainContainer>
+      </Fragment>
+    </ShareScreenshot>
   );
 };
 

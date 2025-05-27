@@ -10,6 +10,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   StyleSheet as StyleSheetRN,
+  ImageBackground,
 } from "react-native";
 import { Button, Headline, Menu, Provider, Text } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -24,7 +25,6 @@ import GenderSelector from "../../../components/Astral/components/GenderSelector
 import RelationshipScreen from "../../../components/Astral/components/RelationshipScreen";
 import { Button as CommonButton } from "../../../components/commonButton";
 import { colors } from "../../../utils/colors";
-import SpaceSky from "../../../components/Astral/components/space-sky";
 import Aquarius from "../../../svgs/Aquarius";
 import { useFocusEffect } from "@react-navigation/native";
 import { StatusBar } from "react-native";
@@ -787,15 +787,8 @@ function NewPersonAstrograma({ navigation, route }) {
   return (
     <Provider>
       <Fragment>
-        <MainContainer style={{ flex: 1, backgroundColor: '#fffbe6' }}>
+        <ImageBackground source={require('../../../../assets/dashboardbg.jpg')} style={{ flex: 1 }} imageStyle={{ opacity: 1 }}>
           <SafeAreaView style={{ flex: 1 }}>
-          <LinearGradient
-              colors={["#fffbe6", "#f7e7ce", "#e7c585"]}
-              style={{ flex: 1 }}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-          >
-              <View style={styles.overlay} />
             {!isLoading && (
               <View style={styles.textContainer}>
                   <Text style={styles.titleText}>{i18n.translate("informatiiCalcule")}</Text>
@@ -943,8 +936,8 @@ function NewPersonAstrograma({ navigation, route }) {
                               style={styles.selectButton}
                           theme={{
                             colors: {
-                                  primary: '#C9A14A',
-                                  onSurface: '#C9A14A',
+                                  primary: '#FFD700',
+                                  onSurface: '#FFD700',
                             },
                           }}
                               onPress={() => setDayMenuVisible(true)}
@@ -973,8 +966,8 @@ function NewPersonAstrograma({ navigation, route }) {
                               style={styles.selectButton}
                           theme={{
                             colors: {
-                                  primary: '#C9A14A',
-                                  onSurface: '#C9A14A',
+                                  primary: '#FFD700',
+                                  onSurface: '#FFD700',
                             },
                           }}
                               onPress={() => setMonthMenuVisible(true)}
@@ -1016,8 +1009,8 @@ function NewPersonAstrograma({ navigation, route }) {
                               style={styles.selectButton}
                           theme={{
                             colors: {
-                                  primary: '#C9A14A',
-                                  onSurface: '#C9A14A',
+                                  primary: '#FFD700',
+                                  onSurface: '#FFD700',
                             },
                           }}
                           onPress={() => setYearMenuVisible(true)}
@@ -1045,11 +1038,11 @@ function NewPersonAstrograma({ navigation, route }) {
                     mode="outlined"
                     onPress={() => setShowTimePicker(true)}
                         style={styles.selectButton}
-                        color="#C9A14A"
+                        color="#FFD700"
                     theme={{
                       colors: {
-                            primary: '#C9A14A',
-                            onSurface: '#C9A14A',
+                            primary: '#FFD700',
+                            onSurface: '#FFD700',
                       },
                     }}
                         labelStyle={styles.selectButtonLabel}
@@ -1088,9 +1081,9 @@ function NewPersonAstrograma({ navigation, route }) {
                     disabled={false}
                     funCallback={handleContinue}
                         borderWidth={0}
-                        bgColor={'#C9A14A'}
+                        bgColor={'#FFD700'}
                     label={i18n.translate("clinicLoginRedirect")}
-                        borderColor={'#C9A14A'}
+                        borderColor={'#FFD700'}
                     success={true}
                         style={styles.loginButtonNew}
                         txtColor={'#fff'}
@@ -1100,9 +1093,8 @@ function NewPersonAstrograma({ navigation, route }) {
                   </ScrollView>
                 </KeyboardAvoidingView>
             )}
-          </LinearGradient>
           </SafeAreaView>
-        </MainContainer>
+        </ImageBackground>
       </Fragment>
     </Provider>
   );
@@ -1178,11 +1170,11 @@ const styles = StyleSheet.create({
   selectButton: {
     backgroundColor: '#fff',
     borderWidth: 1.5,
-    borderColor: '#C9A14A',
+    borderColor: '#FFD700',
     borderRadius: 22,
     marginHorizontal: 4,
     marginVertical: 4,
-    shadowColor: '#C9A14A',
+    shadowColor: '#FFD700',
     shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 2,
@@ -1192,13 +1184,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   selectButtonLabel: {
-    color: '#C9A14A',
+    color: '#FFD700',
     fontFamily: 'Lora',
     fontSize: 16,
     textAlign: 'center',
   },
   genderSelectorNew: {
-    borderColor: '#C9A14A',
+    borderColor: '#FFD700',
     backgroundColor: '#fff',
     borderWidth: 1.5,
     borderRadius: 22,
@@ -1210,8 +1202,8 @@ const styles = StyleSheet.create({
     width: '100%',
     borderRadius: 22,
     marginBottom: 10,
-    backgroundColor: '#C9A14A',
-    shadowColor: '#C9A14A',
+    backgroundColor: '#FFD700',
+    shadowColor: '#FFD700',
     shadowOpacity: 0.12,
     shadowRadius: 8,
     elevation: 3,
@@ -1225,7 +1217,7 @@ const styles = StyleSheet.create({
   titleText: {
     textAlign: 'center',
     paddingVertical: 5,
-    color: '#C9A14A',
+    color: '#FFD700',
     fontSize: 22,
     fontWeight: '700',
     fontFamily: 'LoraBold',

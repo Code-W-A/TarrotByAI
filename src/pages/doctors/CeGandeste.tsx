@@ -31,6 +31,7 @@ import { authentication } from "../../../firebase";
 import { useNumberContext } from "../../context/NumberContext";
 import SingleCardLayout from "../../components/CardLayout/SingleCardLayout";
 import SingleFlipCard from "../../components/FlipCard/SingleFlipCard";
+import ShareScreenshot from '../../components/common/ShareScreenshot';
 
 const CeGandeste = ({ route }) => {
   const isFirstEntry = useRef(true);
@@ -246,42 +247,44 @@ const CeGandeste = ({ route }) => {
   };
 
   return (
-    <Fragment>
-      <MainContainer secondary={false} style={{ flex: 1 }}>
-        <ImageBackground
-          source={require("../../../assets/dashboardbg.jpg")}
-          style={{ flex: 1, paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0 }}
-          imageStyle={{ opacity: 1 }}
-        >
-          {/* <GreetingBar isGoBack={true} /> */}
-          {loading ? (
-            <CustomSpinner size={74} color={colors.primary3} />
-          ) : (
-            <ScrollView
-              contentContainerStyle={{
-                paddingBottom: 20,
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                backgroundColor: "transparent",
-                minHeight: Dimensions.get("window").height,
-              }}
-            >
-              <SingleCardLayout
-                shuffledCartiPersonalizate={shuffledCartiPersonalizate}
-                title={i18n.translate("personalReading")}
-                ind={0}
+    <ShareScreenshot>
+      <Fragment>
+        <MainContainer secondary={false} style={{ flex: 1 }}>
+          <ImageBackground
+            source={require("../../../assets/dashboardbg.jpg")}
+            style={{ flex: 1, paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0 }}
+            imageStyle={{ opacity: 1 }}
+          >
+            {/* <GreetingBar isGoBack={true} /> */}
+            {loading ? (
+              <CustomSpinner size={74} color={colors.primary3} />
+            ) : (
+              <ScrollView
+                contentContainerStyle={{
+                  paddingBottom: 20,
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  backgroundColor: "transparent",
+                  minHeight: Dimensions.get("window").height,
+                }}
               >
-                {categoriiPersonalizate &&
-                  categoriiPersonalizate.map((category, index) =>
-                    renderFlipCard(category, index)
-                  )}
-              </SingleCardLayout>
-            </ScrollView>
-          )}
-        </ImageBackground>
-      </MainContainer>
-    </Fragment>
+                <SingleCardLayout
+                  shuffledCartiPersonalizate={shuffledCartiPersonalizate}
+                  title={i18n.translate("personalReading")}
+                  ind={0}
+                >
+                  {categoriiPersonalizate &&
+                    categoriiPersonalizate.map((category, index) =>
+                      renderFlipCard(category, index)
+                    )}
+                </SingleCardLayout>
+              </ScrollView>
+            )}
+          </ImageBackground>
+        </MainContainer>
+      </Fragment>
+    </ShareScreenshot>
   );
 };
 

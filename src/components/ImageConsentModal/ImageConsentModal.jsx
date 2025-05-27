@@ -30,9 +30,9 @@ const ConsentModal = ({ hideModalAndSetConsent, visible }) => {
                   hideModalAndSetConsent();
                 }}
                 borderWidth={0}
-                bgColor={colors.gold || '#C9A14A'}
+                bgColor={colors.gold || '#FFD700'}
                 label={"Accept"}
-                borderColor={colors.gold || '#C9A14A'}
+                borderColor={colors.gold || '#FFD700'}
                 success={true}
                 style={{ marginTop: 24, width: "80%", borderRadius: 28, alignSelf: 'center' }}
                 txtColor={colors.white}
@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 22,
-    color: '#C9A14A',
+    color: '#FFD700',
     fontFamily: 'LoraBold',
     textAlign: 'center',
     marginBottom: 12,
@@ -112,9 +112,9 @@ const styles = StyleSheet.create({
     paddingVertical: 36,
     paddingHorizontal: 28,
     borderWidth: 2,
-    borderColor: colors.gold || '#C9A14A',
+    borderColor: colors.gold || '#FFD700',
     borderRadius: 28,
-    shadowColor: '#C9A14A',
+    shadowColor: '#FFD700',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.13,
     shadowRadius: 18,

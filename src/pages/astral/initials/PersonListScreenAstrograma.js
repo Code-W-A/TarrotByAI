@@ -11,12 +11,12 @@ import {
   Modal,
   Alert,
   Linking,
+  ImageBackground,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { Button, Surface, Title } from "react-native-paper";
 import { colors } from "../../../utils/colors";
-import SpaceSky from "../../../components/Astral/components/space-sky";
 import Constellation from "../../../svgs/backgrounds/Constellation";
 import {
   collection,
@@ -165,12 +165,12 @@ const PersonListScreenAstrograma = ({ navigation }) => {
 
     return (
       <Surface
-        style={[styles.surfaceRight, { backgroundColor: "#fffbeae0", borderColor: "#C9A14A", borderWidth: 1.2 }]}
+        style={[styles.surfaceRight, { backgroundColor: "#fffbeae0", borderColor: "#FFD700", borderWidth: 1.2 }]}
       >
         <View style={[StyleSheet.absoluteFill, { top: -10, left: -10, opacity: 0.28 }]}> 
           <Constellation
-            color={'#C9A14A99'}
-            dotColor={'#C9A14A'}
+            color={'#FFD70099'}
+            dotColor={'#FFD700'}
             width={250}
             height={300}
           />
@@ -220,7 +220,7 @@ const PersonListScreenAstrograma = ({ navigation }) => {
                         personData: item,
                       });
                 }}
-                theme={{ colors: { primary: '#C9A14A', text: '#2D2A22' } }}
+                theme={{ colors: { primary: '#FFD700', text: '#2D2A22' } }}
                 labelStyle={{ fontFamily: 'LoraBold', fontSize: 14 }}
               >
                 {veziAstrogramaText}
@@ -240,7 +240,7 @@ const PersonListScreenAstrograma = ({ navigation }) => {
                           personData: item, // Trimiți datele persoanei selectate
                         });
                   }}
-                  theme={{ colors: { primary: '#C9A14A', text: '#C9A14A' } }}
+                  theme={{ colors: { primary: '#FFD700', text: '#FFD700' } }}
                 >
                   {actualizeazaAstrogramaText}
                 </Button>
@@ -257,26 +257,14 @@ const PersonListScreenAstrograma = ({ navigation }) => {
   }
 
   return (
-    <View style={{ flex: 1 }}>
-      <LinearGradient
-        colors={[
-          '#F7E7B4',
-          '#F9EFD6CC',
-          '#FAF7F2',
-          '#FFFBEA00'
-        ]}
-        style={{ ...StyleSheet.absoluteFillObject, zIndex: 0 }}
-        start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 1 }}
-      />
-      <SpaceSky style={{ ...StyleSheet.absoluteFillObject, zIndex: 1 }} />
-      <View style={{ flex: 1, zIndex: 2 }}>
+    <ImageBackground source={require('../../../../assets/dashboardbg.jpg')} style={{ flex: 1 }} imageStyle={{ opacity: 1 }}>
+      <View style={{ flex: 1 }}>
         <View style={styles.listContainer}>
           <View style={styles.helpContainer}>
             <Text style={styles.helpText}>
               {helpText.split('webdynamicx@gmail.com')[0]}
               <TouchableOpacity onPress={() => Linking.openURL('mailto:webdynamicx@gmail.com')}>
-                <Text style={{ fontWeight: 'bold', color: '#C9A14A', textDecorationLine: 'underline' }}>webdynamicx@gmail.com</Text>
+                <Text style={{ fontWeight: 'bold', color: 'black', textDecorationLine: 'underline' }}>webdynamicx@gmail.com</Text>
               </TouchableOpacity>
             </Text>
           </View>
@@ -369,7 +357,7 @@ const PersonListScreenAstrograma = ({ navigation }) => {
           </View>
         </Modal>
       </View>
-    </View>
+    </ImageBackground>
   );
 };
 
@@ -380,7 +368,7 @@ const styles = StyleSheet.create({
   },
   helpText: {
     fontSize: 14,
-    color: '#C9A14A',
+    color: 'black',
     textAlign: 'center',
   },
   statusBadge: {
@@ -393,15 +381,15 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   statusBadgePaid: {
-    backgroundColor: "#C9A14A", // Auriu pentru achiziționat
+    backgroundColor: "#FFD700", // Auriu pentru achiziționat
   },
   statusBadgeUnpaid: {
     backgroundColor: "#fffbe6", // Crem deschis pentru neachiziționat
     borderWidth: 1.5,
-    borderColor: "#C9A14A",
+    borderColor: "#FFD700",
   },
   statusBadgeText: {
-    color: "#C9A14A",
+    color: "#FFD700",
     fontSize: 12,
     fontFamily: 'LoraBold',
   },
@@ -435,7 +423,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     backgroundColor: '#fff',
     borderWidth: 1.5,
-    borderColor: '#C9A14A',
+    borderColor: '#FFD700',
   },
   gradientRight: {
     padding: 15,
@@ -448,7 +436,7 @@ const styles = StyleSheet.create({
   nameText: {
     fontSize: 20,
     fontFamily: 'LoraBold',
-    color: '#C9A14A',
+    color: '#FFD700',
     marginBottom: 2,
   },
   detailsText: {
@@ -463,27 +451,27 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   sinButton: {
-    backgroundColor: '#C9A14A',
+    backgroundColor: '#FFD700',
     marginRight: 10,
     borderRadius: 22,
     minWidth: 120,
   },
   updateButton: {
-    borderColor: '#C9A14A',
+    borderColor: '#FFD700',
     borderWidth: 1.5,
     backgroundColor: '#fff',
     borderRadius: 22,
     minWidth: 120,
   },
   updateButtonLabel: {
-    color: '#C9A14A',
+    color: '#FFD700',
     fontFamily: 'LoraBold',
     fontSize: 15,
   },
   emptyText: {
     textAlign: "center",
     fontSize: 16,
-    color: '#C9A14A',
+    color: '#FFD700',
     fontFamily: 'LoraBold',
     marginTop: 20,
   },
@@ -496,7 +484,7 @@ const styles = StyleSheet.create({
   },
   addButton: {
     width: "100%",
-    backgroundColor: '#C9A14A',
+    backgroundColor: '#FFD700',
     borderRadius: 22,
   },
   modalOverlay: {
@@ -512,7 +500,7 @@ const styles = StyleSheet.create({
     width: "80%",
     alignItems: "center",
     borderWidth: 1.5,
-    borderColor: '#C9A14A',
+    borderColor: '#FFD700',
   },
   modalText: {
     fontSize: 16,
@@ -536,10 +524,10 @@ const styles = StyleSheet.create({
   cancelButton: {
     backgroundColor: '#fffbe6',
     borderWidth: 1.5,
-    borderColor: '#C9A14A',
+    borderColor: '#FFD700',
   },
   confirmButton: {
-    backgroundColor: '#C9A14A',
+    backgroundColor: '#FFD700',
   },
   modalButtonText: {
     color: '#131523',

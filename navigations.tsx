@@ -123,6 +123,9 @@ import AstrogramaNatalaOtherPerson from "./src/pages/astral/initials/AstrogramaN
 import NewTwoSyanstryPersons from "./src/pages/astral/initials/NewTwoSynastryPersons";
 import SinastrieRelatieOthers from "./src/pages/astral/initials/SinastrieRelatieOthers";
 import WebViewConsultatiiScreen from "./src/pages/doctors/WebViewConsultatiiScreen";
+import TarotMaineScreen from "./src/pages/doctors/TarotMainScreen";
+import NorocMainScreen from "./src/pages/doctors/NorocMainScreen";
+import MesajeMagiceMainScreen from "./src/pages/doctors/MesajeMagiceMainScreen";
 // import BirthDateScreen from "./src/pages/astral/initials/birth-date.screen";
 // import RelationshipScreen from "./src/pages/astral/initials/relationship.screen";
 // import SexScreen from "./src/pages/astral/initials/sex.screen";
@@ -205,6 +208,9 @@ const HomeNavigation = (props: NavigationProps) => {
         <Stack.Screen name={screenName.luckyNumber} component={LuckyNumber} />
 
         <Stack.Screen name={"TarrotSettings"} component={TarrotSettings} />
+        <Stack.Screen name={"TarotMaineScreen"} component={TarotMaineScreen} />
+        <Stack.Screen name={"NorocMaineScreen"} component={NorocMainScreen} />
+        <Stack.Screen name={"MesajeMagiceMainScreen"} component={MesajeMagiceMainScreen} />
         <Stack.Screen name={"News"} component={News} />
         <Stack.Screen name={"SavedNews"} component={SavedNews} />
 

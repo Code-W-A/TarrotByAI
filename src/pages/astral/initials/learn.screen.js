@@ -1,4 +1,6 @@
 import { LinearGradient } from "expo-linear-gradient";
+import { ImageBackground, TouchableOpacity, Image, Modal, ScrollView, StyleSheet as RNStyleSheet } from "react-native";
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 import React, { useCallback, useEffect, useState } from "react";
 import { Platform, SafeAreaView, StyleSheet, View } from "react-native";
@@ -15,7 +17,6 @@ import {
 import Leo from "../../../svgs/Leo";
 import Constellation from "../../../svgs/backgrounds/Constellation";
 import ConstellationSimple from "../../../svgs/backgrounds/ConstellationSimple";
-import SpaceSky from "../../../components/Astral/components/space-sky";
 import ShadowHeadline from "../../../components/Astral/components/shadow-headline";
 import ScrollViewFadeFirst from "../../../components/Astral/components/scroll-view-fade-first";
 import { colors } from "../../../utils/colors";
@@ -65,7 +66,7 @@ const SubHeading = () => {
     >
       <Text
         style={{
-          color: "#C9A14A", // gold
+          color: "black", // gold
           fontSize: 22,
           fontWeight: "700",
           fontFamily: "LoraBold",
@@ -86,7 +87,7 @@ const SubHeading = () => {
           fontSize: 16,
           fontFamily: "Lora",
           textAlign: "center",
-          opacity: 0.85,
+          opacity: 1,
           maxWidth: 340,
           letterSpacing: 0.2,
         }}
@@ -276,201 +277,46 @@ function LearnScreen({ navigation }) {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <LinearGradient
-        colors={[
-          '#F7E7B4', // Aurie pastel, foarte soft, sus
-          '#F9EFD6CC', // Crem-auriu luminos, semi-transparent
-          '#FAF7F2',   // Crem foarte deschis
-          '#FFFBEA00'  // Complet transparent jos
-        ]}
-        style={{
-          flex: 1,
-          paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
-        }}
-        start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 1 }}
-      >
-        <SpaceSky />
-        <View style={{ marginBottom: 10 }}>
-          <View style={styles.headerContainer}>
-            <ShadowHeadline>{""}</ShadowHeadline>
+    <ImageBackground source={require('../../../../assets/dashboardbg.jpg')} style={{ flex: 1 }}>
+      {/* Overlay alb translucid */}
+      <View style={learnScreenStyles.overlay} pointerEvents="none" />
+      <SafeAreaView style={{ flex: 1, paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0 }}>
+        {/* Header compact, ca pe TarotMainScreen */}
+        <View style={learnScreenStyles.fixedHeader}>
+          <View style={learnScreenStyles.headerRow}>
+            <Image source={require("../../../../assets/LogoPngTransparent.png")} style={learnScreenStyles.logo} resizeMode="contain" />
+            <View style={learnScreenStyles.headerTextBlock}>
+              <Text style={learnScreenStyles.headerSalute}>{i18n.translate('digitalAstrology')}</Text>
+            </View>
           </View>
         </View>
-        <ScrollViewFadeFirst element={<SubHeading />} height={140}>
-          <Surface
-            style={[
-              styles.surfaceRight,
-              { backgroundColor: "#fffbeae0", marginTop: 10, borderColor: "#C9A14A", borderWidth: 1.2 },
-            ]}
-          >
-            <View style={[StyleSheet.absoluteFill, { top: -10, left: -10, opacity: 0.32 }]}>
-              <Constellation
-                color={'#C9A14A99'}
-                dotColor={'#C9A14A'}
-                width={280}
-                height={340}
-              />
-            </View>
-            <LinearGradient
-              colors={["#FFFBEA99", "#FAF7F299", "#F7E7B499"]}
-              start={[0, 0]}
-              end={[1, 0]}
-              style={styles.gradientRight}
-            >
-              <View style={{ flex: 0.8 }} />
-              <View style={{ flex: 1 }}>
-                <Text style={{ color: '#C9A14A', fontFamily: 'LoraBold', fontSize: 18, marginBottom: 2 }}>{i18n.translate("natalAstrogram")}</Text>
-                <Text style={{ color: '#2D2A22', fontFamily: 'Lora', fontSize: 15, marginBottom: 0 }}>{i18n.translate("exploreTheAstralProfile")}</Text>
-                <Text style={{ color: '#2D2A22', fontFamily: 'Lora', fontSize: 15, marginTop: -3 }}>{i18n.translate("withTheNatalAstrogram")}</Text>
-                <View style={{ heigt: 200, justifyContent: "flex-start" }}>
-                  <Button
-                    mode="contained"
-                    style={{ borderRadius: 25, marginTop: 5 }}
-                    theme={{
-                      colors: {
-                        primary: '#C9A14A',
-                        text: "#2D2A22",
-                      },
-                    }}
-                    labelStyle={{ fontSize: 12, letterSpacing: 0 }}
-                    onPress={() => handleViewLesson("PersonsListAstrograma")}
-                  >
-                    {i18n.translate("seeTheAstrogram")}
-                  </Button>
-                </View>
+        <ScrollView contentContainerStyle={learnScreenStyles.scrollContent} showsVerticalScrollIndicator={false}>
+          <View style={learnScreenStyles.sectionContainer}>
+            <View style={learnScreenStyles.subSectionGrid}>
+              {/* Card 1: Natal Astrogram */}
+              <View style={tarotCardStyles.subSectionCardBox}>
+                <TouchableOpacity onPress={() => handleViewLesson("PersonsListAstrograma")} activeOpacity={0.85} style={tarotCardStyles.functionalCardContent}>
+                  <MaterialCommunityIcons name="account-circle-outline" size={38} color="#FFD700" style={{ marginBottom: 6 }} />
+                  <Text style={tarotCardStyles.functionalCardLabel}>{i18n.translate("natalAstrogram")}</Text>
+                </TouchableOpacity>
               </View>
-            </LinearGradient>
-          </Surface>
-          <View style={{ height: 20 }} />
-
-          <Surface
-            style={[styles.surfaceRight, { backgroundColor: "#fffbeae0", borderColor: "#C9A14A", borderWidth: 1.2 }]}
-          >
-            <View style={[StyleSheet.absoluteFill, { top: -10, left: -10, opacity: 0.28 }]}>
-              <Leo color={'#C9A14A'} width={220} height={220} />
-            </View>
-            <LinearGradient
-              colors={["#FFFBEA99", "#FAF7F299", "#F7E7B499"]}
-              start={[0, 0]}
-              end={[1, 0]}
-              style={styles.gradientRight}
-            >
-              <View style={{ flex: 0.8 }} />
-              <View style={{ flex: 1 }}>
-                <Text style={{ color: '#C9A14A', fontFamily: 'LoraBold', fontSize: 18, marginBottom: 2 }}>{i18n.translate("dailyHoroscope")}</Text>
-                <Text style={{ color: '#2D2A22', fontFamily: 'Lora', fontSize: 15 }}>{i18n.translate("personalizedHoroscope")}</Text>
-                <View style={{ flex: 1, justifyContent: "flex-end" }}>
-                  <Button
-                    mode="contained"
-                    style={{ borderRadius: 25, marginTop: 5 }}
-                    theme={{
-                      colors: {
-                        primary: '#C9A14A',
-                        text: "#2D2A22",
-                      },
-                    }}
-                    labelStyle={{ fontSize: 12, letterSpacing: 0 }}
-                    onPress={() => handleViewLesson("Horoscop")}
-                  >
-                    {i18n.translate("seeTheHoroscope")}
-                  </Button>
-                </View>
+              {/* Card 2: Daily Horoscope */}
+              <View style={tarotCardStyles.subSectionCardBox}>
+                <TouchableOpacity onPress={() => handleViewLesson("Horoscop")} activeOpacity={0.85} style={tarotCardStyles.functionalCardContent}>
+                  <MaterialCommunityIcons name="calendar-star" size={38} color="#FFD700" style={{ marginBottom: 6 }} />
+                  <Text style={tarotCardStyles.functionalCardLabel}>{i18n.translate("dailyHoroscope")}</Text>
+                </TouchableOpacity>
               </View>
-            </LinearGradient>
-          </Surface>
-          <View style={{ height: 20 }} />
-
-          <Surface
-            style={[styles.surfaceRight, { backgroundColor: "#fffbeae0", borderColor: "#C9A14A", borderWidth: 1.2 }]}
-          >
-            <View style={[StyleSheet.absoluteFill, { top: -10, left: -10, opacity: 0.28 }]}>
-              <Married color={'#C9A14A'} width={170} height={170} />
-            </View>
-            <LinearGradient
-              colors={["#FFFBEA99", "#FAF7F299", "#F7E7B499"]}
-              start={[0, 0]}
-              end={[1, 0]}
-              style={styles.gradientRight}
-            >
-              <View style={{ flex: 0.8 }} />
-              <View style={{ flex: 1 }}>
-                <Text style={{ color: '#C9A14A', fontFamily: 'LoraBold', fontSize: 18, marginBottom: 2 }}>{i18n.translate("sinastriePartener")}</Text>
-                <Text style={{ color: '#2D2A22', fontFamily: 'Lora', fontSize: 15 }}>Lista Persoane</Text>
-                <View style={{ flex: 1, justifyContent: "flex-end" }}>
-                  <Button
-                    mode="contained"
-                    style={{ borderRadius: 25, marginTop: 5 }}
-                    theme={{
-                      colors: {
-                        primary: '#C9A14A',
-                        text: "#2D2A22",
-                      },
-                    }}
-                    labelStyle={{ fontSize: 12, letterSpacing: 0 }}
-                    onPress={() => handleViewLesson("PersonsList")}
-                  >
-                    {i18n.translate("clinicLoginRedirect")}
-                  </Button>
-                </View>
+              {/* Card 3: Sinastrie Partener */}
+              <View style={tarotCardStyles.subSectionCardBox}>
+                <TouchableOpacity onPress={() => handleViewLesson("PersonsList")} activeOpacity={0.85} style={tarotCardStyles.functionalCardContent}>
+                  <MaterialCommunityIcons name="account-group-outline" size={38} color="#FFD700" style={{ marginBottom: 6 }} />
+                  <Text style={tarotCardStyles.functionalCardLabel}>{i18n.translate("sinastriePartener")}</Text>
+                </TouchableOpacity>
               </View>
-            </LinearGradient>
-          </Surface>
-          <View style={{ height: 20 }} />
-
-          <Surface
-            style={[
-              styles.surfaceLeft,
-              { backgroundColor: "#fffbeae0", height: 140, borderColor: "#C9A14A", borderWidth: 1.2 },
-            ]}
-          >
-            <View
-              style={[StyleSheet.absoluteFill, { right: 120, opacity: 0.22 }]}
-            >
-              <ConstellationSimple
-                color={'#C9A14A99'}
-                dotColor={'#C9A14A'}
-                width={220}
-                height={170}
-              />
             </View>
-            <LinearGradient
-              colors={["#FFFBEA99", "#FAF7F299", "#F7E7B499"]}
-              start={[0, 0]}
-              end={[1, 0]}
-              style={styles.gradientLeft}
-            >
-              <View style={{ flex: 1 }}>
-                <Text style={{ color: '#2D2A22', fontFamily: 'Lora', fontSize: 15 }}>
-                  {i18n.translate(
-                    "updateYourInformationToReceiveTheMostAccurateAnalyses"
-                  )}
-                </Text>
-                <View style={{ flex: 1, justifyContent: "flex-start" }}>
-                  <Button
-                    mode="contained"
-                    style={{ borderRadius: 25, marginTop: 5 }}
-                    theme={{
-                      colors: {
-                        primary: '#C9A14A',
-                        text: "#2D2A22",
-                      },
-                    }}
-                    labelStyle={{ fontSize: 12, letterSpacing: 0 }}
-                    onPress={() => {
-                      setModalVisible(true);
-                      navigation.navigate("Learn");
-                    }}
-                  >
-                    {i18n.translate("update")}
-                  </Button>
-                </View>
-              </View>
-              <View style={{ flex: 0.6 }} />
-            </LinearGradient>
-          </Surface>
-          <View style={{ height: 20 }} />
-        </ScrollViewFadeFirst>
+          </View>
+        </ScrollView>
         {isModalVisible && (
           <MoreInfoModal
             visible={isModalVisible}
@@ -486,8 +332,8 @@ function LearnScreen({ navigation }) {
             setLastName={setLastName}
           />
         )}
-      </LinearGradient>
-    </SafeAreaView>
+      </SafeAreaView>
+    </ImageBackground>
   );
 }
 
@@ -538,5 +384,199 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
 });
+
+// Stiluri pentru cardurile LearnScreen
+const learnCardStyles = StyleSheet.create({
+  cardBox: {
+    width: '90%',
+    alignSelf: 'center',
+    backgroundColor: 'rgba(255,255,255,0.92)',
+    borderRadius: 18,
+    alignItems: 'center',
+    marginBottom: 18,
+    paddingVertical: 24,
+    paddingHorizontal: 8,
+    shadowColor: '#bfa76a',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.10,
+    shadowRadius: 8,
+    elevation: 3,
+    borderWidth: 1.5,
+    borderColor: '#FFD700',
+  },
+  iconCircle: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    backgroundColor: '#fffbe6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 10,
+    borderWidth: 2,
+    borderColor: '#FFD700',
+    shadowColor: '#bfa76a',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.10,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  cardLabel: {
+    fontSize: 18,
+    fontWeight: '600',
+    textAlign: 'center',
+    color: '#FFD700',
+    textShadowColor: '#B8860B',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 1,
+    fontFamily: 'LoraBold',
+  },
+});
+
+// Stiluri pentru layout LearnScreen ca pe TarotMainScreen
+const learnScreenStyles = RNStyleSheet.create({
+  overlay: {
+    ...RNStyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(255,255,255,0)',
+    zIndex: 2,
+  },
+  fixedHeader: {
+    backgroundColor: 'rgba(255,255,255,1)',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    paddingBottom: 4,
+    paddingTop: 6,
+    paddingHorizontal: 10,
+    shadowColor: '#bfa76a',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.10,
+    shadowRadius: 10,
+    elevation: 6,
+    zIndex: 10,
+    borderBottomWidth: 1,
+    borderColor: '#e7c585',
+    minHeight: 0,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 0,
+    justifyContent: 'space-between',
+    gap: 8,
+    width: '100%',
+  },
+  logo: {
+    width: 38,
+    height: 38,
+    marginRight: 8,
+    borderRadius: 12,
+    backgroundColor: '#fffbe6',
+    borderWidth: 1.5,
+    borderColor: '#e7c585',
+    shadowColor: '#bfa76a',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  headerTextBlock: {
+    flex: 1,
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    minHeight: 0,
+    paddingTop: 2,
+  },
+  headerSalute: {
+    fontSize: 19,
+    fontWeight: 'bold',
+    letterSpacing: 0.2,
+    marginBottom: 0,
+    color: '#FFD700',
+    textShadowColor: '#B8860B',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 1,
+    fontFamily: 'LoraBold',
+  },
+  scrollContent: {
+    paddingBottom: 100,
+    paddingTop: 16,
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+  },
+  sectionContainer: {
+    width: '100%',
+    marginBottom: 6,
+    paddingHorizontal: 10,
+  },
+  subSectionGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    gap: 10,
+    marginBottom: 8,
+  },
+  subSectionCardBox: {
+    width: '48%',
+    marginBottom: 12,
+    backgroundColor: 'rgba(255,255,255,0.92)',
+    borderRadius: 16,
+    alignItems: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 8,
+    shadowColor: '#bfa76a',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.10,
+    shadowRadius: 8,
+    elevation: 3,
+    borderWidth: 1.5,
+    borderColor: '#FFD700',
+  },
+  functionalCardContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  functionalCardLabel: {
+    fontSize: 15,
+    fontWeight: '600',
+    textAlign: 'center',
+    color: '#FFD700',
+    textShadowColor: '#B8860B',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 1,
+    fontFamily: 'LoraBold',
+  },
+});
+
+// === START: Copiat din TarotMainScreen ===
+const tarotCardStyles = RNStyleSheet.create({
+  subSectionCardBox: {
+    width: '48%',
+    marginBottom: 12,
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    alignItems: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.18,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  functionalCardContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  functionalCardLabel: {
+    fontSize: 15,
+    fontWeight: '600',
+    textAlign: 'center',
+    color: '#FFD700',
+    textShadowColor: '#B8860B',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 1,
+    fontFamily: 'LoraBold',
+  },
+});
+// === END: Copiat din TarotMainScreen ===
 
 export default LearnScreen;

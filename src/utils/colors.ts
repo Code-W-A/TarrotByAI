@@ -1,3 +1,5 @@
+import { Platform } from "react-native";
+
 export const colors = {
   // gradientLogin1: "#27253B",
   // gradientLogin2: "#16151A",
@@ -7,7 +9,8 @@ export const colors = {
   gradientLogin2: "#E6E2B8",
   // gradientLogin2: "#FCF6C6",
   gradientLogin3: "#FEF495",
-
+  cream : "#FAF7F2", // fundal crem deschis
+   cream2 : "#F5E9D6",
   background: "#f6f6f6",
   white: "#FFFFFF",
   black: "#131523",
@@ -47,4 +50,64 @@ export const colors = {
   imageGray: "#CFCFCF",
   lightSelect: "#7e7070",
   darkSelect: "#453f3f",
+  goldLight: '#FFF9C4',  // lumina
+  gold:       '#FFD700', // ton mediu
+  goldDark:   '#B8860B', // umbră
+};
+
+// versiune comună, minimală (un singur textShadow)
+const goldBase = {
+  color: colors.gold,
+  textShadowColor: 'rgba(184,134,11,0.7)',   // #B8860B cu transparență
+  textShadowOffset: { width: 0, height: 1 },
+  textShadowRadius: 2,                       // <= 2 pt claritate
+};
+
+
+export const textStyles = {
+  /** titluri / corp ≥ 24 px */
+  goldenText: {
+    ...goldBase,
+    ...(Platform.OS === 'ios' && {
+      shadowColor: colors.goldDark,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.35,
+      shadowRadius: 1.5,
+    }),
+  },
+
+  goldenTextBold: {
+    ...goldBase,
+    fontWeight: '900',
+    letterSpacing: 0.5,
+    ...(Platform.OS === 'ios' && {
+      shadowColor: colors.goldDark,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.35,
+      shadowRadius: 1.5,
+    }),
+  },
+
+  goldenGlow: {
+    color: colors.gold,
+    textShadowColor: colors.goldLight,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 8,
+    fontWeight: 'bold',
+  },
+  goldenGlowStrong: {
+    color: colors.gold,
+    textShadowColor: colors.goldLight,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 16,
+    fontWeight: '900',
+  },
+
+  liftingText: {
+    color: colors.gold,
+    textShadowColor: 'rgba(184,134,11,0.5)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 6,
+    fontWeight: 'bold',
+  },
 };
