@@ -66,14 +66,17 @@ import RattingDialog from "../../components/RattingDialog/RattingDialog";
 import LongCard from "../../components/MenuCard/LongCard";
 import AutoScrollingFlatList from "../../components/MenuCard/AutoScrollingFlatList";
 import MoreInfoModal from "../../components/Astral/components/MoreInfoModal";
-import { doc, getFirestore, updateDoc, collection, query, orderBy, limit, getDocs } from "firebase/firestore";
+import { doc, getFirestore, updateDoc, collection, query, orderBy, limit, getDocs, getDoc } from "firebase/firestore";
 import { db } from "../../../firebase";
 import { NewsDetailsModal } from "../../components/NewsDetailsModal/NewsDetailsModal";
+import UpdateAppModal from '../../components/UpdateAppModal';
 
 //---ADS---
 const adUnitId = __DEV__
   ? TestIds.INTERSTITIAL
-  : "ca-app-pub-9577714849380446/7080054250";
+  : Platform.OS === "android"
+    ? "ca-app-pub-9577714849380446/7080054250"
+    : "ca-app-pub-9577714849380446/5660268593";
 // const adUnitId = "ca-app-pub-9577714849380446/7080054250";
 
 const interstitial = InterstitialAd.createForAdRequest(adUnitId, {
@@ -148,6 +151,9 @@ const languages = [
   { name: "Albania", code: "sq", flag: require("../../../assets/flags/albania.png") },
 ];
 
+const UPDATE_MODAL_KEY = 'updateModalLastDismissed';
+const UPDATE_MODAL_DELAY_DAYS = 3;
+
 const NorocMainScreen = () => {
   const [loaded, setLoaded] = useState(false);
   const [cardAnimations, setCardAnimations] = useState([]);
@@ -170,6 +176,7 @@ const NorocMainScreen = () => {
   const [loadingArticles, setLoadingArticles] = useState(false);
   const [articleModalVisible, setArticleModalVisible] = useState(false);
   const [selectedArticle, setSelectedArticle] = useState(null);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
 
   useEffect(() => {
     const checkAndLoadData = async () => {
@@ -572,6 +579,31 @@ const NorocMainScreen = () => {
     setArticleModalVisible(true);
   };
 
+  useEffect(() => {
+    const checkUpdate = async () => {
+      try {
+        const docRef = doc(db, 'ShouldUpdate', 'unicde');
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists() && docSnap.data().update === true) {
+          const lastDismissed = await AsyncStorage.getItem(UPDATE_MODAL_KEY);
+          if (!lastDismissed) {
+            setShowUpdateModal(true);
+          } else {
+            const last = new Date(parseInt(lastDismissed, 10));
+            const now = new Date();
+            const diffDays = (now - last) / (1000 * 60 * 60 * 24);
+            if (diffDays >= UPDATE_MODAL_DELAY_DAYS) {
+              setShowUpdateModal(true);
+            }
+          }
+        }
+      } catch (e) {
+        console.log('Eroare la verificarea update-ului:', e);
+      }
+    };
+    checkUpdate();
+  }, []);
+
   return (
     <Fragment>
       <SafeAreaView style={{ flex: 1, backgroundColor: '#fffbe6' }}>
@@ -722,6 +754,7 @@ const NorocMainScreen = () => {
 
          
             </ScrollView>
+<></>
             {/* RattingDialog dacă este activ */}
             {visible && (
             <RattingDialog setVisible={setVisible} visible={visible} />
@@ -734,6 +767,10 @@ const NorocMainScreen = () => {
               onClose={() => setArticleModalVisible(false)}
               saveArticle={() => {}}
             />
+            <UpdateAppModal visible={showUpdateModal} onClose={async () => {
+              await AsyncStorage.setItem(UPDATE_MODAL_KEY, Date.now().toString());
+              setShowUpdateModal(false);
+            }} />
           </View>
         </LinearGradient>
       </SafeAreaView>

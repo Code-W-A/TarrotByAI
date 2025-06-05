@@ -190,15 +190,12 @@ const App = () => {
           <LanguageProvider>
             <NavigationProvider>
               <NavBarVisibilityProvider>
-                {/* <StripeProvider publishableKey="pk_test_51QA6KbFfPQUdD5PABUhGRnZQYxEM4MyS2vZLmWzJf5W88qvXSwMAieAkzSuxpZW5Lqw22kl0RMQ4N5ZH8ioUHBDN00lTXqo57s"> */}
                 <StripeProvider publishableKey="pk_live_51QA6KbFfPQUdD5PApH13dFiVdcrIcqIDRE0vDWVQRPApbE7DpAJDiHIYeeDDOMJwsUsqhvyRLayxXjEyErHLlm2O0015KzM92n">
                   <AuthProvider>
                     <NavigationContainer>
                       <StatusBar style="light" />
                       <Provider store={store}>
-                        {/* <MenuProvider> */}
                         <RootNavigation />
-                        {/* </MenuProvider> */}
                       </Provider>
                     </NavigationContainer>
                   </AuthProvider>

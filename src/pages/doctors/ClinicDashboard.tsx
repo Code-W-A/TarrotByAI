@@ -33,6 +33,7 @@ import {
 import { MaterialCommunityIcons, FontAwesome5, Feather, Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SvgUri } from 'react-native-svg';
+import { TestIds } from "react-native-google-mobile-ads";
 
 import NavBarBottom from "../../components/Navbar";
 import FlipCard from "../../components/FlipCard/FlipCard";
@@ -52,7 +53,6 @@ import { handleLanguagei18n } from "../../utils/handleLanguageGeneral";
 //---ADS---
 import {
   InterstitialAd,
-  TestIds,
   AdEventType,
 } from "react-native-google-mobile-ads";
 
@@ -71,11 +71,14 @@ import MoreInfoModal from "../../components/Astral/components/MoreInfoModal";
 import { doc, getFirestore, updateDoc, collection, query, orderBy, limit, getDocs } from "firebase/firestore";
 import { db } from "../../../firebase";
 import { NewsDetailsModal } from "../../components/NewsDetailsModal/NewsDetailsModal";
+import { useUserDataModal } from "../../hooks/useUserDataModal";
 
 //---ADS---
 const adUnitId = __DEV__
   ? TestIds.INTERSTITIAL
-  : "ca-app-pub-9577714849380446/7080054250";
+  : Platform.OS === "android"
+    ? "ca-app-pub-9577714849380446/7080054250"
+    : "ca-app-pub-9577714849380446/5660268593";
 // const adUnitId = "ca-app-pub-9577714849380446/7080054250";
 
 const interstitial = InterstitialAd.createForAdRequest(adUnitId, {
@@ -98,7 +101,7 @@ const CATEGORIES = [
     icon: <Image source={require('../../../assets/clinicdashboard/astrology.png')} style={{ width: 55, height: 55 }} />,
     screen: "Learn",
     description: i18n.translate('Descoperă astrograma natală, sinastria și articole astrologice.'),
-    image: require('../../../assets/astrogramacard.jpg'),
+    image: require('../../../assets/card-back.png'),
   },
   {
     key: 'tarot',
@@ -106,7 +109,7 @@ const CATEGORIES = [
     icon: <Image source={require('../../../assets/clinicdashboard/Tarot.png')} style={{ width: 38, height: 38 }} />,
     screen: 'TarotMaineScreen',
     description: i18n.translate('Citiri de tarot personalizate pentru tine.'),
-    image: require('../../../assets/tarotbg.jpg'),
+    image: require('../../../assets/card-back.png'),
   },
   {
     key: 'luck',
@@ -114,7 +117,7 @@ const CATEGORIES = [
     icon: <Image source={require('../../../assets/clinicdashboard/Noroc.png')} style={{ width: 38, height: 38 }} />,
     screen: 'NorocMaineScreen',
     description: i18n.translate('Numere, culori și ore norocoase.'),
-    image: require('../../../assets/norocbg.jpg'),
+    image: require('../../../assets/card-back.png'),
   },
   {
     key: 'magic',
@@ -122,7 +125,7 @@ const CATEGORIES = [
     icon: <Image source={require('../../../assets/clinicdashboard/Mesajemagice.png')} style={{ width: 38, height: 38 }} />,
     screen: 'MesajeMagiceMainScreen',
     description: i18n.translate('Afirmații pozitive și ghidare spirituală.'),
-    image: require('../../../assets/mesajemagicebg.jpg'),
+    image: require('../../../assets/card-back.png'),
   },
 ];
 
@@ -157,12 +160,29 @@ const ClinicDashboard = () => {
   const navigation: any = useNavigation();
   const { expoPushToken } = usePushNotifications();
   const { currentUser, userData, isGuestUser, setUserData } = useAuth();
-  // Stări pentru informațiile utilizatorului
+  
+  // Hook pentru gestionarea verificării datelor utilizatorului
+  const {
+    firstName: modalFirstName,
+    setFirstName: setModalFirstName,
+    lastName: modalLastName,
+    setLastName: setModalLastName,
+    email: modalEmail,
+    setEmail: setModalEmail,
+    phone: modalPhone,
+    setPhone: setModalPhone,
+    isModalVisible,
+    setModalVisible,
+    navigateToLearn,
+    handleModalConfirm,
+    onCompleteCallback,
+  } = useUserDataModal(navigation);
+  
+  // Stări pentru informațiile utilizatorului (pentru afișare în header)
   const [firstName, setFirstName] = useState<string>("");
   const [lastName, setLastName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [phone, setPhone] = useState<string>("");
-  const [isModalVisible, setModalVisible] = useState<boolean>(false);
   const [langModalVisible, setLangModalVisible] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState("Romanian");
   const [latestArticles, setLatestArticles] = useState([]);
@@ -170,84 +190,30 @@ const ClinicDashboard = () => {
   const [articleModalVisible, setArticleModalVisible] = useState(false);
   const [selectedArticle, setSelectedArticle] = useState(null);
 
+  // Funcție pentru gestionarea navigării către Learn screen cu verificarea datelor
+  const handleNavigateToLearn = async () => {
+    await navigateToLearn();
+  };
+
   useEffect(() => {
-    const checkAndLoadData = async () => {
+    const loadUserData = async () => {
       try {
         const storedData = await AsyncStorage.getItem("userDetails");
         const parsedData = storedData ? JSON.parse(storedData) : null;
-        // Show modal if any field is missing, regardless of guest
-        if (!parsedData || !parsedData.firstName || !parsedData.lastName || !parsedData.email || !parsedData.phone) {
-          setModalVisible(true);
-          setFirstName(parsedData?.firstName || "");
-          setLastName(parsedData?.lastName || "");
-          setEmail(parsedData?.email || "");
-          setPhone(parsedData?.phone || "");
-          return;
+        
+        // Doar încarcă datele pentru afișare, fără verificare obligatorie
+        if (parsedData) {
+          setFirstName(parsedData.firstName || "");
+          setLastName(parsedData.lastName || "");
+          setEmail(parsedData.email || "");
+          setPhone(parsedData.phone || "");
         }
-        setFirstName(parsedData.firstName);
-        setLastName(parsedData.lastName);
-        setEmail(parsedData.email);
-        setPhone(parsedData.phone);
       } catch (error) {
-        setModalVisible(true);
+        console.error("Error loading user data:", error);
       }
     };
-    checkAndLoadData();
+    loadUserData();
   }, [userData]);
-
-  const handleConfirm = async (
-    firstName: string,
-    lastName: string,
-    email: string,
-    phone: string
-  ) => {
-    const userDetails = { firstName, lastName, email, phone };
-
-    try {
-      // Salvează datele local în AsyncStorage
-      await AsyncStorage.setItem("userDetails", JSON.stringify(userDetails));
-
-      // Șterge datele din cheile specificate
-      const keysToRemove = [
-        // "userData",
-        "personsDataAstrograma",
-        "personsData",
-        "personsDataOthers",
-      ];
-      await Promise.all(
-        keysToRemove.map((key) => AsyncStorage.removeItem(key))
-      );
-
-      // Actualizează state-ul local
-      setFirstName(firstName);
-      setLastName(lastName);
-      setEmail(email);
-      setPhone(phone);
-
-      // Dacă există `owner_uid`, trimite telefonul în Firestore
-      if (userData?.owner_uid) {
-        const db = getFirestore();
-        const userDocRef = doc(db, "Users", userData.owner_uid);
-
-        await updateDoc(userDocRef, {
-          phone,
-        });
-
-        console.log(
-          `Numărul de telefon ${phone} a fost actualizat în Firestore.`
-        );
-      }
-
-      setModalVisible(false);
-      console.log("Datele au fost actualizate cu succes.");
-      // navigation.navigate(screenName.OnboardingScreen);
-    } catch (error) {
-      console.error(
-        "Eroare la salvarea datelor în AsyncStorage sau Firestore:",
-        error
-      );
-    }
-  };
 
   useEffect(() => {
     const handleUploadToken = async () => {
@@ -615,7 +581,13 @@ const ClinicDashboard = () => {
                     <TouchableOpacity
                       key={category.key}
                       style={stylesNew.categoryCard}
-                      onPress={() => navigation.navigate(category.screen as never)}
+                      onPress={() => {
+                        if (category.screen === "Learn") {
+                          handleNavigateToLearn();
+                        } else {
+                          navigation.navigate(category.screen as never);
+                        }
+                      }}
                       activeOpacity={0.96}
                     >
                       <View style={stylesNew.categoryContent}>
@@ -759,15 +731,16 @@ const ClinicDashboard = () => {
             <MoreInfoModal
               visible={isModalVisible}
               onDismiss={() => setModalVisible(false)}
-              onConfirm={handleConfirm}
-              email={email}
-              setEmail={setEmail}
-              phone={phone}
-              setPhone={setPhone}
-              firstName={firstName}
-              setFirstName={setFirstName}
-              lastName={lastName}
-              setLastName={setLastName}
+              onConfirm={handleModalConfirm}
+              email={modalEmail}
+              setEmail={setModalEmail}
+              phone={modalPhone}
+              setPhone={setModalPhone}
+              firstName={modalFirstName}
+              setFirstName={setModalFirstName}
+              lastName={modalLastName}
+              setLastName={setModalLastName}
+              onCompleteCallback={onCompleteCallback}
             />
           </View>
         </LinearGradient>

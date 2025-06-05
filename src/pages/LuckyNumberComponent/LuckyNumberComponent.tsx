@@ -141,15 +141,45 @@ const LuckyNumber = () => {
                   style={[styles.secondImage, { tintColor: '#FFD700' }]}
                   resizeMode="contain"
                 />
+                            <Text
+              style={{
+                color: '#FFD700',
+                fontWeight: '700',
+                fontSize: 16,
+                textAlign: 'center',
+                textShadowColor: '#fffbeae0',
+                textShadowOffset: { width: 0, height: 2 },
+                textShadowRadius: 6,
+                letterSpacing: 1.1,
+                fontFamily: 'LoraBold',
+                marginTop: 0,
+                position:"relative",
+                bottom:"15%"
+              }}
+            >
+              @CristinaZurba.App
+            </Text>
               </View>
+              
             </View>
-            <View style={{ flex: 1, padding: 10 }}>
+            <View style={{ flex: 1, padding: 10, paddingHorizontal: 22 }}>
               <ScrollView contentContainerStyle={[styles.scrollViewContainer, {flexGrow: 1}]} style={{flex: 1}}>
                 {/* <H7fontBoldWhite style={{ alignSelf: "center" }}>
                 {zilnicNumereNorocoase.info[language].nume}
               </H7fontBoldWhite> */}
                 {zilnicNumereNorocoase.info ? (
-                  <H7fontMediumPrimary style={{ textAlign: "justify", color: '#131523', fontFamily: 'Lora', fontWeight: '400', fontSize: 19, lineHeight: 28, marginTop: 18, backgroundColor: 'transparent' }}>
+                  <Text
+                    style={{
+                      textAlign: 'justify',
+                      color: '#7c6f57',
+                      fontFamily: 'Lora',
+                      fontWeight: '400',
+                      fontSize: 19,
+                      lineHeight: 28,
+                      marginTop: 18,
+                      backgroundColor: 'transparent',
+                    }}
+                  >
                     {language === "hi"
                       ? zilnicNumereNorocoase.info.hu?.descriere
                       : language === "id"
@@ -157,7 +187,7 @@ const LuckyNumber = () => {
                       : language === "ru"
                       ? zilnicNumereNorocoase.info.rusa?.descriere
                       : zilnicNumereNorocoase.info[language]?.descriere}
-                  </H7fontMediumPrimary>
+                  </Text>
                 ) : null}
               </ScrollView>
             </View>

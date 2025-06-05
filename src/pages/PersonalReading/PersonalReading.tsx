@@ -70,7 +70,7 @@ const LuckyColor = () => {
                 Roșu
               </H8fontMediumPrimary>
 
-              <H8fontMediumWhite>
+              <H8fontMediumWhite style={{ color: '#131523', textAlign: 'justify' }}>
                 Această culoare îți aduce pasiune, iubire, poftă de viață, dar
                 și foarte multă energie!
               </H8fontMediumWhite>
@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
   },
   description: {
     color: "white",
-    fontSize: 18,
+    fontSize: 24,
     textAlign: "center", // Aliniere text la centru
   },
 });

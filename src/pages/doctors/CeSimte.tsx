@@ -248,42 +248,42 @@ const CeSimte = ({ route }) => {
 
   return (
     <ShareScreenshot>
-      <Fragment>
-        <MainContainer secondary={false} style={{ flex: 1 }}>
-          <ImageBackground
-            source={require("../../../assets/dashboardbg.jpg")}
-            style={{ flex: 1, paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0 }}
-            imageStyle={{ opacity: 1 }}
-          >
-            {/* <GreetingBar isGoBack={true} /> */}
-            {loading ? (
-              <CustomSpinner size={74} color={colors.primary3} />
-            ) : (
-              <ScrollView
-                contentContainerStyle={{
-                  paddingBottom: 20,
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  backgroundColor: "transparent",
-                  minHeight: Dimensions.get("window").height,
-                }}
+    <Fragment>
+      <MainContainer secondary={false} style={{ flex: 1 }}>
+        <ImageBackground
+          source={require("../../../assets/dashboardbg.jpg")}
+          style={{ flex: 1, paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0 }}
+          imageStyle={{ opacity: 1 }}
+        >
+          {/* <GreetingBar isGoBack={true} /> */}
+          {loading ? (
+            <CustomSpinner size={74} color={colors.primary3} />
+          ) : (
+            <ScrollView
+              contentContainerStyle={{
+                paddingBottom: 20,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: "transparent",
+                minHeight: Dimensions.get("window").height,
+              }}
+            >
+              <SingleCardLayout
+                shuffledCartiPersonalizate={shuffledCartiPersonalizate}
+                title={i18n.translate("personalReading")}
+                ind={3}
               >
-                <SingleCardLayout
-                  shuffledCartiPersonalizate={shuffledCartiPersonalizate}
-                  title={i18n.translate("personalReading")}
-                  ind={3}
-                >
-                  {categoriiPersonalizate &&
-                    categoriiPersonalizate.map((category, index) =>
-                      renderFlipCard(category, index)
-                    )}
-                </SingleCardLayout>
-              </ScrollView>
-            )}
-          </ImageBackground>
-        </MainContainer>
-      </Fragment>
+                {categoriiPersonalizate &&
+                  categoriiPersonalizate.map((category, index) =>
+                    renderFlipCard(category, index)
+                  )}
+              </SingleCardLayout>
+            </ScrollView>
+          )}
+        </ImageBackground>
+      </MainContainer>
+    </Fragment>
     </ShareScreenshot>
   );
 };

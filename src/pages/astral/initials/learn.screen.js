@@ -108,7 +108,9 @@ const SubHeading = () => {
 //----ADS----
 const adUnitId = __DEV__
   ? TestIds.INTERSTITIAL
-  : "ca-app-pub-9577714849380446/7080054250";
+  : Platform.OS === "android"
+    ? "ca-app-pub-9577714849380446/7080054250"
+    : "ca-app-pub-9577714849380446/5660268593";
 // const adUnitId = "ca-app-pub-9577714849380446/7080054250";
 
 const interstitial = InterstitialAd.createForAdRequest(adUnitId, {
@@ -294,24 +296,79 @@ function LearnScreen({ navigation }) {
           <View style={learnScreenStyles.sectionContainer}>
             <View style={learnScreenStyles.subSectionGrid}>
               {/* Card 1: Natal Astrogram */}
-              <View style={tarotCardStyles.subSectionCardBox}>
-                <TouchableOpacity onPress={() => handleViewLesson("PersonsListAstrograma")} activeOpacity={0.85} style={tarotCardStyles.functionalCardContent}>
-                  <MaterialCommunityIcons name="account-circle-outline" size={38} color="#FFD700" style={{ marginBottom: 6 }} />
-                  <Text style={tarotCardStyles.functionalCardLabel}>{i18n.translate("natalAstrogram")}</Text>
+              <View style={{
+                backgroundColor: 'rgba(255,255,255,0.97)',
+                borderRadius: 18,
+                paddingVertical: 24,
+                paddingHorizontal: 24,
+                marginBottom: 18,
+                shadowColor: '#bfa76a',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.13,
+                shadowRadius: 16,
+                elevation: 7,
+                width: '100%',
+              }}>
+                <TouchableOpacity onPress={() => handleViewLesson("PersonsListAstrograma")} activeOpacity={0.85} style={{ flexDirection: 'row', alignItems: 'center', width: '100%' }}>
+                  <MaterialCommunityIcons name="account-circle-outline" size={48} color="#FFD700" style={{ marginRight: 18 }} />
+                  <Text style={{ fontSize: 28, fontWeight: '700', color: '#FFD700', flex: 1 }}>{i18n.translate("natalAstrogram")}</Text>
                 </TouchableOpacity>
               </View>
               {/* Card 2: Daily Horoscope */}
-              <View style={tarotCardStyles.subSectionCardBox}>
-                <TouchableOpacity onPress={() => handleViewLesson("Horoscop")} activeOpacity={0.85} style={tarotCardStyles.functionalCardContent}>
-                  <MaterialCommunityIcons name="calendar-star" size={38} color="#FFD700" style={{ marginBottom: 6 }} />
-                  <Text style={tarotCardStyles.functionalCardLabel}>{i18n.translate("dailyHoroscope")}</Text>
+              <View style={{
+                backgroundColor: 'rgba(255,255,255,0.97)',
+                borderRadius: 18,
+                paddingVertical: 24,
+                paddingHorizontal: 24,
+                marginBottom: 18,
+                shadowColor: '#bfa76a',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.13,
+                shadowRadius: 16,
+                elevation: 7,
+                width: '100%',
+              }}>
+                <TouchableOpacity onPress={() => handleViewLesson("Horoscop")} activeOpacity={0.85} style={{ flexDirection: 'row', alignItems: 'center', width: '100%' }}>
+                  <MaterialCommunityIcons name="calendar-star" size={48} color="#FFD700" style={{ marginRight: 18 }} />
+                  <Text style={{ fontSize: 28, fontWeight: '700', color: '#FFD700', flex: 1 }}>{i18n.translate("dailyHoroscope")}</Text>
                 </TouchableOpacity>
               </View>
               {/* Card 3: Sinastrie Partener */}
-              <View style={tarotCardStyles.subSectionCardBox}>
-                <TouchableOpacity onPress={() => handleViewLesson("PersonsList")} activeOpacity={0.85} style={tarotCardStyles.functionalCardContent}>
-                  <MaterialCommunityIcons name="account-group-outline" size={38} color="#FFD700" style={{ marginBottom: 6 }} />
-                  <Text style={tarotCardStyles.functionalCardLabel}>{i18n.translate("sinastriePartener")}</Text>
+              <View style={{
+                backgroundColor: 'rgba(255,255,255,0.97)',
+                borderRadius: 18,
+                paddingVertical: 24,
+                paddingHorizontal: 24,
+                marginBottom: 18,
+                shadowColor: '#bfa76a',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.13,
+                shadowRadius: 16,
+                elevation: 7,
+                width: '100%',
+              }}>
+                <TouchableOpacity onPress={() => handleViewLesson("PersonsList")} activeOpacity={0.85} style={{ flexDirection: 'row', alignItems: 'center', width: '100%' }}>
+                  <MaterialCommunityIcons name="account-group-outline" size={48} color="#FFD700" style={{ marginRight: 18 }} />
+                  <Text style={{ fontSize: 28, fontWeight: '700', color: '#FFD700', flex: 1 }}>{i18n.translate("sinastriePartener")}</Text>
+                </TouchableOpacity>
+              </View>
+              {/* Card 4: Reintrodu date */}
+              <View style={{
+                backgroundColor: 'rgba(255,255,255,0.97)',
+                borderRadius: 18,
+                paddingVertical: 24,
+                paddingHorizontal: 24,
+                marginBottom: 18,
+                shadowColor: '#bfa76a',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.13,
+                shadowRadius: 16,
+                elevation: 7,
+                width: '100%',
+              }}>
+                <TouchableOpacity onPress={() => setModalVisible(true)} activeOpacity={0.85} style={{ flexDirection: 'row', alignItems: 'center', width: '100%' }}>
+                  <MaterialCommunityIcons name="account-edit-outline" size={48} color="#FFD700" style={{ marginRight: 18 }} />
+                  <Text style={{ fontSize: 28, fontWeight: '700', color: '#FFD700', flex: 1 }}>{i18n.translate("sinasUpdate") || "Update Info"}</Text>
                 </TouchableOpacity>
               </View>
             </View>

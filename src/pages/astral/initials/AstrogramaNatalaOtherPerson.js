@@ -65,7 +65,6 @@ import { btoa, atob } from "react-native-quick-base64";
 import base64 from "react-native-base64";
 import TestSvg from "../../../../assets/base64.svg";
 
-import localGif from "../../../../assets/constelatii.gif";
 import { Image } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import MyTopBar from "../../../components/Astral/components/TopBar";
@@ -1191,7 +1190,7 @@ function AstrogramaNatalaOtherPerson({ navigation }) {
                       </Text>
                       {!isPaid ? (
                         <>
-                          <Text style={{ color: '#131523', fontFamily: 'Lora' }}>
+                          <Text style={{ color: '#131523', fontFamily: 'Lora', textAlign: 'justify', width: '100%' }}>
                             {achizitioneazaInterpretareCompletaText2}
                           </Text>
                           <Button
@@ -1240,7 +1239,7 @@ function AstrogramaNatalaOtherPerson({ navigation }) {
                                   {`${planetData.planet_name} is in ${planetData.sign_name}`}
                                 </Text>
                                 {/* Text descriptiv */}
-                                <Text style={{ color: '#131523', fontFamily: 'Lora', fontSize: 18, lineHeight: 26 }}>
+                                <Text style={{ color: '#131523', fontFamily: 'Lora', fontSize: 18, lineHeight: 26, textAlign: 'justify', width: '100%' }}>
                                   {planetData.report}
                                 </Text>
                               </View>
@@ -1264,7 +1263,7 @@ function AstrogramaNatalaOtherPerson({ navigation }) {
                                   {`${houseData.planet_name} is in the ${houseData.house}th house`}
                                 </Text>
                                 {/* Text descriptiv */}
-                                <Text style={{ color: '#131523', fontFamily: 'Lora', fontSize: 18, lineHeight: 26 }}>
+                                <Text style={{ color: '#131523', fontFamily: 'Lora', fontSize: 18, lineHeight: 26, textAlign: 'justify', width: '100%' }}>
                                   {houseData.report}
                                 </Text>
                               </View>

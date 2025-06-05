@@ -221,6 +221,24 @@ export const NewsDetailsModal: React.FC<{
                 ? article?.info?.rusa?.nume
                 : article?.info[language]?.nume}
             </Text>
+            <Text
+              style={{
+                color: '#FFD700',
+                fontWeight: '700',
+                fontSize: 16,
+                textAlign: 'center',
+                textShadowColor: '#fffbeae0',
+                textShadowOffset: { width: 0, height: 2 },
+                textShadowRadius: 6,
+                letterSpacing: 1.1,
+                fontFamily: 'LoraBold',
+                marginTop: 0,
+                position:"relative",
+                bottom:"-20%"
+              }}
+            >
+              @CristinaZurba.App
+            </Text>
           </View>
           {/* <Text style={[styles.content, { color: contentColor }]}>
             {article?.info?.ro.content}

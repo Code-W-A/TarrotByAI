@@ -8,7 +8,7 @@ const LoadingOverlay = ({ isLoadingBuy }) => {
   return (
     <View style={styles.overlay}>
       <Video
-        source={require('../../../../../assets/analizerscreennosound.mp4')}
+        source={require('../../../../../assets/analizerscreen.mp4')}
         style={StyleSheet.absoluteFill}
         resizeMode="cover"
         isLooping

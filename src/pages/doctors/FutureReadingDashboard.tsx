@@ -209,7 +209,7 @@ const FutureReadingDashboard = () => {
             style={{
               marginTop: 10,
               textAlign: 'center',
-              color: '#fff',
+              color: "#FFD700",
               fontFamily: 'Lora',
               fontSize: 16,
               textShadowColor: '#00000055',

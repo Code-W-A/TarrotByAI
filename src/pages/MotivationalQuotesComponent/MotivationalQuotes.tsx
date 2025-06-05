@@ -38,6 +38,7 @@ import { captureRef } from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 import * as MediaLibrary from 'expo-media-library';
 import { MaterialIcons } from '@expo/vector-icons';
+import { Image as RNImage } from 'react-native';
 
 const MotivationalQuotes = () => {
   const {
@@ -58,8 +59,7 @@ const MotivationalQuotes = () => {
   const { setIsNavBarVisible } = useNavBarVisibility();
   const [luck, setLuck] = React.useState(null);
 
-  const [zilnicCitateMotivationale, setZilnicCitateMotivationale] =
-    React.useState({});
+  const [zilnicCitateMotivationale, setZilnicCitateMotivationale] = React.useState<any>({});
 
   const getRandomDocumentFirestore = async () => {
     // Presupunem că deja ai definit `collection` și `db`
@@ -120,54 +120,54 @@ const MotivationalQuotes = () => {
     require("../../../assets/afirmatiipoze/23.png"),
     require("../../../assets/afirmatiipoze/24.png"),
     require("../../../assets/afirmatiipoze/25.png"),
-    require("../../../assets/afirmatiipoze/26.png"),
-    require("../../../assets/afirmatiipoze/27.png"),
-    require("../../../assets/afirmatiipoze/28.png"),
-    require("../../../assets/afirmatiipoze/29.png"),
-    require("../../../assets/afirmatiipoze/30.png"),
-    require("../../../assets/afirmatiipoze/31.png"),
-    require("../../../assets/afirmatiipoze/32.png"),
-    require("../../../assets/afirmatiipoze/33.png"),
-    require("../../../assets/afirmatiipoze/34.png"),
-    require("../../../assets/afirmatiipoze/35.png"),
-    require("../../../assets/afirmatiipoze/36.png"),
-    require("../../../assets/afirmatiipoze/37.png"),
-    require("../../../assets/afirmatiipoze/38.png"),
-    require("../../../assets/afirmatiipoze/39.png"),
-    require("../../../assets/afirmatiipoze/40.png"),
-    require("../../../assets/afirmatiipoze/41.png"),
-    require("../../../assets/afirmatiipoze/42.png"),
-    require("../../../assets/afirmatiipoze/43.png"),
-    require("../../../assets/afirmatiipoze/44.png"),
-    require("../../../assets/afirmatiipoze/45.png"),
-    require("../../../assets/afirmatiipoze/46.png"),
-    require("../../../assets/afirmatiipoze/47.png"),
-    require("../../../assets/afirmatiipoze/48.png"),
-    require("../../../assets/afirmatiipoze/49.png"),
-    require("../../../assets/afirmatiipoze/50.png"),
-    require("../../../assets/afirmatiipoze/51.png"),
-    require("../../../assets/afirmatiipoze/52.png"),
-    require("../../../assets/afirmatiipoze/53.png"),
-    require("../../../assets/afirmatiipoze/54.png"),
-    require("../../../assets/afirmatiipoze/55.png"),
-    require("../../../assets/afirmatiipoze/56.png"),
-    require("../../../assets/afirmatiipoze/57.png"),
-    require("../../../assets/afirmatiipoze/58.png"),
-    require("../../../assets/afirmatiipoze/59.png"),
-    require("../../../assets/afirmatiipoze/60.png"),
-    require("../../../assets/afirmatiipoze/61.png"),
-    require("../../../assets/afirmatiipoze/62.png"),
-    require("../../../assets/afirmatiipoze/63.png"),
-    require("../../../assets/afirmatiipoze/64.png"),
-    require("../../../assets/afirmatiipoze/65.png"),
-    require("../../../assets/afirmatiipoze/66.png"),
-    require("../../../assets/afirmatiipoze/67.png"),
-    require("../../../assets/afirmatiipoze/68.png"),
-    require("../../../assets/afirmatiipoze/69.png"),
-    require("../../../assets/afirmatiipoze/70.png"),
-    require("../../../assets/afirmatiipoze/71.png"),
-    require("../../../assets/afirmatiipoze/72.png"),
-    require("../../../assets/afirmatiipoze/73.png"),
+    // require("../../../assets/afirmatiipoze/26.png"),
+    // require("../../../assets/afirmatiipoze/27.png"),
+    // require("../../../assets/afirmatiipoze/28.png"),
+    // require("../../../assets/afirmatiipoze/29.png"),
+    // require("../../../assets/afirmatiipoze/30.png"),
+    // require("../../../assets/afirmatiipoze/31.png"),
+    // require("../../../assets/afirmatiipoze/32.png"),
+    // require("../../../assets/afirmatiipoze/33.png"),
+    // require("../../../assets/afirmatiipoze/34.png"),
+    // require("../../../assets/afirmatiipoze/35.png"),
+    // require("../../../assets/afirmatiipoze/36.png"),
+    // require("../../../assets/afirmatiipoze/37.png"),
+    // require("../../../assets/afirmatiipoze/38.png"),
+    // require("../../../assets/afirmatiipoze/39.png"),
+    // require("../../../assets/afirmatiipoze/40.png"),
+    // require("../../../assets/afirmatiipoze/41.png"),
+    // require("../../../assets/afirmatiipoze/42.png"),
+    // require("../../../assets/afirmatiipoze/43.png"),
+    // require("../../../assets/afirmatiipoze/44.png"),
+    // require("../../../assets/afirmatiipoze/45.png"),
+    // require("../../../assets/afirmatiipoze/46.png"),
+    // require("../../../assets/afirmatiipoze/47.png"),
+    // require("../../../assets/afirmatiipoze/48.png"),
+    // require("../../../assets/afirmatiipoze/49.png"),
+    // require("../../../assets/afirmatiipoze/50.png"),
+    // require("../../../assets/afirmatiipoze/51.png"),
+    // require("../../../assets/afirmatiipoze/52.png"),
+    // require("../../../assets/afirmatiipoze/53.png"),
+    // require("../../../assets/afirmatiipoze/54.png"),
+    // require("../../../assets/afirmatiipoze/55.png"),
+    // require("../../../assets/afirmatiipoze/56.png"),
+    // require("../../../assets/afirmatiipoze/57.png"),
+    // require("../../../assets/afirmatiipoze/58.png"),
+    // require("../../../assets/afirmatiipoze/59.png"),
+    // require("../../../assets/afirmatiipoze/60.png"),
+    // require("../../../assets/afirmatiipoze/61.png"),
+    // require("../../../assets/afirmatiipoze/62.png"),
+    // require("../../../assets/afirmatiipoze/63.png"),
+    // require("../../../assets/afirmatiipoze/64.png"),
+    // require("../../../assets/afirmatiipoze/65.png"),
+    // require("../../../assets/afirmatiipoze/66.png"),
+    // require("../../../assets/afirmatiipoze/67.png"),
+    // require("../../../assets/afirmatiipoze/68.png"),
+    // require("../../../assets/afirmatiipoze/69.png"),
+    // require("../../../assets/afirmatiipoze/70.png"),
+    // require("../../../assets/afirmatiipoze/71.png"),
+    // require("../../../assets/afirmatiipoze/72.png"),
+    // require("../../../assets/afirmatiipoze/73.png"),
   ];
 
   // Fix: imaginea random să fie aleasă o singură dată
@@ -190,14 +190,17 @@ const MotivationalQuotes = () => {
   const viewRef = React.useRef(null);
   const [fabOpen, setFabOpen] = React.useState(false);
   const [hideFab, setHideFab] = React.useState(false);
+  const [showShareOverlay, setShowShareOverlay] = React.useState(false);
 
   const handleCapture = async (share = false) => {
     try {
       setHideFab(true);
+      if (share) setShowShareOverlay(true);
       await new Promise(resolve => setTimeout(resolve, 100));
       if (!viewRef.current) {
         alert('Eroare: view-ul nu este disponibil pentru captură!');
         setHideFab(false);
+        if (share) setShowShareOverlay(false);
         return;
       }
       const uri = await captureRef(viewRef, {
@@ -205,6 +208,7 @@ const MotivationalQuotes = () => {
         quality: 1,
       });
       setHideFab(false);
+      if (share) setShowShareOverlay(false);
       if (share) {
         await Sharing.shareAsync(uri, {
           dialogTitle: 'Distribuie citatul motivațional',
@@ -222,6 +226,7 @@ const MotivationalQuotes = () => {
       }
     } catch (e) {
       setHideFab(false);
+      if (share) setShowShareOverlay(false);
       console.log('Eroare la captură/share:', e);
       alert('Eroare la captură sau share! ' + (e?.message || ''));
     }
@@ -236,7 +241,7 @@ const MotivationalQuotes = () => {
             resizeMode="cover"
             style={{ flex: 1 }}
           >
-            <GreetingBar isGoBack={true} />
+            <GreetingBar isGoBack={true} isPersonalGoBack={true} />
 
             {/* Imaginea header */}
             <View style={styles.secondImageContainer}>
@@ -246,6 +251,8 @@ const MotivationalQuotes = () => {
                 resizeMode="contain"
               />
             </View>
+
+    
 
             <View style={styles.contentContainer}>
               {/* Titlul (dacă avem citat) */}
@@ -261,7 +268,7 @@ const MotivationalQuotes = () => {
                 contentContainerStyle={styles.scrollContentContainer}
               >
                 {!!quoteText && (
-                  <H6fontMediumWhite style={styles.description}>
+                  <H6fontMediumWhite style={{ textAlign: 'justify' }}>
                     {quoteText}
                   </H6fontMediumWhite>
                 )}
@@ -270,7 +277,7 @@ const MotivationalQuotes = () => {
               {/* Mențiune sub zona scrollabilă */}
               {zilnicCitateMotivationale.info && (
                 <View style={{ alignItems: 'center' }}>
-                  <H7fontBoldWhite>@cristinazurba</H7fontBoldWhite>
+                  <H7fontBoldWhite>@CristinaZurba.App</H7fontBoldWhite>
                 </View>
               )}
             </View>

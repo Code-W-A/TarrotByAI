@@ -55,7 +55,7 @@ const LuckyColor = () => {
 
   const { setIsNavBarVisible } = useNavBarVisibility();
   const [luck, setLuck] = React.useState(null);
-  const [zilnicCuloriNorocoase, setZilnicCuloriNorocoase] = React.useState({});
+  const [zilnicCuloriNorocoase, setZilnicCuloriNorocoase] = React.useState<any>({});
   const [isImageLoading, setIsImageLoading] = React.useState(true);
 
   const getRandomDocumentFirestore = async () => {
@@ -108,26 +108,61 @@ const LuckyColor = () => {
             resizeMode="cover"
             style={{ flex: 1 }}
           >
-            <GreetingBar isGoBack={true} />
+            <GreetingBar isGoBack={true} isPersonalGoBack={true} />
             <View style={styles.overlay}>
-              <View style={[styles.imageContainer, { borderColor: '#FFD700', borderWidth: 3, backgroundColor: '#FFFBEA', borderRadius: 18, shadowOpacity: 0.08, shadowRadius: 8 }]}>
-                {isImageLoading && (
-                  <ActivityIndicator
-                    size="large"
-                    color={colors.primary3}
-                    style={{ position: "relative", top: 150 }}
+              <View style={{ alignItems: 'center', marginTop: 32 }}>
+                <View style={[styles.imageContainer, { borderColor: '#FFD700', borderWidth: 3, backgroundColor: '#FFFBEA', borderRadius: 18, shadowOpacity: 0.08, shadowRadius: 8, marginBottom: 8 }]}>
+                  {isImageLoading && (
+                    <ActivityIndicator
+                      size="large"
+                      color={colors.primary3}
+                      style={{ position: "relative", top: 80 }}
+                    />
+                  )}
+                  <Image
+                    style={[styles.image, { borderColor: '#FFD700', borderWidth: 2, borderRadius: 14 }]}
+                    source={{
+                      uri: zilnicCuloriNorocoase.image
+                        ? zilnicCuloriNorocoase.image.finalUri
+                        : "",
+                    }}
+                    onLoad={() => setIsImageLoading(false)}
+                    onError={() => setIsImageLoading(false)}
                   />
-                )}
-                <Image
-                  style={[styles.image, { borderColor: '#FFD700', borderWidth: 2, borderRadius: 14 }]}
-                  source={{
-                    uri: zilnicCuloriNorocoase.image
-                      ? zilnicCuloriNorocoase.image.finalUri
-                      : "",
+                </View>
+                <Text
+                  style={{
+                    alignSelf: "center",
+                    marginTop: 8,
+                    textAlign: "center",
+                    color: '#FFD700',
+                    fontFamily: 'Lora',
+                    fontWeight: '700',
+                    fontSize: 26,
+                    marginVertical: 8,
+                    backgroundColor: 'transparent',
                   }}
-                  onLoad={() => setIsImageLoading(false)}
-                  onError={() => setIsImageLoading(false)}
-                />
+                >
+                  {i18n.translate("luckyColorOfTheDay")}
+                </Text>
+                <Text
+              style={{
+                color: '#FFD700',
+                fontWeight: '700',
+                fontSize: 16,
+                textAlign: 'center',
+                textShadowColor: '#fffbeae0',
+                textShadowOffset: { width: 0, height: 2 },
+                textShadowRadius: 6,
+                letterSpacing: 1.1,
+                fontFamily: 'LoraBold',
+                marginTop: 0,
+                position:"relative",
+                bottom:"0%"
+              }}
+            >
+              @CristinaZurba.App
+            </Text>
               </View>
             </View>
             {/* <View style={styles.secondImageContainer}>
@@ -147,29 +182,18 @@ const LuckyColor = () => {
                 paddingRight: 10,
               }}
             >
-              <H6fontBoldPrimary
-                style={{
-                  alignSelf: "center",
-                  marginTop: "5%",
-                  textAlign: "center",
-                  color: '#FFD700',
-                  fontFamily: 'Lora',
-                  fontWeight: '700',
-                  fontSize: 38,
-                  marginVertical: 16,
-                  backgroundColor: 'transparent',
-                }}
-              >
-                {i18n.translate("luckyColorOfTheDay")}
-              </H6fontBoldPrimary>
               <ScrollView contentContainerStyle={[styles.scrollViewContainer, {flexGrow: 1}]} style={{flex: 1}}>
-                {zilnicCuloriNorocoase.info ? (
+                {zilnicCuloriNorocoase && zilnicCuloriNorocoase.info ? (
                   <>
-                    <H8fontBoldPrimary
+                    <Text
                       style={{
                         alignSelf: "center",
-                        marginTop: "5%",
+                        marginTop: 8,
                         textAlign: "center",
+                        fontFamily: 'Lora',
+                        fontWeight: '700',
+                        fontSize: 22,
+                        color: colors.primary3,
                       }}
                     >
                       {language === "hi"
@@ -179,10 +203,19 @@ const LuckyColor = () => {
                         : language === "ru"
                         ? zilnicCuloriNorocoase.info?.rusa?.nume
                         : zilnicCuloriNorocoase.info[language]?.nume}
-                    </H8fontBoldPrimary>
+                    </Text>
 
-                    <H7fontMediumPrimary
-                      style={{ textAlign: "justify", marginTop: 16, color: '#131523', fontFamily: 'Lora', fontWeight: '400', fontSize: 19, lineHeight: 28, backgroundColor: 'transparent' }}
+                    <Text
+                      style={{
+                        textAlign: 'justify',
+                        color: '#7c6f57',
+                        fontFamily: 'Lora',
+                        fontWeight: '400',
+                        fontSize: 19,
+                        lineHeight: 28,
+                        marginTop: 16,
+                        backgroundColor: 'transparent',
+                      }}
                     >
                       {language === "hi"
                         ? zilnicCuloriNorocoase.info.hu?.descriere
@@ -191,7 +224,7 @@ const LuckyColor = () => {
                         : language === "ru"
                         ? zilnicCuloriNorocoase.info.rusa?.descriere
                         : zilnicCuloriNorocoase.info[language]?.descriere}
-                    </H7fontMediumPrimary>
+                    </Text>
                   </>
                 ) : null}
               </ScrollView>
@@ -211,19 +244,20 @@ const styles = StyleSheet.create({
     // backgroundColor: "red",
 
     padding: 10,
+    paddingBottom:"30%"
 
     // paddingBottom: 20, // Ajustați această valoare după cum este necesar
   },
   imageContainer: {
     alignSelf: "center",
-    marginTop: 20,
-    marginBottom: 20,
+    marginTop: 12,
+    marginBottom: 8,
     width: "auto",
     height: "auto",
   },
   image: {
-    width: 300,
-    height: 300,
+    width: 260,
+    height: 260,
     resizeMode: "contain",
     borderWidth: 3,
     borderColor: colors.primary2,
@@ -275,7 +309,7 @@ const styles = StyleSheet.create({
   description: {
     color: "white",
     fontSize: 18,
-    textAlign: "center", // Aliniere text la centru
+    textAlign: "justify", // Aliniere text la centru
   },
 });
 

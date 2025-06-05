@@ -45,11 +45,18 @@ const CardLayoutViitor = ({ shuffledCartiViitor, title, children }) => {
           hasRows ? styles.titleTop : styles.titleCenter,
         ]}
       >
-        <H6fontBoldYellow
-          style={{ color: shuffledCartiViitor.length > 0 && "white" }}
-        >
-          {title}
-        </H6fontBoldYellow>
+        <Text style={{
+          color: '#FFD700',
+          fontSize: 30,
+          fontWeight: 'bold',
+          fontFamily: 'LoraBold',
+          textAlign: 'center',
+          marginBottom: 1,
+          letterSpacing: 1.1,
+          textShadowColor: '#fffbeae0',
+          textShadowOffset: { width: 0, height: 2 },
+          textShadowRadius: 6,
+        }}>{title}</Text>
       </View>
       {rows.map((row, rowIndex) => (
         <View
@@ -103,7 +110,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    color: colors.primary3,
+    color: colors.gold,
     textAlign: "center",
     marginBottom: 1, // Poți ajusta această valoare după preferințe
   },

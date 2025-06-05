@@ -228,7 +228,7 @@ const PersonalReadingDashboard = ({ route }) => {
             style={{
               marginTop: 10,
               textAlign: 'center',
-              color: 'black',
+              color: '#FFD700',
               fontFamily: 'Lora',
               fontSize: 16,
               textShadowColor: '#00000055',

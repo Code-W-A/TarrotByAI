@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
-  SafeAreaView,
   Image,
   StyleSheet,
   FlatList,
@@ -11,6 +10,7 @@ import {
   Platform,
   Animated,
 } from "react-native";
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useIsFocused } from "@react-navigation/native";
 import { screenName } from "../utils/screenName";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -112,6 +112,7 @@ const OnboardingScreen = ({ navigation }) => {
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [visible, setVisible] = useState(false);
   const ref = useRef();
+  const insets = useSafeAreaInsets();
 
   const updateCurrentSlideIndex = (e) => {
     const contentOffsetX = e.nativeEvent.contentOffset.x;
@@ -160,7 +161,7 @@ const OnboardingScreen = ({ navigation }) => {
   }, []);
 
   const Footer = () => (
-    <View style={styles.footerCurveWrapper}>
+    <View style={[styles.footerCurveWrapper, { paddingBottom: insets.bottom }]}>
       <View style={styles.indicatorRow}>
         {slides.map((_, index) => (
           <Animated.View
@@ -197,49 +198,54 @@ const OnboardingScreen = ({ navigation }) => {
   );
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      {/* Video background absolut, sub toate elementele */}
-      <View style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 0 }} pointerEvents="none">
-        <Video
-          source={require('../../assets/onboardbg.mp4')}
-          style={{ width: '100%', height: '100%', opacity: 1 }}
-          resizeMode="cover"
-          isLooping
-          shouldPlay
-          isMuted
-          ignoreSilentSwitch="obey"
-        />
-      </View>
-      {/* Elimin LinearGradient, pun direct continutul peste video */}
-      {visible ? (
-        <ConsentModal
-          hideModalAndSetConsent={hideModalAndSetConsent}
-          visible={visible}
-        />
-      ) : (
-        <>
-          <FlatList
-            ref={ref}
-            onMomentumScrollEnd={updateCurrentSlideIndex}
-            contentContainerStyle={{ height: "100%", zIndex: 1 }}
-            showsHorizontalScrollIndicator={false}
-            horizontal
-            data={slides}
-            pagingEnabled
-            renderItem={({ item, index }) => (
-              <Slide item={item} isActive={currentSlideIndex === index} />
-            )}
-            keyExtractor={(item) => item.id}
-            extraData={currentSlideIndex}
+    <View style={{ flex: 1 }}>
+      {/* Video background care acoperă întregul ecran */}
+      <Video
+        source={require('../../assets/onboardbg.mp4')}
+        style={StyleSheet.absoluteFillObject}
+        resizeMode="cover"
+        isLooping
+        shouldPlay
+        isMuted
+        ignoreSilentSwitch="obey"
+      />
+      
+      {/* Content overlay fără SafeAreaView pentru a permite video să acopere totul */}
+      <View style={[styles.contentOverlay, { paddingTop: insets.top }]}>
+        {visible ? (
+          <ConsentModal
+            hideModalAndSetConsent={hideModalAndSetConsent}
+            visible={visible}
           />
-          <Footer />
-        </>
-      )}
-    </SafeAreaView>
+        ) : (
+          <>
+            <FlatList
+              ref={ref}
+              onMomentumScrollEnd={updateCurrentSlideIndex}
+              contentContainerStyle={{ height: "100%" }}
+              showsHorizontalScrollIndicator={false}
+              horizontal
+              data={slides}
+              pagingEnabled
+              renderItem={({ item, index }) => (
+                <Slide item={item} isActive={currentSlideIndex === index} />
+              )}
+              keyExtractor={(item) => item.id}
+              extraData={currentSlideIndex}
+            />
+            <Footer />
+          </>
+        )}
+      </View>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  contentOverlay: {
+    flex: 1,
+    backgroundColor: 'transparent',
+  },
   gradient: {
     flex: 1,
     width: "100%",
@@ -252,7 +258,7 @@ const styles = StyleSheet.create({
     width,
     alignItems: "center",
     justifyContent: "center",
-    paddingTop: Platform.OS === "android" ? 60 : 80,
+    paddingTop: Platform.OS === "android" ? 60 : 40,
     paddingBottom: 30,
     minHeight: height * 0.8,
     backgroundColor: 'transparent',
@@ -312,7 +318,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 10,
-    paddingBottom: 0,
   },
   footerCurveContainer: {
     width: '100%',

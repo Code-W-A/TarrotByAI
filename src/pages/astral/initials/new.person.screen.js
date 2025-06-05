@@ -38,7 +38,6 @@ import {
   generateTimestampFromDateTime,
   getZodiacSign,
 } from "../../../utils/AstralUtils/fetchNatalWheelChart";
-import localGif from "../../../../assets/constelatii.gif";
 import {
   H6fontBoldPrimary,
   H7fontBoldWhite,

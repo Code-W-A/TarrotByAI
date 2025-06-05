@@ -12,6 +12,7 @@ import {
   where,
   getDocs,
 } from "firebase/firestore";
+import { checkUserDataCompleteness } from "../../utils/userDataUtils";
 
 const data = [
   {
@@ -45,10 +46,21 @@ const AutoScrollingFlatList = ({ interstitialAdLoaded, interstitial }) => {
   const { setCurrentScreen } = useNavigationState();
 
   const onCardPress = async (screen) => {
-    let screenToNavigate;
+    let screenToNavigate = screen;
     console.log("onCardPress called with screen:", screen);
+    
     if (screen === "Astral") {
-      console.log("Screen is Astral, performing Firestore query...");
+      console.log("Screen is Astral, performing checks...");
+      
+      // Verifică mai întâi dacă utilizatorul are datele complete
+      const { hasAllData } = await checkUserDataCompleteness();
+      
+      if (!hasAllData) {
+        console.warn("User data incomplete. Cannot navigate to Astral screens.");
+        // Poți aici să afișezi o alertă sau să navighezi către un screen de completare date
+        return;
+      }
+      
       const storedData = await AsyncStorage.getItem("userDetails");
       const parsedUserDetails = storedData ? JSON.parse(storedData) : null;
       console.log("parsedUserDetails.........:", parsedUserDetails);
@@ -78,9 +90,11 @@ const AutoScrollingFlatList = ({ interstitialAdLoaded, interstitial }) => {
         }
       } catch (error) {
         console.error("Firestore query error:", error);
+        screenToNavigate = screen; // Fallback la screen-ul original
       }
     }
 
+    // Continuă cu navigarea și reclama
     if (interstitialAdLoaded) {
       console.log("Interstitial ad is loaded, showing ad...");
       try {

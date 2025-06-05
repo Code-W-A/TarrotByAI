@@ -25,6 +25,7 @@ interface MoreInfoModalProps {
   setFirstName: (value: string) => void;
   lastName: string;
   setLastName: (value: string) => void;
+  onCompleteCallback?: () => void;
 }
 
 const MoreInfoModal: React.FC<MoreInfoModalProps> = ({
@@ -39,6 +40,7 @@ const MoreInfoModal: React.FC<MoreInfoModalProps> = ({
   setFirstName,
   lastName,
   setLastName,
+  onCompleteCallback,
 }) => {
   const [emailError, setEmailError] = useState(false);
   const [phoneError, setPhoneError] = useState(false);
@@ -91,6 +93,10 @@ const MoreInfoModal: React.FC<MoreInfoModalProps> = ({
     if (validateFields()) {
       onConfirm(firstName, lastName, email, phone);
       onDismiss();
+      
+      if (onCompleteCallback) {
+        onCompleteCallback();
+      }
     }
   };
 
@@ -219,7 +225,6 @@ const MoreInfoModal: React.FC<MoreInfoModalProps> = ({
                   defaultCountry="RO"
                   placeholder={completeazaInfoText4}
                   style={{ width: '100%' }}
-                  containerStyle={{ width: '100%' }}
                 />
               </View>
       

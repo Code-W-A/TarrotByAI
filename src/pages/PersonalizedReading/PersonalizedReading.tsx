@@ -211,7 +211,26 @@ const PersonalizedReading = ({ route }) => {
               source={{ uri: item.carte.image.finalUri }}
               resizeMode="stretch"
             />
+            
           </View>
+          <Text
+              style={{
+                color: '#FFD700',
+                fontWeight: '700',
+                fontSize: 16,
+                textAlign: 'center',
+                textShadowColor: '#fffbeae0',
+                textShadowOffset: { width: 0, height: 2 },
+                textShadowRadius: 6,
+                letterSpacing: 1.1,
+                fontFamily: 'LoraBold',
+                marginTop: 0,
+                position:"relative",
+                bottom:"0%"
+              }}
+            >
+              @CristinaZurba.App
+            </Text>
           {showVideo && videoUrl && (
             <View style={styles.secondImageContainer}>
               {isVideoLoading && (
@@ -263,7 +282,7 @@ const PersonalizedReading = ({ route }) => {
                   textAlign: 'justify',
                   color: '#7c6f57',
                   fontFamily: 'LoraRegular',
-                  fontSize: 16,
+                  fontSize: 22,
                   letterSpacing: 0.2,
                 }}
               >

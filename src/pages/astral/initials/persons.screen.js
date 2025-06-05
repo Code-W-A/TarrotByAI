@@ -85,7 +85,9 @@ const SubHeading = () => {
 //----ADS----
 const adUnitId = __DEV__
   ? TestIds.INTERSTITIAL
-  : "ca-app-pub-9577714849380446/7080054250";
+  : Platform.OS === "android"
+    ? "ca-app-pub-9577714849380446/7080054250"
+    : "ca-app-pub-9577714849380446/5660268593";
 // const adUnitId = "ca-app-pub-9577714849380446/7080054250";
 
 const interstitial = InterstitialAd.createForAdRequest(adUnitId, {

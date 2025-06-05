@@ -4,7 +4,11 @@ import React, { createContext, useState, useContext } from "react";
 // Define the shape of the context data and its updater function
 const defaultContextValue = {
   isNavBarVisible: true,
-  setIsNavBarVisible: () => {},
+  /**
+   * Setter dummy default implementation – primește o valoare booleană dar nu face nimic.
+   * @param {boolean} _visible
+   */
+  setIsNavBarVisible: (_visible) => {},
 };
 
 // Create the context with a default value

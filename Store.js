@@ -1,7 +1,7 @@
 import {createStore, applyMiddleware, compose, combineReducers} from 'redux';
 import thunk from 'redux-thunk';
 // import devToolsEnhancer from 'remote-redux-devtools';
-import {composeWithDevTools} from 'redux-devtools-extension';
+import {composeWithDevTools} from '@redux-devtools/extension';
 // import {composeWithDevTools} from '@redux-devtools/core';
 // import {termsListReducers} from './app/Reducers/termReducers';
 
@@ -27,7 +27,7 @@ const middleware = [thunk];
 // const composeEnhancers =
 //   typeof window === 'object' && window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
 //     ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({
-//         // Specify extension’s options like name, actionsBlacklist, actionsCreators, serialize...
+//         // Specify extension's options like name, actionsBlacklist, actionsCreators, serialize...
 //       })
 //     : compose;
 
@@ -46,9 +46,9 @@ const store = createStore(
 
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
-export type RootState = ReturnType<typeof store.getState>
+// export type RootState = ReturnType<typeof store.getState>
 // Inferred type: {posts: PostsState, comments: CommentsState, users: UsersState}
-export type AppDispatch = typeof store.dispatch
+// export type AppDispatch = typeof store.dispatch
 
 
 

@@ -79,6 +79,24 @@ const FutureReading = ({ route }) => {
               }}
               source={{ uri: item.image.finalUri }}
             />
+            <Text
+              style={{
+                color: '#FFD700',
+                fontWeight: '700',
+                fontSize: 16,
+                textAlign: 'center',
+                textShadowColor: '#fffbeae0',
+                textShadowOffset: { width: 0, height: 2 },
+                textShadowRadius: 6,
+                letterSpacing: 1.1,
+                fontFamily: 'LoraBold',
+                marginTop: 6,
+                position:"relative",
+                bottom:"-8%"
+              }}
+            >
+              @CristinaZurba.App
+            </Text>
           </View>
           <ScrollView contentContainerStyle={styles.scrollViewContainer}>
             <View
@@ -109,7 +127,7 @@ const FutureReading = ({ route }) => {
                   textAlign: 'justify',
                   color: '#7c6f57',
                   fontFamily: 'LoraRegular',
-                  fontSize: 16,
+                  fontSize: 22,
                   letterSpacing: 0.2,
                 }}
               >
@@ -134,9 +152,8 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     alignSelf: "center",
-    marginBottom: 20,
-    width: "auto",
-    height: "auto",
+    alignItems: "center",
+    marginBottom: 8,
   },
   imageShadow: {
     width: 541,

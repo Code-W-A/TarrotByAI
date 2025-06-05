@@ -65,7 +65,6 @@ import { btoa, atob } from "react-native-quick-base64";
 import base64 from "react-native-base64";
 import TestSvg from "../../../../assets/base64.svg";
 
-import localGif from "../../../../assets/constelatii.gif";
 import { Image } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import MyTopBar from "../../../components/Astral/components/TopBar";
@@ -1061,10 +1060,10 @@ function SinastrieRelatie({ navigation, route }) {
                             <View key={index}>
                               {aspect.reading.map((read, readIndex) => (
                                 <View key={readIndex} style={{ marginTop: 20 }}>
-                                  <Text style={{ color: '#131523', fontFamily: 'Lora' }}>
+                                  <Text style={{ color: '#131523', fontFamily: 'Lora', textAlign: 'justify' }}>
                                     {read?.title}
                                   </Text>
-                                  <Text style={{ color: '#131523', fontFamily: 'Lora' }}>
+                                  <Text style={{ color: '#131523', fontFamily: 'Lora', textAlign: 'justify' }}>
                                     {read?.description}
                                   </Text>
                                 </View>
@@ -1078,10 +1077,10 @@ function SinastrieRelatie({ navigation, route }) {
                           {activeData.length > 0 &&
                             activeData[0]?.reading?.length > 0 && (
                               <View>
-                                <Text style={{ color: '#131523', fontFamily: 'Lora' }}>
+                                <Text style={{ color: '#131523', fontFamily: 'Lora', textAlign: 'justify', fontWeight: '700' }}>
                                   {activeData[0].reading[0]?.title}
                                 </Text>
-                                <Text style={{ color: '#131523', fontFamily: 'Lora' }}>
+                                <Text style={{ color: '#131523', fontFamily: 'Lora', textAlign: 'justify' }}>
                                   {activeData[0].reading[0]?.description}
                                 </Text>
                               </View>

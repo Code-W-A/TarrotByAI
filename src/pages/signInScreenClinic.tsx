@@ -316,7 +316,7 @@ const SignInScreenClinic: React.FC<Props> = ({
           style={{ flex: 1, width: '100%', height: '100%' }}
           imageStyle={{ opacity: 1 }}
         >
-          <CustomLoader isLoading={isLoading} />
+        <CustomLoader isLoading={isLoading} />
           <KeyboardAvoidingView
             style={{ flex: 1 }}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}

@@ -52,7 +52,9 @@ import {
 //---ADS---
 const adUnitId = __DEV__
   ? TestIds.INTERSTITIAL
-  : "ca-app-pub-9577714849380446/7080054250";
+  : Platform.OS === "android"
+    ? "ca-app-pub-9577714849380446/7080054250"
+    : "ca-app-pub-9577714849380446/5660268593";
 const interstitialAd = InterstitialAd.createForAdRequest(adUnitId);
 
 const PAGE_SIZE = 5; // Definește câte articole să fie încărcate odată

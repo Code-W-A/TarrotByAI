@@ -65,7 +65,6 @@ import { btoa, atob } from "react-native-quick-base64";
 import base64 from "react-native-base64";
 import TestSvg from "../../../../assets/base64.svg";
 
-import localGif from "../../../../assets/constelatii.gif";
 import { Image } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import MyTopBar from "../../../components/Astral/components/TopBar";
@@ -724,8 +723,8 @@ function SinastrieRelatieOthers({ navigation, route }) {
     return regex.test(base64);
   };
 
-  const getActiveTabData = () => {
-    switch (activeTab) {
+  const getActiveTabData = (tab) => {
+    switch (tab) {
       case "Harmony":
         return userD?.synastry?.harmoniousAspectReading?.data;
       case "Conflict":
@@ -1109,65 +1108,32 @@ function SinastrieRelatieOthers({ navigation, route }) {
                         },
                       ]}
                     >
-                      <View>
-                        {isPaid ? (
-                          <>
-                            <Button
-                              disabled={false}
-                              funCallback={handleDownloadPDF}
-                              label={descarcaPdfText}
-                              success={true}
-                              bgColor={colors.gradientLogin11}
-                              borderColor={colors.white}
-                              borderWidth={0.2}
-                              txtColor={colors.white}
-                              style={{ marginTop: "10%" }}
-                            />
-                            {activeData.map((aspect, index) => (
-                              <View key={index}>
-                                {aspect.reading.map((read, readIndex) => (
-                                  <View key={readIndex} style={{ marginTop: 20 }}>
-                                    <Text style={{ color: '#131523', fontFamily: 'Lora', fontWeight: '700' }}>
-                                      {read?.title}
-                                    </Text>
-                                    <Text style={{ color: '#131523', fontFamily: 'Lora' }}>
-                                      {read?.description}
-                                    </Text>
-                                  </View>
-                                ))}
-                              </View>
-                            ))}
-                          </>
-                        ) : (
-                          <>
-                            {activeData.length > 0 &&
-                              activeData[0]?.reading?.length > 0 && (
-                                <View>
-                                  <Text style={{ color: '#131523', fontFamily: 'Lora', fontWeight: '700' }}>
-                                    {activeData[0].reading[0]?.title}
-                                  </Text>
-                                  <Text style={{ color: '#131523', fontFamily: 'Lora' }}>
-                                    {activeData[0].reading[0]?.description}
-                                  </Text>
-                                </View>
-                              )}
-                            <Text style={styles.partialContent}>
-                              {achizitioneazaInterpretareCompletaText2}
+                      {/* Afișează conținut limitat dacă nu este achiziționat */}
+                      {activeData.length > 0 &&
+                        activeData[0]?.reading?.length > 0 && (
+                          <View>
+                            <Text style={{ color: '#131523', fontFamily: 'Lora', textAlign: 'justify', fontWeight: '700' }}>
+                              {activeData[0].reading[0]?.title}
                             </Text>
-                            <Button
-                              disabled={false}
-                              funCallback={() => setModalVisible(true)}
-                              label={achizitioneazaInterpretareCompletaText}
-                              success={true}
-                              bgColor={colors.gradientLogin11}
-                              borderColor={colors.white}
-                              borderWidth={0.2}
-                              txtColor={colors.white}
-                              style={{ marginTop: "10%" }}
-                            />
-                          </>
+                            <Text style={{ color: '#131523', fontFamily: 'Lora', textAlign: 'justify' }}>
+                              {activeData[0].reading[0]?.description}
+                            </Text>
+                          </View>
                         )}
-                      </View>
+                      <Text style={styles.partialContent}>
+                        {achizitioneazaInterpretareCompletaText2}
+                      </Text>
+                      <Button
+                        disabled={false}
+                        funCallback={() => setModalVisible(true)}
+                        label={achizitioneazaInterpretareCompletaText}
+                        success={true}
+                        bgColor={colors.gradientLogin11}
+                        borderColor={colors.white}
+                        borderWidth={0.2}
+                        txtColor={colors.white}
+                        style={{ marginTop: "10%" }}
+                      />
                     </View>
                   </View>
                   <View style={{ paddingVertical: 10 }} />

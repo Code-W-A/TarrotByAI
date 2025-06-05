@@ -283,7 +283,7 @@ export async function fetchHoroscopeDataYear(
 
 //parser
 
-import { DOMParser } from "xmldom";
+import { DOMParser } from "@xmldom/xmldom";
 import { formatDate, getCurrentDateFormatted } from "../commonUtils";
 import moment from "moment";
 

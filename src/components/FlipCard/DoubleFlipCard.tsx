@@ -7,6 +7,7 @@ import {
   Text,
   StyleSheet,
   View,
+  Platform,
 } from "react-native";
 import i18n from "../../../i18n";
 import { useFocusEffect, useNavigation } from "@react-navigation/native"; // Importă hook-ul pentru navigare
@@ -33,7 +34,9 @@ import {
 // Înlocuiți cu ID-ul real al unității de anunțuri pentru producție
 const adUnitId = __DEV__
   ? TestIds.INTERSTITIAL
-  : "ca-app-pub-9577714849380446/7080054250";
+  : Platform.OS === "android"
+    ? "ca-app-pub-9577714849380446/7080054250"
+    : "ca-app-pub-9577714849380446/5660268593";
 const interstitialAd = InterstitialAd.createForAdRequest(adUnitId);
 
 const DoubleFlipCard = ({

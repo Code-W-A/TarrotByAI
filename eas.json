@@ -1,18 +1,43 @@
 {
   "cli": {
-    "version": ">= 3.16.0"
+    "version": ">= 7.1.0"
   },
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "node": "20.18.0",
+      "ios": {
+        "image": "latest"
+      }
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "node": "20.18.0",
+      "ios": {
+        "image": "latest"
+      }
     },
-    "production": {}
+    "production": {
+      "node": "20.18.0",
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "ios": {
+        "resourceClass": "m1-medium",
+        "distribution": "store",
+        "image": "latest"
+      }
+    }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "android": {
+        "serviceAccountKeyPath": "./service-account.json"
+      },
+      "ios": {
+        "appleId": "mobitoolsro@gmail.com"
+      }
+    }
   }
 }

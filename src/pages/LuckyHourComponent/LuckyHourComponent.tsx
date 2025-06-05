@@ -117,6 +117,24 @@ const LuckyHour = () => {
                       style={[styles.secondImage, { tintColor: '#FFD700' }]}
                       resizeMode="contain"
                     />
+                                      <Text
+              style={{
+                color: '#FFD700',
+                fontWeight: '700',
+                fontSize: 16,
+                textAlign: 'center',
+                textShadowColor: '#fffbeae0',
+                textShadowOffset: { width: 0, height: 2 },
+                textShadowRadius: 6,
+                letterSpacing: 1.1,
+                fontFamily: 'LoraBold',
+                marginTop: 0,
+                position:"relative",
+                bottom:"21%"
+              }}
+            >
+              @CristinaZurba.App
+            </Text>
                   </View>
                 </View>
               </View>
@@ -132,7 +150,18 @@ const LuckyHour = () => {
                 </H7fontBoldWhite> */}
                 <ScrollView contentContainerStyle={[styles.scrollViewContainer, {flexGrow: 1}]} style={{flex: 1}}>
                   {zilnicOreNorocoase.info ? (
-                    <H7fontMediumPrimary style={{ textAlign: "justify", color: '#131523', fontFamily: 'Lora', fontWeight: '400', fontSize: 19, lineHeight: 28, marginTop: 16, backgroundColor: 'transparent' }}>
+                    <Text
+                      style={{
+                        textAlign: 'justify',
+                        color: '#7c6f57',
+                        fontFamily: 'Lora',
+                        fontWeight: '400',
+                        fontSize: 19,
+                        lineHeight: 28,
+                        marginTop: 16,
+                        backgroundColor: 'transparent',
+                      }}
+                    >
                       {language === "hi"
                         ? zilnicOreNorocoase.info.hu?.descriere
                         : language === "id"
@@ -140,7 +169,7 @@ const LuckyHour = () => {
                         : language === "ru"
                         ? zilnicOreNorocoase.info.rusa?.descriere
                         : zilnicOreNorocoase.info[language]?.descriere}
-                    </H7fontMediumPrimary>
+                    </Text>
                   ) : null}
                 </ScrollView>
               </View>
