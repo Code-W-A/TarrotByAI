@@ -14,4 +14,6 @@ defaultConfig.resolver.sourceExts = additionalExts.concat(defaultSourceExts);
 // Adăugați orice alte extensii de asset-uri necesare
 defaultConfig.resolver.assetExts.push("cjs");
 
+
+
 module.exports = defaultConfig;

@@ -97,6 +97,7 @@ import { registerForPushNotificationsAsync } from "../utils/Notification/registe
 import { uploadExpoPushToken } from "../utils/UploadFirebaseData";
 import { retrieveTypeOfUser } from "../utils/getFirebaseData";
 import { handleSignOutFromSignIn } from "../utils/handleSignOut";
+import { handleLoginAsGuest } from "../utils/loginAsGuestHelper";
 import CustomLoader from "../components/customLoader";
 import { MaterialIcons } from "@expo/vector-icons";
 import i18n from "../../i18n";

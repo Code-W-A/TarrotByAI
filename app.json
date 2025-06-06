@@ -34,7 +34,7 @@
         "config": {},
         "softwareKeyboardLayoutMode": "pan",
         "package": "com.cristina.zurba.tarot",
-        "versionCode": 96,
+        "versionCode": 97,
         "permissions": [
           "android.permission.RECORD_AUDIO",
           "WRITE_EXTERNAL_STORAGE",
@@ -67,9 +67,6 @@
           "projectId": "87e423c7-eea6-4713-aac2-c4510baebd19"
         }
       },
-      "owner": "shikatedo1",
-      "react-native-google-mobile-ads": {
-        "android_app_id": "ca-app-pub-9577714849380446~4870228858"
-      }
+      "owner": "shikatedo1"
     }
   }

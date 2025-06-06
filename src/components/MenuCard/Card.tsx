@@ -22,20 +22,21 @@ const Card = ({ text, screen, image, interstitialAdLoaded, interstitial }) => {
   const { setCurrentScreen } = useNavigationState();
 
   const onCardPress = async () => {
-    if (interstitialAdLoaded) {
-      try {
-        await interstitial.show();
-        navigation.navigate(screen);
-        setCurrentScreen(screen);
-      } catch (error) {
-        console.error("InterstitialAd.show() error:", error);
-        navigation.navigate(screen);
-        setCurrentScreen(screen);
-      }
-    } else {
+    // ADS REMOVED - Direct navigation always
+    // if (interstitialAdLoaded) {
+    //   try {
+    //     await interstitial.show();
+    //     navigation.navigate(screen);
+    //     setCurrentScreen(screen);
+    //   } catch (error) {
+    //     console.error("InterstitialAd.show() error:", error);
+    //     navigation.navigate(screen);
+    //     setCurrentScreen(screen);
+    //   }
+    // } else {
       navigation.navigate(screen);
       setCurrentScreen(screen);
-    }
+    // }
   };
 
   return (

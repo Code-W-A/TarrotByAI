@@ -10,14 +10,14 @@
 //   AppRegistry.runApplication('main', {rootTag});
 // }
 
-import * as Sentry from '@sentry/react-native';
-
-Sentry.init({
-  dsn: 'https://DSN-ul-tau@sentry.io/NUMAR_PROIECT', // Înlocuiește cu DSN-ul tău Sentry
-  debug: true, // true pentru development, false pentru producție
-});
-
 import {registerRootComponent} from 'expo';
 import App from './App';
 
-registerRootComponent(Sentry.wrap(App));
+// Sentry disabled for now - uncomment and configure with real DSN when needed
+// import * as Sentry from '@sentry/react-native';
+// Sentry.init({
+//   dsn: 'YOUR_REAL_SENTRY_DSN_HERE',
+//   debug: __DEV__,
+// });
+
+registerRootComponent(App);

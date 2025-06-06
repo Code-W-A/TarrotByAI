@@ -56,6 +56,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
 import CustomLoader from "../components/customLoader";
 import { handleSignOut } from "../utils/handleSignOut";
+import { handleLoginAsGuest } from "../utils/loginAsGuestHelper";
 import i18n from "../../i18n";
 import {
   ICountry,

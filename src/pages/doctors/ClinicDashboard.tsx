@@ -33,7 +33,8 @@ import {
 import { MaterialCommunityIcons, FontAwesome5, Feather, Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SvgUri } from 'react-native-svg';
-import { TestIds } from "react-native-google-mobile-ads";
+// ADS COMPLETELY REMOVED FOR DEBUGGING
+// import { TestIds } from "react-native-google-mobile-ads";
 
 import NavBarBottom from "../../components/Navbar";
 import FlipCard from "../../components/FlipCard/FlipCard";
@@ -50,11 +51,11 @@ import { useApiData } from "../../context/ApiContext";
 import { colors, textStyles } from "../../utils/colors";
 import { handleLanguagei18n } from "../../utils/handleLanguageGeneral";
 
-//---ADS---
-import {
-  InterstitialAd,
-  AdEventType,
-} from "react-native-google-mobile-ads";
+// ADS COMPLETELY REMOVED FOR DEBUGGING
+// import {
+//   InterstitialAd,
+//   AdEventType,
+// } from "react-native-google-mobile-ads";
 
 import { usePushNotifications } from "../../hooks/usePushNotifications";
 import { useAuth } from "../../context/AuthContext";
@@ -73,17 +74,17 @@ import { db } from "../../../firebase";
 import { NewsDetailsModal } from "../../components/NewsDetailsModal/NewsDetailsModal";
 import { useUserDataModal } from "../../hooks/useUserDataModal";
 
-//---ADS---
-const adUnitId = __DEV__
-  ? TestIds.INTERSTITIAL
-  : Platform.OS === "android"
-    ? "ca-app-pub-9577714849380446/7080054250"
-    : "ca-app-pub-9577714849380446/5660268593";
-// const adUnitId = "ca-app-pub-9577714849380446/7080054250";
+// ADS COMPLETELY REMOVED FOR DEBUGGING
+// const adUnitId = __DEV__
+//   ? TestIds.INTERSTITIAL
+//   : Platform.OS === "android"
+//     ? "ca-app-pub-9577714849380446/7080054250"
+//     : "ca-app-pub-9577714849380446/5660268593";
+// // const adUnitId = "ca-app-pub-9577714849380446/7080054250";
 
-const interstitial = InterstitialAd.createForAdRequest(adUnitId, {
-  keywords: ["spiritualitate", "bunăstare"],
-});
+// const interstitial = InterstitialAd.createForAdRequest(adUnitId, {
+//   keywords: ["spiritualitate", "bunăstare"],
+// });
 
 // const interstitial = "";
 
@@ -363,35 +364,35 @@ const ClinicDashboard = () => {
   const screenHeight = Dimensions.get("window").height;
 
   //---ADS---
-  useEffect(() => {
-    const loadListener = interstitial.addAdEventListener(
-      AdEventType.LOADED,
-      () => {
-        setLoaded(true);
-      }
-    );
-    const closeListener = interstitial.addAdEventListener(
-      AdEventType.CLOSED,
-      () => {
-        setLoaded(false);
-        interstitial.load(); // Reîncarcă reclama pentru o utilizare ulterioară
-      }
-    );
-    const errorListener = interstitial.addAdEventListener(
-      AdEventType.ERROR,
-      (error) => {
-        console.error(error);
-      }
-    );
+  // useEffect(() => {
+  //   const loadListener = interstitial.addAdEventListener(
+  //     AdEventType.LOADED,
+  //     () => {
+  //       setLoaded(true);
+  //     }
+  //   );
+  //   const closeListener = interstitial.addAdEventListener(
+  //     AdEventType.CLOSED,
+  //     () => {
+  //       setLoaded(false);
+  //       interstitial.load(); // Reîncarcă reclama pentru o utilizare ulterioară
+  //     }
+  //   );
+  //   const errorListener = interstitial.addAdEventListener(
+  //     AdEventType.ERROR,
+  //     (error) => {
+  //       console.error(error);
+  //     }
+  //   );
 
-    interstitial.load(); // Începe încărcarea anunțului
+  //   interstitial.load(); // Începe încărcarea anunțului
 
-    return () => {
-      loadListener();
-      closeListener();
-      errorListener();
-    };
-  }, []);
+  //   return () => {
+  //     loadListener();
+  //     closeListener();
+  //     errorListener();
+  //   };
+  // }, []);
 
   // No advert ready to show yet
   // if (!loaded) {

@@ -74,7 +74,12 @@ const PersonListScreen = ({ navigation }) => {
     // }
   };
 
-
+  const handleRecoverBoughtAnalysis = () => {
+    // Funcție pentru recuperarea analizelor cumpărate
+    // Poate redirecționa către un ecran special sau afișa un modal
+    console.log("Recupereaza analizele cumparate");
+    // navigation.navigate("RecoverAnalysis");
+  };
 
   // Funcție pentru sincronizarea datelor:
   // 1. Se face backup-ul (din AsyncStorage în Firestore) pentru ambele colecții sinastrie.
@@ -385,6 +390,7 @@ const PersonListScreen = ({ navigation }) => {
           <FloatingActionButton
             handleAddYourSinastrie={handleAddPerson}
             handleAddOtherSinastrie={handleAddPersonForOthers}
+            handleRecoverBoughtAnalysis={handleRecoverBoughtAnalysis}
           />
         </View>
 

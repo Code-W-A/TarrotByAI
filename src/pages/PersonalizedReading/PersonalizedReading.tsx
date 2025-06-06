@@ -42,8 +42,9 @@ import {
 } from "../../utils/AstralUtils/fetchGPTData";
 
 const PersonalizedReading = ({ route }) => {
-  const [isVideoLoading, setIsVideoLoading] = useState(!!videoUrl);
-  const [showVideo, setShowVideo] = useState(!!videoUrl);
+  // Initialize with false, will be updated in useEffect
+  const [isVideoLoading, setIsVideoLoading] = useState(false);
+  const [showVideo, setShowVideo] = useState(false);
   const [videoEnded, setVideoEnded] = useState(false);
   const navigation = useNavigation();
   const { currentNumber, updateNumber } = useNumberContext();
@@ -188,9 +189,13 @@ const PersonalizedReading = ({ route }) => {
 
     setIsNavBarVisible(false);
 
-    // Verifică dacă nu există URL valid pentru video
-    if (!videoUrl) {
-      setIsVideoLoading(false); // Nu mai afișăm spinner-ul dacă nu există video
+    // Update video states based on videoUrl availability
+    if (videoUrl) {
+      setIsVideoLoading(true);
+      setShowVideo(true);
+    } else {
+      setIsVideoLoading(false);
+      setShowVideo(false);
     }
 
     return () => setIsNavBarVisible(true); // Restabilește vizibilitatea la ieșirea din componentă

@@ -899,7 +899,7 @@ export const retrieveInfoAboutPatientsFromClinic = async (
       "Users",
       appointmentsArr[i].clinicId,
       "Doctors",
-      appointmentInfo[i].doctorId
+      appointmentsArr[i].doctorId
     );
     const docSnap = await getDoc(docRef);
 

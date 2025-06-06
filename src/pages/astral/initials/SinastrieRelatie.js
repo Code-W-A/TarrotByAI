@@ -61,7 +61,6 @@ import {
 import AstrogramaImage from "../../../components/Astral/components/AstrogramaImage";
 import AstrologyAspectsView from "../../../components/Astral/components/AstrologyAspectsView";
 import { SvgUri, SvgXml } from "react-native-svg";
-import { btoa, atob } from "react-native-quick-base64";
 import base64 from "react-native-base64";
 import TestSvg from "../../../../assets/base64.svg";
 
@@ -232,7 +231,7 @@ function SinastrieRelatie({ navigation, route }) {
       <div>
         ${
           wheelImageP1
-            ? `<img src="data:image/svg+xml;base64,${btoa(
+            ? `<img src="data:image/svg+xml;base64,${base64.encode(
                 wheelImageP1
               )}" style="width: 500px; height: 500px; display: block; margin: 0 auto; border: 1px solid #ddd; border-radius: 10px;" />`
             : "<p>Astrogramă Natală pentru P1 nu este disponibilă.</p>"
@@ -252,7 +251,7 @@ function SinastrieRelatie({ navigation, route }) {
       <div style="margin-top: 20px;">
         ${
           wheelImageP2
-            ? `<img src="data:image/svg+xml;base64,${btoa(
+            ? `<img src="data:image/svg+xml;base64,${base64.encode(
                 wheelImageP2
               )}" style="width: 500px; height: 500px; display: block; margin: 0 auto; border: 1px solid #ddd; border-radius: 10px;" />`
             : "<p>Astrogramă Natală pentru P2 nu este disponibilă.</p>"

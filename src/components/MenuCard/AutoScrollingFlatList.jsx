@@ -98,12 +98,13 @@ const AutoScrollingFlatList = ({ interstitialAdLoaded, interstitial }) => {
     if (interstitialAdLoaded) {
       console.log("Interstitial ad is loaded, showing ad...");
       try {
-        await interstitial.show();
-        console.log("Interstitial ad shown successfully.");
+        // ADS REMOVED - Direct navigation
+        // await interstitial.show();
+        // console.log("Interstitial ad shown successfully.");
         navigation.navigate(screenToNavigate);
         setCurrentScreen(screenToNavigate);
       } catch (error) {
-        console.error("InterstitialAd.show() error:", error);
+        // console.error("InterstitialAd.show() error:", error);
         navigation.navigate(screenToNavigate);
         setCurrentScreen(screenToNavigate);
       }

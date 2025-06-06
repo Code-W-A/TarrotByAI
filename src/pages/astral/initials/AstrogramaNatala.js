@@ -58,7 +58,6 @@ import {
 import AstrogramaImage from "../../../components/Astral/components/AstrogramaImage";
 import AstrologyAspectsView from "../../../components/Astral/components/AstrologyAspectsView";
 import { SvgUri, SvgXml } from "react-native-svg";
-import { btoa, atob } from "react-native-quick-base64";
 import base64 from "react-native-base64";
 import TestSvg from "../../../../assets/base64.svg";
 

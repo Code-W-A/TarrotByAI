@@ -40,22 +40,7 @@ import {
 } from "../../utils/firestoreUtils";
 import { filterArticlesBeforeCurrentTime } from "../../utils/commonUtils";
 
-//---ADS---
-import {
-  InterstitialAd,
-  AdEventType,
-  TestIds,
-} from "react-native-google-mobile-ads";
-
-// Înlocuiți cu ID-ul real al unității de anunțuri pentru producție
-
-//---ADS---
-const adUnitId = __DEV__
-  ? TestIds.INTERSTITIAL
-  : Platform.OS === "android"
-    ? "ca-app-pub-9577714849380446/7080054250"
-    : "ca-app-pub-9577714849380446/5660268593";
-const interstitialAd = InterstitialAd.createForAdRequest(adUnitId);
+// ADS COMPLETELY REMOVED FOR DEBUGGING
 
 const PAGE_SIZE = 5; // Definește câte articole să fie încărcate odată
 
@@ -70,7 +55,7 @@ const News = () => {
   const navigation = useNavigation();
   const colorScheme = useColorScheme();
   const { language, changeLanguage } = useLanguage();
-  const [interstitialLoaded, setInterstitialLoaded] = useState(false);
+  // const [interstitialLoaded, setInterstitialLoaded] = useState(false); // REMOVED ADS
 
   const fetchArticles = async (refresh = false) => {
     console.log("Start fetch...");
@@ -218,12 +203,9 @@ const News = () => {
   }, [selectedCategory]);
 
   const openModalWithArticle = async (article) => {
-    //---ADS---
-    await interstitialAd.show();
-    setTimeout(() => {
-      setSelectedArticle(article);
-      setModalVisible(true);
-    }, 500); // Ajustează întârzierea după necesități
+    // ADS COMPLETELY REMOVED FOR DEBUGGING
+    setSelectedArticle(article);
+    setModalVisible(true);
   };
 
   const handleCloseModal = () => {
@@ -310,43 +292,7 @@ const News = () => {
     }
   };
 
-  //---ADS---
-  useEffect(() => {
-    // Ascultător pentru evenimentul de încărcare a interstitialului
-    const loadListener = interstitialAd.addAdEventListener(
-      AdEventType.LOADED,
-      () => {
-        setInterstitialLoaded(true);
-      }
-    );
-
-    // Ascultător pentru evenimentul de închidere a interstitialului
-    const closeListener = interstitialAd.addAdEventListener(
-      AdEventType.CLOSED,
-      () => {
-        // Reîncărcați interstitialul pentru utilizări ulterioare
-        setInterstitialLoaded(false);
-        interstitialAd.load();
-      }
-    );
-
-    const errorListener = interstitialAd.addAdEventListener(
-      AdEventType.ERROR,
-      (error) => {
-        console.error(error);
-      }
-    );
-
-    // Încărcați interstitialul
-    interstitialAd.load();
-
-    return () => {
-      // Curățare la demontare
-      loadListener();
-      closeListener();
-      errorListener();
-    };
-  }, []);
+  // ADS COMPLETELY REMOVED FOR DEBUGGING
 
   const renderArticle = ({ item }) => (
     <NewsCard post={item} onPress={() => openModalWithArticle(item)} />

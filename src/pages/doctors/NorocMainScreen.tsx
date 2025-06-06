@@ -47,12 +47,12 @@ import { useApiData } from "../../context/ApiContext";
 import { colors, textStyles } from "../../utils/colors";
 import { handleLanguagei18n } from "../../utils/handleLanguageGeneral";
 
-//---ADS---
-import {
-  InterstitialAd,
-  TestIds,
-  AdEventType,
-} from "react-native-google-mobile-ads";
+// ADS COMPLETELY REMOVED FOR DEBUGGING
+// import {
+//   InterstitialAd,
+//   TestIds,
+//   AdEventType,
+// } from "react-native-google-mobile-ads";
 
 import { usePushNotifications } from "../../hooks/usePushNotifications";
 import { useAuth } from "../../context/AuthContext";
@@ -72,16 +72,16 @@ import { NewsDetailsModal } from "../../components/NewsDetailsModal/NewsDetailsM
 import UpdateAppModal from '../../components/UpdateAppModal';
 
 //---ADS---
-const adUnitId = __DEV__
-  ? TestIds.INTERSTITIAL
-  : Platform.OS === "android"
-    ? "ca-app-pub-9577714849380446/7080054250"
-    : "ca-app-pub-9577714849380446/5660268593";
+// const adUnitId = __DEV__
+//   ? TestIds.INTERSTITIAL
+//   : Platform.OS === "android"
+//     ? "ca-app-pub-9577714849380446/7080054250"
+//     : "ca-app-pub-9577714849380446/5660268593";
 // const adUnitId = "ca-app-pub-9577714849380446/7080054250";
 
-const interstitial = InterstitialAd.createForAdRequest(adUnitId, {
-  keywords: ["spiritualitate", "bunăstare"],
-});
+// const interstitial = InterstitialAd.createForAdRequest(adUnitId, {
+//   keywords: ["spiritualitate", "bunăstare"],
+// });
 
 // const interstitial = "";
 
@@ -450,35 +450,36 @@ const NorocMainScreen = () => {
   const screenHeight = Dimensions.get("window").height;
 
   //---ADS---
-  useEffect(() => {
-    const loadListener = interstitial.addAdEventListener(
-      AdEventType.LOADED,
-      () => {
-        setLoaded(true);
-      }
-    );
-    const closeListener = interstitial.addAdEventListener(
-      AdEventType.CLOSED,
-      () => {
-        setLoaded(false);
-        interstitial.load(); // Reîncarcă reclama pentru o utilizare ulterioară
-      }
-    );
-    const errorListener = interstitial.addAdEventListener(
-      AdEventType.ERROR,
-      (error) => {
-        console.error(error);
-      }
-    );
+  // ADS COMPLETELY REMOVED - useEffect commented out
+  // useEffect(() => {
+  //   const loadListener = interstitial.addAdEventListener(
+  //     AdEventType.LOADED,
+  //     () => {
+  //       setLoaded(true);
+  //     }
+  //   );
+  //   const closeListener = interstitial.addAdEventListener(
+  //     AdEventType.CLOSED,
+  //     () => {
+  //       setLoaded(false);
+  //       interstitial.load(); // Reîncarcă reclama pentru o utilizare ulterioară
+  //     }
+  //   );
+  //   const errorListener = interstitial.addAdEventListener(
+  //     AdEventType.ERROR,
+  //     (error) => {
+  //       console.error(error);
+  //     }
+  //   );
 
-    interstitial.load(); // Începe încărcarea anunțului
+  //   interstitial.load(); // Începe încărcarea anunțului
 
-    return () => {
-      loadListener();
-      closeListener();
-      errorListener();
-    };
-  }, []);
+  //   return () => {
+  //     loadListener();
+  //     closeListener();
+  //     errorListener();
+  //   };
+  // }, []);
 
   // No advert ready to show yet
   // if (!loaded) {

@@ -200,42 +200,42 @@ const OnboardingScreen = ({ navigation }) => {
   return (
     <View style={{ flex: 1 }}>
       {/* Video background care acoperă întregul ecran */}
-      <Video
-        source={require('../../assets/onboardbg.mp4')}
+        <Video
+          source={require('../../assets/onboardbg.mp4')}
         style={StyleSheet.absoluteFillObject}
-        resizeMode="cover"
-        isLooping
-        shouldPlay
-        isMuted
-        ignoreSilentSwitch="obey"
-      />
+          resizeMode="cover"
+          isLooping
+          shouldPlay
+          isMuted
+          ignoreSilentSwitch="obey"
+        />
       
       {/* Content overlay fără SafeAreaView pentru a permite video să acopere totul */}
       <View style={[styles.contentOverlay, { paddingTop: insets.top }]}>
-        {visible ? (
-          <ConsentModal
-            hideModalAndSetConsent={hideModalAndSetConsent}
-            visible={visible}
-          />
-        ) : (
-          <>
-            <FlatList
-              ref={ref}
-              onMomentumScrollEnd={updateCurrentSlideIndex}
+      {visible ? (
+        <ConsentModal
+          hideModalAndSetConsent={hideModalAndSetConsent}
+          visible={visible}
+        />
+      ) : (
+        <>
+          <FlatList
+            ref={ref}
+            onMomentumScrollEnd={updateCurrentSlideIndex}
               contentContainerStyle={{ height: "100%" }}
-              showsHorizontalScrollIndicator={false}
-              horizontal
-              data={slides}
-              pagingEnabled
-              renderItem={({ item, index }) => (
-                <Slide item={item} isActive={currentSlideIndex === index} />
-              )}
-              keyExtractor={(item) => item.id}
-              extraData={currentSlideIndex}
-            />
-            <Footer />
-          </>
-        )}
+            showsHorizontalScrollIndicator={false}
+            horizontal
+            data={slides}
+            pagingEnabled
+            renderItem={({ item, index }) => (
+              <Slide item={item} isActive={currentSlideIndex === index} />
+            )}
+            keyExtractor={(item) => item.id}
+            extraData={currentSlideIndex}
+          />
+          <Footer />
+        </>
+      )}
       </View>
     </View>
   );

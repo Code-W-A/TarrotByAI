@@ -1,5 +1,5 @@
 import base64 from "react-native-base64";
-import { atob } from "react-native-quick-base64";
+import { DOMParser, XMLSerializer } from "@xmldom/xmldom";
 import { SvgUri, SvgXml } from "react-native-svg";
 // Funcția care redimensionează SVG-ul
 // Funcția care redimensionează SVG-ul
@@ -283,7 +283,6 @@ export async function fetchHoroscopeDataYear(
 
 //parser
 
-import { DOMParser } from "@xmldom/xmldom";
 import { formatDate, getCurrentDateFormatted } from "../commonUtils";
 import moment from "moment";
 

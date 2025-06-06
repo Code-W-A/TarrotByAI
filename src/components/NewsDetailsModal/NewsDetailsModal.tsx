@@ -233,8 +233,7 @@ export const NewsDetailsModal: React.FC<{
                 letterSpacing: 1.1,
                 fontFamily: 'LoraBold',
                 marginTop: 0,
-                position:"relative",
-                bottom:"-20%"
+                marginBottom: 101,
               }}
             >
               @CristinaZurba.App
