@@ -50,6 +50,8 @@ import * as Font from "expo-font";
 import { NumberProvider } from "./src/context/NumberContext";
 import { StripeProvider } from "@stripe/stripe-react-native";
 import { usePushNotifications } from "./src/hooks/usePushNotifications";
+import { useAppTrackingTransparency } from "./src/hooks/useAppTrackingTransparency";
+import { initializeTrackingServices } from "./src/utils/trackingUtils";
 
 // ADS COMPLETELY REMOVED FOR DEBUGGING
 
@@ -60,6 +62,9 @@ const App = () => {
 
   const notificationListener = useRef(null);
   const responseListener = useRef(null);
+
+  // App Tracking Transparency hook
+  const { status: attStatus, hasPermission: hasTrackingPermission, requestPermission: requestATTPermission } = useAppTrackingTransparency();
 
   const handleRequestLocationPermission = async () => {
     try {
@@ -95,6 +100,13 @@ const App = () => {
 
     loadLanguage();
     // handleRequestLocationPermission();
+    
+    // Request ATT permission after a short delay to ensure app is fully loaded
+    const timer = setTimeout(() => {
+      requestATTPermission();
+    }, 2000);
+
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
@@ -103,6 +115,22 @@ const App = () => {
       console.log("Both language and fonts loaded - ready for analytics");
     }
   }, [languageLoaded, fontsLoaded]);
+
+  // Handle ATT permission status changes
+  useEffect(() => {
+    if (attStatus && languageLoaded && fontsLoaded) {
+      console.log("ATT Status changed:", attStatus);
+      
+      // Initialize tracking services based on permission
+      initializeTrackingServices(hasTrackingPermission)
+        .then((services) => {
+          console.log("Tracking services initialized:", services.isPersonalized ? "Personalized" : "Non-personalized");
+        })
+        .catch((error) => {
+          console.error("Failed to initialize tracking services:", error);
+        });
+    }
+  }, [attStatus, hasTrackingPermission, languageLoaded, fontsLoaded]);
 
   if (!languageLoaded || !fontsLoaded) {
     return (

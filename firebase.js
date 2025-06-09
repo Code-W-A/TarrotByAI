@@ -4,6 +4,7 @@ import { getStorage, ref, uploadBytes } from "firebase/storage";
 import { initializeAuth, getReactNativePersistence } from "firebase/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getAnalytics } from "firebase/analytics";
+import { Platform } from "react-native";
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -33,6 +34,20 @@ const db = getFirestore(app);
 
 //Storage
 const storage = getStorage(app);
-const analytics = getAnalytics(app);
 
-export { db, authentication, storage, analytics };
+// Initialize Analytics with conditional configuration
+const analytics = Platform.OS === 'web' ? getAnalytics(app) : null;
+
+// Function to initialize analytics with ATT compliance
+const initializeAnalytics = (hasTrackingPermission = false) => {
+  if (Platform.OS === 'web') {
+    return analytics;
+  }
+  
+  // For mobile platforms, analytics will be initialized based on ATT permission
+  // This will be called from the app after ATT permission is determined
+  console.log('Analytics initialization with tracking permission:', hasTrackingPermission);
+  return getAnalytics(app);
+};
+
+export { db, authentication, storage, analytics, initializeAnalytics };

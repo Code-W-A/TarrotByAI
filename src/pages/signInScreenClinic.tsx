@@ -77,11 +77,13 @@ import {
   PhoneAuthProvider,
   GoogleAuthProvider,
   signInWithCredential,
+  OAuthProvider,
 } from "firebase/auth";
 import { authentication, db } from "../../firebase";
 import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
 import { makeRedirectUri } from "expo-auth-session";
+import * as AppleAuthentication from 'expo-apple-authentication';
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -303,6 +305,68 @@ const SignInScreenClinic: React.FC<Props> = ({
     }
   }, [response]);
 
+  // Check Apple Authentication availability on iOS
+  useEffect(() => {
+    if (Platform.OS === "ios") {
+      AppleAuthentication.isAvailableAsync().then((available) => {
+        console.log("Apple Authentication available:", available);
+      });
+    }
+  }, []);
+
+  const handleAppleSignIn = async () => {
+    try {
+      // Start Apple authentication flow
+      const appleCredential = await AppleAuthentication.signInAsync({
+        requestedScopes: [
+          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+          AppleAuthentication.AppleAuthenticationScope.EMAIL,
+        ],
+      });
+
+      // Create Firebase credential using Apple token
+      const provider = new OAuthProvider('apple.com');
+      const firebaseCredential = provider.credential({
+        idToken: appleCredential.identityToken,
+      });
+
+      // Authenticate user in Firebase
+      const userCredential = await signInWithCredential(authentication, firebaseCredential);
+      const user = userCredential.user;
+      console.log('User authenticated with Apple:', user);
+
+      // Create or update user document in Firestore
+      const collectionId = "Users";
+      const documentId = user.uid;
+      const value = {
+        owner_uid: user.uid,
+        // Use full name provided by Apple (only available on first authentication)
+        first_name: appleCredential.fullName?.givenName || user.displayName || "Utilizator",
+        last_name: appleCredential.fullName?.familyName || "",
+        email: appleCredential.email || user.email || "Email necunoscut",
+        photoURL: user.photoURL || "",
+        auth_provider: "Apple",
+      };
+
+      const userRef = doc(db, collectionId, documentId);
+      const docSnapshot = await getDoc(userRef);
+
+      if (!docSnapshot.exists()) {
+        await setDoc(userRef, value);
+        console.log("New user created:", value);
+      } else {
+        console.log("Existing user:", docSnapshot.data());
+      }
+
+      // Navigate to dashboard
+      setIsNavBarVisible(true);
+      navigation.replace(screenName.ClinicDashBoard);
+    } catch (error) {
+      console.error('Error with Apple authentication:', error);
+      Alert.alert("Eroare", "Autentificarea cu Apple a eșuat. Vă rugăm să încercați din nou.");
+    }
+  };
+
   useEffect(() => {
     setIsNavBarVisible(false);
     return () => setIsNavBarVisible(true);
@@ -427,6 +491,18 @@ const SignInScreenClinic: React.FC<Props> = ({
                       <Icon name="google" size={22} color="#FFD700" style={{ marginRight: 10 }} />
                       <Text style={styles.googleButtonTextNew}>{i18n.translate('loginWithGoogle')}</Text>
                 </TouchableOpacity>
+
+                {/* Apple Sign In Button - iOS only */}
+                {Platform.OS === 'ios' && (
+                  <TouchableOpacity
+                    style={styles.appleButtonNew}
+                    onPress={handleAppleSignIn}
+                    activeOpacity={0.85}
+                  >
+                    <Icon name="apple" size={22} color="#FFD700" style={{ marginRight: 10 }} />
+                    <Text style={styles.appleButtonTextNew}>Sign in with Apple</Text>
+                  </TouchableOpacity>
+                )}
                   </View>
                   <View style={styles.infoTextViewStyleNew}>
                     <H7fontBoldPrimary>
@@ -673,6 +749,29 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   googleButtonTextNew: {
+    color: '#FFD700',
+    fontSize: 16,
+    fontFamily: 'LoraBold',
+  },
+  appleButtonNew: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#000',
+    borderWidth: 1.5,
+    borderColor: '#000',
+    borderRadius: 22,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    marginTop: 8,
+    marginBottom: 8,
+    width: '100%',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  appleButtonTextNew: {
     color: '#FFD700',
     fontSize: 16,
     fontFamily: 'LoraBold',

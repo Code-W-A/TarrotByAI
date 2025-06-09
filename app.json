@@ -7,17 +7,17 @@
       "android",
       "web"
     ],
-    "version": "2.0.0",
+    "version": "2.0.2",
     "orientation": "portrait",
-    "scheme": "com.cristina.zurba.tarot",
-    "plugins": [
-      [
-        "expo-tracking-transparency",
-        {
-          "userTrackingPermission": "This identifier will be used to deliver personalized ads to you."
-        }
-      ],
-      [
+          "scheme": "com.cristina.zurba.tarot",
+      "plugins": [
+        [
+          "expo-tracking-transparency",
+          {
+            "userTrackingPermission": "This identifier will be used to deliver personalized ads to you."
+          }
+        ],
+        [
         "expo-build-properties",
         {
           "ios": {
@@ -26,7 +26,8 @@
         }
       ],
       "expo-font",
-      "expo-localization"
+      "expo-localization",
+      "expo-apple-authentication"
     ],
     "android": {
       "adaptiveIcon": {
@@ -36,7 +37,7 @@
       "config": {},
       "softwareKeyboardLayoutMode": "pan",
       "package": "com.cristina.zurba.tarot",
-      "versionCode": 32,
+      "versionCode": 35,
       "permissions": [
         "android.permission.RECORD_AUDIO",
         "com.google.android.gms.permission.AD_ID"
@@ -60,10 +61,13 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.cristina.zurba.tarotai",
-      "buildNumber": "52",
+      "buildNumber": "53",
       "infoPlist": {
         "NSUserTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you.",
         "ITSAppUsesNonExemptEncryption": false
+      },
+      "entitlements": {
+        "com.apple.developer.applesignin": ["Default"]
       },
       "googleServicesFile": "./GoogleService-Info.plist"
     },
