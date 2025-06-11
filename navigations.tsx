@@ -382,6 +382,10 @@ const RootNavigation = () => {
         setInitialScreen(screenName.OnboardingScreen);
         return;
       }
+
+      // Verifică dacă limba a fost deja selectată
+      const savedLanguage = await AsyncStorage.getItem("@userLanguage");
+      
       let screen = isGuestUser
         ? screenName.ClinicDashBoard
         : currentUser
@@ -395,10 +399,21 @@ const RootNavigation = () => {
         if (userData) {
           screen = screenName.ClinicDashBoard;
         } else {
-          screen = screenName.languageSelectScreen;
+          // Dacă limba a fost selectată, sari peste ecranul de selecție limbă
+          if (savedLanguage) {
+            screen = screenName.ClinicDashBoard;
+          } else {
+            screen = screenName.languageSelectScreen;
+          }
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
+        // În caz de eroare, verifică totuși limba
+        if (savedLanguage) {
+          screen = screenName.ClinicDashBoard;
+        } else {
+          screen = screenName.languageSelectScreen;
+        }
       }
 
       setInitialScreen(screen);

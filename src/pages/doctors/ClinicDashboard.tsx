@@ -73,6 +73,9 @@ import { doc, getFirestore, updateDoc, collection, query, orderBy, limit, getDoc
 import { db } from "../../../firebase";
 import { NewsDetailsModal } from "../../components/NewsDetailsModal/NewsDetailsModal";
 import { useUserDataModal } from "../../hooks/useUserDataModal";
+// NEW: Import the centralized ads system
+import { useAds } from "../../hooks/useAds";
+import { useAdsContext } from "../../context/AdsContext";
 
 // ADS COMPLETELY REMOVED FOR DEBUGGING
 // const adUnitId = __DEV__
@@ -156,6 +159,10 @@ const ClinicDashboard = () => {
   const [cardAnimations, setCardAnimations] = useState([]);
   const initialAnimations = useRef(Array(4).fill(null)).current; // Utilizarea useRef pentru a păstra starea inițială
   const { language, changeLanguage } = useLanguage();
+  
+  // ADS Integration
+  const { adsConfig } = useAdsContext();
+  const { showInterstitial, isInterstitialLoaded, canShowAds } = useAds(adsConfig);
 
   const [visible, setVisible] = useState(false);
   const navigation: any = useNavigation();
@@ -582,11 +589,21 @@ const ClinicDashboard = () => {
                     <TouchableOpacity
                       key={category.key}
                       style={stylesNew.categoryCard}
-                      onPress={() => {
-                        if (category.screen === "Learn") {
-                          handleNavigateToLearn();
-                        } else {
-                          navigation.navigate(category.screen as never);
+                      onPress={async () => {
+                        console.log('🎯 ClinicDashboard Category apăsat:', category.key);
+                        try {
+                          // Show ads before navigation
+                          const adShown = await showInterstitial();
+                          console.log('✅ ClinicDashboard Ad shown:', adShown);
+                        } catch (error) {
+                          console.error("❌ ClinicDashboard Error showing ad:", error);
+                        } finally {
+                          // Navigate regardless of ad success/failure
+                          if (category.screen === "Learn") {
+                            handleNavigateToLearn();
+                          } else {
+                            navigation.navigate(category.screen as never);
+                          }
                         }
                       }}
                       activeOpacity={0.96}

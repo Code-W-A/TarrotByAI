@@ -29,7 +29,42 @@ export const checkUserDataCompleteness = async () => {
 };
 
 /**
- * Navighează către Learn screen cu verificarea prealabilă a datelor utilizatorului
+ * Verifică dacă utilizatorul are datele astrologice complete pentru astrograma natală
+ * @returns {Promise<{hasAstroData: boolean, astroData: Object|null}>}
+ */
+export const checkAstroDataCompleteness = async () => {
+  try {
+    const userData = await AsyncStorage.getItem("userData");
+    const parsedData = userData ? JSON.parse(userData) : null;
+    
+    // Verifică dacă există datele esențiale pentru astrograma natală
+    const hasAstroData = parsedData && 
+                        parsedData.full_name && 
+                        parsedData.selectedDate && 
+                        parsedData.selectedTime && 
+                        parsedData.place && 
+                        parsedData.lat && 
+                        parsedData.lon &&
+                        parsedData.natalData &&
+                        parsedData.ascendantData &&
+                        parsedData.generalSignTextData &&
+                        parsedData.generalHouseTextData;
+    
+    return {
+      hasAstroData: !!hasAstroData,
+      astroData: parsedData
+    };
+  } catch (error) {
+    console.error("Error checking astro data completeness:", error);
+    return {
+      hasAstroData: false,
+      astroData: null
+    };
+  }
+};
+
+/**
+ * Navighează către Learn screen cu verificarea prealabilă a datelor utilizatorului și astrologice
  * @param {Object} navigation - Navigation object din React Navigation
  * @param {Function} setModalVisible - Funcție pentru afișarea modal-ului de completare date
  * @param {Function} setModalCallback - Funcție pentru setarea callback-ului după completarea datelor
@@ -48,26 +83,50 @@ export const navigateToLearnWithCheck = async (
   setPhone
 ) => {
   const { hasAllData, userData } = await checkUserDataCompleteness();
+  const { hasAstroData, astroData } = await checkAstroDataCompleteness();
   
-  if (hasAllData) {
-    // Toate datele sunt complete, navighează direct
-    navigation.navigate("Learn");
-  } else {
-    // Datele lipsesc, afișează modal-ul
+  console.log("🔍 navigateToLearnWithCheck - Verificare date:");
+  console.log("📱 hasAllData (userDetails):", hasAllData);
+  console.log("⭐ hasAstroData (userData astro):", hasAstroData);
+  
+  // PRIMA VERIFICARE: Datele utilizatorului (firstName, lastName, email, phone)
+  if (!hasAllData) {
+    console.log("⚠️ Datele utilizatorului lipsesc - afișare MoreInfoModal");
     // Pre-populează cu datele existente (dacă sunt)
     setFirstName(userData?.firstName || "");
     setLastName(userData?.lastName || "");
     setEmail(userData?.email || "");
     setPhone(userData?.phone || "");
     
-    // Setează callback-ul să navigheze către Learn după completare
-    setModalCallback(() => () => {
-      navigation.navigate("Learn");
+    // Setează callback-ul să verifice din nou datele astrologice după completare
+    setModalCallback(() => async () => {
+      // După completarea datelor utilizatorului, verifică din nou datele astrologice
+      const { hasAstroData: hasAstroDataAfter } = await checkAstroDataCompleteness();
+      
+      if (!hasAstroDataAfter) {
+        console.log("🔄 Datele astrologice lipsesc - navigare către Name screen");
+        navigation.navigate("Name");
+      } else {
+        console.log("✅ Toate datele sunt complete după modal - navigare către Learn screen");
+        navigation.navigate("Learn");
+      }
     });
     
     // Afișează modal-ul
     setModalVisible(true);
+    return;
   }
+  
+  // A DOUA VERIFICARE: Datele astrologice (dacă datele utilizatorului sunt complete)
+  if (!hasAstroData) {
+    console.log("🔄 Datele astrologice lipsesc - navigare către Name screen");
+    navigation.navigate("Name");
+    return;
+  }
+  
+  // Toate datele sunt complete, navighează direct la Learn
+  console.log("✅ Toate datele sunt complete - navigare către Learn screen");
+  navigation.navigate("Learn");
 };
 
 /**
@@ -77,13 +136,27 @@ export const navigateToLearnWithCheck = async (
  */
 export const navigateToLearnSimple = async (navigation) => {
   const { hasAllData } = await checkUserDataCompleteness();
+  const { hasAstroData } = await checkAstroDataCompleteness();
   
-  if (hasAllData) {
-    navigation.navigate("Learn");
-    return true;
-  } else {
-    // Poate afișa o alertă sau redirecționa către un alt screen pentru completarea datelor
-    console.warn("User data incomplete. Cannot navigate to Learn screen.");
+  console.log("🔍 navigateToLearnSimple - Verificare date:");
+  console.log("📱 hasAllData (userDetails):", hasAllData);
+  console.log("⭐ hasAstroData (userData astro):", hasAstroData);
+  
+  // PRIMA VERIFICARE: Datele utilizatorului
+  if (!hasAllData) {
+    console.warn("⚠️ User data incomplete. Cannot navigate without MoreInfoModal.");
     return false;
   }
+  
+  // A DOUA VERIFICARE: Datele astrologice
+  if (!hasAstroData) {
+    console.log("🔄 Datele astrologice lipsesc - navigare către Name screen");
+    navigation.navigate("Name");
+    return true;
+  }
+  
+  // Toate datele sunt complete
+  console.log("✅ Toate datele sunt complete - navigare către Learn screen");
+  navigation.navigate("Learn");
+  return true;
 }; 

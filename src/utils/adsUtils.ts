@@ -1,9 +1,21 @@
 import { Platform } from 'react-native';
+import mobileAds, { 
+  InterstitialAd, 
+  RewardedAd, 
+  BannerAd, 
+  TestIds, 
+  AdEventType,
+  MaxAdContentRating 
+} from 'react-native-google-mobile-ads';
 
 export interface AdsConfig {
   isPersonalized: boolean;
   canShowAds: boolean;
 }
+
+// Singleton ads instances
+let interstitialAd: InterstitialAd | null = null;
+let rewardedAd: RewardedAd | null = null;
 
 export const initializeAds = async (hasTrackingPermission: boolean): Promise<AdsConfig> => {
   console.log('Initializing ads with tracking permission:', hasTrackingPermission);
@@ -14,32 +26,34 @@ export const initializeAds = async (hasTrackingPermission: boolean): Promise<Ads
   };
 
   try {
+    // Initialize the mobile ads SDK
+    await mobileAds().initialize();
+    
+    // Configure ad requests based on personalization
+    const requestConfiguration = {
+      requestNonPersonalizedAdsOnly: !hasTrackingPermission,
+      maxAdContentRating: MaxAdContentRating.T,
+      tagForChildDirectedTreatment: false,
+      tagForUnderAgeOfConsent: false,
+    };
+    
+    await mobileAds().setRequestConfiguration(requestConfiguration);
+    
     if (Platform.OS === 'ios') {
       // iOS Ad Configuration
       if (hasTrackingPermission) {
         console.log('iOS: Initializing personalized ads');
-        // TODO: Initialize Google Mobile Ads with personalized ads
-        // Example:
-        // await mobileAds().initialize();
-        // await mobileAds().setRequestConfiguration({
-        //   requestNonPersonalizedAdsOnly: false,
-        // });
       } else {
         console.log('iOS: Initializing non-personalized ads');
-        // TODO: Initialize Google Mobile Ads with non-personalized ads
-        // Example:
-        // await mobileAds().initialize();
-        // await mobileAds().setRequestConfiguration({
-        //   requestNonPersonalizedAdsOnly: true,
-        // });
       }
     } else if (Platform.OS === 'android') {
       // Android doesn't require ATT, but respect user's choice if available
       console.log('Android: Initializing ads');
-      // TODO: Initialize Google Mobile Ads for Android
-      // Example:
-      // await mobileAds().initialize();
     }
+    
+    // Pre-load doar interstitial ad (momentan nu avem banner/rewarded)
+    loadInterstitialAd();
+    // loadRewardedAd(); // Când vei avea rewarded ads, decomentează
     
     console.log('Ads initialized successfully:', config);
   } catch (error) {
@@ -50,31 +64,130 @@ export const initializeAds = async (hasTrackingPermission: boolean): Promise<Ads
   return config;
 };
 
-export const showInterstitialAd = (adUnitId: string) => {
-  console.log('Showing interstitial ad:', adUnitId);
-  // TODO: Implement interstitial ad display
+const loadInterstitialAd = () => {
+  const adUnitId = __DEV__ 
+    ? TestIds.INTERSTITIAL 
+    : Platform.OS === 'android' 
+      ? AD_UNIT_IDS.android.interstitial 
+      : AD_UNIT_IDS.ios.interstitial;
+
+  console.log('🎯 Loading interstitial ad with ID:', adUnitId);
+  
+  interstitialAd = InterstitialAd.createForAdRequest(adUnitId);
+  
+  interstitialAd.addAdEventListener(AdEventType.LOADED, () => {
+    console.log('✅ Interstitial ad loaded and ready to show!');
+  });
+  
+  interstitialAd.addAdEventListener(AdEventType.ERROR, (error) => {
+    console.error('❌ Interstitial ad error:', error);
+  });
+  
+  interstitialAd.addAdEventListener(AdEventType.CLOSED, () => {
+    console.log('🔄 Interstitial ad closed, reloading for next use...');
+    loadInterstitialAd(); // Reload for next use
+  });
+  
+  interstitialAd.load();
 };
 
-export const showRewardedAd = (adUnitId: string) => {
-  console.log('Showing rewarded ad:', adUnitId);
-  // TODO: Implement rewarded ad display
+// MOMENTAN NU FOLOSIM REWARDED ADS - funcția e comentată
+// const loadRewardedAd = () => {
+//   const adUnitId = __DEV__ 
+//     ? TestIds.REWARDED 
+//     : Platform.OS === 'android' 
+//       ? AD_UNIT_IDS.android.rewarded 
+//       : AD_UNIT_IDS.ios.rewarded;
+
+//   rewardedAd = RewardedAd.createForAdRequest(adUnitId);
+  
+//   rewardedAd.addAdEventListener(AdEventType.LOADED, () => {
+//     console.log('Rewarded ad loaded');
+//   });
+  
+//   rewardedAd.addAdEventListener(AdEventType.ERROR, (error) => {
+//     console.error('Rewarded ad error:', error);
+//   });
+  
+//   rewardedAd.addAdEventListener(AdEventType.CLOSED, () => {
+//     console.log('Rewarded ad closed, reloading...');
+//     loadRewardedAd(); // Reload for next use
+//   });
+  
+//   rewardedAd.load();
+// };
+
+export const showInterstitialAd = async (): Promise<boolean> => {
+  try {
+    if (interstitialAd?.loaded) {
+      console.log('🎬 Showing interstitial ad now!');
+      await interstitialAd.show();
+      console.log('✅ Interstitial ad shown successfully!');
+      return true;
+    } else {
+      console.log('⏳ Interstitial ad not loaded yet, skipping...');
+      return false;
+    }
+  } catch (error) {
+    console.error('❌ Error showing interstitial ad:', error);
+    return false;
+  }
 };
 
-export const showBannerAd = (adUnitId: string) => {
-  console.log('Showing banner ad:', adUnitId);
-  // TODO: Implement banner ad display
+export const showRewardedAd = async (): Promise<boolean> => {
+  try {
+    if (rewardedAd?.loaded) {
+      await rewardedAd.show();
+      return true;
+    } else {
+      console.log('Rewarded ad not loaded yet');
+      return false;
+    }
+  } catch (error) {
+    console.error('Error showing rewarded ad:', error);
+    return false;
+  }
 };
 
-// Ad Unit IDs (to be replaced with real ones)
+export const showBannerAd = (adUnitId?: string) => {
+  console.log('Banner ad component should be used directly in components');
+  // Banner ads are handled by BannerAd component directly in React components
+};
+
+// Check if ads are loaded
+export const isInterstitialAdLoaded = (): boolean => {
+  return interstitialAd?.loaded || false;
+};
+
+export const isRewardedAdLoaded = (): boolean => {
+  return rewardedAd?.loaded || false;
+};
+
+// Get appropriate ad unit ID
+export const getAdUnitId = (adType: 'banner' | 'interstitial' | 'rewarded'): string => {
+  if (__DEV__) {
+    switch (adType) {
+      case 'banner': return TestIds.BANNER;
+      case 'interstitial': return TestIds.INTERSTITIAL;
+      case 'rewarded': return TestIds.REWARDED;
+      default: return TestIds.BANNER;
+    }
+  }
+  
+  const platform = Platform.OS as 'android' | 'ios';
+  return AD_UNIT_IDS[platform][adType];
+};
+
+// Ad Unit IDs - REAL Production IDs
 export const AD_UNIT_IDS = {
   ios: {
-    banner: 'ca-app-pub-3940256099942544/2934735716', // Test ID
-    interstitial: 'ca-app-pub-3940256099942544/4411468910', // Test ID
-    rewarded: 'ca-app-pub-3940256099942544/1712485313', // Test ID
+    banner: 'ca-app-pub-3940256099942544/2934735716', // Test ID (nu avem banner încă)
+    interstitial: 'ca-app-pub-9577714849380446/5660268593', // REAL iOS Interstitial
+    rewarded: 'ca-app-pub-3940256099942544/1712485313', // Test ID (nu avem rewarded încă)
   },
   android: {
-    banner: 'ca-app-pub-3940256099942544/6300978111', // Test ID
-    interstitial: 'ca-app-pub-3940256099942544/1033173712', // Test ID
-    rewarded: 'ca-app-pub-3940256099942544/5224354917', // Test ID
+    banner: 'ca-app-pub-3940256099942544/6300978111', // Test ID (nu avem banner încă)
+    interstitial: 'ca-app-pub-9577714849380446/7080054250', // REAL Android Interstitial
+    rewarded: 'ca-app-pub-3940256099942544/5224354917', // Test ID (nu avem rewarded încă)
   },
 }; 

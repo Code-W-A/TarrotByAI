@@ -158,7 +158,7 @@ const News = () => {
       // Aplicăm filtrul pentru a elimina articolele cu timestamp în viitor
       articlesData = filterArticlesBeforeCurrentTime(articlesData);
 
-      console.log("Filtered articles:", articlesData);
+      console.log("Filered articles:", articlesData);
 
       let articles = {};
       if (articlesData.length > 0) {

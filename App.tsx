@@ -52,8 +52,7 @@ import { StripeProvider } from "@stripe/stripe-react-native";
 import { usePushNotifications } from "./src/hooks/usePushNotifications";
 import { useAppTrackingTransparency } from "./src/hooks/useAppTrackingTransparency";
 import { initializeTrackingServices } from "./src/utils/trackingUtils";
-
-// ADS COMPLETELY REMOVED FOR DEBUGGING
+import { AdsProvider, useAdsContext } from "./src/context/AdsContext";
 
 const App = () => {
   const [notification, setNotification] = useState(false);
@@ -65,6 +64,34 @@ const App = () => {
 
   // App Tracking Transparency hook
   const { status: attStatus, hasPermission: hasTrackingPermission, requestPermission: requestATTPermission } = useAppTrackingTransparency();
+  
+  // We'll use this inside the AdsProvider to get access to setAdsConfig
+  const AppContent = () => {
+    const { setAdsConfig, isAdsReady } = useAdsContext();
+    
+    // Handle ATT permission status changes - DOAR O DATĂ
+    useEffect(() => {
+      if (attStatus && languageLoaded && fontsLoaded && !isAdsReady) {
+        console.log("ATT Status changed:", attStatus);
+        
+        // Initialize tracking services based on permission - DOAR O DATĂ
+        initializeTrackingServices(hasTrackingPermission, setAdsConfig)
+          .then((services) => {
+            console.log("Tracking services initialized:", services.isPersonalized ? "Personalized" : "Non-personalized");
+          })
+          .catch((error) => {
+            console.error("Failed to initialize tracking services:", error);
+          });
+      }
+    }, [attStatus, languageLoaded, fontsLoaded, isAdsReady]); // Removed hasTrackingPermission and setAdsConfig to prevent loop
+    
+    return (
+      <NavigationContainer>
+        <StatusBar style="light" />
+        <RootNavigation />
+      </NavigationContainer>
+    );
+  };
 
   const handleRequestLocationPermission = async () => {
     try {
@@ -116,21 +143,7 @@ const App = () => {
     }
   }, [languageLoaded, fontsLoaded]);
 
-  // Handle ATT permission status changes
-  useEffect(() => {
-    if (attStatus && languageLoaded && fontsLoaded) {
-      console.log("ATT Status changed:", attStatus);
-      
-      // Initialize tracking services based on permission
-      initializeTrackingServices(hasTrackingPermission)
-        .then((services) => {
-          console.log("Tracking services initialized:", services.isPersonalized ? "Personalized" : "Non-personalized");
-        })
-        .catch((error) => {
-          console.error("Failed to initialize tracking services:", error);
-        });
-    }
-  }, [attStatus, hasTrackingPermission, languageLoaded, fontsLoaded]);
+  // This useEffect is now moved inside AppContent component
 
   if (!languageLoaded || !fontsLoaded) {
     return (
@@ -147,10 +160,9 @@ const App = () => {
               <NavBarVisibilityProvider>
                 <StripeProvider publishableKey="pk_live_51QA6KbFfPQUdD5PApH13dFiVdcrIcqIDRE0vDWVQRPApbE7DpAJDiHIYeeDDOMJwsUsqhvyRLayxXjEyErHLlm2O0015KzM92n">
                   <AuthProvider>
-                    <NavigationContainer>
-                      <StatusBar style="light" />
-                      <RootNavigation />
-                    </NavigationContainer>
+                    <AdsProvider>
+                      <AppContent />
+                    </AdsProvider>
                   </AuthProvider>
                 </StripeProvider>
               </NavBarVisibilityProvider>

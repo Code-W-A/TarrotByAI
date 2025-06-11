@@ -15,28 +15,35 @@ import {
   H8fontBoldPrimary,
   H8fontBoldYellow,
 } from "../commonText";
+// NEW: Import the centralized ads system
+import { useAds } from "../../hooks/useAds";
+import { useAdsContext } from "../../context/AdsContext";
 
-// Adaugă 'text', 'screen', și 'image' ca props-uri ale componentei Card
-const Card = ({ text, screen, image, interstitialAdLoaded, interstitial }) => {
-  const navigation = useNavigation(); // folosește useNavigation pentru a naviga la screen-ul specific când card-ul este apăsat
+// Updated Card component - now uses centralized ads
+const Card = ({ text, screen, image }) => {
+  const navigation = useNavigation();
   const { setCurrentScreen } = useNavigationState();
+  
+  // NEW: Use centralized ads system
+  const { adsConfig } = useAdsContext();
+  const { showInterstitial, isInterstitialLoaded } = useAds(adsConfig);
 
   const onCardPress = async () => {
-    // ADS REMOVED - Direct navigation always
-    // if (interstitialAdLoaded) {
-    //   try {
-    //     await interstitial.show();
-    //     navigation.navigate(screen);
-    //     setCurrentScreen(screen);
-    //   } catch (error) {
-    //     console.error("InterstitialAd.show() error:", error);
-    //     navigation.navigate(screen);
-    //     setCurrentScreen(screen);
-    //   }
-    // } else {
+    console.log('🎯 Card apăsat! Încerc să afișez reclama...');
+    try {
+      // NEW: Show interstitial ad using centralized system
+      const adShown = await showInterstitial();
+      console.log('✅ Card pressed - Ad shown:', adShown);
+      console.log('🎯 Ads config disponibil:', adsConfig);
+      console.log('🎯 Interstitial loaded:', isInterstitialLoaded);
+    } catch (error) {
+      console.error("❌ Error showing interstitial ad:", error);
+    } finally {
+      // Navigate regardless of ad success/failure
+      console.log('🧭 Navigating to screen:', screen);
       navigation.navigate(screen);
       setCurrentScreen(screen);
-    // }
+    }
   };
 
   return (

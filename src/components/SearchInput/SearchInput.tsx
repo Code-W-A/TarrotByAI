@@ -1,6 +1,5 @@
 import React from "react";
 import { TextInput, useColorScheme } from "react-native";
-import { useDispatch } from "react-redux";
 
 import styles from "./styles";
 
@@ -10,8 +9,6 @@ export const SearchInput: React.FC<{
   setIsLoading: Function;
   handleSearchData: Function;
 }> = ({ searchText, setSearchText, setIsLoading, handleSearchData }) => {
-  const dispatch = useDispatch();
-
   return (
     <TextInput
       placeholder={"Search"}

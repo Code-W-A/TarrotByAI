@@ -47,12 +47,10 @@ import { useApiData } from "../../context/ApiContext";
 import { colors, textStyles } from "../../utils/colors";
 import { handleLanguagei18n } from "../../utils/handleLanguageGeneral";
 
-// ADS COMPLETELY REMOVED FOR DEBUGGING
-// import {
-//   InterstitialAd,
-//   TestIds,
-//   AdEventType,
-// } from "react-native-google-mobile-ads";
+// ADS - Now using centralized ads system
+import { useAds } from "../../hooks/useAds";
+import { useAdsContext } from "../../context/AdsContext";
+import { AdBanner } from "../../components/AdBanner/AdBanner";
 
 import { usePushNotifications } from "../../hooks/usePushNotifications";
 import { useAuth } from "../../context/AuthContext";
@@ -133,6 +131,10 @@ const TarotMaineScreen = () => {
   const [cardAnimations, setCardAnimations] = useState([]);
   const initialAnimations = useRef(Array(4).fill(null)).current; // Utilizarea useRef pentru a păstra starea inițială
   const { language, changeLanguage } = useLanguage();
+  
+  // ADS Integration
+  const { adsConfig } = useAdsContext();
+  const { showInterstitial, isInterstitialLoaded, canShowAds } = useAds(adsConfig);
 
   const [visible, setVisible] = useState(false);
   const navigation: any = useNavigation();

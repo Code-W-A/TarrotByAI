@@ -8,7 +8,7 @@ adsConfig: AdsConfig | null;
 isPersonalized: boolean;
 }
 
-export const initializeTrackingServices = async (hasTrackingPermission: boolean): Promise<TrackingServices> => {
+export const initializeTrackingServices = async (hasTrackingPermission: boolean, setAdsConfig?: (config: AdsConfig) => void): Promise<TrackingServices> => {
 console.log('Initializing tracking services with permission:', hasTrackingPermission);
 
 let analytics = null;
@@ -23,6 +23,11 @@ analytics = initializeAnalytics(hasTrackingPermission);
 
 // Initialize ads
 adsConfig = await initializeAds(hasTrackingPermission);
+
+// Update ads context if setter is provided
+if (setAdsConfig && adsConfig) {
+  setAdsConfig(adsConfig);
+}
 
 console.log('Tracking services initialized successfully');
 } catch (error) {
