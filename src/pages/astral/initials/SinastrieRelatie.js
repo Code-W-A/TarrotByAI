@@ -94,6 +94,7 @@ import { getFunctions, httpsCallable } from "firebase/functions";
 import { useStripe } from "@stripe/stripe-react-native";
 import { useTranslation } from "../../../utils/translateUtil";
 import { capturePaymentIntentTest, createInvoiceAfterPaymentTest, createPaymentIntentTest, sendPdfEmail } from "../../../utils/constant";
+import { textStyles } from '../../../utils/colors';
 
 export const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -944,65 +945,46 @@ function SinastrieRelatie({ navigation, route }) {
                   {wheelImage && (
                     <SvgComponent
                       svgBase64={wheelImage.base64ImageP1}
-                      width="430"
-                      height="430"
+                      width="460"
+                      height="460"
                     />
                   )}
+                  
                 </View>
                 <Divider style={{ marginTop: "0%" }} />
                 <View style={{ flex: 1, flexDirection: "row" }}>
                   <View style={{ flexDirection: "column", width: "55%" }}>
                     <View style={styles.horoscopeTodayContainer}>
-                      <Text style={{ color: '#131523', fontFamily: 'Lora', fontWeight: '700' }}>
-                        {UData.full_name}
-                      </Text>
+                      <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 22 }]}>{UData.full_name}</Text>
                     </View>
                     <View style={styles.horoscopeTodayContainer}>
-                      <Text style={{ color: '#131523', fontFamily: 'Lora' }}>
-                        {UData.day} - {UData.month} - {UData.year}
-                      </Text>
+                      <Text style={[styles.textDescription, textStyles.goldenText, { marginTop: 0 }]}>{UData.day} - {UData.month} - {UData.year}</Text>
                     </View>
                     <View style={styles.horoscopeTodayContainer}>
-                      <Text style={{ color: '#131523', fontFamily: 'Lora' }}>
-                        {UData.hour}:{UData.min}
-                      </Text>
+                      <Text style={[styles.textDescription, textStyles.goldenText, { marginTop: 0 }]}>{UData.hour}:{UData.min}</Text>
                     </View>
                     <View style={styles.horoscopeTodayContainer}>
-                      <Text style={{ color: '#131523', fontFamily: 'Lora' }}>
-                        {UData.place}
-                      </Text>
+                      <Text style={[styles.textDescription, textStyles.goldenText, { marginTop: 0 }]}>{UData.place}</Text>
                     </View>
                     <View style={styles.horoscopeTodayContainer}>
-                      <Text style={{ color: '#131523', fontFamily: 'Lora' }}>
-                        {UData.gender}
-                      </Text>
+                      <Text style={[styles.textDescription, textStyles.goldenText, { marginTop: 0 }]}>{UData.gender}</Text>
                     </View>
                   </View>
                   <View style={{ flexDirection: "column", width: "55%" }}>
                     <View style={styles.horoscopeTodayContainer}>
-                      <Text style={{ color: '#131523', fontFamily: 'Lora' }}>
-                        {userD?.full_name}
-                      </Text>
+                      <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 22 }]}>{userD?.full_name}</Text>
                     </View>
                     <View style={styles.horoscopeTodayContainer}>
-                      <Text style={{ color: '#131523', fontFamily: 'Lora' }}>
-                        {userD?.day} - {userD?.month} - {userD?.year}
-                      </Text>
+                      <Text style={[styles.textDescription, textStyles.goldenText, { marginTop: 0 }]}>{userD?.day} - {userD?.month} - {userD?.year}</Text>
                     </View>
                     <View style={styles.horoscopeTodayContainer}>
-                      <Text style={{ color: '#131523', fontFamily: 'Lora' }}>
-                        {userD?.selectedTime}
-                      </Text>
+                      <Text style={[styles.textDescription, textStyles.goldenText, { marginTop: 0 }]}>{userD?.selectedTime}</Text>
                     </View>
                     <View style={styles.horoscopeTodayContainer}>
-                      <Text style={{ color: '#131523', fontFamily: 'Lora' }}>
-                        {userD?.place}
-                      </Text>
+                      <Text style={[styles.textDescription, textStyles.goldenText, { marginTop: 0 }]}>{userD?.place}</Text>
                     </View>
                     <View style={styles.horoscopeTodayContainer}>
-                      <Text style={{ color: '#131523', fontFamily: 'Lora' }}>
-                        {userD?.gender}
-                      </Text>
+                      <Text style={[styles.textDescription, textStyles.goldenText, { marginTop: 0 }]}>{userD?.gender}</Text>
                     </View>
                   </View>
                 </View>
@@ -1059,10 +1041,10 @@ function SinastrieRelatie({ navigation, route }) {
                             <View key={index}>
                               {aspect.reading.map((read, readIndex) => (
                                 <View key={readIndex} style={{ marginTop: 20 }}>
-                                  <Text style={{ color: '#131523', fontFamily: 'Lora', textAlign: 'justify' }}>
+                                  <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 16 }]}>
                                     {read?.title}
                                   </Text>
-                                  <Text style={{ color: '#131523', fontFamily: 'Lora', textAlign: 'justify' }}>
+                                  <Text style={[styles.textDescription, textStyles.goldenText, { marginTop: 0 }]}>
                                     {read?.description}
                                   </Text>
                                 </View>
@@ -1076,15 +1058,15 @@ function SinastrieRelatie({ navigation, route }) {
                           {activeData.length > 0 &&
                             activeData[0]?.reading?.length > 0 && (
                               <View>
-                                <Text style={{ color: '#131523', fontFamily: 'Lora', textAlign: 'justify', fontWeight: '700' }}>
+                                <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 16 }]}>
                                   {activeData[0].reading[0]?.title}
                                 </Text>
-                                <Text style={{ color: '#131523', fontFamily: 'Lora', textAlign: 'justify' }}>
+                                <Text style={[styles.textDescription, textStyles.goldenText, { marginTop: 0 }]}>
                                   {activeData[0].reading[0]?.description}
                                 </Text>
                               </View>
                             )}
-                          <Text style={styles.partialContent}>
+                          <Text style={[styles.textDescription, textStyles.goldenText, { marginTop: 0 }]}>
                             {achizitioneazaInterpretareCompletaText2}
                           </Text>
                           <Button
@@ -1250,14 +1232,17 @@ const styles = StyleSheet.create({
     paddingBottom: "15%",
   },
   textTitles: {
-    fontSize: 15,
+    fontSize: 18,
     fontWeight: "bold",
   },
   textDescription: {
-    fontSize: 12,
+    fontSize: 18,
+    lineHeight: 26,
     color: "#F0F0F0",
     marginTop: "5%",
     marginLeft: "3%",
+    textAlign: 'justify',
+    paddingRight: "8%",
   },
   horoscopeTodayContainer: {
     flexDirection: "row",

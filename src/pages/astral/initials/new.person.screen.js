@@ -56,6 +56,9 @@ import i18n from "../../../../i18n";
 import { useLanguage } from "../../../context/LanguageContext";
 import { capitalizeFirstLetter } from "../../../utils/stringUtils";
 import { fetchSinastrieData } from "../../../utils/AstralUtils/fetchSinastrieDate";
+import DayPickerModal from '../../../components/DayPickerModal';
+import MonthPickerModal from '../../../components/MonthPickerModal';
+import YearPickerModal from '../../../components/YearPickerModal';
 
 const { width } = Dimensions.get("window");
 
@@ -275,6 +278,24 @@ function NewPersonScreen({ navigation, route }) {
         // Adaugă o persoană nouă
         parsedDataPersons.push(newPersonData);
         currentPersonIndex = parsedDataPersons.length - 1;
+      }
+
+      //───────────────────────────────────────────────
+      //  Recalculăm timezone-ul PERSOANEI UTILIZATOR (parsedData)
+      //───────────────────────────────────────────────
+      if (parsedData && parsedData.day && parsedData.month && parsedData.year) {
+        try {
+          const userTimestamp = generateTimestampFromDateTime(
+            `${parsedData.day}-${parsedData.month}-${parsedData.year}`,
+            parsedData.selectedTime || "00:00"
+          );
+          const userTzData = await fetchTimeZone(parsedData.lat, parsedData.lon, userTimestamp);
+          if (userTzData) {
+            parsedData.tzone = userTzData.offset;
+          }
+        } catch (err) {
+          console.log("Recalculare tzone user failed", err);
+        }
       }
 
       // Configurați URL-urile pentru analizele de sinastrie
@@ -552,127 +573,82 @@ function NewPersonScreen({ navigation, route }) {
                       paddingHorizontal: "10%",
                     }}
                   >
-                    <Menu
+                    {/* Ziua */}
+                    <Button
+                      mode="outlined"
+                      style={styles.selectButton}
+                      onPress={() => setDayMenuVisible(true)}
+                      theme={{
+                        colors: {
+                          primary: '#FFD700',
+                          onSurface: '#FFD700',
+                        },
+                      }}
+                      labelStyle={styles.selectButtonLabel}
+                    >
+                      {day}
+                    </Button>
+                    <DayPickerModal
                       visible={isDayMenuVisible}
-                      onDismiss={() => setDay(false)}
-                      anchor={
-                        <Button
-                          mode="outlined"
-                              style={styles.selectButton}
-                          onPress={() => setDayMenuVisible(true)}
-                          theme={{
-                            colors: {
-                                  primary: '#FFD700',
-                                  onSurface: '#FFD700',
-                            },
-                          }}
-                              labelStyle={styles.selectButtonLabel}
-                        >
-                          {day}
-                        </Button>
-                      }
+                      onClose={() => setDayMenuVisible(false)}
+                      onSelect={(value) => setDay(value)}
+                      selectedDay={day}
+                    />
+                    {/* Luna */}
+                    <Button
+                      mode="outlined"
+                      style={styles.selectButton}
+                      onPress={() => setMonthMenuVisible(true)}
+                      theme={{
+                        colors: {
+                          primary: '#FFD700',
+                          onSurface: '#FFD700',
+                        },
+                      }}
+                      labelStyle={styles.selectButtonLabel}
                     >
-                      {Array.from({ length: 31 }, (_, i) => (
-                        <Menu.Item
-                          key={i}
-                          onPress={() => {
-                            setDay(`${i + 1}`);
-                            setDayMenuVisible(false);
-                          }}
-                          title={`${i + 1}`}
-                        />
-                      ))}
-                    </Menu>
-                    <Menu
+                      {month}
+                    </Button>
+                    <MonthPickerModal
                       visible={isMonthMenuVisible}
-                      onDismiss={() => setMonthMenuVisible(false)}
-                      anchor={
-                        <Button
-                          mode="outlined"
-                              style={styles.selectButton}
-                          onPress={() => setMonthMenuVisible(true)}
-                          theme={{
-                            colors: {
-                                  primary: '#FFD700',
-                                  onSurface: '#FFD700',
-                            },
-                          }}
-                              labelStyle={styles.selectButtonLabel}
-                        >
-                          {month}
-                        </Button>
-                      }
+                      onClose={() => setMonthMenuVisible(false)}
+                      onSelect={(value) => setMonth(value)}
+                      selectedMonth={month}
+                    />
+                    {/* Anul */}
+                    <Button
+                      mode="outlined"
+                      style={styles.selectButton}
+                      onPress={() => setYearMenuVisible(true)}
+                      theme={{
+                        colors: {
+                          primary: '#FFD700',
+                          onSurface: '#FFD700',
+                        },
+                      }}
+                      labelStyle={styles.selectButtonLabel}
                     >
-                      {[
-                        "1",
-                        "2",
-                        "3",
-                        "4",
-                        "5",
-                        "6",
-                        "7",
-                        "8",
-                        "9",
-                        "10",
-                        "11",
-                        "12",
-                      ].map((month, index) => (
-                        <Menu.Item
-                          key={index}
-                          onPress={() => {
-                            setMonth(month);
-                            setMonthMenuVisible(false);
-                          }}
-                          title={month}
-                        />
-                      ))}
-                    </Menu>
-                    <Menu
+                      {year}
+                    </Button>
+                    <YearPickerModal
                       visible={isYearMenuVisible}
-                      onDismiss={() => setYearMenuVisible(false)}
-                      anchor={
-                        <Button
-                          mode="outlined"
-                              style={styles.selectButton}
-                          theme={{
-                            colors: {
-                                  primary: '#FFD700',
-                                  onSurface: '#FFD700',
-                            },
-                          }}
-                          onPress={() => setYearMenuVisible(true)}
-                        >
-                          {year}
-                        </Button>
-                      }
-                    >
-                      {Array.from(
-                            { length: new Date().getFullYear() - 1900 + 1 },
-                        (_, i) => (
-                          <Menu.Item
-                            key={i}
-                            onPress={() => {
-                              setYear(`${new Date().getFullYear() - i}`);
-                              setYearMenuVisible(false);
-                            }}
-                            title={`${new Date().getFullYear() - i}`}
-                          />
-                        )
-                      )}
-                    </Menu>
+                      onClose={() => setYearMenuVisible(false)}
+                      onSelect={(value) => setYear(value)}
+                      selectedYear={year}
+                    />
                   </View>
                   <Button
                     mode="outlined"
                     onPress={() => setShowTimePicker(true)}
-                        style={styles.selectButton}
-                        color="#FFD700"
+                    style={styles.selectButton}
+                    color="#FFD700"
                     theme={{
                       colors: {
-                            primary: '#FFD700',
-                            onSurface: '#FFD700',
+                        primary: '#FFD700',
+                        onSurface: '#FFD700',
                       },
                     }}
-                        labelStyle={styles.selectButtonLabel}
+                    labelStyle={styles.selectButtonLabel}
                   >
                     {selectedTime || i18n.translate("SelecteazaOraNasterii")}
                   </Button>

@@ -82,6 +82,7 @@ import { getFunctions, httpsCallable } from "firebase/functions";
 import { StorageAccessFramework } from "expo-file-system";
 import { useTranslation } from "../../../utils/translateUtil";
 import { capturePaymentIntentTest, createInvoiceAfterPaymentTest, createPaymentIntentTest, sendPdfEmail } from "../../../utils/constant";
+import { textStyles } from '../../../utils/colors';
 
 // const LuckyNumber = ({ number }) => {
 //   return (
@@ -1031,56 +1032,36 @@ function SinastrieRelatieOthers({ navigation, route }) {
                   <View style={{ flex: 1, flexDirection: "row" }}>
                     <View style={{ flexDirection: "column", width: "55%" }}>
                       <View style={styles.horoscopeTodayContainer}>
-                        <Text style={{ color: '#131523', fontFamily: 'Lora', fontWeight: '700' }}>
-                          {personOne?.full_name}
-                        </Text>
+                        <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 22 }]}>{personOne?.full_name}</Text>
                       </View>
                       <View style={styles.horoscopeTodayContainer}>
-                        <Text style={{ color: '#131523', fontFamily: 'Lora' }}>
-                          {personOne?.day} - {personOne?.month} - {personOne?.year}
-                        </Text>
+                        <Text style={[styles.textDescription, textStyles.goldenText, { marginTop: 0 }]}>{personOne?.day} - {personOne?.month} - {personOne?.year}</Text>
                       </View>
                       <View style={styles.horoscopeTodayContainer}>
-                        <Text style={{ color: '#131523', fontFamily: 'Lora' }}>
-                          {personOne?.hour}:{personOne?.min}
-                        </Text>
+                        <Text style={[styles.textDescription, textStyles.goldenText, { marginTop: 0 }]}>{personOne?.hour}:{personOne?.min}</Text>
                       </View>
                       <View style={styles.horoscopeTodayContainer}>
-                        <Text style={{ color: '#131523', fontFamily: 'Lora' }}>
-                          {personOne?.place}
-                        </Text>
+                        <Text style={[styles.textDescription, textStyles.goldenText, { marginTop: 0 }]}>{personOne?.place}</Text>
                       </View>
                       <View style={styles.horoscopeTodayContainer}>
-                        <Text style={{ color: '#131523', fontFamily: 'Lora' }}>
-                          {personOne?.gender}
-                        </Text>
+                        <Text style={[styles.textDescription, textStyles.goldenText, { marginTop: 0 }]}>{personOne?.gender}</Text>
                       </View>
                     </View>
                     <View style={{ flexDirection: "column", width: "55%" }}>
                       <View style={styles.horoscopeTodayContainer}>
-                        <Text style={{ color: '#131523', fontFamily: 'Lora', fontWeight: '700' }}>
-                          {personTwo?.full_name}
-                        </Text>
+                        <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 22 }]}>{personTwo?.full_name}</Text>
                       </View>
                       <View style={styles.horoscopeTodayContainer}>
-                        <Text style={{ color: '#131523', fontFamily: 'Lora' }}>
-                          {personTwo?.day} - {personTwo?.month} - {personTwo?.year}
-                        </Text>
+                        <Text style={[styles.textDescription, textStyles.goldenText, { marginTop: 0 }]}>{personTwo?.day} - {personTwo?.month} - {personTwo?.year}</Text>
                       </View>
                       <View style={styles.horoscopeTodayContainer}>
-                        <Text style={{ color: '#131523', fontFamily: 'Lora' }}>
-                          {personTwo?.selectedTime}
-                        </Text>
+                        <Text style={[styles.textDescription, textStyles.goldenText, { marginTop: 0 }]}>{personTwo?.selectedTime}</Text>
                       </View>
                       <View style={styles.horoscopeTodayContainer}>
-                        <Text style={{ color: '#131523', fontFamily: 'Lora' }}>
-                          {personTwo?.place}
-                        </Text>
+                        <Text style={[styles.textDescription, textStyles.goldenText, { marginTop: 0 }]}>{personTwo?.place}</Text>
                       </View>
                       <View style={styles.horoscopeTodayContainer}>
-                        <Text style={{ color: '#131523', fontFamily: 'Lora' }}>
-                          {personTwo?.gender}
-                        </Text>
+                        <Text style={[styles.textDescription, textStyles.goldenText, { marginTop: 0 }]}>{personTwo?.gender}</Text>
                       </View>
                     </View>
                   </View>
@@ -1111,15 +1092,11 @@ function SinastrieRelatieOthers({ navigation, route }) {
                       {activeData.length > 0 &&
                         activeData[0]?.reading?.length > 0 && (
                           <View>
-                            <Text style={{ color: '#131523', fontFamily: 'Lora', textAlign: 'justify', fontWeight: '700' }}>
-                              {activeData[0].reading[0]?.title}
-                            </Text>
-                            <Text style={{ color: '#131523', fontFamily: 'Lora', textAlign: 'justify' }}>
-                              {activeData[0].reading[0]?.description}
-                            </Text>
+                            <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 22 }]}>{activeData[0].reading[0]?.title}</Text>
+                            <Text style={[styles.textDescription, textStyles.goldenText, { marginTop: 0 }]}>{activeData[0].reading[0]?.description}</Text>
                           </View>
                         )}
-                      <Text style={styles.partialContent}>
+                      <Text style={[styles.partialContent, textStyles.goldenText]}>
                         {achizitioneazaInterpretareCompletaText2}
                       </Text>
                       <Button
@@ -1278,14 +1255,17 @@ const styles = StyleSheet.create({
     paddingBottom: "15%",
   },
   textTitles: {
-    fontSize: 15,
+    fontSize: 18,
     fontWeight: "bold",
   },
   textDescription: {
-    fontSize: 12,
+    fontSize: 18,
+    lineHeight: 26,
     color: "#F0F0F0",
     marginTop: "5%",
     marginLeft: "3%",
+    textAlign: 'justify',
+    paddingRight: "8%",
   },
   horoscopeTodayContainer: {
     flexDirection: "row",

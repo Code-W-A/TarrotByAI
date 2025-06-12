@@ -1046,7 +1046,7 @@ function AstrogramaNatala({ navigation, route }) {
                         />
                       </>
                     )}
-                    <Text style={[styles.textDescription, textStyles.goldenText]}>
+                    <Text style={[styles.textDescription, textStyles.goldenText, {color:"#bfa76a"}]}>
                       {userD.ascendantData.data.result}
                     </Text>
 

@@ -33,6 +33,7 @@ import { capitalizeFirstLetter } from "../../../utils/stringUtils";
 import MyTopBar from "../../../components/Astral/components/TopBar";
 import MyTopBarHoroscope from "../../../components/Astral/components/TopBarHoroscope";
 import i18n from "../../../../i18n";
+import { translateZodiacSignAuto } from "../../../utils/zodiacUtils";
 import LoadingOverlay from "../../../components/Astral/components/zodiac/LoadingOverlay";
 import {
   fetchHoroscopeData,
@@ -158,7 +159,25 @@ function HoroscopZilnic({ navigation }) {
           signHeight={70}
         />
         <ShadowHeadline style={styles.headerHeadline}>
-          {userD.zodiacSign}
+          {(() => {
+            try {
+              // Try main translation first
+              const translated = translateZodiacSignAuto(userD.zodiacSign);
+              if (translated && translated !== userD.zodiacSign) {
+                return translated;
+              }
+              // Try i18n direct translation
+              const directTranslation = i18n.translate(userD.zodiacSign);
+              if (directTranslation && directTranslation !== userD.zodiacSign) {
+                return directTranslation;
+              }
+              // Fallback to original
+              return userD.zodiacSign;
+            } catch (error) {
+              console.log('Error translating zodiac sign:', error);
+              return userD.zodiacSign; // Fallback to original
+            }
+          })()}
         </ShadowHeadline>
         <Subheading style={{ color: '#131523', fontFamily: 'Lora', fontSize: 16, textAlign: 'center' }}>
           {userD.day} - {userD.month} - {userD.year}
@@ -661,12 +680,12 @@ function HoroscopZilnic({ navigation }) {
                                 },
                               ]}
                             >
-                              <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 23 }]}>
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 28 }]}>
                                 {i18n.translate("hAstazi")}
                               </Text>
                             </View>
                             <View style={styles.defaultContainer}>
-                              <Text style={styles.textTitles}>
+                              <Text style={[styles.textTitles, {fontSize:24}]}>
                                 {i18n.translate("hNumbers")}
                               </Text>
                             </View>
@@ -691,7 +710,7 @@ function HoroscopZilnic({ navigation }) {
                                   ))}
                             </View>
                             <View style={styles.defaultContainer}>
-                              <Text style={[styles.textTitles, textStyles.goldenTextBold]}>
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold, {color:"#bfa76a", fontSize:20}]}>
                                 {
                                   userD?.horoscopeResultsDaily?.data?.prediction
                                     ?.luck[0]
@@ -699,7 +718,7 @@ function HoroscopZilnic({ navigation }) {
                               </Text>
                             </View>
                             <View style={styles.defaultContainer}>
-                              <Text style={[styles.textTitles, textStyles.goldenTextBold]}>
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold, {color:"#bfa76a", fontSize:20}]}>
                                 {
                                   userD?.horoscopeResultsDaily?.data?.prediction
                                     ?.luck[2]
@@ -707,7 +726,7 @@ function HoroscopZilnic({ navigation }) {
                               </Text>
                             </View>
                             <View style={styles.defaultContainer}>
-                              <Text style={[styles.textTitles, textStyles.goldenTextBold]}>
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold, {color:"#bfa76a", fontSize:20}]}>
                                 {
                                   userD?.horoscopeResultsDaily?.data?.prediction
                                     ?.luck[3]
@@ -715,7 +734,7 @@ function HoroscopZilnic({ navigation }) {
                               </Text>
                             </View>
                             <View style={styles.defaultContainer}>
-                              <Text style={[styles.textTitles, textStyles.goldenTextBold]}>
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold, {color:"#bfa76a", fontSize:20}]}>
                                 {
                                   userD?.horoscopeResultsDaily?.data?.prediction
                                     ?.luck[4]
@@ -723,7 +742,7 @@ function HoroscopZilnic({ navigation }) {
                               </Text>
                             </View>
                             <View style={styles.defaultContainer}>
-                              <Text style={[styles.textTitles, textStyles.goldenTextBold]}>
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold, {color:"#bfa76a", fontSize:20}]}>
                                 {
                                   userD?.horoscopeResultsDaily?.data?.prediction
                                     ?.luck[5]
@@ -733,7 +752,7 @@ function HoroscopZilnic({ navigation }) {
                             <Divider style={{ marginTop: 20 }} />
                             <View style={[styles.defaultContainer]}>
                               <View style={styles.horoscopeTodayContainer}>
-                                <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 20 }]}>
+                                <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 24 }]}>
                                   {i18n.translate("hPredictions")}
                                 </Text>
                                 <View style={styles.iconsHoroscopeToday}>
@@ -759,10 +778,10 @@ function HoroscopZilnic({ navigation }) {
                               </View>
                             </View>
                             <View style={styles.defaultContainer}>
-                              <Text style={[styles.textTitles, textStyles.goldenText]}>
+                              <Text style={[styles.textTitles, textStyles.goldenText, {fontSize:24}]}>
                                 {i18n.translate("hEmotions")}
                               </Text>
-                              <Text style={{ marginTop: 15 }}>
+                              <Text style={{ marginTop: 15, fontSize:20 }}>
                                 {
                                   userD?.horoscopeResultsDaily?.data?.prediction
                                     ?.emotions
@@ -770,18 +789,18 @@ function HoroscopZilnic({ navigation }) {
                               </Text>
                             </View>
                             <View style={styles.defaultContainer}>
-                              <Text style={[styles.textTitles, textStyles.goldenText]}>
+                              <Text style={[styles.textTitles, textStyles.goldenText, {fontSize:24}]}>
                                 {i18n.translate("hHealth")}
                               </Text>
-                              <Text style={{ marginTop: 15 }}>
+                              <Text style={{ marginTop: 15, fontSize:20 }}>
                                 {userD?.horoscopeResultsDaily?.data?.prediction?.health}
                               </Text>
                             </View>
                             <View style={styles.defaultContainer}>
-                              <Text style={[styles.textTitles, textStyles.goldenText]}>
+                              <Text style={[styles.textTitles, textStyles.goldenText, {fontSize:24}]}>
                                 {i18n.translate("hPersonal")}
                               </Text>
-                              <Text style={{ marginTop: 15 }}>
+                              <Text style={{ marginTop: 15, fontSize:20 }}>
                                 {
                                   userD?.horoscopeResultsDaily?.data?.prediction
                                     ?.personal
@@ -789,10 +808,10 @@ function HoroscopZilnic({ navigation }) {
                               </Text>
                             </View>
                             <View style={styles.defaultContainer}>
-                              <Text style={[styles.textTitles, textStyles.goldenText]}>
+                              <Text style={[styles.textTitles, textStyles.goldenText, {fontSize:24}]}>
                                 {i18n.translate("hProfession")}
                               </Text>
-                              <Text style={{ marginTop: 15 }}>
+                              <Text style={{ marginTop: 15, fontSize:20 }}>
                                 {
                                   userD?.horoscopeResultsDaily?.data?.prediction
                                     ?.profession
@@ -800,10 +819,10 @@ function HoroscopZilnic({ navigation }) {
                               </Text>
                             </View>
                             <View style={styles.defaultContainer}>
-                              <Text style={[styles.textTitles, textStyles.goldenText]}>
+                              <Text style={[styles.textTitles, textStyles.goldenText, {fontSize:24}]}>
                                 {i18n.translate("hTravel")}
                               </Text>
-                              <Text style={{ marginTop: 15 }}>
+                              <Text style={{ marginTop: 15, fontSize:20 }}>
                                 {userD?.horoscopeResultsDaily?.data?.prediction?.travel}
                               </Text>
                             </View>
@@ -820,12 +839,12 @@ function HoroscopZilnic({ navigation }) {
                                 },
                               ]}
                             >
-                              <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 23 }]}>
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 28 }]}>
                                 {i18n.translate("hSaptamana")}{" "}
                               </Text>
                             </View>
                             <View style={styles.defaultContainer}>
-                              <Text style={styles.textTitles}>
+                              <Text style={[styles.textTitles, {fontSize:24}]}>
                                 {i18n.translate("hNumbers")}{" "}
                               </Text>
                             </View>
@@ -850,7 +869,7 @@ function HoroscopZilnic({ navigation }) {
                                   ))}
                             </View>
                             <View style={styles.defaultContainer}>
-                              <Text style={[styles.textTitles, textStyles.goldenTextBold]}>
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold, {color:"#bfa76a", fontSize:20}]}>
                                 {
                                   userD?.horoscopeResultsWeekly?.data?.weekly_horoscope
                                     ?.luck[0]
@@ -858,7 +877,7 @@ function HoroscopZilnic({ navigation }) {
                               </Text>
                             </View>
                             <View style={styles.defaultContainer}>
-                              <Text style={[styles.textTitles, textStyles.goldenTextBold]}>
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold, {color:"#bfa76a", fontSize:20}]}>
                                 {
                                   userD?.horoscopeResultsWeekly?.data?.weekly_horoscope
                                     ?.luck[2]
@@ -866,7 +885,7 @@ function HoroscopZilnic({ navigation }) {
                               </Text>
                             </View>
                             <View style={styles.defaultContainer}>
-                              <Text style={[styles.textTitles, textStyles.goldenTextBold]}>
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold, {color:"#bfa76a", fontSize:20}]}>
                                 {
                                   userD?.horoscopeResultsWeekly?.data?.weekly_horoscope
                                     ?.luck[3]
@@ -874,7 +893,7 @@ function HoroscopZilnic({ navigation }) {
                               </Text>
                             </View>
                             <View style={styles.defaultContainer}>
-                              <Text style={[styles.textTitles, textStyles.goldenTextBold]}>
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold, {color:"#bfa76a", fontSize:20}]}>
                                 {
                                   userD?.horoscopeResultsWeekly?.data?.weekly_horoscope
                                     ?.luck[4]
@@ -882,7 +901,7 @@ function HoroscopZilnic({ navigation }) {
                               </Text>
                             </View>
                             <View style={styles.defaultContainer}>
-                              <Text style={[styles.textTitles, textStyles.goldenTextBold]}>
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold, {color:"#bfa76a", fontSize:20}]}>
                                 {
                                   userD?.horoscopeResultsWeekly?.data?.weekly_horoscope
                                     ?.luck[5]
@@ -892,7 +911,7 @@ function HoroscopZilnic({ navigation }) {
                             <Divider style={{ marginTop: 20 }} />
                             <View style={[styles.defaultContainer]}>
                               <View style={styles.horoscopeTodayContainer}>
-                                <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 20 }]}>
+                                <Text style={[styles.textTitles, textStyles.goldenTextBold, {color:"#bfa76a"}, { fontSize: 20 }]}>
                                   {i18n.translate("hPredictions")}
                                 </Text>
                                 <View style={styles.iconsHoroscopeToday}>
@@ -918,10 +937,10 @@ function HoroscopZilnic({ navigation }) {
                               </View>
                             </View>
                             <View style={styles.defaultContainer}>
-                              <Text style={[styles.textTitles, textStyles.goldenText]}>
+                              <Text style={[styles.textTitles, textStyles.goldenText, {fontSize:24}]}>
                                 {i18n.translate("hEmotions")}
                               </Text>
-                              <Text style={{ marginTop: 15 }}>
+                              <Text style={{ marginTop: 15, fontSize:20 }}>
                                 {
                                   userD?.horoscopeResultsWeekly?.data?.weekly_horoscope
                                     ?.emotions
@@ -929,10 +948,10 @@ function HoroscopZilnic({ navigation }) {
                               </Text>
                             </View>
                             <View style={styles.defaultContainer}>
-                              <Text style={[styles.textTitles, textStyles.goldenText]}>
+                              <Text style={[styles.textTitles, textStyles.goldenText, {fontSize:24}]}>
                                 {i18n.translate("hHealth")}
                               </Text>
-                              <Text style={{ marginTop: 15 }}>
+                              <Text style={{ marginTop: 15, fontSize:20 }}>
                                 {
                                   userD?.horoscopeResultsWeekly?.data?.weekly_horoscope
                                     ?.health
@@ -940,10 +959,10 @@ function HoroscopZilnic({ navigation }) {
                               </Text>
                             </View>
                             <View style={styles.defaultContainer}>
-                              <Text style={[styles.textTitles, textStyles.goldenText]}>
+                              <Text style={[styles.textTitles, textStyles.goldenText, {fontSize:24}]}>
                                 {i18n.translate("hPersonal")}
                               </Text>
-                              <Text style={{ marginTop: 15 }}>
+                              <Text style={{ marginTop: 15, fontSize:20 }}>
                                 {
                                   userD?.horoscopeResultsWeekly?.data?.weekly_horoscope
                                     ?.personal
@@ -951,10 +970,10 @@ function HoroscopZilnic({ navigation }) {
                               </Text>
                             </View>
                             <View style={styles.defaultContainer}>
-                              <Text style={[styles.textTitles, textStyles.goldenText]}>
+                              <Text style={[styles.textTitles, textStyles.goldenText, {fontSize:24}]}>
                                 {i18n.translate("hProfession")}
                               </Text>
-                              <Text style={{ marginTop: 15 }}>
+                              <Text style={{ marginTop: 15, fontSize:20 }}>
                                 {
                                   userD?.horoscopeResultsWeekly?.data?.weekly_horoscope
                                     ?.profession
@@ -962,10 +981,10 @@ function HoroscopZilnic({ navigation }) {
                               </Text>
                             </View>
                             <View style={styles.defaultContainer}>
-                              <Text style={[styles.textTitles, textStyles.goldenText]}>
+                              <Text style={[styles.textTitles, textStyles.goldenText, {fontSize:24}]}>
                                 {i18n.translate("hTravel")}
                               </Text>
-                              <Text style={{ marginTop: 15 }}>
+                              <Text style={{ marginTop: 15, fontSize:20 }}>
                                 {
                                   userD?.horoscopeResultsWeekly?.data?.weekly_horoscope
                                     ?.travel
@@ -985,12 +1004,12 @@ function HoroscopZilnic({ navigation }) {
                                 },
                               ]}
                             >
-                              <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 23 }]}>
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 28 }]}>
                                 {i18n.translate("hMonth")}{" "}
                               </Text>
                             </View>
                             <View style={styles.defaultContainer}>
-                              <Text style={styles.textTitles}>
+                              <Text style={[styles.textTitles, {fontSize:24}]}>
                                 {i18n.translate("hNumbers")}{" "}
                               </Text>
                             </View>
@@ -1015,7 +1034,7 @@ function HoroscopZilnic({ navigation }) {
                                   ))}
                             </View>
                             <View style={styles.defaultContainer}>
-                              <Text style={[styles.textTitles, textStyles.goldenTextBold]}>
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold, {color:"#bfa76a", fontSize:20}]}>
                                 {
                                   userD?.horoscopeResultsMonthly?.data
                                     ?.monthly_horoscope?.luck[0]
@@ -1023,7 +1042,7 @@ function HoroscopZilnic({ navigation }) {
                               </Text>
                             </View>
                             <View style={styles.defaultContainer}>
-                              <Text style={[styles.textTitles, textStyles.goldenTextBold]}>
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold, {color:"#bfa76a", fontSize:20}]}>
                                 {
                                   userD?.horoscopeResultsMonthly?.data
                                     ?.monthly_horoscope?.luck[2]
@@ -1031,7 +1050,7 @@ function HoroscopZilnic({ navigation }) {
                               </Text>
                             </View>
                             <View style={styles.defaultContainer}>
-                              <Text style={[styles.textTitles, textStyles.goldenTextBold]}>
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold, {color:"#bfa76a", fontSize:20}]}>
                                 {
                                   userD?.horoscopeResultsMonthly?.data
                                     ?.monthly_horoscope?.luck[3]
@@ -1039,7 +1058,7 @@ function HoroscopZilnic({ navigation }) {
                               </Text>
                             </View>
                             <View style={styles.defaultContainer}>
-                              <Text style={[styles.textTitles, textStyles.goldenTextBold]}>
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold, {color:"#bfa76a", fontSize:20}]}>
                                 {
                                   userD?.horoscopeResultsMonthly?.data
                                     ?.monthly_horoscope?.luck[4]
@@ -1047,7 +1066,7 @@ function HoroscopZilnic({ navigation }) {
                               </Text>
                             </View>
                             <View style={styles.defaultContainer}>
-                              <Text style={[styles.textTitles, textStyles.goldenTextBold]}>
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold, {color:"#bfa76a", fontSize:20}]}>
                                 {
                                   userD?.horoscopeResultsMonthly?.data
                                     ?.monthly_horoscope?.luck[5]
@@ -1057,7 +1076,7 @@ function HoroscopZilnic({ navigation }) {
                             <Divider style={{ marginTop: 20 }} />
                             <View style={[styles.defaultContainer]}>
                               <View style={styles.horoscopeTodayContainer}>
-                                <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 20 }]}>
+                                <Text style={[styles.textTitles, textStyles.goldenTextBold, {color:"#bfa76a"}, { fontSize: 20 }]}>
                                   {i18n.translate("hPredictions")}
                                 </Text>
                                 <View style={styles.iconsHoroscopeToday}>
@@ -1083,10 +1102,10 @@ function HoroscopZilnic({ navigation }) {
                               </View>
                             </View>
                             <View style={styles.defaultContainer}>
-                              <Text style={[styles.textTitles, textStyles.goldenText]}>
+                              <Text style={[styles.textTitles, textStyles.goldenText, {fontSize:24}]}>
                                 {i18n.translate("hEmotions")}
                               </Text>
-                              <Text style={{ marginTop: 15 }}>
+                              <Text style={{ marginTop: 15, fontSize:20 }}>
                                 {
                                   userD?.horoscopeResultsMonthly?.data
                                     ?.monthly_horoscope?.emotions
@@ -1094,10 +1113,10 @@ function HoroscopZilnic({ navigation }) {
                               </Text>
                             </View>
                             <View style={styles.defaultContainer}>
-                              <Text style={[styles.textTitles, textStyles.goldenText]}>
+                              <Text style={[styles.textTitles, textStyles.goldenText, {fontSize:24}]}>
                                 {i18n.translate("hHealth")}
                               </Text>
-                              <Text style={{ marginTop: 15 }}>
+                              <Text style={{ marginTop: 15, fontSize:20 }}>
                                 {
                                   userD?.horoscopeResultsMonthly?.data
                                     ?.monthly_horoscope?.health
@@ -1105,10 +1124,10 @@ function HoroscopZilnic({ navigation }) {
                               </Text>
                             </View>
                             <View style={styles.defaultContainer}>
-                              <Text style={[styles.textTitles, textStyles.goldenText]}>
+                              <Text style={[styles.textTitles, textStyles.goldenText, {fontSize:24}]}>
                                 {i18n.translate("hPersonal")}
                               </Text>
-                              <Text style={{ marginTop: 15 }}>
+                              <Text style={{ marginTop: 15, fontSize:20 }}>
                                 {
                                   userD?.horoscopeResultsMonthly?.data
                                     ?.monthly_horoscope?.personal
@@ -1116,10 +1135,10 @@ function HoroscopZilnic({ navigation }) {
                               </Text>
                             </View>
                             <View style={styles.defaultContainer}>
-                              <Text style={[styles.textTitles, textStyles.goldenText]}>
+                              <Text style={[styles.textTitles, textStyles.goldenText, {fontSize:24}]}>
                                 {i18n.translate("hProfession")}
                               </Text>
-                              <Text style={{ marginTop: 15 }}>
+                              <Text style={{ marginTop: 15, fontSize:20 }}>
                                 {
                                   userD?.horoscopeResultsMonthly?.data
                                     ?.monthly_horoscope?.profession
@@ -1127,10 +1146,10 @@ function HoroscopZilnic({ navigation }) {
                               </Text>
                             </View>
                             <View style={styles.defaultContainer}>
-                              <Text style={[styles.textTitles, textStyles.goldenText]}>
+                              <Text style={[styles.textTitles, textStyles.goldenText, {fontSize:24}]}>
                                 {i18n.translate("hTravel")}
                               </Text>
-                              <Text style={{ marginTop: 15 }}>
+                              <Text style={{ marginTop: 15, fontSize:20 }}>
                                 {
                                   userD?.horoscopeResultsMonthly?.data
                                     ?.monthly_horoscope?.travel
@@ -1150,12 +1169,12 @@ function HoroscopZilnic({ navigation }) {
                                 },
                               ]}
                             >
-                              <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 23 }]}>
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 28 }]}>
                                 Anul acesta{" "}
                               </Text>
                             </View>
                             <View style={styles.defaultContainer}>
-                              <Text style={styles.textTitles}>
+                              <Text style={[styles.textTitles, {fontSize:24}]}>
                                 {i18n.translate("hNumbers")}{" "}
                               </Text>
                             </View>
@@ -1180,7 +1199,7 @@ function HoroscopZilnic({ navigation }) {
                                   ))}
                             </View>
                             <View style={styles.defaultContainer}>
-                              <Text style={[styles.textTitles, textStyles.goldenTextBold]}>
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold, {color:"#bfa76a", fontSize:20}]}>
                                 {
                                   userD?.horoscopeResultsYearly?.data?.yearly_horoscope
                                     ?.luck[0]
@@ -1188,7 +1207,7 @@ function HoroscopZilnic({ navigation }) {
                               </Text>
                             </View>
                             <View style={styles.defaultContainer}>
-                              <Text style={[styles.textTitles, textStyles.goldenTextBold]}>
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold, {color:"#bfa76a", fontSize:20}]}>
                                 {
                                   userD?.horoscopeResultsYearly?.data?.yearly_horoscope
                                     ?.luck[2]
@@ -1196,7 +1215,7 @@ function HoroscopZilnic({ navigation }) {
                               </Text>
                             </View>
                             <View style={styles.defaultContainer}>
-                              <Text style={[styles.textTitles, textStyles.goldenTextBold]}>
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold, {color:"#bfa76a", fontSize:20}]}>
                                 {
                                   userD?.horoscopeResultsYearly?.data?.yearly_horoscope
                                     ?.luck[3]
@@ -1204,7 +1223,7 @@ function HoroscopZilnic({ navigation }) {
                               </Text>
                             </View>
                             <View style={styles.defaultContainer}>
-                              <Text style={[styles.textTitles, textStyles.goldenTextBold]}>
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold, {color:"#bfa76a", fontSize:20}]}>
                                 {
                                   userD?.horoscopeResultsYearly?.data?.yearly_horoscope
                                     ?.luck[4]
@@ -1212,7 +1231,7 @@ function HoroscopZilnic({ navigation }) {
                               </Text>
                             </View>
                             <View style={styles.defaultContainer}>
-                              <Text style={[styles.textTitles, textStyles.goldenTextBold]}>
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold, {color:"#bfa76a", fontSize:20}]}>
                                 {
                                   userD?.horoscopeResultsYearly?.data?.yearly_horoscope
                                     ?.luck[5]
@@ -1222,7 +1241,7 @@ function HoroscopZilnic({ navigation }) {
                             <Divider style={{ marginTop: 20 }} />
                             <View style={[styles.defaultContainer]}>
                               <View style={styles.horoscopeTodayContainer}>
-                                <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 20 }]}>
+                                <Text style={[styles.textTitles, textStyles.goldenTextBold, {color:"#bfa76a"}, { fontSize: 20 }]}>
                                   {i18n.translate("hPredictions")}
                                 </Text>
                                 <View style={styles.iconsHoroscopeToday}>
@@ -1248,10 +1267,10 @@ function HoroscopZilnic({ navigation }) {
                               </View>
                             </View>
                             <View style={styles.defaultContainer}>
-                              <Text style={[styles.textTitles, textStyles.goldenText]}>
+                              <Text style={[styles.textTitles, textStyles.goldenText, {fontSize:24}]}>
                                 {i18n.translate("hEmotions")}
                               </Text>
-                              <Text style={{ marginTop: 15 }}>
+                              <Text style={{ marginTop: 15, fontSize:20 }}>
                                 {
                                   userD?.horoscopeResultsYearly?.data?.yearly_horoscope
                                     ?.emotions
@@ -1259,10 +1278,10 @@ function HoroscopZilnic({ navigation }) {
                               </Text>
                             </View>
                             <View style={styles.defaultContainer}>
-                              <Text style={[styles.textTitles, textStyles.goldenText]}>
+                              <Text style={[styles.textTitles, textStyles.goldenText, {fontSize:24}]}>
                                 {i18n.translate("hHealth")}
                               </Text>
-                              <Text style={{ marginTop: 15 }}>
+                              <Text style={{ marginTop: 15, fontSize:20 }}>
                                 {
                                   userD?.horoscopeResultsYearly?.data?.yearly_horoscope
                                     ?.health
@@ -1270,10 +1289,10 @@ function HoroscopZilnic({ navigation }) {
                               </Text>
                             </View>
                             <View style={styles.defaultContainer}>
-                              <Text style={[styles.textTitles, textStyles.goldenText]}>
+                              <Text style={[styles.textTitles, textStyles.goldenText, {fontSize:24}]}>
                                 {i18n.translate("hPersonal")}
                               </Text>
-                              <Text style={{ marginTop: 15 }}>
+                              <Text style={{ marginTop: 15, fontSize:20 }}>
                                 {
                                   userD?.horoscopeResultsYearly?.data?.yearly_horoscope
                                     ?.personal
@@ -1281,10 +1300,10 @@ function HoroscopZilnic({ navigation }) {
                               </Text>
                             </View>
                             <View style={styles.defaultContainer}>
-                              <Text style={[styles.textTitles, textStyles.goldenText]}>
+                              <Text style={[styles.textTitles, textStyles.goldenText, {fontSize:24}]}>
                                 {i18n.translate("hProfession")}
                               </Text>
-                              <Text style={{ marginTop: 15 }}>
+                              <Text style={{ marginTop: 15, fontSize:20 }}>
                                 {
                                   userD?.horoscopeResultsYearly?.data?.yearly_horoscope
                                     ?.profession
@@ -1292,10 +1311,10 @@ function HoroscopZilnic({ navigation }) {
                               </Text>
                             </View>
                             <View style={styles.defaultContainer}>
-                              <Text style={[styles.textTitles, textStyles.goldenText]}>
+                              <Text style={[styles.textTitles, textStyles.goldenText, {fontSize:24}]}>
                                 {i18n.translate("hTravel")}
                               </Text>
-                              <Text style={{ marginTop: 15 }}>
+                              <Text style={{ marginTop: 15, fontSize:20 }}>
                                 {
                                   userD?.horoscopeResultsYearly?.data?.yearly_horoscope
                                     ?.travel

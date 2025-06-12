@@ -57,6 +57,9 @@ import { useLanguage } from "../../../context/LanguageContext";
 import { capitalizeFirstLetter } from "../../../utils/stringUtils";
 import { fetchSinastrieData } from "../../../utils/AstralUtils/fetchSinastrieDate";
 import { useTranslation } from "../../../utils/translateUtil";
+import DayPickerModal from '../../../components/DayPickerModal';
+import MonthPickerModal from '../../../components/MonthPickerModal';
+import YearPickerModal from '../../../components/YearPickerModal';
 
 const { width } = Dimensions.get("window");
 
@@ -240,10 +243,10 @@ function NewTwoSyanstryPersons({ navigation, route }) {
           : moment();
 
         const timestamp = generateTimestampFromDateTime(
-          `${day}-${month}-${year}`,
+          `${person.day}-${person.month}-${person.year}`,
           selectedTime
         );
-        console.log("time zone....selectedDate", `${day}-${month}-${year}`);
+        console.log("time zone....selectedDate_person", `${person.day}-${person.month}-${person.year}`);
         console.log("time zone....selectedTime", selectedTime);
         console.log("time zone....timestamp", timestamp);
         const data = await fetchTimeZone(person.lat, person.long, timestamp);
@@ -583,137 +586,93 @@ function NewTwoSyanstryPersons({ navigation, route }) {
                     paddingHorizontal: "10%",
                   }}
                 >
-                  <Menu
+                  {/* Ziua */}
+                  <Button
+                    mode="outlined"
+                    style={styles.selectButton}
+                    onPress={() => setDayMenuVisible(true)}
+                    theme={{
+                      colors: {
+                        primary: '#FFD700',
+                        onSurface: '#FFD700',
+                      },
+                    }}
+                    labelStyle={styles.selectButtonLabel}
+                  >
+                    {currentStep === 1
+                      ? person1Data.day || "Zi"
+                      : person2Data.day || "Zi"}
+                  </Button>
+                  <DayPickerModal
                     visible={isDayMenuVisible}
-                    onDismiss={() => setDayMenuVisible(false)}
-                    anchor={
-                      <Button
-                        mode="outlined"
-                            style={styles.selectButton}
-                        theme={{
-                          colors: {
-                                primary: '#FFD700',
-                                onSurface: '#FFD700',
-                          },
-                        }}
-                            onPress={() => setDayMenuVisible(true)}
-                            labelStyle={styles.selectButtonLabel}
-                      >
-                        {currentStep === 1
-                          ? person1Data.day || "Zi"
-                          : person2Data.day || "Zi"}
-                      </Button>
-                    }
+                    onClose={() => setDayMenuVisible(false)}
+                    onSelect={(value) => {
+                      if (currentStep === 1) {
+                        setPerson1Data({ ...person1Data, day: value });
+                      } else {
+                        setPerson2Data({ ...person2Data, day: value });
+                      }
+                    }}
+                    selectedDay={currentStep === 1 ? person1Data.day : person2Data.day}
+                  />
+                  {/* Luna */}
+                  <Button
+                    mode="outlined"
+                    style={styles.selectButton}
+                    onPress={() => setMonthMenuVisible(true)}
+                    theme={{
+                      colors: {
+                        primary: '#FFD700',
+                        onSurface: '#FFD700',
+                      },
+                    }}
+                    labelStyle={styles.selectButtonLabel}
                   >
-                    {Array.from({ length: 31 }, (_, i) => (
-                      <Menu.Item
-                        key={i}
-                        onPress={() => {
-                          const dayValue = `${i + 1}`;
-                          if (currentStep === 1) {
-                            setPerson1Data({ ...person1Data, day: dayValue });
-                          } else {
-                            setPerson2Data({ ...person2Data, day: dayValue });
-                          }
-                          setDayMenuVisible(false);
-                        }}
-                        title={`${i + 1}`}
-                      />
-                    ))}
-                  </Menu>
-
-                  <Menu
+                    {currentStep === 1
+                      ? person1Data.month || "Lună"
+                      : person2Data.month || "Lună"}
+                  </Button>
+                  <MonthPickerModal
                     visible={isMonthMenuVisible}
-                    onDismiss={() => setMonthMenuVisible(false)}
-                    anchor={
-                      <Button
-                        mode="outlined"
-                            style={styles.selectButton}
-                        theme={{
-                          colors: {
-                                primary: '#FFD700',
-                                onSurface: '#FFD700',
-                          },
-                        }}
-                            onPress={() => setMonthMenuVisible(true)}
-                            labelStyle={styles.selectButtonLabel}
-                      >
-                        {currentStep === 1
-                          ? person1Data.month || "Lună"
-                          : person2Data.month || "Lună"}
-                      </Button>
-                    }
+                    onClose={() => setMonthMenuVisible(false)}
+                    onSelect={(value) => {
+                      if (currentStep === 1) {
+                        setPerson1Data({ ...person1Data, month: value });
+                      } else {
+                        setPerson2Data({ ...person2Data, month: value });
+                      }
+                    }}
+                    selectedMonth={currentStep === 1 ? person1Data.month : person2Data.month}
+                  />
+                  {/* Anul */}
+                  <Button
+                    mode="outlined"
+                    style={styles.selectButton}
+                    onPress={() => setYearMenuVisible(true)}
+                    theme={{
+                      colors: {
+                        primary: '#FFD700',
+                        onSurface: '#FFD700',
+                      },
+                    }}
+                    labelStyle={styles.selectButtonLabel}
                   >
-                    {[...Array(12).keys()].map((month) => (
-                      <Menu.Item
-                        key={month}
-                        onPress={() => {
-                          const monthValue = `${month + 1}`;
-                          if (currentStep === 1) {
-                            setPerson1Data({
-                              ...person1Data,
-                              month: monthValue,
-                            });
-                          } else {
-                            setPerson2Data({
-                              ...person2Data,
-                              month: monthValue,
-                            });
-                          }
-                          setMonthMenuVisible(false);
-                        }}
-                        title={`${month + 1}`}
-                      />
-                    ))}
-                  </Menu>
-
-                  <Menu
+                    {currentStep === 1
+                      ? person1Data.year || "An"
+                      : person2Data.year || "An"}
+                  </Button>
+                  <YearPickerModal
                     visible={isYearMenuVisible}
-                    onDismiss={() => setYearMenuVisible(false)}
-                    anchor={
-                      <Button
-                        mode="outlined"
-                            style={styles.selectButton}
-                        theme={{
-                          colors: {
-                                primary: '#FFD700',
-                                onSurface: '#FFD700',
-                          },
-                        }}
-                            onPress={() => setYearMenuVisible(true)}
-                            labelStyle={styles.selectButtonLabel}
-                      >
-                        {currentStep === 1
-                          ? person1Data.year || "An"
-                          : person2Data.year || "An"}
-                      </Button>
-                    }
-                  >
-                    {Array.from(
-                          { length: new Date().getFullYear() - 1900 + 1 },
-                      (_, i) => (
-                        <Menu.Item
-                          key={i}
-                          onPress={() => {
-                            const yearValue = `${new Date().getFullYear() - i}`;
-                            if (currentStep === 1) {
-                              setPerson1Data({
-                                ...person1Data,
-                                year: yearValue,
-                              });
-                            } else {
-                              setPerson2Data({
-                                ...person2Data,
-                                year: yearValue,
-                              });
-                            }
-                            setYearMenuVisible(false);
-                          }}
-                          title={`${new Date().getFullYear() - i}`}
-                        />
-                      )
-                    )}
-                  </Menu>
+                    onClose={() => setYearMenuVisible(false)}
+                    onSelect={(value) => {
+                      if (currentStep === 1) {
+                        setPerson1Data({ ...person1Data, year: value });
+                      } else {
+                        setPerson2Data({ ...person2Data, year: value });
+                      }
+                    }}
+                    selectedYear={currentStep === 1 ? person1Data.year : person2Data.year}
+                  />
                 </View>
                 <Button
                   mode="outlined"

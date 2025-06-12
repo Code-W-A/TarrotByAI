@@ -80,6 +80,7 @@ import { getFunctions, httpsCallable } from "firebase/functions";
 import { useStripe } from "@stripe/stripe-react-native";
 import { useTranslation } from "../../../utils/translateUtil";
 import { capturePaymentIntentTest, createInvoiceAfterPaymentTest, createPaymentIntentTest, sendPdfEmail } from "../../../utils/constant";
+import { textStyles } from '../../../utils/colors';
 
 // const LuckyNumber = ({ number }) => {
 //   return (
@@ -1123,29 +1124,21 @@ function AstrogramaNatalaOtherPerson({ navigation }) {
                   <View style={[styles.defaultContainer]}>
                     <Divider style={{ marginTop: "5%" }} />
                     <View style={styles.horoscopeTodayContainer}>
-                      <Text style={{ color: '#131523', fontFamily: 'Lora', fontWeight: '700' }}>
+                      <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 22 }]}>
                         {userD.full_name}
                       </Text>
                     </View>
                     <View style={styles.horoscopeTodayContainer}>
-                      <Text style={{ color: '#131523', fontFamily: 'Lora' }}>
-                        {userD.day} - {userD.month} - {userD.year}
-                      </Text>
+                      <Text style={[styles.textDescription, textStyles.goldenText, { marginTop: 0 }]}>{userD.day} - {userD.month} - {userD.year}</Text>
                     </View>
                     <View style={styles.horoscopeTodayContainer}>
-                      <Text style={{ color: '#131523', fontFamily: 'Lora' }}>
-                        {userD.selectedTime}
-                      </Text>
+                      <Text style={[styles.textDescription, textStyles.goldenText, { marginTop: 0 }]}>{userD.selectedTime}</Text>
                     </View>
                     <View style={styles.horoscopeTodayContainer}>
-                      <Text style={{ color: '#131523', fontFamily: 'Lora' }}>
-                        {userD.place}
-                      </Text>
+                      <Text style={[styles.textDescription, textStyles.goldenText, { marginTop: 0 }]}>{userD.place}</Text>
                     </View>
                     <View style={styles.horoscopeTodayContainer}>
-                      <Text style={{ color: '#131523', fontFamily: 'Lora' }}>
-                        {userD.gender}
-                      </Text>
+                      <Text style={[styles.textDescription, textStyles.goldenText, { marginTop: 0 }]}>{userD.gender}</Text>
                     </View>
                     {/* Interpretează următoarea diagramă natală: Născut pe 10 martie 1994, la 14:05, în București, România. Soarele în Pești, Luna în Capricorn, Mercur în Vărsător, Venus în Berbec, și Marte în Pești. Ascendentul este în Scorpion. Soarele formează o conjuncție cu Venus, Luna este în opoziție cu Marte, iar Mercur formează un trigon cu Saturn. */}
                     {/* Interpretează următoarea diagramă natală si sa fie pe categorii General, Personalitate, Dragoste, Cariera, Bani:  */}
@@ -1163,12 +1156,8 @@ function AstrogramaNatalaOtherPerson({ navigation }) {
                 <ShowFromTop>
                   <View style={[styles.defaultContainer]}>
                     <View style={styles.horoscopeTodayContainer}>
-                      <Text style={{ color: '#FFD700', fontFamily: 'Lora', fontWeight: '700' }}>
-                        {isLoading ? (
-                          <ActivityIndicator />
-                        ) : (
-                          i18n.translate("InterpretareAstrograma")
-                        )}
+                      <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 18, marginTop: '7%' }]}>
+                        {personalitateText}
                       </Text>
                     </View>
                     <Divider style={{ marginTop: "5%" }} />
@@ -1184,12 +1173,9 @@ function AstrogramaNatalaOtherPerson({ navigation }) {
                         },
                       ]}
                     >
-                      <Text style={{ color: '#FFD700', fontFamily: 'Lora', fontWeight: '700' }}>
-                        {personalitateText}
-                      </Text>
                       {!isPaid ? (
                         <>
-                          <Text style={{ color: '#131523', fontFamily: 'Lora', textAlign: 'justify', width: '100%' }}>
+                          <Text style={[styles.textDescription, textStyles.goldenText, { textAlign: 'justify', width: '100%' }]}>
                             {achizitioneazaInterpretareCompletaText2}
                           </Text>
                           <Button
@@ -1219,13 +1205,13 @@ function AstrogramaNatalaOtherPerson({ navigation }) {
                           />
                         </>
                       )}
-                      <Text style={{ color: '#131523', fontFamily: 'Lora' }}>
+                      <Text style={[styles.textDescription, textStyles.goldenText, { marginTop: 0 }]}>
                         {userD.ascendantData.data.result}
                       </Text>
 
                       {isPaid && (
                         <View>
-                          <Text style={{ color: '#FFD700', fontFamily: 'Lora', fontWeight: '700' }}>
+                          <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 18, marginTop: '7%' }]}>
                             {signReportText}
                           </Text>
                           {Object.keys(userD.generalSignTextData).map((key) => {
@@ -1234,11 +1220,11 @@ function AstrogramaNatalaOtherPerson({ navigation }) {
                             return (
                               <View key={key} style={{ marginBottom: 20 }}>
                                 {/* Titlul planetă + semn zodiacal */}
-                                <Text style={{ color: '#FFD700', fontFamily: 'Lora', fontWeight: '700' }}>
+                                <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 18, marginTop: '7%' }]}>
                                   {`${planetData.planet_name} is in ${planetData.sign_name}`}
                                 </Text>
                                 {/* Text descriptiv */}
-                                <Text style={{ color: '#131523', fontFamily: 'Lora', fontSize: 18, lineHeight: 26, textAlign: 'justify', width: '100%' }}>
+                                <Text style={[styles.textDescription, textStyles.goldenText, { textAlign: 'justify', width: '100%' }]}>
                                   {planetData.report}
                                 </Text>
                               </View>
@@ -1249,7 +1235,7 @@ function AstrogramaNatalaOtherPerson({ navigation }) {
 
                       {isPaid && (
                         <View>
-                          <Text style={{ color: '#FFD700', fontFamily: 'Lora', fontWeight: '700' }}>
+                          <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 18, marginTop: '7%' }]}>
                             {houseReportText}
                           </Text>
                           {Object.keys(userD.generalHouseTextData).map((key) => {
@@ -1258,11 +1244,11 @@ function AstrogramaNatalaOtherPerson({ navigation }) {
                             return (
                               <View key={key} style={{ marginBottom: 20 }}>
                                 {/* Titlul planetă + casă astrologică */}
-                                <Text style={{ color: '#FFD700', fontFamily: 'Lora', fontWeight: '700' }}>
+                                <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 18, marginTop: '7%' }]}>
                                   {`${houseData.planet_name} is in the ${houseData.house}th house`}
                                 </Text>
                                 {/* Text descriptiv */}
-                                <Text style={{ color: '#131523', fontFamily: 'Lora', fontSize: 18, lineHeight: 26, textAlign: 'justify', width: '100%' }}>
+                                <Text style={[styles.textDescription, textStyles.goldenText, { textAlign: 'justify', width: '100%' }]}>
                                   {houseData.report}
                                 </Text>
                               </View>
@@ -1338,7 +1324,7 @@ function AstrogramaNatalaOtherPerson({ navigation }) {
 const styles = StyleSheet.create({
   partialContent: {
     fontSize: 14,
-    color: "#F0F0F0",
+    color: "black",
     textAlign: "center",
     marginVertical: 15,
     marginHorizontal: 20,
@@ -1358,7 +1344,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#f0f0f0",
     borderRadius: 5,
   },
-
   container: {
     flex: 1,
     padding: 20,
@@ -1432,10 +1417,13 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   textDescription: {
-    fontSize: 14,
+    fontSize: 18,
+    lineHeight: 26,
     color: "#F0F0F0",
     marginTop: "5%",
     marginLeft: "3%",
+    textAlign: 'justify',
+    paddingRight: "8%"
   },
   horoscopeTodayContainer: {
     flexDirection: "row",
@@ -1476,7 +1464,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   text: {
-    marginBottom: 20, // Spațiu între text și imagine
+    marginBottom: 20,
     textAlign: "center",
     fontSize: 16,
     color: "white",
@@ -1484,17 +1472,17 @@ const styles = StyleSheet.create({
   image: {
     width: 200,
     height: 200,
-    resizeMode: "contain", // Asigură-te că GIF-ul se încadrează în dimensiunile specificate
+    resizeMode: "contain",
   },
   iconContainer: {
-    position: "absolute", // Poziționează iconița absolut peste imagine
+    position: "absolute",
     top: "89.7%",
     right: "52%",
     width: "auto",
     height: "auto",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "white", // Îndepărtează fundalul pentru a lăsa imaginea vizibilă
+    backgroundColor: "white",
     borderRadius: 50,
   },
 });

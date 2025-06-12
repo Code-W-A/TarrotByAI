@@ -55,7 +55,7 @@ export const NewsDetailsModal: React.FC<{
           font-size: 28px; /* Titluri mari */
           margin-bottom: 16px;
           margin-top: 20px;
-          color: #FFD700;
+          color: black;
           font-weight: bold;
       }
       h2 {
