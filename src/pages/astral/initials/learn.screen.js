@@ -3,7 +3,7 @@ import { ImageBackground, TouchableOpacity, Image, Modal, ScrollView, StyleSheet
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 import React, { useCallback, useEffect, useState } from "react";
-import { Platform, SafeAreaView, StyleSheet, View } from "react-native";
+import { Platform, SafeAreaView, StyleSheet, View, BackHandler } from "react-native";
 import {
   Button,
   Caption,
@@ -209,6 +209,22 @@ function LearnScreen({ navigation }) {
       };
     }, []) // Dependențele sunt opționale și pot fi omise dacă datele trebuie reîncărcate la fiecare focalizare
   );
+
+  // Gestionează butonul de back al telefonului
+  useEffect(() => {
+    const backAction = () => {
+      // Navighează către ClinicDashBoard în loc să meargă înapoi în stack
+      navigation.navigate(screenName.ClinicDashBoard);
+      return true; // Previne comportamentul default de back
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => backHandler.remove();
+  }, [navigation]);
 
   const handleViewLesson = async (lesson) => {
     console.log("lesson....", lesson);

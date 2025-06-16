@@ -540,44 +540,54 @@ function SinastrieRelatie({ navigation, route }) {
       // Extrage datele persoanei din route.params sau fallback la AsyncStorage
       const personIndex = route.params?.personIndex;
 
-      const userDataJson = await AsyncStorage.getItem("personsData");
-      let userData = userDataJson ? JSON.parse(userDataJson) : null;
-      userData = personData
+      // Încarcă datele utilizatorului curent (pentru "Sinastria mea")
       const userJson = await AsyncStorage.getItem("userData");
-      const userD = userJson ? JSON.parse(userJson) : null;
+      const currentUserData = userJson ? JSON.parse(userJson) : null;
 
-      if (!userData || !userData || personIndex === undefined) {
+      // Încarcă datele persoanelor salvate
+      const userDataJson = await AsyncStorage.getItem("personsData");
+      let personsData = userDataJson ? JSON.parse(userDataJson) : null;
+      
+      // Determină persoana selectată pentru sinastrie
+      let selectedPerson = null;
+      if (personData) {
+        // Dacă avem personData din route.params, folosește-l
+        selectedPerson = personData;
+      } else if (personsData && personIndex !== undefined) {
+        // Altfel, încearcă să găsești persoana din lista salvată
+        selectedPerson = personsData[personIndex];
+      }
+
+      if (!currentUserData || !selectedPerson) {
         console.error(
-          "Nu există date de utilizator disponibile sau index invalid."
+          "Nu există date de utilizator disponibile sau persoana selectată nu există."
         );
         setIsLoading(false);
         return;
       }
 
-      setUData(userD);
-      setCurrentUserData(userData);
-      let person = userData;
-      // let person = userData[personIndex];
-      if (!person) {
-        console.error("Persoana specificată nu există în lista people.");
+      // Setează datele utilizatorului curent (pentru prima persoană în sinastrie)
+      setUData(currentUserData);
+      setCurrentUserData(currentUserData);
+      
+      // Setează datele persoanei selectate (pentru a doua persoană în sinastrie)
+      setUserD(selectedPerson);
+
+      // Verifică dacă există date de sinastrie pentru persoana selectată
+      if(!selectedPerson.synastry?.natalWheelChart){
+        console.error("Nu există date de sinastrie pentru persoana selectată");
         setIsLoading(false);
         return;
       }
-      if(!person.synastry?.natalWheelChart){
-        person = personData
-      }
-      // console.log("Procesare date pentru persoana:", person);
 
       // Verifică dacă traducerea este necesară
-
-      // Verifică dacă traducerea este necesară
-      if (language !== person.actualLanguageSinastrie) {
+      if (language !== selectedPerson.actualLanguageSinastrie) {
         console.log("Traducere necesară, limbă curentă:", language);
         setIsLoading(true);
 
         try {
           // Creează o copie temporară a datelor persoanei
-          const translatedPerson = { ...person };
+          const translatedPerson = { ...selectedPerson };
 
           const categories = [
             "harmoniousAspectReading",
@@ -640,11 +650,11 @@ function SinastrieRelatie({ navigation, route }) {
           // Actualizează limba curentă pentru persoană
           translatedPerson.actualLanguageSinastrie = language;
 
-          // Actualizează persoana tradusă în `userData`
-          userData[personIndex] = translatedPerson;
-
-          // Salvează datele actualizate în AsyncStorage
-          await AsyncStorage.setItem("personsData", JSON.stringify(userData));
+          // Actualizează persoana tradusă în lista persoanelor (dacă există)
+          if (personsData && personIndex !== undefined) {
+            personsData[personIndex] = translatedPerson;
+            await AsyncStorage.setItem("personsData", JSON.stringify(personsData));
+          }
 
           // Setează persoana tradusă în starea locală
           setUserD(translatedPerson);
@@ -656,32 +666,30 @@ function SinastrieRelatie({ navigation, route }) {
         }
       } else {
         console.log("Traducere nu este necesară, limbă curentă:", language);
-        setUserD(person); // Folosește datele existente dacă traducerea nu este necesară
+        setUserD(selectedPerson); // Folosește datele existente dacă traducerea nu este necesară
       }
 
-     
-
       console.log(
-        "person.synastry?.natalWheelChart...",
-        person.synastry?.natalWheelChart
+        "selectedPerson.synastry?.natalWheelChart...",
+        selectedPerson.synastry?.natalWheelChart
       );
-      if (person.synastry?.natalWheelChart?.data) {
+      if (selectedPerson.synastry?.natalWheelChart?.data) {
         const svgElementsP1 = parseSVG(
-          person.synastry.natalWheelChart.data.p1.svg
+          selectedPerson.synastry.natalWheelChart.data.p1.svg
         );
         const svgElementsP2 = parseSVG(
-          person.synastry.natalWheelChart.data.p2.svg
+          selectedPerson.synastry.natalWheelChart.data.p2.svg
         );
         setSvgData({ svgElementsP1, svgElementsP2 });
 
         const base64ImageP1 = base64.decode(
-          person.synastry.natalWheelChart.data.p1.base64_image.replace(
+          selectedPerson.synastry.natalWheelChart.data.p1.base64_image.replace(
             "data:image/svg+xml;base64,",
             ""
           )
         );
         const base64ImageP2 = base64.decode(
-          person.synastry.natalWheelChart.data.p2.base64_image.replace(
+          selectedPerson.synastry.natalWheelChart.data.p2.base64_image.replace(
             "data:image/svg+xml;base64,",
             ""
           )
@@ -691,27 +699,27 @@ function SinastrieRelatie({ navigation, route }) {
       }
 
       // Procesează aspectele astrogramei
-      const aspectsP1 = person.synastry?.aspect?.data?.p1_p2_aspect?.aspects;
-      const aspectsP2 = person.synastry?.aspect?.data?.p2_p1_aspect?.aspects;
-      setAspectsData(person.synastry?.aspect ? { aspectsP1, aspectsP2 } : null);
+      const aspectsP1 = selectedPerson.synastry?.aspect?.data?.p1_p2_aspect?.aspects;
+      const aspectsP2 = selectedPerson.synastry?.aspect?.data?.p2_p1_aspect?.aspects;
+      setAspectsData(selectedPerson.synastry?.aspect ? { aspectsP1, aspectsP2 } : null);
 
       // Procesează pozițiile planetare
-      const planetaryP1 = person.synastry?.planetaryPositions?.data?.p1_data;
-      const planetaryP2 = person.synastry?.planetaryPositions?.data?.p2_data;
+      const planetaryP1 = selectedPerson.synastry?.planetaryPositions?.data?.p1_data;
+      const planetaryP2 = selectedPerson.synastry?.planetaryPositions?.data?.p2_data;
       setPlanetaryData(
-        person.synastry?.planetaryPositions
+        selectedPerson.synastry?.planetaryPositions
           ? { planetaryP1, planetaryP2 }
           : null
       );
 
       // Procesează cuspidele caselor
-      const housesP1 = person.synastry?.houseCusps?.data?.p1_data;
-      const housesP2 = person.synastry?.houseCusps?.data?.p2_data;
+      const housesP1 = selectedPerson.synastry?.houseCusps?.data?.p1_data;
+      const housesP2 = selectedPerson.synastry?.houseCusps?.data?.p2_data;
       setHouseCusps(
-        person.synastry?.houseCusps ? { housesP1, housesP2 } : null
+        selectedPerson.synastry?.houseCusps ? { housesP1, housesP2 } : null
       );
 
-      // console.log("Date procesate cu succes pentru persoana:", person);
+      console.log("Date procesate cu succes pentru sinastria între:", currentUserData.full_name, "și", selectedPerson.full_name);
 
       setIsLoading(false);
     } catch (error) {
@@ -941,7 +949,11 @@ function SinastrieRelatie({ navigation, route }) {
           {selectedTab === "natal" ? (
             <ScrollView>
               <View style={[styles.defaultContainer]}>
-                <View>
+                <ScrollView 
+                  style={{ maxHeight: 500 }}
+                  showsVerticalScrollIndicator={true}
+                  nestedScrollEnabled={true}
+                >
                   {wheelImage && (
                     <SvgComponent
                       svgBase64={wheelImage.base64ImageP1}
@@ -950,7 +962,20 @@ function SinastrieRelatie({ navigation, route }) {
                     />
                   )}
                   
-                </View>
+                  {/* Adaugă și al doilea chart dacă există */}
+                  {wheelImage && wheelImage.base64ImageP2 && (
+                    <View style={{ marginTop: 20 }}>
+                      <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 18, textAlign: 'center', marginBottom: 10 }]}>
+                        Chart 2
+                      </Text>
+                      <SvgComponent
+                        svgBase64={wheelImage.base64ImageP2}
+                        width="460"
+                        height="460"
+                      />
+                    </View>
+                  )}
+                </ScrollView>
                 <Divider style={{ marginTop: "0%" }} />
                 <View style={{ flex: 1, flexDirection: "row" }}>
                   <View style={{ flexDirection: "column", width: "55%" }}>

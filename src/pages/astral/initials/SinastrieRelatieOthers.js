@@ -754,19 +754,25 @@ function SinastrieRelatieOthers({ navigation, route }) {
       const personIndex = route.params?.analysisIndex;
       const userDataJson = await AsyncStorage.getItem("personsDataOthers");
       let userData = userDataJson ? JSON.parse(userDataJson) : null;
-      userData = analysisData
-      console.log("Data....", userData);
+      
+      // Folosește analysisData din route.params dacă este disponibil
+      const analiza = analysisData || userData;
+      console.log("Data....", analiza);
 
-      if (!userData || !userData || personIndex === undefined) {
+      if (!analiza) {
         console.error(
-          "Nu există date de utilizator disponibile sau index invalid."
+          "Nu există date de analiză disponibile."
         );
         setIsLoading(false);
         return;
       }
 
-      // const analiza = userData[personIndex];
-      const analiza = userData;
+      // Setează datele pentru cele două persoane din sinastrie
+      if (analiza.person1 && analiza.person2) {
+        setPersonOne(analiza.person1);
+        setPersonTwo(analiza.person2);
+        console.log("Persoane setate:", analiza.person1.full_name, "și", analiza.person2.full_name);
+      }
 
       if (language !== analiza.actualLanguageSinastrie) {
         console.log("Traducere necesară, limbă curentă:", language);
@@ -837,18 +843,23 @@ function SinastrieRelatieOthers({ navigation, route }) {
           // Actualizează limba curentă pentru persoană
           translatedAnaliza.actualLanguageSinastrie = language;
 
-          // Actualizează persoana tradusă în `userData`
-          userData = translatedAnaliza;
-          // userData[personIndex] = translatedAnaliza;
+          // Actualizează analiza tradusă în AsyncStorage dacă este cazul
+          if (userData && personIndex !== undefined) {
+            userData = translatedAnaliza;
+            await AsyncStorage.setItem(
+              "personsDataOthers",
+              JSON.stringify(userData)
+            );
+          }
 
-          // Salvează datele actualizate în AsyncStorage
-          await AsyncStorage.setItem(
-            "personsDataOthers",
-            JSON.stringify(userData)
-          );
-
-          // Setează persoana tradusă în starea locală
+          // Setează analiza tradusă în starea locală
           setUserD(translatedAnaliza);
+          
+          // Actualizează și persoanele traduse
+          if (translatedAnaliza.person1 && translatedAnaliza.person2) {
+            setPersonOne(translatedAnaliza.person1);
+            setPersonTwo(translatedAnaliza.person2);
+          }
         } catch (translationError) {
           console.error("Eroare generală la traducere:", translationError);
           Alert.alert("Eroare", "A apărut o problemă la traducerea datelor.");
@@ -857,14 +868,9 @@ function SinastrieRelatieOthers({ navigation, route }) {
           setIsLoading(false);
         }
       } else {
-        console.log("analiza....alta", analiza);
-        console.log("analiza....alta", analiza.person2);
-        console.log("analiza....alta", analiza.synastry);
-
+        console.log("Traducere nu este necesară");
         setUserD(analiza); // Folosește datele existente dacă traducerea nu este necesară
       }
-
-     
 
       // Procesează graficele natale
       if (analiza.synastry?.natalWheelChart?.data) {
@@ -917,7 +923,7 @@ function SinastrieRelatieOthers({ navigation, route }) {
         analiza.synastry?.houseCusps ? { housesP1, housesP2 } : null
       );
 
-      console.log("Date procesate cu succes pentru persoana:", person);
+      console.log("Date procesate cu succes pentru sinastria între:", analiza.person1?.full_name, "și", analiza.person2?.full_name);
 
       setIsLoading(false);
     } catch (error) {
@@ -1019,7 +1025,11 @@ function SinastrieRelatieOthers({ navigation, route }) {
             {selectedTab === "natal" ? (
               <ScrollView>
                 <View style={[styles.defaultContainer]}>
-                  <View>
+                  <ScrollView 
+                    style={{ maxHeight: 500 }}
+                    showsVerticalScrollIndicator={true}
+                    nestedScrollEnabled={true}
+                  >
                     {wheelImage && (
                       <SvgComponent
                         svgBase64={wheelImage.base64ImageP1}
@@ -1027,7 +1037,21 @@ function SinastrieRelatieOthers({ navigation, route }) {
                         height="430"
                       />
                     )}
-                  </View>
+                    
+                    {/* Adaugă și al doilea chart */}
+                    {wheelImage && wheelImage.base64ImageP2 && (
+                      <View style={{ marginTop: 20 }}>
+                        <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 18, textAlign: 'center', marginBottom: 10 }]}>
+                          Chart 2
+                        </Text>
+                        <SvgComponent
+                          svgBase64={wheelImage.base64ImageP2}
+                          width="430"
+                          height="430"
+                        />
+                      </View>
+                    )}
+                  </ScrollView>
                   <Divider style={{ marginTop: "0%" }} />
                   <View style={{ flex: 1, flexDirection: "row" }}>
                     <View style={{ flexDirection: "column", width: "55%" }}>
