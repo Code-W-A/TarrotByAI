@@ -485,17 +485,14 @@ function SinastrieRelatie({ navigation, route }) {
           Alert.alert("Fișier salvat", `PDF-ul a fost salvat cu succes la: ${fileUri}`);
           console.log("Fișier salvat cu succes:", fileUri);
         }
-      } else {
-        // Pe iOS, nu putem alege o locație. Putem salva automat sau putem folosi expo-sharing.
-        // Aici salvăm automat în documentDirectory:
-        const fileUri = `${FileSystem.documentDirectory}RaportAnaliza.pdf`;
-        await FileSystem.copyAsync({ from: uri, to: fileUri });
-        await Sharing.shareAsync(uri);
-        Alert.alert("Fișier salvat", `PDF-ul a fost salvat cu succes la: ${fileUri}`);
-        console.log("Fișier salvat cu succes:", fileUri);
-    
-        // Alternativ, pentru a permite utilizatorului să decidă ce face cu fișierul, poți folosi:
-        // await Sharing.shareAsync(uri);
+      } else if (Platform.OS === "ios") {
+        // Pe iOS, folosim share sheet pentru ca utilizatorul să aleagă ce face cu fișierul
+        await Sharing.shareAsync(uri, {
+          dialogTitle: 'Salvează sau distribuie PDF-ul',
+          mimeType: 'application/pdf',
+          UTI: 'com.adobe.pdf'
+        });
+        console.log("iOS share sheet prezentat pentru PDF");
       }
     } catch (error) {
       console.error("Eroare la salvarea fișierului:", error);
@@ -949,11 +946,7 @@ function SinastrieRelatie({ navigation, route }) {
           {selectedTab === "natal" ? (
             <ScrollView>
               <View style={[styles.defaultContainer]}>
-                <ScrollView 
-                  style={{ maxHeight: 500 }}
-                  showsVerticalScrollIndicator={true}
-                  nestedScrollEnabled={true}
-                >
+                <View>
                   {wheelImage && (
                     <SvgComponent
                       svgBase64={wheelImage.base64ImageP1}
@@ -962,20 +955,7 @@ function SinastrieRelatie({ navigation, route }) {
                     />
                   )}
                   
-                  {/* Adaugă și al doilea chart dacă există */}
-                  {wheelImage && wheelImage.base64ImageP2 && (
-                    <View style={{ marginTop: 20 }}>
-                      <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 18, textAlign: 'center', marginBottom: 10 }]}>
-                        Chart 2
-                      </Text>
-                      <SvgComponent
-                        svgBase64={wheelImage.base64ImageP2}
-                        width="460"
-                        height="460"
-                      />
-                    </View>
-                  )}
-                </ScrollView>
+                </View>
                 <Divider style={{ marginTop: "0%" }} />
                 <View style={{ flex: 1, flexDirection: "row" }}>
                   <View style={{ flexDirection: "column", width: "55%" }}>
@@ -1066,7 +1046,7 @@ function SinastrieRelatie({ navigation, route }) {
                             <View key={index}>
                               {aspect.reading.map((read, readIndex) => (
                                 <View key={readIndex} style={{ marginTop: 20 }}>
-                                  <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 16 }]}>
+                                  <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 20, marginBottom:"5%" }]}>
                                     {read?.title}
                                   </Text>
                                   <Text style={[styles.textDescription, textStyles.goldenText, { marginTop: 0 }]}>

@@ -97,6 +97,9 @@ function NewPersonScreen({ navigation, route }) {
 
   const inputRef = React.useRef(null);
 
+  // Add state for MapInputPatientDash focus
+  const [isMapInputFocused, setIsMapInputFocused] = useState(false);
+
   useEffect(() => {
     console.log("selectedTime.......", selectedTime);
   }, []);
@@ -499,189 +502,195 @@ function NewPersonScreen({ navigation, route }) {
                   calculateTimeZone={(lat, long) =>
                     calculateTimeZone(lat, long)
                   }
+                  onFocus={() => setIsMapInputFocused(true)}
+                  onBlur={() => setIsMapInputFocused(false)}
                 />
 
-                <View
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "space-around",
-                    alignItems: "flex-start",
-                    paddingTop: timeZoneData?.offset ? 15 : 0,
-                    paddingLeft: 10,
-                  }}
-                >
-                      <Text style={styles.labelTextContrast}>
-                    {i18n.translate("Adresa")}: {place || "-"}
-                      </Text>
-                  {timeZoneData?.offset && (
-                        <Text style={styles.labelTextContrast}>
-                      {timeZoneData?.data?.timeZoneName}, UTC/GMT +
-                      {timeZoneData?.offset} hours
-                        </Text>
-                  )}
-                      <Text style={styles.labelTextContrast}>
-                    Long/Lat: {long || "-"}/{lat || "-"}
-                      </Text>
-                </View>
+                {!(Platform.OS === 'ios' && isMapInputFocused) && (
+                  <>
+                    <View
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "space-around",
+                        alignItems: "flex-start",
+                        paddingTop: timeZoneData?.offset ? 15 : 0,
+                        paddingLeft: 10,
+                      }}
+                    >
+                          <Text style={styles.labelTextContrast}>
+                        {i18n.translate("Adresa")}: {place || "-"}
+                          </Text>
+                      {timeZoneData?.offset && (
+                            <Text style={styles.labelTextContrast}>
+                          {timeZoneData?.data?.timeZoneName}, UTC/GMT +
+                          {timeZoneData?.offset} hours
+                            </Text>
+                      )}
+                          <Text style={styles.labelTextContrast}>
+                        Long/Lat: {long || "-"}/{lat || "-"}
+                          </Text>
+                    </View>
 
-                {showDatePicker && (
-                  <DatePicker
-                    date={selectedDate || today}
-                    selectedDate={(selectedDate) => {
-                      setSelectedDate(selectedDate);
-                      setShowDatePicker(false);
-                    }}
+                    {showDatePicker && (
+                      <DatePicker
+                        date={selectedDate || today}
+                        selectedDate={(selectedDate) => {
+                          setSelectedDate(selectedDate);
+                          setShowDatePicker(false);
+                        }}
+                      />
+                    )}
+
+                    {showTimePicker && (
+                      <TimePicker
+                        time={
+                          selectedTime
+                            ? new Date(
+                                moment(selectedTime, "HH:mm:ss").toISOString()
+                              )
+                            : new Date()
+                        } // Convertește timpul selectat înapoi într-un Date
+                        selectedTime={(time) => {
+                          console.log("time....", time);
+                          setSelectedTime(time); // Aici păstrează doar timpul selectat
+                          setShowTimePicker(false);
+                        }}
+                        minTime="00:00"
+                        maxTime="23:59"
+                      />
+                    )}
+
+                    <View
+                      style={{
+                        marginTop: "5%",
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                          <Text style={styles.labelTextContrast}>
+                        {i18n.translate("IntroduDataOraNasterii")}
+                          </Text>
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          justifyContent: "space-around",
+                          width: "100%",
+                          marginTop: "3%",
+                          paddingHorizontal: "10%",
+                        }}
+                      >
+                        {/* Ziua */}
+                            <Button
+                              mode="outlined"
+                                  style={styles.selectButton}
+                              onPress={() => setDayMenuVisible(true)}
+                              theme={{
+                                colors: {
+                                      primary: '#FFD700',
+                                      onSurface: '#FFD700',
+                                },
+                              }}
+                                  labelStyle={styles.selectButtonLabel}
+                            >
+                              {day}
+                            </Button>
+                        <DayPickerModal
+                          visible={isDayMenuVisible}
+                          onClose={() => setDayMenuVisible(false)}
+                          onSelect={(value) => setDay(value)}
+                          selectedDay={day}
+                        />
+                        {/* Luna */}
+                            <Button
+                              mode="outlined"
+                                  style={styles.selectButton}
+                              onPress={() => setMonthMenuVisible(true)}
+                              theme={{
+                                colors: {
+                                      primary: '#FFD700',
+                                      onSurface: '#FFD700',
+                                },
+                              }}
+                                  labelStyle={styles.selectButtonLabel}
+                            >
+                              {month}
+                            </Button>
+                        <MonthPickerModal
+                          visible={isMonthMenuVisible}
+                          onClose={() => setMonthMenuVisible(false)}
+                          onSelect={(value) => setMonth(value)}
+                          selectedMonth={month}
+                            />
+                        {/* Anul */}
+                            <Button
+                              mode="outlined"
+                                  style={styles.selectButton}
+                          onPress={() => setYearMenuVisible(true)}
+                              theme={{
+                                colors: {
+                                      primary: '#FFD700',
+                                      onSurface: '#FFD700',
+                                },
+                              }}
+                          labelStyle={styles.selectButtonLabel}
+                            >
+                              {year}
+                            </Button>
+                        <YearPickerModal
+                          visible={isYearMenuVisible}
+                          onClose={() => setYearMenuVisible(false)}
+                          onSelect={(value) => setYear(value)}
+                          selectedYear={year}
+                              />
+                      </View>
+                      <Button
+                        mode="outlined"
+                        onPress={() => setShowTimePicker(true)}
+                            style={styles.selectButton}
+                            color="#FFD700"
+                        theme={{
+                          colors: {
+                                primary: '#FFD700',
+                                onSurface: '#FFD700',
+                          },
+                        }}
+                            labelStyle={styles.selectButtonLabel}
+                      >
+                        {selectedTime || i18n.translate("SelecteazaOraNasterii")}
+                      </Button>
+                    </View>
+
+                        <GenderSelector setGender={setGender} gender={gender} style={styles.genderSelectorNew} />
+                    {/* {currentStep === 5 && (
+                  <RelationshipScreen
+                    setRelationshipStatus={setRelationshipStatus}
                   />
+                )} */}
+                    {/* {currentStep === 6 && (
+                  <InputFields
+                    value={numarNorocos}
+                    onChangeText={setNumarNorocos}
+                    placeholder={"Număr norocos"}
+                    image={"star"}
+                  />
+                )} */}
+                    <View style={styles.buttonContainer}>
+                      <CommonButton
+                        disabled={false}
+                        funCallback={handleContinue}
+                            borderWidth={0}
+                            bgColor={'#FFD700'}
+                        label={i18n.translate("clinicLoginRedirect")}
+                            borderColor={'#FFD700'}
+                        success={true}
+                            style={styles.loginButtonNew}
+                            txtColor={'#fff'}
+                            txtStyle={styles.loginButtonTextNew}
+                      />
+                    </View>
+                  </>
                 )}
-
-                {showTimePicker && (
-                  <TimePicker
-                    time={
-                      selectedTime
-                        ? new Date(
-                            moment(selectedTime, "HH:mm:ss").toISOString()
-                          )
-                        : new Date()
-                    } // Convertește timpul selectat înapoi într-un Date
-                    selectedTime={(time) => {
-                      console.log("time....", time);
-                      setSelectedTime(time); // Aici păstrează doar timpul selectat
-                      setShowTimePicker(false);
-                    }}
-                    minTime="00:00"
-                    maxTime="23:59"
-                  />
-                )}
-
-                <View
-                  style={{
-                    marginTop: "5%",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                >
-                      <Text style={styles.labelTextContrast}>
-                    {i18n.translate("IntroduDataOraNasterii")}
-                      </Text>
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      justifyContent: "space-around",
-                      width: "100%",
-                      marginTop: "3%",
-                      paddingHorizontal: "10%",
-                    }}
-                  >
-                    {/* Ziua */}
-                    <Button
-                      mode="outlined"
-                      style={styles.selectButton}
-                      onPress={() => setDayMenuVisible(true)}
-                      theme={{
-                        colors: {
-                          primary: '#FFD700',
-                          onSurface: '#FFD700',
-                        },
-                      }}
-                      labelStyle={styles.selectButtonLabel}
-                    >
-                      {day}
-                    </Button>
-                    <DayPickerModal
-                      visible={isDayMenuVisible}
-                      onClose={() => setDayMenuVisible(false)}
-                      onSelect={(value) => setDay(value)}
-                      selectedDay={day}
-                    />
-                    {/* Luna */}
-                    <Button
-                      mode="outlined"
-                      style={styles.selectButton}
-                      onPress={() => setMonthMenuVisible(true)}
-                      theme={{
-                        colors: {
-                          primary: '#FFD700',
-                          onSurface: '#FFD700',
-                        },
-                      }}
-                      labelStyle={styles.selectButtonLabel}
-                    >
-                      {month}
-                    </Button>
-                    <MonthPickerModal
-                      visible={isMonthMenuVisible}
-                      onClose={() => setMonthMenuVisible(false)}
-                      onSelect={(value) => setMonth(value)}
-                      selectedMonth={month}
-                    />
-                    {/* Anul */}
-                    <Button
-                      mode="outlined"
-                      style={styles.selectButton}
-                      onPress={() => setYearMenuVisible(true)}
-                      theme={{
-                        colors: {
-                          primary: '#FFD700',
-                          onSurface: '#FFD700',
-                        },
-                      }}
-                      labelStyle={styles.selectButtonLabel}
-                    >
-                      {year}
-                    </Button>
-                    <YearPickerModal
-                      visible={isYearMenuVisible}
-                      onClose={() => setYearMenuVisible(false)}
-                      onSelect={(value) => setYear(value)}
-                      selectedYear={year}
-                    />
-                  </View>
-                  <Button
-                    mode="outlined"
-                    onPress={() => setShowTimePicker(true)}
-                    style={styles.selectButton}
-                    color="#FFD700"
-                    theme={{
-                      colors: {
-                        primary: '#FFD700',
-                        onSurface: '#FFD700',
-                      },
-                    }}
-                    labelStyle={styles.selectButtonLabel}
-                  >
-                    {selectedTime || i18n.translate("SelecteazaOraNasterii")}
-                  </Button>
-                </View>
-
-                    <GenderSelector setGender={setGender} gender={gender} style={styles.genderSelectorNew} />
-                {/* {currentStep === 5 && (
-              <RelationshipScreen
-                setRelationshipStatus={setRelationshipStatus}
-              />
-            )} */}
-                {/* {currentStep === 6 && (
-              <InputFields
-                value={numarNorocos}
-                onChangeText={setNumarNorocos}
-                placeholder={"Număr norocos"}
-                image={"star"}
-              />
-            )} */}
-                <View style={styles.buttonContainer}>
-                  <CommonButton
-                    disabled={false}
-                    funCallback={handleContinue}
-                        borderWidth={0}
-                        bgColor={'#FFD700'}
-                    label={i18n.translate("clinicLoginRedirect")}
-                        borderColor={'#FFD700'}
-                    success={true}
-                        style={styles.loginButtonNew}
-                        txtColor={'#fff'}
-                        txtStyle={styles.loginButtonTextNew}
-                  />
-                </View>
                   </ScrollView>
                 </KeyboardAvoidingView>
             )}

@@ -18,6 +18,8 @@ export default function MapInputPatientDash({
   adress,
   calculateTimeZone,
   currentStep, // Adaugăm currentStep ca prop
+  onFocus, // Callback pentru focus
+  onBlur, // Callback pentru blur
 }) {
   return (
     <GooglePlacesAutocomplete
@@ -41,6 +43,14 @@ export default function MapInputPatientDash({
           //   setAdress(text);
           // }
           // setAdress(text);
+        },
+        onFocus: () => {
+          console.log("MapInputPatientDash focused");
+          if (onFocus) onFocus();
+        },
+        onBlur: () => {
+          console.log("MapInputPatientDash blurred");
+          if (onBlur) onBlur();
         },
       }}
       onFail={(error) =>

@@ -15,7 +15,7 @@ import { Button } from "../../../components/commonButton";
 import { colors } from "../../../utils/colors";
 import { useTranslation } from "../../../utils/translateUtil";
 import { useLanguage } from "../../../context/LanguageContext";
-import { Checkbox } from "react-native-paper";
+
 
 const PurchaseModal = ({
   visible,
@@ -290,11 +290,20 @@ const PurchaseModal = ({
             )}
 
             <View style={styles.checkboxContainerCustom}>
-              <Checkbox
-                status={isChecked ? "checked" : "unchecked"}
+              <TouchableOpacity 
+                style={styles.checkboxTouchableCustom}
                 onPress={() => setIsChecked(!isChecked)}
-                color={colors.primary3}
-              />
+                activeOpacity={0.7}
+              >
+                <View style={[
+                  styles.checkboxCustom, 
+                  isChecked && styles.checkboxCheckedCustom
+                ]}>
+                  {isChecked && (
+                    <Text style={styles.checkmarkCustom}>✓</Text>
+                  )}
+                </View>
+              </TouchableOpacity>
 
               <TouchableOpacity onPress={() => setTermsVisible(true)}>
                 <Text style={styles.termsTextCustom}>
@@ -437,6 +446,28 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginTop: 10,
+  },
+  checkboxTouchableCustom: {
+    marginRight: 8,
+  },
+  checkboxCustom: {
+    width: 20,
+    height: 20,
+    borderWidth: 2,
+    borderColor: '#FFD700',
+    borderRadius: 4,
+    backgroundColor: 'transparent',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkboxCheckedCustom: {
+    backgroundColor: '#FFD700',
+  },
+  checkmarkCustom: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
   termsTextCustom: {
     fontSize: 14,

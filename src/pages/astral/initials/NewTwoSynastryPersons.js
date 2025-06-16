@@ -163,6 +163,9 @@ function NewTwoSyanstryPersons({ navigation, route }) {
 
   const inputRef = React.useRef(null);
 
+  // Add state for MapInputPatientDash focus
+  const [isMapInputFocused, setIsMapInputFocused] = useState(false);
+
   useEffect(() => {
     console.log("selectedTime.......", selectedTime);
   }, []);
@@ -544,235 +547,241 @@ function NewTwoSyanstryPersons({ navigation, route }) {
                     calculateTimeZone(lat, long)
                   }
                   currentStep={currentStep}
+                  onFocus={() => setIsMapInputFocused(true)}
+                  onBlur={() => setIsMapInputFocused(false)}
                 />
 
-                <View
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "space-around",
-                    alignItems: "flex-start",
-                    paddingTop: timeZoneData?.offset ? 15 : 0,
-                    paddingLeft: 10,
-                  }}
-                >
-                      <Text style={styles.labelTextContrast}>
-                        {i18n.translate("Adresa")}: {currentStep === 1
-                      ? person1Data.place || "-"
-                      : person2Data.place || "-"}
-                      </Text>
-                  {timeZoneData?.offset && (
-                        <Text style={styles.labelTextContrast}>
-                      {timeZoneData?.data?.timeZoneName}, UTC/GMT +
-                      {timeZoneData?.offset} hours
-                        </Text>
-                  )}
-                      <Text style={styles.labelTextContrast}>
-                        Long/Lat: {currentStep === 1
-                      ? `${person1Data.long || "-"} / ${person1Data.lat || "-"}`
-                          : `${person2Data.long || "-"} / ${person2Data.lat || "-"}`}
-                      </Text>
-                </View>
-
-                    <Text style={styles.labelTextContrast}>
-                  {i18n.translate("IntroduDataOraNasterii")}
-                    </Text>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "space-around",
-                    width: "100%",
-                    marginTop: "3%",
-                    paddingHorizontal: "10%",
-                  }}
-                >
-                  {/* Ziua */}
-                  <Button
-                    mode="outlined"
-                    style={styles.selectButton}
-                    onPress={() => setDayMenuVisible(true)}
-                    theme={{
-                      colors: {
-                        primary: '#FFD700',
-                        onSurface: '#FFD700',
-                      },
-                    }}
-                    labelStyle={styles.selectButtonLabel}
-                  >
-                    {currentStep === 1
-                      ? person1Data.day || "Zi"
-                      : person2Data.day || "Zi"}
-                  </Button>
-                  <DayPickerModal
-                    visible={isDayMenuVisible}
-                    onClose={() => setDayMenuVisible(false)}
-                    onSelect={(value) => {
-                      if (currentStep === 1) {
-                        setPerson1Data({ ...person1Data, day: value });
-                      } else {
-                        setPerson2Data({ ...person2Data, day: value });
-                      }
-                    }}
-                    selectedDay={currentStep === 1 ? person1Data.day : person2Data.day}
-                  />
-                  {/* Luna */}
-                  <Button
-                    mode="outlined"
-                    style={styles.selectButton}
-                    onPress={() => setMonthMenuVisible(true)}
-                    theme={{
-                      colors: {
-                        primary: '#FFD700',
-                        onSurface: '#FFD700',
-                      },
-                    }}
-                    labelStyle={styles.selectButtonLabel}
-                  >
-                    {currentStep === 1
-                      ? person1Data.month || "Lună"
-                      : person2Data.month || "Lună"}
-                  </Button>
-                  <MonthPickerModal
-                    visible={isMonthMenuVisible}
-                    onClose={() => setMonthMenuVisible(false)}
-                    onSelect={(value) => {
-                      if (currentStep === 1) {
-                        setPerson1Data({ ...person1Data, month: value });
-                      } else {
-                        setPerson2Data({ ...person2Data, month: value });
-                      }
-                    }}
-                    selectedMonth={currentStep === 1 ? person1Data.month : person2Data.month}
-                  />
-                  {/* Anul */}
-                  <Button
-                    mode="outlined"
-                    style={styles.selectButton}
-                    onPress={() => setYearMenuVisible(true)}
-                    theme={{
-                      colors: {
-                        primary: '#FFD700',
-                        onSurface: '#FFD700',
-                      },
-                    }}
-                    labelStyle={styles.selectButtonLabel}
-                  >
-                    {currentStep === 1
-                      ? person1Data.year || "An"
-                      : person2Data.year || "An"}
-                  </Button>
-                  <YearPickerModal
-                    visible={isYearMenuVisible}
-                    onClose={() => setYearMenuVisible(false)}
-                    onSelect={(value) => {
-                      if (currentStep === 1) {
-                        setPerson1Data({ ...person1Data, year: value });
-                      } else {
-                        setPerson2Data({ ...person2Data, year: value });
-                      }
-                    }}
-                    selectedYear={currentStep === 1 ? person1Data.year : person2Data.year}
-                  />
-                </View>
-                <Button
-                  mode="outlined"
-                  onPress={() => setShowTimePicker(true)}
-                      style={styles.selectButton}
-                      color="#FFD700"
-                  theme={{
-                    colors: {
-                          primary: '#FFD700',
-                          onSurface: '#FFD700',
-                    },
-                  }}
-                      labelStyle={styles.selectButtonLabel}
-                >
-                  {currentStep === 1
-                    ? person1Data.timeOfBirth ||
-                      i18n.translate("SelecteazaOraNasterii")
-                    : person2Data.timeOfBirth ||
-                      i18n.translate("SelecteazaOraNasterii")}
-                </Button>
-
-                {showTimePicker && (
-                  <TimePicker
-                    time={
-                      currentStep === 1
-                        ? new Date(
-                            moment(
-                              person1Data.timeOfBirth || "00:00:00",
-                              "HH:mm:ss"
-                            )
-                          )
-                        : new Date(
-                            moment(
-                              person2Data.timeOfBirth || "00:00:00",
-                              "HH:mm:ss"
-                            )
-                          )
-                    }
-                    selectedTime={(time) => {
-                      if (currentStep === 1) {
-                        setPerson1Data({
-                          ...person1Data,
-                          timeOfBirth: time,
-                        });
-                      } else {
-                        setPerson2Data({
-                          ...person2Data,
-                          timeOfBirth: time,
-                        });
-                      }
-                      setShowTimePicker(false);
-                    }}
-                    minTime="00:00"
-                    maxTime="23:59"
-                  />
-                )}
-
-                <GenderSelector
-                  setGender={(gender) =>
-                    currentStep === 1
-                      ? setPerson1Data({ ...person1Data, gender })
-                      : setPerson2Data({ ...person2Data, gender })
-                  }
-                  gender={
-                    currentStep === 1 ? person1Data.gender : person2Data.gender
-                  }
-                      style={styles.genderSelectorNew}
-                />
-
-                <View style={styles.buttonContainer}>
-                  {currentStep === 1 ? (
-                    <CommonButton
-                      disabled={false}
-                      funCallback={() => {
-                        handleNext();
+                {!(Platform.OS === 'ios' && isMapInputFocused) && (
+                  <>
+                    <View
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "space-around",
+                        alignItems: "flex-start",
+                        paddingTop: timeZoneData?.offset ? 15 : 0,
+                        paddingLeft: 10,
                       }}
-                          borderWidth={0}
-                          bgColor={'#FFD700'}
-                      label={"Următoarea persoană"}
-                          borderColor={'#FFD700'}
-                      success={true}
-                          style={styles.loginButtonNew}
-                          txtColor={'#fff'}
-                          txtStyle={styles.loginButtonTextNew}
+                    >
+                          <Text style={styles.labelTextContrast}>
+                            {i18n.translate("Adresa")}: {currentStep === 1
+                          ? person1Data.place || "-"
+                          : person2Data.place || "-"}
+                          </Text>
+                      {timeZoneData?.offset && (
+                            <Text style={styles.labelTextContrast}>
+                          {timeZoneData?.data?.timeZoneName}, UTC/GMT +
+                          {timeZoneData?.offset} hours
+                            </Text>
+                      )}
+                          <Text style={styles.labelTextContrast}>
+                            Long/Lat: {currentStep === 1
+                          ? `${person1Data.long || "-"} / ${person1Data.lat || "-"}`
+                              : `${person2Data.long || "-"} / ${person2Data.lat || "-"}`}
+                          </Text>
+                    </View>
+
+                        <Text style={styles.labelTextContrast}>
+                      {i18n.translate("IntroduDataOraNasterii")}
+                        </Text>
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        justifyContent: "space-around",
+                        width: "100%",
+                        marginTop: "3%",
+                        paddingHorizontal: "10%",
+                      }}
+                    >
+                      {/* Ziua */}
+                          <Button
+                            mode="outlined"
+                                style={styles.selectButton}
+                        onPress={() => setDayMenuVisible(true)}
+                            theme={{
+                              colors: {
+                                    primary: '#FFD700',
+                                    onSurface: '#FFD700',
+                              },
+                            }}
+                                labelStyle={styles.selectButtonLabel}
+                          >
+                            {currentStep === 1
+                              ? person1Data.day || "Zi"
+                              : person2Data.day || "Zi"}
+                          </Button>
+                      <DayPickerModal
+                        visible={isDayMenuVisible}
+                        onClose={() => setDayMenuVisible(false)}
+                        onSelect={(value) => {
+                              if (currentStep === 1) {
+                            setPerson1Data({ ...person1Data, day: value });
+                              } else {
+                            setPerson2Data({ ...person2Data, day: value });
+                              }
+                        }}
+                        selectedDay={currentStep === 1 ? person1Data.day : person2Data.day}
+                          />
+                      {/* Luna */}
+                          <Button
+                            mode="outlined"
+                                style={styles.selectButton}
+                        onPress={() => setMonthMenuVisible(true)}
+                            theme={{
+                              colors: {
+                                    primary: '#FFD700',
+                                    onSurface: '#FFD700',
+                              },
+                            }}
+                                labelStyle={styles.selectButtonLabel}
+                          >
+                            {currentStep === 1
+                              ? person1Data.month || "Lună"
+                              : person2Data.month || "Lună"}
+                          </Button>
+                      <MonthPickerModal
+                        visible={isMonthMenuVisible}
+                        onClose={() => setMonthMenuVisible(false)}
+                        onSelect={(value) => {
+                              if (currentStep === 1) {
+                            setPerson1Data({ ...person1Data, month: value });
+                              } else {
+                            setPerson2Data({ ...person2Data, month: value });
+                              }
+                        }}
+                        selectedMonth={currentStep === 1 ? person1Data.month : person2Data.month}
+                          />
+                      {/* Anul */}
+                          <Button
+                            mode="outlined"
+                                style={styles.selectButton}
+                        onPress={() => setYearMenuVisible(true)}
+                            theme={{
+                              colors: {
+                                    primary: '#FFD700',
+                                    onSurface: '#FFD700',
+                              },
+                            }}
+                                labelStyle={styles.selectButtonLabel}
+                          >
+                            {currentStep === 1
+                              ? person1Data.year || "An"
+                              : person2Data.year || "An"}
+                          </Button>
+                      <YearPickerModal
+                        visible={isYearMenuVisible}
+                        onClose={() => setYearMenuVisible(false)}
+                        onSelect={(value) => {
+                                if (currentStep === 1) {
+                            setPerson1Data({ ...person1Data, year: value });
+                                } else {
+                            setPerson2Data({ ...person2Data, year: value });
+                                }
+                              }}
+                        selectedYear={currentStep === 1 ? person1Data.year : person2Data.year}
+                            />
+                    </View>
+                    <Button
+                      mode="outlined"
+                      onPress={() => setShowTimePicker(true)}
+                          style={styles.selectButton}
+                          color="#FFD700"
+                      theme={{
+                        colors: {
+                              primary: '#FFD700',
+                              onSurface: '#FFD700',
+                        },
+                      }}
+                          labelStyle={styles.selectButtonLabel}
+                    >
+                      {currentStep === 1
+                        ? person1Data.timeOfBirth ||
+                          i18n.translate("SelecteazaOraNasterii")
+                        : person2Data.timeOfBirth ||
+                          i18n.translate("SelecteazaOraNasterii")}
+                    </Button>
+
+                    {showTimePicker && (
+                      <TimePicker
+                        time={
+                          currentStep === 1
+                            ? new Date(
+                                moment(
+                                  person1Data.timeOfBirth || "00:00:00",
+                                  "HH:mm:ss"
+                                )
+                              )
+                            : new Date(
+                                moment(
+                                  person2Data.timeOfBirth || "00:00:00",
+                                  "HH:mm:ss"
+                                )
+                              )
+                        }
+                        selectedTime={(time) => {
+                          if (currentStep === 1) {
+                            setPerson1Data({
+                              ...person1Data,
+                              timeOfBirth: time,
+                            });
+                          } else {
+                            setPerson2Data({
+                              ...person2Data,
+                              timeOfBirth: time,
+                            });
+                          }
+                          setShowTimePicker(false);
+                        }}
+                        minTime="00:00"
+                        maxTime="23:59"
+                      />
+                    )}
+
+                    <GenderSelector
+                      setGender={(gender) =>
+                        currentStep === 1
+                          ? setPerson1Data({ ...person1Data, gender })
+                          : setPerson2Data({ ...person2Data, gender })
+                      }
+                      gender={
+                        currentStep === 1 ? person1Data.gender : person2Data.gender
+                      }
+                          style={styles.genderSelectorNew}
                     />
-                  ) : (
-                    <CommonButton
-                      disabled={false}
-                      funCallback={handleFinalize}
-                          borderWidth={0}
-                          bgColor={'#FFD700'}
-                      label={"Finalizare"}
-                          borderColor={'#FFD700'}
-                      success={true}
-                          style={styles.loginButtonNew}
-                          txtColor={'#fff'}
-                          txtStyle={styles.loginButtonTextNew}
-                    />
-                  )}
-                </View>
+
+                    <View style={styles.buttonContainer}>
+                      {currentStep === 1 ? (
+                        <CommonButton
+                          disabled={false}
+                          funCallback={() => {
+                            handleNext();
+                          }}
+                              borderWidth={0}
+                              bgColor={'#FFD700'}
+                          label={"Următoarea persoană"}
+                              borderColor={'#FFD700'}
+                          success={true}
+                              style={styles.loginButtonNew}
+                              txtColor={'#fff'}
+                              txtStyle={styles.loginButtonTextNew}
+                        />
+                      ) : (
+                        <CommonButton
+                          disabled={false}
+                          funCallback={handleFinalize}
+                              borderWidth={0}
+                              bgColor={'#FFD700'}
+                          label={"Finalizare"}
+                              borderColor={'#FFD700'}
+                          success={true}
+                              style={styles.loginButtonNew}
+                              txtColor={'#fff'}
+                              txtStyle={styles.loginButtonTextNew}
+                        />
+                      )}
+                    </View>
+                  </>
+                )}
                   </ScrollView>
                 </KeyboardAvoidingView>
             )}

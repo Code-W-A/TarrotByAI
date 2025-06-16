@@ -356,50 +356,59 @@ function AstrogramaNatalaOtherPerson({ navigation }) {
       const { uri } = await Print.printToFileAsync({ html: htmlContent });
       console.log("PDF generat:", uri);
 
-      if (Platform.OS === "android" && Platform.Version < 29) {
-        // Pentru Android 10 și mai vechi
-        const fileUri = `${FileSystem.documentDirectory}RaportAnaliza.pdf`;
-        await FileSystem.copyAsync({ from: uri, to: fileUri });
-
-        Alert.alert(
-          "Fișier salvat",
-          `PDF-ul a fost salvat cu succes la: ${fileUri}`
-        );
-        console.log("Fișier salvat cu succes:", fileUri);
-      } else {
-        // Pentru Android 11 și mai nou
-        const permissions =
-          await StorageAccessFramework.requestDirectoryPermissionsAsync();
-        if (!permissions.granted) {
+      if (Platform.OS === "android") {
+        if (Platform.Version < 29) {
+          // Pentru Android 10 și mai vechi
+          const fileUri = `${FileSystem.documentDirectory}RaportAnaliza.pdf`;
+          await FileSystem.copyAsync({ from: uri, to: fileUri });
           Alert.alert(
-            "Permisiune refuzată",
-            "Trebuie să acorzi permisiunea pentru a salva fișierul."
+            "Fișier salvat",
+            `PDF-ul a fost salvat cu succes la: ${fileUri}`
           );
-          return;
+          console.log("Fișier salvat cu succes:", fileUri);
+        } else {
+          // Pentru Android 11 și mai nou
+          const permissions =
+            await StorageAccessFramework.requestDirectoryPermissionsAsync();
+          if (!permissions.granted) {
+            Alert.alert(
+              "Permisiune refuzată",
+              "Trebuie să acorzi permisiunea pentru a salva fișierul."
+            );
+            return;
+          }
+
+          const directoryUri = permissions.directoryUri;
+          console.log("Director selectat:", directoryUri);
+
+          const fileName = "RaportAnaliza.pdf";
+          const base64Content = await FileSystem.readAsStringAsync(uri, {
+            encoding: FileSystem.EncodingType.Base64,
+          });
+          const fileUri = await StorageAccessFramework.createFileAsync(
+            directoryUri,
+            fileName,
+            "application/pdf"
+          );
+
+          await FileSystem.writeAsStringAsync(fileUri, base64Content, {
+            encoding: FileSystem.EncodingType.Base64,
+          });
+
+          Alert.alert(
+            "Fișier salvat",
+            `PDF-ul a fost salvat cu succes la: ${fileUri}`
+          );
+          console.log("Fișier salvat cu succes:", fileUri);
         }
-
-        const directoryUri = permissions.directoryUri;
-        console.log("Director selectat:", directoryUri);
-
-        const fileName = "RaportAnaliza.pdf";
-        const base64Content = await FileSystem.readAsStringAsync(uri, {
-          encoding: FileSystem.EncodingType.Base64,
+      } else if (Platform.OS === "ios") {
+        // Pe iOS, folosim share sheet pentru ca utilizatorul să aleagă ce face cu fișierul
+        await Sharing.shareAsync(uri, {
+          dialogTitle: 'Salvează sau distribuie PDF-ul',
+          mimeType: 'application/pdf',
+          UTI: 'com.adobe.pdf'
         });
-        const fileUri = await StorageAccessFramework.createFileAsync(
-          directoryUri,
-          fileName,
-          "application/pdf"
-        );
-
-        await FileSystem.writeAsStringAsync(fileUri, base64Content, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
-
-        Alert.alert(
-          "Fișier salvat",
-          `PDF-ul a fost salvat cu succes la: ${fileUri}`
-        );
-        console.log("Fișier salvat cu succes:", fileUri);
+        console.log("iOS share sheet prezentat pentru PDF");
       }
     } catch (error) {
       console.error("Eroare la salvarea fișierului:", error);
@@ -1224,7 +1233,7 @@ function AstrogramaNatalaOtherPerson({ navigation }) {
                                   {`${planetData.planet_name} is in ${planetData.sign_name}`}
                                 </Text>
                                 {/* Text descriptiv */}
-                                <Text style={[styles.textDescription, textStyles.goldenText, { textAlign: 'justify', width: '100%' }]}>
+                                <Text style={[styles.textDescription, textStyles.goldenText, {color:"#bfa76a"}]}>
                                   {planetData.report}
                                 </Text>
                               </View>
@@ -1248,7 +1257,7 @@ function AstrogramaNatalaOtherPerson({ navigation }) {
                                   {`${houseData.planet_name} is in the ${houseData.house}th house`}
                                 </Text>
                                 {/* Text descriptiv */}
-                                <Text style={[styles.textDescription, textStyles.goldenText, { textAlign: 'justify', width: '100%' }]}>
+                                <Text style={[styles.textDescription, textStyles.goldenText, {color:"#bfa76a"}]}>
                                   {houseData.report}
                                 </Text>
                               </View>

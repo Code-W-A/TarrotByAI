@@ -356,7 +356,7 @@ function SinastrieRelatieOthers({ navigation, route }) {
 
     const sections = tabs
       .map((tab) => {
-        const data = getActiveTabData(tab); // Folosește funcția pentru a obține datele pentru fiecare tab
+        const data = getTabDataForPDF(tab); // Folosește funcția pentru a obține datele pentru fiecare tab
         if (!data || data.length === 0) return ""; // Dacă nu există date, trece peste
 
         const sectionContent = data
@@ -549,10 +549,14 @@ function SinastrieRelatieOthers({ navigation, route }) {
           Alert.alert("Fișier salvat", `PDF-ul a fost salvat cu succes la: ${fileUri}`);
           console.log("Fișier salvat cu succes:", fileUri);
         }
-      } else {
+      } else if (Platform.OS === "ios") {
         // Pe iOS: deschidem share sheet pentru ca utilizatorul să aleagă ce face cu fișierul
-        await Sharing.shareAsync(uri);
-        console.log("iOS share sheet prezentat");
+        await Sharing.shareAsync(uri, {
+          dialogTitle: 'Salvează sau distribuie PDF-ul',
+          mimeType: 'application/pdf',
+          UTI: 'com.adobe.pdf'
+        });
+        console.log("iOS share sheet prezentat pentru PDF");
       }
     } catch (error) {
       console.error("Eroare la salvarea fișierului:", error);
@@ -660,13 +664,16 @@ function SinastrieRelatieOthers({ navigation, route }) {
           console.log("✅ Payment captured successfully.");
   
           // 7) Actualizează analiza ca plătită în personsDataOthers din AsyncStorage
-          // Actualizarea se face identic ca în versiunea originală:
           setIsPaid(true);
+          
+          // Actualizează și analysisData local pentru afișarea imediată
+          const updatedAnalysisData = { ...analysisData, isPaid: true };
+          setUserD(updatedAnalysisData);
+          
           const existingOtherDataString = await AsyncStorage.getItem("personsDataOthers");
           let existingOtherData = existingOtherDataString ? JSON.parse(existingOtherDataString) : [];
-          existingOtherData = [analysisData];
-          console.log("📦 Date existente în personsDataOthers:", existingOtherData);
-  
+          
+          // Găsește și actualizează analiza curentă în lista existentă
           const updatePaidStatus = (dataList) => {
             return dataList.map((item) =>
               item.id === analysisData.id ? { ...item, isPaid: true } : item
@@ -675,7 +682,7 @@ function SinastrieRelatieOthers({ navigation, route }) {
   
           const updatedOtherData = updatePaidStatus(existingOtherData);
           await AsyncStorage.setItem("personsDataOthers", JSON.stringify(updatedOtherData));
-          console.log("✅ Analiza din personsDataOthers marcată ca plătită.");
+          console.log("✅ Analiza din personsDataOthers marcată ca plătită și starea locală actualizată.");
   
           // 8) Creează factura pe server
           console.log("🧾 Creating invoice...");
@@ -723,26 +730,51 @@ function SinastrieRelatieOthers({ navigation, route }) {
     return regex.test(base64);
   };
 
-  const getActiveTabData = (tab) => {
+  const getActiveTabData = () => {
+    switch (activeTab) {
+      case "Harmony":
+        return userD?.synastry?.harmoniousAspectReading?.data || [];
+      case "Conflict":
+        return userD?.synastry?.conflictingAspectReading?.data || [];
+      case "Contrast":
+        return userD?.synastry?.contrastingAspectReading?.data || [];
+      case "Intense_Aspect":
+        return userD?.synastry?.intenseCompatibility?.data || [];
+      case "Physical_Compatibility":
+        return userD?.synastry?.physicalCompatibility?.data || [];
+      case "Emotional_Compatibility":
+        return userD?.synastry?.emotionalCompatibility?.data || [];
+      case "Sexual_Compatibility":
+        return userD?.synastry?.sexualCompatibility?.data || [];
+      case "Spiritual_Compatibility":
+        return userD?.synastry?.spiritualCompatibility?.data || [];
+      case "Financial_Compatibility":
+        return userD?.synastry?.financialCompatibility?.data || [];
+      default:
+        return []; // sau returnează un set de date implicit dacă este necesar
+    }
+  };
+
+  const getTabDataForPDF = (tab) => {
     switch (tab) {
       case "Harmony":
-        return userD?.synastry?.harmoniousAspectReading?.data;
+        return userD?.synastry?.harmoniousAspectReading?.data || [];
       case "Conflict":
-        return userD?.synastry?.conflictingAspectReading?.data;
+        return userD?.synastry?.conflictingAspectReading?.data || [];
       case "Contrast":
-        return userD?.synastry?.contrastingAspectReading?.data;
+        return userD?.synastry?.contrastingAspectReading?.data || [];
       case "Intense_Aspect":
-        return userD?.synastry?.intenseCompatibility?.data;
+        return userD?.synastry?.intenseCompatibility?.data || [];
       case "Physical_Compatibility":
-        return userD?.synastry?.physicalCompatibility?.data;
+        return userD?.synastry?.physicalCompatibility?.data || [];
       case "Emotional_Compatibility":
-        return userD?.synastry?.emotionalCompatibility?.data;
+        return userD?.synastry?.emotionalCompatibility?.data || [];
       case "Sexual_Compatibility":
-        return userD?.synastry?.sexualCompatibility?.data;
+        return userD?.synastry?.sexualCompatibility?.data || [];
       case "Spiritual_Compatibility":
-        return userD?.synastry?.spiritualCompatibility?.data;
+        return userD?.synastry?.spiritualCompatibility?.data || [];
       case "Financial_Compatibility":
-        return userD?.synastry?.financialCompatibility?.data;
+        return userD?.synastry?.financialCompatibility?.data || [];
       default:
         return []; // sau returnează un set de date implicit dacă este necesar
     }
@@ -1010,6 +1042,9 @@ function SinastrieRelatieOthers({ navigation, route }) {
   }
 
   const activeData = getActiveTabData(); // Obține datele pentru tabul activ
+  console.log("Active Tab:", activeTab);
+  console.log("Active Data:", activeData);
+  console.log("UserD synastry:", userD?.synastry);
 
   return (
     <>
@@ -1025,11 +1060,7 @@ function SinastrieRelatieOthers({ navigation, route }) {
             {selectedTab === "natal" ? (
               <ScrollView>
                 <View style={[styles.defaultContainer]}>
-                  <ScrollView 
-                    style={{ maxHeight: 500 }}
-                    showsVerticalScrollIndicator={true}
-                    nestedScrollEnabled={true}
-                  >
+                  <View>
                     {wheelImage && (
                       <SvgComponent
                         svgBase64={wheelImage.base64ImageP1}
@@ -1037,21 +1068,7 @@ function SinastrieRelatieOthers({ navigation, route }) {
                         height="430"
                       />
                     )}
-                    
-                    {/* Adaugă și al doilea chart */}
-                    {wheelImage && wheelImage.base64ImageP2 && (
-                      <View style={{ marginTop: 20 }}>
-                        <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 18, textAlign: 'center', marginBottom: 10 }]}>
-                          Chart 2
-                        </Text>
-                        <SvgComponent
-                          svgBase64={wheelImage.base64ImageP2}
-                          width="430"
-                          height="430"
-                        />
-                      </View>
-                    )}
-                  </ScrollView>
+                  </View>
                   <Divider style={{ marginTop: "0%" }} />
                   <View style={{ flex: 1, flexDirection: "row" }}>
                     <View style={{ flexDirection: "column", width: "55%" }}>
@@ -1112,28 +1129,67 @@ function SinastrieRelatieOthers({ navigation, route }) {
                         },
                       ]}
                     >
-                      {/* Afișează conținut limitat dacă nu este achiziționat */}
-                      {activeData.length > 0 &&
-                        activeData[0]?.reading?.length > 0 && (
-                          <View>
-                            <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 22 }]}>{activeData[0].reading[0]?.title}</Text>
-                            <Text style={[styles.textDescription, textStyles.goldenText, { marginTop: 0 }]}>{activeData[0].reading[0]?.description}</Text>
-                          </View>
+                      <View>
+                        {isPaid ? (
+                          // Afișează conținutul complet dacă este achiziționat
+                          <>
+                            <Button
+                              disabled={false}
+                              funCallback={handleDownloadPDF}
+                              label={descarcaPdfText}
+                              success={true}
+                              bgColor={colors.gradientLogin11}
+                              borderColor={colors.white}
+                              borderWidth={0.2}
+                              txtColor={colors.white}
+                              style={{ marginTop: "10%" }}
+                            />
+                            {activeData && Array.isArray(activeData) && activeData.map((aspect, index) => (
+                              <View key={index}>
+                                {aspect.reading && Array.isArray(aspect.reading) && aspect.reading.map((read, readIndex) => (
+                                  <View key={readIndex} style={{ marginTop: 20 }}>
+                                    <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 20, marginBottom:"5%" }]}>
+                                      {read?.title}
+                                    </Text>
+                                    <Text style={[styles.textDescription, textStyles.goldenText, { marginTop: 0, color:"#bfa76a" }]}>
+                                      {read?.description}
+                                    </Text>
+                                  </View>
+                                ))}
+                              </View>
+                            ))}
+                          </>
+                        ) : (
+                          // Afișează conținut limitat dacă nu este achiziționat
+                          <>
+                            {activeData && Array.isArray(activeData) && activeData.length > 0 &&
+                              activeData[0]?.reading && Array.isArray(activeData[0]?.reading) && activeData[0]?.reading?.length > 0 && (
+                                <View>
+                                  <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 16 }]}>
+                                    {activeData[0].reading[0]?.title}
+                                  </Text>
+                                  <Text style={[styles.textDescription, textStyles.goldenText, { marginTop: 0, color:"#bfa76a" }]}>
+                                    {activeData[0].reading[0]?.description}
+                                  </Text>
+                                </View>
+                              )}
+                            <Text style={[styles.textDescription, textStyles.goldenText, { marginTop: 0, color:"#bfa76a" }]}>
+                              {achizitioneazaInterpretareCompletaText2}
+                            </Text>
+                            <Button
+                              disabled={false}
+                              funCallback={() => setModalVisible(true)}
+                              label={achizitioneazaInterpretareCompletaText}
+                              success={true}
+                              bgColor={colors.gradientLogin11}
+                              borderColor={colors.white}
+                              borderWidth={0.2}
+                              txtColor={colors.white}
+                              style={{ marginTop: "10%" }}
+                            />
+                          </>
                         )}
-                      <Text style={[styles.partialContent, textStyles.goldenText]}>
-                        {achizitioneazaInterpretareCompletaText2}
-                      </Text>
-                      <Button
-                        disabled={false}
-                        funCallback={() => setModalVisible(true)}
-                        label={achizitioneazaInterpretareCompletaText}
-                        success={true}
-                        bgColor={colors.gradientLogin11}
-                        borderColor={colors.white}
-                        borderWidth={0.2}
-                        txtColor={colors.white}
-                        style={{ marginTop: "10%" }}
-                      />
+                      </View>
                     </View>
                   </View>
                   <View style={{ paddingVertical: 10 }} />
