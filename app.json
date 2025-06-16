@@ -1,92 +1,79 @@
 {
-  "expo": {
-    "name": "Cristina Zurba",
-    "slug": "TarotByAi",
-    "platforms": [
-      "ios",
-      "android",
-      "web"
-    ],
-    "version": "2.1.0",
-    "orientation": "portrait",
-          "scheme": "com.cristina.zurba.tarot",
+    "expo": {
+      "name": "Cristina Zurba",
+      "slug": "TarotByAi",
+      "scheme": "com.cristina.zurba.tarot",
+      "platforms": ["ios", "android", "web"],
+      "version": "2.0.2",
+      "orientation": "portrait",
       "plugins": [
         [
-          "expo-tracking-transparency",
+          "expo-build-properties",
           {
-            "userTrackingPermission": "This identifier will be used to deliver personalized ads to you."
+            "android": {
+              "kotlinVersion": "1.9.25",
+              "compileSdkVersion": 35,
+              "targetSdkVersion": 34,
+              "buildToolsVersion": "35.0.0",
+              "useAndroidX": true,
+              "enableProguardInReleaseBuilds": false
+            }
           }
         ],
+        "expo-asset",
+        "expo-font",
+        "expo-localization",
+        "expo-tracking-transparency",
+        "expo-secure-store",
         [
           "react-native-google-mobile-ads",
           {
             "androidAppId": "ca-app-pub-9577714849380446~4870228858",
-            "iosAppId": "ca-app-pub-9577714849380446~1181241188",
-            "userTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you."
+            "iosAppId": "ca-app-pub-9577714849380446~1181241188"
           }
-        ],
-        [
-        "expo-build-properties",
-        {
-          "ios": {
-            "useFrameworks": "static"
-          }
-        }
+        ]
       ],
-      "expo-font",
-      "expo-localization",
-      "expo-apple-authentication"
-    ],
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/icon.png"
+      "android": {
+        "adaptiveIcon": {
+          "foregroundImage": "./assets/icon.png"
+        },
+        "googleServicesFile": "./google-services.json",
+        "config": {},
+        "softwareKeyboardLayoutMode": "pan",
+        "package": "com.cristina.zurba.tarot",
+        "versionCode": 98,
+        "permissions": [
+          "android.permission.RECORD_AUDIO",
+          "WRITE_EXTERNAL_STORAGE",
+          "READ_EXTERNAL_STORAGE"
+        ]
       },
-      "googleServicesFile": "./google-services.json",
-      "config": {},
-      "softwareKeyboardLayoutMode": "pan",
-      "package": "com.cristina.zurba.tarot",
-      "versionCode": 35,
-      "permissions": [
-        "android.permission.RECORD_AUDIO",
-        "com.google.android.gms.permission.AD_ID"
-      ]
-    },
-    "web": {
-      "config": {
-        "firebase": {
-          "apiKey": "AIzaSyB4zVjD4zGNdjXw90cMudPB74mE-FHRXkE",
-          "measurementId": "G-YJNE2J0837"
+      "web": {
+        "config": {
+          "firebase": {
+            "apiKey": "AIzaSyB4zVjD4zGNdjXw90cMudPB74mE-FHRXkE",
+            "measurementId": "G-YJNE2J0837"
+          }
         }
-      }
-    },
-    "icon": "./assets/icon.png",
-    "updates": {
-      "fallbackToCacheTimeout": 0
-    },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.cristina.zurba.tarotai",
-      "buildNumber": "54",
-      "infoPlist": {
-        "NSUserTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you.",
-        "ITSAppUsesNonExemptEncryption": false
       },
-      "entitlements": {
-        "com.apple.developer.applesignin": ["Default"]
+      "icon": "./assets/icon.png",
+      "updates": {
+        "fallbackToCacheTimeout": 0
       },
-      "googleServicesFile": "./GoogleService-Info.plist"
-    },
-    "description": "Get personalized readings",
-    "extra": {
-      "bugsnag": {
-        "apiKey": "99c24cfa4f8bba7556be3971a0b42300"
+      "assetBundlePatterns": ["**/*"],
+      "ios": {
+        "supportsTablet": true,
+        "bundleIdentifier": "com.cristina.zurba.tarot"
       },
-      "eas": {
-        "projectId": "8a1a3d1c-744e-4f1a-86eb-04ed3a15a020"
-      }
+      "description": "Get personalized readings",
+      "extra": {
+        "bugsnag": {
+          "apiKey": "4b92d358594f0bcb4e0e077080412c3c"
+        },
+        "eas": {
+          "projectId": "87e423c7-eea6-4713-aac2-c4510baebd19"
+        }
+      },
+      "owner": "shikatedo1"
     }
   }
-}
