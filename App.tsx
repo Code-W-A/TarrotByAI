@@ -9,6 +9,7 @@ import { screenName } from "./src/utils/screenName";
 // import { MenuProvider } from "react-native-popup-menu";
 import { Provider } from "react-redux";
 import { Platform, View, ImageBackground, TextComponent, StyleSheet } from "react-native";
+import Constants from "expo-constants";
 import {
   ActivityIndicator,
   Button,
@@ -43,13 +44,14 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { AuthProvider, useAuth } from "./src/context/AuthContext";
 import { NavBarVisibilityProvider } from "./src/context/NavbarVisibilityContext";
 import { NavigationProvider } from "./src/context/NavigationContext";
-import { LanguageProvider } from "./src/context/LanguageContext";
+import { LanguageProvider, useLanguage } from "./src/context/LanguageContext";
 import { ApiDataProvider } from "./src/context/ApiContext";
 import store from "./Store";
 import * as Font from "expo-font";
 import { NumberProvider } from "./src/context/NumberContext";
 import { StripeProvider } from "@stripe/stripe-react-native";
 import { usePushNotifications } from "./src/hooks/usePushNotifications";
+import { handleQueryToken, handleUploadFirestore } from "./src/utils/firestoreUtils";
 import { useAppTrackingTransparency } from "./src/hooks/useAppTrackingTransparency";
 import { initializeTrackingServices } from "./src/utils/trackingUtils";
 import { AdsProvider, useAdsContext } from "./src/context/AdsContext";
@@ -68,6 +70,7 @@ const App = () => {
   // We'll use this inside the AdsProvider to get access to setAdsConfig
   const AppContent = () => {
     const { setAdsConfig, isAdsReady } = useAdsContext();
+    const { language } = useLanguage();
     
     // Handle ATT permission status changes - DOAR O DATĂ
     useEffect(() => {
@@ -85,9 +88,43 @@ const App = () => {
       }
     }, [attStatus, languageLoaded, fontsLoaded, isAdsReady]); // Removed hasTrackingPermission and setAdsConfig to prevent loop
     
+    // IMPORTANT: token upload should run INSIDE NavigationContainer to avoid useNavigation error
+    const PushTokenUploader = () => {
+      const { expoPushToken } = usePushNotifications();
+      useEffect(() => {
+        const uploadToken = async () => {
+          try {
+            if (expoPushToken && expoPushToken.data) {
+              const exists = await handleQueryToken("userTokens", expoPushToken.data);
+              if (!exists) {
+                const timestamp = Date.now().toString(36);
+                const randomPart = Math.random().toString(36).substring(2, 8);
+                const uniqueId = timestamp + randomPart;
+                await handleUploadFirestore(
+                  {
+                    token: expoPushToken.data,
+                    language,
+                    isIos: Platform.OS === "ios",
+                    projectId: Constants.expoConfig?.extra?.eas.projectId,
+                  },
+                  `userTokens/${uniqueId}`
+                );
+                console.log("Uploaded expo push token at startup to userTokens");
+              }
+            }
+          } catch (e) {
+            console.error("Failed to upload expo push token at startup", e);
+          }
+        };
+        uploadToken();
+      }, [expoPushToken, language]);
+      return null;
+    };
+    
     return (
       <NavigationContainer>
         <StatusBar style="light" />
+        <PushTokenUploader />
         <RootNavigation />
       </NavigationContainer>
     );

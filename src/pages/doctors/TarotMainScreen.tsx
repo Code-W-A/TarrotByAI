@@ -22,6 +22,7 @@ import {
   Modal,
   TouchableOpacity,
 } from "react-native";
+import Constants from "expo-constants";
 import { Provider as PaperProvider } from "react-native-paper";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -66,6 +67,7 @@ import AutoScrollingFlatList from "../../components/MenuCard/AutoScrollingFlatLi
 import MoreInfoModal from "../../components/Astral/components/MoreInfoModal";
 import { doc, getFirestore, updateDoc, collection, query, orderBy, limit, getDocs, getDoc } from "firebase/firestore";
 import { db } from "../../../firebase";
+import { filterArticlesBeforeCurrentTime } from "../../utils/commonUtils";
 import { NewsDetailsModal } from "../../components/NewsDetailsModal/NewsDetailsModal";
 import UpdateAppModal from '../../components/UpdateAppModal';
 
@@ -293,7 +295,7 @@ const TarotMaineScreen = () => {
         // Logica pentru utilizatori autentificați
         if (!tokenExists) {
           await handleUploadFirestore(
-            { token: expoPushToken.data, language },
+            { token: expoPushToken.data, language, isIos: Platform.OS === "ios", projectId: Constants.expoConfig?.extra?.eas.projectId },
             `userTokens/${uniqueId}`
           );
         }
@@ -541,7 +543,8 @@ const TarotMaineScreen = () => {
         const q = query(articlesRef, orderBy("firstUploadTimestamp", "desc"), limit(3));
         const snapshot = await getDocs(q);
         const articles = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setLatestArticles(articles);
+        const filtered = filterArticlesBeforeCurrentTime(articles);
+        setLatestArticles(filtered);
       } catch (e) {
         console.error("Failed to fetch latest articles", e);
       } finally {

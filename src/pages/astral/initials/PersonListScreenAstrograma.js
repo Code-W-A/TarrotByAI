@@ -51,8 +51,7 @@ const PersonListScreenAstrograma = ({ navigation }) => {
   const [selectedPerson, setSelectedPerson] = useState(null);
 
   // Debug: log persons and asyncPersons
-  console.log('DEBUG persons:', persons);
-  console.log('DEBUG asyncPersons:', asyncPersons);
+
 
   const handleAddPerson = () => {
     navigation.navigate("NewPersonAstrograma", { editMode: false });

@@ -248,6 +248,27 @@ export const uploadExpoPushToken = async (expoToken) => {
   }
 };
 
+// Upsert guest token directly into userTokens (no Firebase function needed)
+export const uploadGuestExpoToken = async (
+  token: string,
+  languageCode: string,
+  isIos: boolean
+) => {
+  try {
+    if (!token) return;
+    const userTokensRef = collection(db, "userTokens");
+    const existing = await getDocs(query(userTokensRef, where("token", "==", token)));
+    if (!existing.empty) {
+      const ref = existing.docs[0].ref;
+      await updateDoc(ref, { language: languageCode, isIos });
+      return;
+    }
+    await addDoc(userTokensRef, { token, language: languageCode, isIos });
+  } catch (err) {
+    console.log("error uploading guest expoToken", err);
+  }
+};
+
 export const uploadFeedback = async (userType, feedback) => {
   console.log("------UPLOADING FEEDBACK TO FIREBASE---------");
 

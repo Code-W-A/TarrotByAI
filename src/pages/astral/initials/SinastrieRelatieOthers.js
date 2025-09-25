@@ -300,6 +300,7 @@ function SinastrieRelatieOthers({ navigation, route }) {
 
   const [line1, setLine1] = useState("");
   const [city, setCity] = useState("");
+  const [stateCounty, setStateCounty] = useState("");
   const [postalCode, setPostalCode] = useState("");
   const [country, setCountry] = useState(""); // sau un dropdown
 
@@ -580,7 +581,7 @@ function SinastrieRelatieOthers({ navigation, route }) {
   const handlePayment = async () => {
     try {
       // Verifică câmpurile de adresă
-      if (!line1 || !city || !country) {
+      if (!line1 || !city || !stateCounty || !country) {
         Alert.alert("Eroare", "Te rugăm să completezi toate câmpurile de adresă.");
         return;
       }
@@ -696,6 +697,7 @@ function SinastrieRelatieOthers({ navigation, route }) {
             address: {
               line1,
               city,
+              state: stateCounty,
               postal_code: postalCode,
               country,
             },
@@ -789,7 +791,6 @@ function SinastrieRelatieOthers({ navigation, route }) {
       
       // Folosește analysisData din route.params dacă este disponibil
       const analiza = analysisData || userData;
-      console.log("Data....", analiza);
 
       if (!analiza) {
         console.error(
@@ -803,11 +804,9 @@ function SinastrieRelatieOthers({ navigation, route }) {
       if (analiza.person1 && analiza.person2) {
         setPersonOne(analiza.person1);
         setPersonTwo(analiza.person2);
-        console.log("Persoane setate:", analiza.person1.full_name, "și", analiza.person2.full_name);
       }
 
       if (language !== analiza.actualLanguageSinastrie) {
-        console.log("Traducere necesară, limbă curentă:", language);
         setIsLoading(true);
 
         try {
@@ -852,10 +851,6 @@ function SinastrieRelatieOthers({ navigation, route }) {
                               );
                             }
                           } catch (error) {
-                            console.error(
-                              `Eroare la traducerea categoriei ${category}:`,
-                              error
-                            );
                             // Fallback pentru descriere sau titlu
                             reading.description =
                               reading.description ||
@@ -893,14 +888,12 @@ function SinastrieRelatieOthers({ navigation, route }) {
             setPersonTwo(translatedAnaliza.person2);
           }
         } catch (translationError) {
-          console.error("Eroare generală la traducere:", translationError);
           Alert.alert("Eroare", "A apărut o problemă la traducerea datelor.");
           setUserD(analiza); // Fallback la datele existente
         } finally {
           setIsLoading(false);
         }
       } else {
-        console.log("Traducere nu este necesară");
         setUserD(analiza); // Folosește datele existente dacă traducerea nu este necesară
       }
 
@@ -1223,8 +1216,10 @@ function SinastrieRelatieOthers({ navigation, route }) {
         setCountry={setCountry}
         setCity={setCity}
         setLine1={setLine1}
+        setStateCounty={setStateCounty}
         line1={line1}
         city={city}
+        stateCounty={stateCounty}
         country={country}
         postalCode={postalCode}
         setPostalCode={setPostalCode}

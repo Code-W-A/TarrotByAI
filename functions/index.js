@@ -11,9 +11,11 @@ admin.initializeApp();
 const db = admin.firestore();
 
 exports.checkAndSendNotifications = functions.pubsub
-    .schedule("every 5 minutes")
+    .schedule("every 120 minutes")
     .timeZone("Europe/Bucharest")
     .onRun(async () => {
+      const runId = `checkAndSendNotifications-${Date.now().toString(36)}`;
+      console.log(`[${runId}] start`);
       const now = new Date();
       const offset = 2;
       now.setHours(now.getHours() + offset);
@@ -50,6 +52,7 @@ exports.checkAndSendNotifications = functions.pubsub
       const u = "userTokens";
       const userTokensSnap = await admin.firestore().collection(u).get();
       userTokensSnap.forEach((doc) => tokens.push(doc.data()));
+      console.log(`[${runId}] fetched tokens: ${tokens.length}`);
 
       // Impărțirea tokenurilor în batch-uri
       const BATCH_SIZE = 100;
@@ -81,29 +84,36 @@ exports.checkAndSendNotifications = functions.pubsub
           } else {
             console.log("isIos present..don't add to messages for android..");
           }
-        });
+        }).filter(Boolean);
+        console.log(`[${runId}] batch messages: ${messages.length}`);
         // Trimite un batch de notificări
         try {
           const chunks = expo.chunkPushNotifications(messages);
           const tickets = [];
+          console.log(`[${runId}] chunks to send: ${chunks.length}`);
 
           for (const chunk of chunks) {
             try {
+              console.log(`[${runId}] sending chunk size=${chunk.length}`);
               const ticketChunk = await expo.sendPushNotificationsAsync(chunk);
               tickets.push(...ticketChunk);
+              console.log(`[${runId}] sent chunk, receipts: ${ticketChunk.length}`);
             } catch (error) {
-              console.error(`Eroare la trimiterea notificărilor: ${error}`);
+              console.error(`[${runId}] Eroare la trimiterea notificărilor: ${error}`);
             }
           }
         } catch (error) {
-          console.error("Eroare:", error);
+          console.error(`[${runId}] Eroare:`, error);
         }
       }
+      console.log(`[${runId}] done`);
     });
 exports.checkAndSendNotificationsIos = functions.pubsub
-    .schedule("every 5 minutes")
+    .schedule("every 90 minutes")
     .timeZone("Europe/Bucharest")
     .onRun(async () => {
+      const runId = `checkAndSendNotificationsIos-${Date.now().toString(36)}`;
+      console.log(`[${runId}] start`);
       const now = new Date();
       const offset = 2;
       now.setHours(now.getHours() + offset);
@@ -144,6 +154,7 @@ exports.checkAndSendNotificationsIos = functions.pubsub
           .where("isIos", "==", true)
           .get(); // Adaugă filtrul pentru isIos
       userTokensSnap.forEach((doc) => tokens.push(doc.data()));
+      console.log(`[${runId}] fetched iOS tokens: ${tokens.length}`);
 
       // Impărțirea tokenurilor în batch-uri
       const BATCH_SIZE = 100;
@@ -170,31 +181,37 @@ exports.checkAndSendNotificationsIos = functions.pubsub
             title: article.info[languageKey].nume,
             body: article.info[languageKey].descriere,
           };
-        });
+        }).filter(Boolean);
+        console.log(`[${runId}] batch messages: ${messages.length}`);
         // Trimite un batch de notificări
         try {
           const chunks = expo.chunkPushNotifications(messages);
           const tickets = [];
+          console.log(`[${runId}] chunks to send: ${chunks.length}`);
 
           for (const chunk of chunks) {
             try {
+              console.log(`[${runId}] sending chunk size=${chunk.length}`);
               const ticketChunk = await expo.sendPushNotificationsAsync(chunk);
               tickets.push(...ticketChunk);
+              console.log(`[${runId}] sent chunk, receipts: ${ticketChunk.length}`);
             } catch (error) {
-              console.error(`Eroare la trimiterea notificărilor: ${error}`);
+              console.error(`[${runId}] Eroare la trimiterea notificărilor: ${error}`);
             }
           }
         } catch (error) {
-          console.error("Eroare:", error);
+          console.error(`[${runId}] Eroare:`, error);
         }
       }
+      console.log(`[${runId}] done`);
     });
 
 exports.sendRandomNotification = functions.pubsub
-    .schedule("every 120 minutes")
+    .schedule("every 100 minutes")
     .timeZone("Europe/Bucharest")
     .onRun(async () => {
-      console.log("📢 Începerea procesului de trimitere a notificărilor...");
+      const runId = `sendRandomNotification-${Date.now().toString(36)}`;
+      console.log(`[${runId}] 📢 start trimitere notificări random`);
 
       // 1️⃣ Obține toate notificările din Firestore
       const loc = "RegularNotifications";
@@ -217,6 +234,7 @@ exports.sendRandomNotification = functions.pubsub
       const users = [];
 
       tS.forEach((doc) => users.push(doc.data()));
+      console.log(`[${runId}] fetched users: ${users.length}`);
 
       if (users.length === 0) {
         console.log("⚠️ Niciun token de notificare disponibil.");
@@ -265,36 +283,36 @@ exports.sendRandomNotification = functions.pubsub
 
       // 4️⃣ Împărțim notificările în loturi de max. 100
       const chunks = expo.chunkPushNotifications(messages, 100);
+      console.log(`[${runId}] chunks to send: ${chunks.length}, messages: ${messages.length}`);
 
       // 🔹 Funcție pentru a trimite fiecare lot cu întârziere
       const sendBatchedNotifications = async () => {
         let totalSent = 0;
         for (let i = 0; i < chunks.length; i++) {
           try {
-            console.log(`📤 Trimitere batch ${i + 1}/${chunks.length}...`);
+            console.log(`[${runId}] 📤 Trimitere batch ${i + 1}/${chunks.length}... size=${chunks[i].length}`);
             const tC = await expo.sendPushNotificationsAsync(chunks[i]);
             totalSent += tC.length;
-            console.log(`✅ Batch ${i + 1} trimis. Total: ${totalSent}`);
+            console.log(`[${runId}] ✅ Batch ${i + 1} trimis. Total: ${totalSent}`);
 
             // 🔹 Adaugă o întârziere de 1 secundă între loturi
             if (i < chunks.length - 1) {
               await new Promise((resolve) => setTimeout(resolve, 1000));
             }
           } catch (error) {
-            console.error(`❌ Eroare la trimiterea batch-ului ${i + 1}:`, error);
+            console.error(`[${runId}] ❌ Eroare la trimiterea batch-ului ${i + 1}:`, error);
           }
         }
-        console.log(
-            `🚀 Notificări trimise cu succes. Total trimise: ${totalSent}`,
-        );
+        console.log(`[${runId}] 🚀 Notificări trimise cu succes. Total trimise: ${totalSent}`);
       };
 
       // 🔹 Executăm trimiterea notificărilor cu întârziere
       await sendBatchedNotifications();
+      console.log(`[${runId}] done`);
     });
 
 exports.sendRegularNotificationsIos = functions.pubsub
-    .schedule("every 120 minutes")
+    .schedule("every 90 minutes")
     .timeZone("Europe/Bucharest")
     .onRun(async () => {
     // Obține toate notificările din Firestore
@@ -348,24 +366,26 @@ exports.sendRegularNotificationsIos = functions.pubsub
       }
 
       // Trimite notificările în batch-uri
-      const chunks = expo.chunkPushNotifications(messages);
-      const tickets = [];
-
-      for (const chunk of chunks) {
+      // Pentru a evita eroarea Expo "All push notification messages in the same request must be for the same project",
+      // trimitem câte un mesaj per request (fără a amesteca proiecte diferite în același request)
+      let totalSent = 0;
+      for (const msg of messages) {
         try {
-          const ticketChunk = await expo.sendPushNotificationsAsync(chunk);
-          tickets.push(...ticketChunk);
+          const ticketChunk = await expo.sendPushNotificationsAsync([msg]);
+          totalSent += ticketChunk.length;
+          // Mic throttling ca bună practică
+          await new Promise((r) => setTimeout(r, 100));
         } catch (error) {
-          console.error(`Eroare la trimiterea notificărilor: ${error}`);
+          console.error(`Eroare la trimiterea notificării individuale: ${error}`);
         }
       }
 
-      console.log(`Notificări trimise cu succes. total: ${tickets.length}`);
+      console.log(`Notificări trimise cu succes. total: ${totalSent}`);
     });
 
 exports.sendRandomAfirmatii = functions
     .runWith({timeoutSeconds: 300, memory: "512MB"}) // 5 minute timeout
-    .pubsub.schedule("every 120 minutes")
+    .pubsub.schedule("every 110 minutes")
     .timeZone("Europe/Bucharest")
     .onRun(async () => {
       console.log(
@@ -465,7 +485,7 @@ exports.sendRandomAfirmatii = functions
     });
 
 exports.sendRegularAfirmatiiIos = functions.pubsub
-    .schedule("every 120 minutes")
+    .schedule("9 */2 * * *")
     .timeZone("Europe/Bucharest")
     .onRun(async () => {
     // Obține toate notificările din Firestore
@@ -529,23 +549,23 @@ exports.sendRegularAfirmatiiIos = functions.pubsub
       }
 
       // Trimite notificările în batch-uri
-      const chunks = expo.chunkPushNotifications(messages);
-      const tickets = [];
-
-      for (const chunk of chunks) {
+      // Evită amestecul de proiecte diferite într-un singur request către Expo
+      let totalSent = 0;
+      for (const msg of messages) {
         try {
-          const ticketChunk = await expo.sendPushNotificationsAsync(chunk);
-          tickets.push(...ticketChunk);
+          const ticketChunk = await expo.sendPushNotificationsAsync([msg]);
+          totalSent += ticketChunk.length;
+          await new Promise((r) => setTimeout(r, 100));
         } catch (error) {
-          console.error(`Eroare la trimiterea notificărilor: ${error}`);
+          console.error(`Eroare la trimiterea notificării individuale: ${error}`);
         }
       }
 
-      console.log(`Notificări trimise cu succes. total: ${tickets.length}`);
+      console.log(`Notificări trimise cu succes. total: ${totalSent}`);
     });
 
 exports.sendHoroscopeNotificationsAndroid = functions.pubsub
-    .schedule("every 24 hours")
+    .schedule("every 80 minutes")
     .timeZone("Europe/Bucharest")
     .onRun(async () => {
       const collectionRef = db.collection("NotificariHoroscop");
@@ -595,23 +615,23 @@ exports.sendHoroscopeNotificationsAndroid = functions.pubsub
         return false;
       }
 
-      const chunks = expo.chunkPushNotifications(messages);
-      const tickets = [];
-
-      for (const chunk of chunks) {
+      // Evită amestecarea tokenurilor din proiecte diferite într-un singur request
+      let totalSent = 0;
+      for (const msg of messages) {
         try {
-          const ticketChunk = await expo.sendPushNotificationsAsync(chunk);
-          tickets.push(...ticketChunk);
+          const ticketChunk = await expo.sendPushNotificationsAsync([msg]);
+          totalSent += ticketChunk.length;
+          await new Promise((r) => setTimeout(r, 100));
         } catch (error) {
-          console.error(`Eroare la trimiterea notificărilor: ${error}`);
+          console.error(`Eroare la trimiterea notificării individuale: ${error}`);
         }
       }
 
-      console.log(`Notificări trimise cu succes. total: ${tickets.length}`);
+      console.log(`Notificări trimise cu succes. total: ${totalSent}`);
     });
 
 exports.sendHoroscopeNotificationsIos = functions.pubsub
-    .schedule("every 24 hours")
+    .schedule("every 85 minutes")
     .timeZone("Europe/Bucharest")
     .onRun(async () => {
       const collectionRef = db.collection("NotificariHoroscop");
@@ -665,19 +685,19 @@ exports.sendHoroscopeNotificationsIos = functions.pubsub
         return false;
       }
 
-      const chunks = expo.chunkPushNotifications(messages);
-      const tickets = [];
-
-      for (const chunk of chunks) {
+      // Evită amestecul de proiecte diferite într-un singur request
+      let totalSent = 0;
+      for (const msg of messages) {
         try {
-          const ticketChunk = await expo.sendPushNotificationsAsync(chunk);
-          tickets.push(...ticketChunk);
+          const ticketChunk = await expo.sendPushNotificationsAsync([msg]);
+          totalSent += ticketChunk.length;
+          await new Promise((r) => setTimeout(r, 100));
         } catch (error) {
-          console.error(`Eroare la trimiterea notificărilor: ${error}`);
+          console.error(`Eroare la trimiterea notificării individuale: ${error}`);
         }
       }
 
-      console.log(`Notificări trimise cu succes. total: ${tickets.length}`);
+      console.log(`Notificări trimise cu succes. total: ${totalSent}`);
     });
 
 exports.createNotificariHoroscop = functions.https.onRequest(
@@ -1519,6 +1539,7 @@ exports.createInvoiceAfterPayment = functions.https.onCall(
             address: {
               line1: address.line1 || "",
               city: address.city || "",
+              state: address.state || "",
               postal_code: address.postal_code || "",
               country: address.country || "",
             },
@@ -1693,6 +1714,7 @@ exports.createInvoiceAfterPaymentTest = functions.https.onCall(
             address: {
               line1: address.line1 || "",
               city: address.city || "",
+              state: address.state || "",
               postal_code: address.postal_code || "",
               country: address.country || "",
             },
@@ -1835,3 +1857,136 @@ exports.sendPdfEmail = functions
       timeoutSeconds: 60, // (Opțional)
     })
     .https.onCall(sendPdfEmail);
+
+// Sincronizează în mod sigur token-ul Expo din `Users/{uid}.expoToken` în colecția `userTokens`
+// - Nu schimbă logica existentă de trimitere
+// - Evită duplicatele prin căutare după `token`
+// - Actualizează doar `language` dacă îl poate deduce din documentul User
+exports.syncExpoTokenToUserTokens = functions.firestore
+    .document("Users/{uid}")
+    .onWrite(async (change, context) => {
+      try {
+        // const before = change.before.exists ? change.before.data() : null;
+        const after = change.after.exists ? change.after.data() : null;
+
+        if (!after) {
+          return null;
+        }
+
+        const rawToken = after.expoToken;
+        if (!rawToken) {
+          // Niciun token prezent în document
+          return null;
+        }
+
+        const tokenString = typeof rawToken === "string" ? rawToken : (rawToken && rawToken.data);
+        if (!tokenString) {
+          return null;
+        }
+
+        const languageCandidate = after.actualLanguage || after.language || null;
+
+        const uTokens = admin.firestore().collection("userTokens");
+        const existingSnap = await uTokens.where("token", "==", tokenString).get();
+
+        if (!existingSnap.empty) {
+          // Există deja un doc pentru acest token; actualizează doar limba dacă e disponibilă
+          const docRef = existingSnap.docs[0].ref;
+          if (languageCandidate) {
+            await docRef.update({language: languageCandidate});
+          }
+          return null;
+        }
+
+        // Creează în siguranță un document nou pentru token-ul lipsă
+        const id = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 10)}`;
+        const data = {token: tokenString};
+        if (languageCandidate) {
+          data.language = languageCandidate;
+        }
+        await uTokens.doc(id).set(data);
+
+        return null;
+      } catch (err) {
+        console.error("syncExpoTokenToUserTokens error", err);
+        return null;
+      }
+    });
+
+// Backfill: copiază token-urile din Users/{uid}.expoToken în colecția userTokens, paginat
+exports.backfillUserTokens = functions
+    .runWith({timeoutSeconds: 540, memory: "512MB"})
+    .https.onRequest(async (req, res) => {
+      const runId = `backfillUserTokens-${Date.now().toString(36)}`;
+      try {
+        const configuredSecret = (functions.config().backfill && functions.config().backfill.secret) || null;
+        const providedSecret = req.header("x-backfill-secret") || req.query.secret || null;
+        if (configuredSecret && providedSecret !== configuredSecret) {
+          console.warn(`[${runId}] unauthorized request`);
+          res.status(401).json({error: "unauthorized"});
+          return;
+        }
+
+        const pageSize = Math.min(parseInt(req.query.pageSize) || 500, 1000);
+        const cursor = req.query.cursor || null;
+
+        let q = db.collection("Users").orderBy(admin.firestore.FieldPath.documentId()).limit(pageSize);
+        if (cursor) {
+          const cursorSnap = await db.collection("Users").doc(cursor).get();
+          if (cursorSnap.exists) {
+            q = q.startAfter(cursorSnap);
+          }
+        }
+
+        const snap = await q.get();
+        let processed = 0;
+        let created = 0;
+        let updated = 0;
+        let skipped = 0;
+        let lastDocId = null;
+
+        for (const docSnap of snap.docs) {
+          lastDocId = docSnap.id;
+          const user = docSnap.data() || {};
+          processed++;
+
+          const rawToken = user.expoToken;
+          if (!rawToken) {
+            skipped++;
+            continue;
+          }
+          const tokenString = typeof rawToken === "string" ? rawToken : (rawToken && rawToken.data);
+          if (!tokenString) {
+            skipped++;
+            continue;
+          }
+
+          const languageCandidate = user.actualLanguage || user.language || null;
+
+          const uTokens = db.collection("userTokens");
+          const existingSnap = await uTokens.where("token", "==", tokenString).limit(1).get();
+          if (!existingSnap.empty) {
+            const ref = existingSnap.docs[0].ref;
+            if (languageCandidate) {
+              await ref.update({language: languageCandidate});
+              updated++;
+            } else {
+              skipped++;
+            }
+          } else {
+            const id = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 10)}`;
+            const data = {token: tokenString};
+            if (languageCandidate) data.language = languageCandidate;
+            await uTokens.doc(id).set(data);
+            created++;
+          }
+        }
+
+        const nextCursor = snap.size > 0 ? lastDocId : null;
+        console.log(`[${runId}] processed=${processed} created=${created} updated=${updated} skipped=${skipped} nextCursor=${nextCursor}`);
+        res.json({processed, created, updated, skipped, nextCursor});
+      } catch (err) {
+        console.error("backfillUserTokens error", err);
+        res.status(500).json({error: "internal"});
+      }
+    });

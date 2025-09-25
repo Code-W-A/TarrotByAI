@@ -106,7 +106,7 @@ const SingleFlipCard = ({
 
   // Simplified function without ads for debugging
   const navigateToPersonalizedReading = async (isManualNav?) => {
-    console.log("start....");
+    console.log("[SingleFlipCard] navigateToPersonalizedReading manual?", !!isManualNav);
     try {
       if (isFuture) {
         // Direct navigation without ads
@@ -114,15 +114,17 @@ const SingleFlipCard = ({
           item,
         });
       } else {
-        console.log("here...");
+        console.log("[SingleFlipCard] here...");
         
         const cardNameNormalized = normalizeString(item.info.ro.nume);
         const categoryNameNormalized = normalizeString(conditieCategorie);
+        console.log("[SingleFlipCard] query VarianteCarti with:", {cardNameNormalized, categoryNameNormalized});
         const filteredVariante = await handleQueryFirestoreVarianteCarti(
           "VarianteCarti",
           cardNameNormalized,
           categoryNameNormalized
         );
+        console.log("[SingleFlipCard] filteredVariante length:", filteredVariante.length);
 
         // Verificare dacă există elemente în array-ul filtrat
         if (filteredVariante.length > 0) {

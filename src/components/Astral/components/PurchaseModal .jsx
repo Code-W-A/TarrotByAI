@@ -33,6 +33,8 @@ const PurchaseModal = ({
   setLine1,
   city,
   setCity,
+  stateCounty,
+  setStateCounty,
   postalCode,
   setPostalCode,
   country,
@@ -78,7 +80,7 @@ const PurchaseModal = ({
       setPhoneError(false);
     }
 
-    if (!line1 || !city || !country) {
+    if (!line1 || !city || !stateCounty || !country) {
       setAddressError(true);
       valid = false;
     } else {
@@ -107,6 +109,7 @@ const PurchaseModal = ({
           phone,
           line1,
           city,
+          state: stateCounty,
           postalCode,
           country,
         };
@@ -263,6 +266,15 @@ const PurchaseModal = ({
               value={city}
               onChangeText={(text) => {
                 setCity(text);
+                setAddressError(false);
+              }}
+            />
+            <TextInput
+              style={[styles.inputCustom, addressError && styles.errorInputCustom]}
+              placeholder="Județ"
+              value={stateCounty}
+              onChangeText={(text) => {
+                setStateCounty(text);
                 setAddressError(false);
               }}
             />

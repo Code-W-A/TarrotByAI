@@ -75,6 +75,7 @@ const PersonalReadingDashboard = ({ route }) => {
 
   useEffect(() => {
     if (isFirstEntry.current) {
+      console.log("[PRD] first entry → setLoading(true) & shuffleCartiPersonalizate()");
       setLoading(true);
       shuffleCartiPersonalizate();
       console.log("Executat doar la prima intrare în acest ecran");
@@ -86,7 +87,8 @@ const PersonalReadingDashboard = ({ route }) => {
 
   // Initialize card animations and animate cards on mount and categoriiPersonalizate change
   useEffect(() => {
-    console.log("TEst...", shuffledCartiPersonalizate.length);
+    console.log("[PRD] shuffledCartiPersonalizate length:", shuffledCartiPersonalizate.length, " triggerExitAnimation:", triggerExitAnimation);
+    console.log("[PRD] categoriiPersonalizate length:", categoriiPersonalizate ? categoriiPersonalizate.length : 0, " loading:", loading);
     if (shuffledCartiPersonalizate.length === 0 || triggerExitAnimation) return;
 
     const screenWidth = Dimensions.get("window").width;
@@ -111,7 +113,7 @@ const PersonalReadingDashboard = ({ route }) => {
   }, [shuffledCartiPersonalizate, triggerExitAnimation]); // Depend on shuffledCartiPersonalizate and triggerExitAnimation
 
   useEffect(() => {
-    console.log("language...", language);
+    console.log("[PRD] language:", language);
   }, [language]);
 
   // Animate cards out of view
@@ -162,6 +164,7 @@ const PersonalReadingDashboard = ({ route }) => {
   useEffect(() => {
     // Acest useEffect va fi activat când `triggerExitAnimation` se schimbă
     if (triggerExitAnimation) {
+      console.log("[PRD] triggerExitAnimation true → fade out cards");
       // Inițiați animația de fade out
       Animated.timing(opacityAnim, {
         toValue: 0,
@@ -193,7 +196,10 @@ const PersonalReadingDashboard = ({ route }) => {
       }
     };
 
-    if (!cardAnimations[index]) return null;
+    if (!cardAnimations[index]) {
+      console.log("[PRD] missing animation for index", index);
+      return null;
+    }
 
     // Asociază fiecare categorie cu o carte, repetând cărțile dacă este necesar
     const card =
@@ -202,6 +208,7 @@ const PersonalReadingDashboard = ({ route }) => {
       transform: [{ translateX: cardAnimations[index] }],
     };
 
+    console.log("[PRD] renderFlipCard index=", index, " category(ro)=", category.info?.ro?.nume);
     return (
       <View
         style={{

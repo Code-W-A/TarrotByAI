@@ -25,20 +25,17 @@ const translateText = async (text, targetLang) => {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Eroare la traducere:", errorText);
       throw new Error(`Eroare API: ${response.status}`);
     }
 
     const data = await response.json();
 
     if (!data || !data.trans) {
-      console.error("Format răspuns neașteptat:", data);
       throw new Error("Format răspuns neașteptat de la RapidAPI");
     }
 
     return data.trans;
   } catch (error) {
-    console.error("Eroare la traducere:", error.message || error);
     return text;
   }
 };

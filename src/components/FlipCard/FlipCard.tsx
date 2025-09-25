@@ -118,16 +118,18 @@ const FlipCard = ({
           });
         // });
       } else {
-        console.log("here...");
+        console.log("[FlipCard] navigateToPersonalizedReading manual?", !!isManualNav);
         if (isManualNav) {
           // ADS REMOVED - Direct execution without ads
           const cardNameNormalized = normalizeString(item.info.ro.nume);
           const categoryNameNormalized = normalizeString(conditieCategorie);
+          console.log("[FlipCard] query VarianteCarti with:", {cardNameNormalized, categoryNameNormalized});
           const filteredVariante = await handleQueryFirestoreVarianteCarti(
             "VarianteCarti",
             cardNameNormalized,
             categoryNameNormalized
           );
+          console.log("[FlipCard] filteredVariante length:", filteredVariante.length);
           // Verificare dacă există elemente în array-ul filtrat
           if (filteredVariante.length > 0) {
             // Selectare aleatorie a unui element
@@ -170,12 +172,14 @@ const FlipCard = ({
         } else {
           const cardNameNormalized = normalizeString(item.info.ro.nume);
           const categoryNameNormalized = normalizeString(conditieCategorie);
+          console.log("[FlipCard] auto query VarianteCarti with:", {cardNameNormalized, categoryNameNormalized});
 
           const filteredVariante = await handleQueryFirestoreVarianteCarti(
             "VarianteCarti",
             cardNameNormalized,
             categoryNameNormalized
           );
+          console.log("[FlipCard] auto filteredVariante length:", filteredVariante.length);
           // Verificare dacă există elemente în array-ul filtrat
           if (filteredVariante.length > 0) {
             // Selectare aleatorie a unui element

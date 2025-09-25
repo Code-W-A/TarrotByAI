@@ -5,6 +5,7 @@ import * as Notifications from "expo-notifications";
 import Constants from "expo-constants";
 
 import { Alert, Linking, Platform } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { RouteProp, useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
@@ -54,6 +55,8 @@ export const usePushNotifications = (): PushNotificationState => {
 
   const notificationListener = useRef<Notifications.Subscription>();
   const responseListener = useRef<Notifications.Subscription>();
+  const isPromptVisibleRef = useRef<boolean>(false);
+  const hasSuppressedPromptRef = useRef<boolean>(false);
 
   const openNotificationSettings = () => {
     if (Platform.OS === "ios") {
@@ -68,6 +71,48 @@ export const usePushNotifications = (): PushNotificationState => {
     }
   };
 
+  async function loadPromptSuppression() {
+    try {
+      const suppressed = await AsyncStorage.getItem("pushNotifPromptSuppressed");
+      hasSuppressedPromptRef.current = suppressed === "true";
+    } catch {}
+  }
+
+  async function setPromptSuppressed() {
+    hasSuppressedPromptRef.current = true;
+    try {
+      await AsyncStorage.setItem("pushNotifPromptSuppressed", "true");
+    } catch {}
+  }
+
+  function showPermissionAlertOnce() {
+    if (isPromptVisibleRef.current || hasSuppressedPromptRef.current) {
+      return;
+    }
+    isPromptVisibleRef.current = true;
+    Alert.alert(
+      "Notifications are stopped",
+      "Do you want to activate notifications?",
+      [
+        {
+          text: "No",
+          onPress: () => {
+            setPromptSuppressed();
+            isPromptVisibleRef.current = false;
+          },
+          style: "cancel",
+        },
+        {
+          text: "Activate",
+          onPress: () => {
+            openNotificationSettings();
+            isPromptVisibleRef.current = false;
+          },
+        },
+      ]
+    );
+  }
+
   async function registerForPushNotificationsAsync() {
     let token;
     if (Device.isDevice) {
@@ -76,23 +121,14 @@ export const usePushNotifications = (): PushNotificationState => {
       let finalStatus = existingStatus;
       console.log("status...", finalStatus);
 
-      if (existingStatus !== "granted") {
+      // Only request permissions automatically if status is undetermined
+      if (existingStatus === "undetermined") {
         const { status } = await Notifications.requestPermissionsAsync();
         finalStatus = status;
       }
+
       if (finalStatus !== "granted") {
-        Alert.alert(
-          "Notifications are stopped",
-          "Do you want to activate notifications?",
-          [
-            {
-              text: "No",
-              onPress: () => console.log("Cancel Pressed"),
-              style: "cancel",
-            },
-            { text: "Activate", onPress: () => openNotificationSettings() },
-          ]
-        );
+        showPermissionAlertOnce();
         setIsGranted(false);
         return;
       }
@@ -119,6 +155,7 @@ export const usePushNotifications = (): PushNotificationState => {
   }
 
   useEffect(() => {
+    loadPromptSuppression();
     registerForPushNotificationsAsync().then((token) => {
       setExpoPushToken(token);
     });

@@ -253,9 +253,10 @@ const News = () => {
         articles.push({ id: doc.id, ...data });
       }
     });
-    console.log("Articles...legnth", articles.length);
-    // Actualizează starea cu rezultatele căutării
-    setArticles(articles);
+    // Aplică filtrul pentru programare (nu afișa cele din viitor)
+    const filtered = filterArticlesBeforeCurrentTime(articles);
+    console.log("Articles after schedule filter:", filtered.length);
+    setArticles(filtered);
     setIsLoading(false);
   };
 

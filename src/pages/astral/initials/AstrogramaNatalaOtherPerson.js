@@ -70,7 +70,7 @@ import MyTopBar from "../../../components/Astral/components/TopBar";
 import AspectTable from "../../../components/Astral/components/AspectTable";
 import i18n from "../../../../i18n";
 import { useLanguage } from "../../../context/LanguageContext";
-import { handleToTranslate } from "../../../utils/AstralUtils/fetchGPTData";
+import { handleToTranslate, gTranslateFallbackFetch } from "../../../utils/AstralUtils/fetchGPTData";
 import LoadingOverlay from "../../../components/Astral/components/zodiac/LoadingOverlay";
 import PurchaseModal from "../../../components/Astral/components/PurchaseModal ";
 
@@ -82,6 +82,17 @@ import { useTranslation } from "../../../utils/translateUtil";
 import { capturePaymentIntentTest, createInvoiceAfterPaymentTest, createPaymentIntentTest, sendPdfEmail } from "../../../utils/constant";
 import { textStyles } from '../../../utils/colors';
 
+// --- DEBUG HELPERS (new logging for translation diagnostics) ---
+const preview = (t) =>
+  String(t || "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 120);
+const logNatalOther = (msg, payload) => {
+  try {
+    console.log(`[NATAL_OTHER] ${msg}`, payload !== undefined ? payload : "");
+  } catch {}
+};
 // const LuckyNumber = ({ number }) => {
 //   return (
 //     <View
@@ -604,56 +615,100 @@ function AstrogramaNatalaOtherPerson({ navigation }) {
       if (language !== userD.actualLanguageAstrograma) {
         setIsLoading(true);
 
-        console.log(
-          `Traducere necesară pentru ${userD.full_name} din ${userD.actualLanguageAstrograma} în ${language}`
-        );
+        const targetLang = (language || "").split("-")[0];
+        logNatalOther("translate_needed", { full_name: userD.full_name, from: userD.actualLanguageAstrograma, to: targetLang });
 
         let translationFailed = false; // Flag pentru a urmări dacă traducerea a eșuat
         const tempUserData = JSON.parse(JSON.stringify(userD)); // Copie temporară a datelor
 
         try {
-          const ascendantData = await handleToTranslate(
+          let ascendantData = await handleToTranslate(
             tempUserData.ascendantData.data.result,
-            language,
+            targetLang,
             tempUserData.actualLanguageAstrograma
           );
+          if (
+            typeof ascendantData === "string" &&
+            typeof userD.ascendantData?.data?.result === "string" &&
+            ascendantData.trim() === userD.ascendantData.data.result.trim()
+          ) {
+            try {
+              const fb = await gTranslateFallbackFetch(userD.ascendantData.data.result, targetLang);
+              if (typeof fb === "string" && fb.trim().length > 0) {
+                ascendantData = fb;
+              }
+            } catch {}
+          }
           tempUserData.ascendantData.data.result = ascendantData;
+          logNatalOther("ascendant_translated", { before: preview(userD.ascendantData?.data?.result), after: preview(tempUserData.ascendantData?.data?.result) });
           await delay(2000); // delay de 1 secundă
 
-          const translatedSignData = await Promise.all(
-            Object.keys(tempUserData.generalSignTextData).map(async (key) => {
-              const planetData = tempUserData.generalSignTextData[key].data;
-              const translatedReport = await handleToTranslate(
-                planetData.report,
-                language,
-                tempUserData.actualLanguageAstrograma
-              );
-              return { key, data: { ...planetData, report: translatedReport } };
-            })
-          );
+          const translatedSignData = [];
+          for (const key of Object.keys(tempUserData.generalSignTextData)) {
+            const planetData = tempUserData.generalSignTextData[key].data;
+            const translatedReport = await handleToTranslate(
+              planetData.report,
+              targetLang,
+              tempUserData.actualLanguageAstrograma
+            );
+            const originalTitle = `${planetData.planet_name} is in ${planetData.sign_name}`;
+            const translatedTitle = await handleToTranslate(
+              originalTitle,
+              targetLang,
+              tempUserData.actualLanguageAstrograma
+            );
+            translatedSignData.push({
+              key,
+              data: { ...planetData, report: translatedReport, title: translatedTitle },
+            });
+            await delay(350);
+          }
+          try {
+            const fk = Object.keys(tempUserData.generalSignTextData || {})[0];
+            if (fk) {
+              const d = translatedSignData.find((x) => x.key === fk)?.data || tempUserData.generalSignTextData[fk].data;
+              logNatalOther("planets_sample", { key: fk, title: preview(d.title), report: preview(d.report) });
+            }
+          } catch {}
 
           translatedSignData.forEach(({ key, data }) => {
             tempUserData.generalSignTextData[key].data = data;
           });
           await delay(2000); // delay de 1 secundă
 
-          const translatedHouseData = await Promise.all(
-            Object.keys(tempUserData.generalHouseTextData).map(async (key) => {
-              const houseData = tempUserData.generalHouseTextData[key].data;
-              const translatedReport = await handleToTranslate(
-                houseData.report,
-                language,
-                tempUserData.actualLanguageAstrograma
-              );
-              return { key, data: { ...houseData, report: translatedReport } };
-            })
-          );
+          const translatedHouseData = [];
+          for (const key of Object.keys(tempUserData.generalHouseTextData)) {
+            const houseData = tempUserData.generalHouseTextData[key].data;
+            const translatedReport = await handleToTranslate(
+              houseData.report,
+              targetLang,
+              tempUserData.actualLanguageAstrograma
+            );
+            const originalTitle = `${houseData.planet_name} is in the ${houseData.house}th house`;
+            const translatedTitle = await handleToTranslate(
+              originalTitle,
+              targetLang,
+              tempUserData.actualLanguageAstrograma
+            );
+            translatedHouseData.push({
+              key,
+              data: { ...houseData, report: translatedReport, title: translatedTitle },
+            });
+            await delay(350);
+          }
+          try {
+            const fk = Object.keys(tempUserData.generalHouseTextData || {})[0];
+            if (fk) {
+              const d = translatedHouseData.find((x) => x.key === fk)?.data || tempUserData.generalHouseTextData[fk].data;
+              logNatalOther("houses_sample", { key: fk, title: preview(d.title), report: preview(d.report) });
+            }
+          } catch {}
 
           translatedHouseData.forEach(({ key, data }) => {
             tempUserData.generalHouseTextData[key].data = data;
           });
 
-          tempUserData.actualLanguageAstrograma = language;
+          tempUserData.actualLanguageAstrograma = targetLang;
         } catch (error) {
           console.error("Eroare în procesul de traducere:", error);
           translationFailed = true;
@@ -675,9 +730,9 @@ function AstrogramaNatalaOtherPerson({ navigation }) {
             "personsDataAstrograma",
             JSON.stringify(updatedPersons)
           );
-          console.log("Traducerea a fost aplicată cu succes.");
+          
         } else {
-          console.log("Traducerea a eșuat. Datele originale sunt păstrate.");
+          
         }
       }
 
@@ -1229,8 +1284,8 @@ function AstrogramaNatalaOtherPerson({ navigation }) {
                             return (
                               <View key={key} style={{ marginBottom: 20 }}>
                                 {/* Titlul planetă + semn zodiacal */}
-                                <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 18, marginTop: '7%' }]}>
-                                  {`${planetData.planet_name} is in ${planetData.sign_name}`}
+                                <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 18, marginTop: '7%' }]}> 
+                                  {planetData.title || `${planetData.planet_name} is in ${planetData.sign_name}`}
                                 </Text>
                                 {/* Text descriptiv */}
                                 <Text style={[styles.textDescription, textStyles.goldenText, {color:"#bfa76a"}]}>
@@ -1253,8 +1308,8 @@ function AstrogramaNatalaOtherPerson({ navigation }) {
                             return (
                               <View key={key} style={{ marginBottom: 20 }}>
                                 {/* Titlul planetă + casă astrologică */}
-                                <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 18, marginTop: '7%' }]}>
-                                  {`${houseData.planet_name} is in the ${houseData.house}th house`}
+                                <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 18, marginTop: '7%' }]}> 
+                                  {houseData.title || `${houseData.planet_name} is in the ${houseData.house}th house`}
                                 </Text>
                                 {/* Text descriptiv */}
                                 <Text style={[styles.textDescription, textStyles.goldenText, {color:"#bfa76a"}]}>

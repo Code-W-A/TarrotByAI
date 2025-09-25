@@ -16,19 +16,49 @@ export const toUrlSlug = (string) => {
 };
 
 export const filterArticlesBeforeCurrentTime = (articlesData) => {
-  const currentTime = new Date(); // Obține timpul actual
+  const now = new Date();
 
   return articlesData.filter((article) => {
-    // Construiește un șir de data și ora în format acceptat de constructorul Date din JavaScript
-    const articleDateStr = `${article.firstUploadDate
-      .split("-")
-      .reverse()
-      .join("-")}T${article.firstUploadtime}:00`;
-    // Convertiți șirul construit într-un obiect Date
-    const articleDateTime = new Date(articleDateStr);
+    const scheduledDate = article?.dataProgramata || article?.firstUploadDate;
+    const scheduledTime = article?.timpProgramat || article?.firstUploadtime || "00:00";
 
-    // Verificați dacă data și ora articolului sunt înainte sau egale cu timpul actual
-    return articleDateTime <= currentTime;
+    if (!scheduledDate) {
+      return true; // dacă nu există dată programată, nu filtrăm articolul
+    }
+
+    // Încercăm parsare robustă cu moment pe formatele uzuale
+    const dateTimeStr = `${scheduledDate} ${scheduledTime}`.trim();
+    const m = moment(dateTimeStr, [
+      "DD-MM-YYYY HH:mm",
+      "YYYY-MM-DD HH:mm",
+      "DD.MM.YYYY HH:mm",
+      "DD/MM/YYYY HH:mm",
+      "DD-MM-YYYY",
+      "YYYY-MM-DD",
+    ], true);
+
+    let scheduledDateTime: Date | null = null;
+    if (m.isValid()) {
+      scheduledDateTime = m.toDate();
+    } else {
+      // Fallback: vechea logică bazată pe inversarea zilei-lunii-anului pentru formatul DD-MM-YYYY
+      try {
+        const parts = scheduledDate.split("-");
+        const isYearFirst = parts?.[0]?.length === 4;
+        const normalizedDate = isYearFirst
+          ? scheduledDate
+          : parts.reverse().join("-");
+        scheduledDateTime = new Date(`${normalizedDate}T${scheduledTime}:00`);
+      } catch (e) {
+        scheduledDateTime = null;
+      }
+    }
+
+    if (!scheduledDateTime || isNaN(scheduledDateTime.getTime())) {
+      return true; // dacă nu putem parsa, nu ascundem articolul ca să evităm dispariții accidentale
+    }
+
+    return scheduledDateTime <= now;
   });
 };
 

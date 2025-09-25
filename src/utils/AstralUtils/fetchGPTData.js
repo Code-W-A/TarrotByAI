@@ -153,9 +153,7 @@ const categories = {
 };
 
 export const handleToTranslate = async (textRoValue, l, actualLanguage) => {
-  console.log("text...", textRoValue);
   const translation = await handleTranslate(textRoValue, l, actualLanguage);
-
   return translation;
 };
 
@@ -288,30 +286,16 @@ export const gTranslateFetch = async (text, targetLanguage) => {
   };
 
   try {
-    // Apel către RapidAPI Google Translate
     const response = await fetch(url, options);
-
-    // Verificăm dacă răspunsul este valid
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Eroare la RapidAPI:", errorText);
       throw new Error(`Eroare API: ${response.status}`);
     }
-
-    // Parsăm răspunsul ca JSON
     const data = await response.json();
-
-    // Verificăm dacă răspunsul conține traducerea
     if (!data || !data.trans) {
-      console.error("Format răspuns neașteptat:", data);
       throw new Error("Format răspuns neașteptat de la RapidAPI");
     }
-
-    // Returnăm textul tradus
     return data.trans;
   } catch (error) {
-    console.error("Eroare la gTranslateFetch:", error.message || error);
-    // Fallback: returnăm textul original dacă apare o eroare
     return text;
   }
 };

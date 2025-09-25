@@ -188,6 +188,7 @@ function SinastrieRelatie({ navigation, route }) {
 
   const [line1, setLine1] = useState("");
   const [city, setCity] = useState("");
+  const [stateCounty, setStateCounty] = useState("");
   const [postalCode, setPostalCode] = useState("");
   const [country, setCountry] = useState(""); // sau un dropdown
 
@@ -579,7 +580,6 @@ function SinastrieRelatie({ navigation, route }) {
 
       // Verifică dacă traducerea este necesară
       if (language !== selectedPerson.actualLanguageSinastrie) {
-        console.log("Traducere necesară, limbă curentă:", language);
         setIsLoading(true);
 
         try {
@@ -624,10 +624,7 @@ function SinastrieRelatie({ navigation, route }) {
                               );
                             }
                           } catch (error) {
-                            console.error(
-                              `Eroare la traducerea câmpului din categoria "${category}":`,
-                              error
-                            );
+                            
                             // Setează o valoare implicită sau fallback
                             reading.description =
                               reading.description ||
@@ -656,20 +653,17 @@ function SinastrieRelatie({ navigation, route }) {
           // Setează persoana tradusă în starea locală
           setUserD(translatedPerson);
         } catch (error) {
-          console.error("Eroare generală la traducere:", error);
+          
           Alert.alert("Eroare", "A apărut o problemă la traducerea datelor.");
         } finally {
           setIsLoading(false);
         }
       } else {
-        console.log("Traducere nu este necesară, limbă curentă:", language);
+        
         setUserD(selectedPerson); // Folosește datele existente dacă traducerea nu este necesară
       }
 
-      console.log(
-        "selectedPerson.synastry?.natalWheelChart...",
-        selectedPerson.synastry?.natalWheelChart
-      );
+      
       if (selectedPerson.synastry?.natalWheelChart?.data) {
         const svgElementsP1 = parseSVG(
           selectedPerson.synastry.natalWheelChart.data.p1.svg
@@ -752,7 +746,7 @@ function SinastrieRelatie({ navigation, route }) {
   const handlePayment = async () => {
     try {
       // 1. Verifică câmpurile de adresă
-      if (!line1 || !city || !country) {
+      if (!line1 || !city || !stateCounty || !country) {
         Alert.alert("Eroare", "Te rugăm să completezi toate câmpurile de adresă.");
         return;
       }
@@ -861,7 +855,7 @@ function SinastrieRelatie({ navigation, route }) {
             lastName,
             email,
             phone,
-            address: { line1, city, postal_code: postalCode, country },
+            address: { line1, city, state: stateCounty, postal_code: postalCode, country },
             analysisData: userD,
           });
           console.log("🧾 Invoice created:", invoiceResp.data);
@@ -1125,8 +1119,10 @@ function SinastrieRelatie({ navigation, route }) {
         setCountry={setCountry}
         setCity={setCity}
         setLine1={setLine1}
+        setStateCounty={setStateCounty}
         line1={line1}
         city={city}
+        stateCounty={stateCounty}
         country={country}
         postalCode={postalCode}
         setPostalCode={setPostalCode}

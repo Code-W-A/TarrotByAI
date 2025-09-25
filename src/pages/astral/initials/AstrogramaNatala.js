@@ -67,7 +67,7 @@ import MyTopBar from "../../../components/Astral/components/TopBar";
 import AspectTable from "../../../components/Astral/components/AspectTable";
 import i18n from "../../../../i18n";
 import { useLanguage } from "../../../context/LanguageContext";
-import { handleToTranslate } from "../../../utils/AstralUtils/fetchGPTData";
+import { handleToTranslate, gTranslateFallbackFetch } from "../../../utils/AstralUtils/fetchGPTData";
 import LoadingOverlay from "../../../components/Astral/components/zodiac/LoadingOverlay";
 import PurchaseModal from "../../../components/Astral/components/PurchaseModal ";
 import * as Print from "expo-print";
@@ -135,6 +135,18 @@ const signAndDegreeToPosition = (sign, degree) => {
   return zodiacSignToDegrees[sign] + degree;
 };
 
+// --- DEBUG HELPERS (new logging for translation diagnostics) ---
+const preview = (t) =>
+  String(t || "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 120);
+const logNatal = (msg, payload) => {
+  try {
+    console.log(`[NATAL] ${msg}`, payload !== undefined ? payload : "");
+  } catch {}
+};
+
 /**
  * @param text {text}
  * @param percent {number}
@@ -189,6 +201,7 @@ function AstrogramaNatala({ navigation, route }) {
 
   const [line1, setLine1] = useState("");
   const [city, setCity] = useState("");
+  const [stateCounty, setStateCounty] = useState("");
   const [postalCode, setPostalCode] = useState("");
   const [country, setCountry] = useState(""); // sau un dropdown
 
@@ -404,9 +417,13 @@ function AstrogramaNatala({ navigation, route }) {
 
   const translateGeneralSignTextData = async (userData, language) => {
     try {
+      const keys = Object.keys(userData.generalSignTextData || {});
+      console.log(
+        `[Natal Translate] generalSignTextData count=${keys.length} to=${language}`
+      );
       // Iterăm prin toate cheile din generalSignTextData
-      const translatedData = await Promise.all(
-        Object.keys(userData.generalSignTextData).map(async (key) => {
+      const translatedData = [];
+      for (const key of Object.keys(userData.generalSignTextData)) {
           const planetData = userData.generalSignTextData[key].data;
 
           // Traducem  și raportul
@@ -416,23 +433,42 @@ function AstrogramaNatala({ navigation, route }) {
             userData.actualLanguageAstrograma
           );
 
+          // Traducem și titlul dinamic (ex: "Sun is in Aquarius")
+          const originalTitle = `${planetData.planet_name} is in ${planetData.sign_name}`;
+          const translatedTitle = await handleToTranslate(
+            originalTitle,
+            language,
+            userData.actualLanguageAstrograma
+          );
+
           // Introducem textele traduse în structura de date
-          return {
+          translatedData.push({
             key,
             data: {
               ...planetData,
               report: translatedReport,
+              title: translatedTitle,
             },
-          };
-        })
-      );
+          });
+
+          // Pauză scurtă între traduceri pentru a evita throttling
+          await delay(350);
+      }
 
       // Actualizăm userData cu datele traduse
       translatedData.forEach(({ key, data }) => {
         userData.generalSignTextData[key].data = data;
       });
 
-      console.log("Traducere finalizată pentru generalSignTextData.");
+      const firstKey = keys[0];
+      if (firstKey) {
+        const sample = String(
+          userData.generalSignTextData[firstKey].data.report || ""
+        )
+          .slice(0, 100)
+          .replace(/\s+/g, " ")
+          .trim();
+      }
     } catch (error) {
       console.error("Eroare la traducerea generalSignTextData:", error);
     }
@@ -440,9 +476,11 @@ function AstrogramaNatala({ navigation, route }) {
 
   const translateGeneralHouseTextData = async (userData, language) => {
     try {
+      const keys = Object.keys(userData.generalHouseTextData || {});
+      
       // Iterăm prin toate cheile din generalHouseTextData
-      const translatedData = await Promise.all(
-        Object.keys(userData.generalHouseTextData).map(async (key) => {
+      const translatedData = [];
+      for (const key of Object.keys(userData.generalHouseTextData)) {
           const houseData = userData.generalHouseTextData[key].data;
 
           // Traducem raportul
@@ -453,23 +491,42 @@ function AstrogramaNatala({ navigation, route }) {
             userData.actualLanguageAstrograma
           );
 
+          // Traducem și titlul dinamic pentru case (ex: "Sun is in the 12th house")
+          const originalTitle = `${houseData.planet_name} is in the ${houseData.house}th house`;
+          const translatedTitle = await handleToTranslate(
+            originalTitle,
+            language,
+            userData.actualLanguageAstrograma
+          );
+
           // Introducem textele traduse în structura de date
-          return {
+          translatedData.push({
             key,
             data: {
               ...houseData,
               report: translatedReport,
+              title: translatedTitle,
             },
-          };
-        })
-      );
+          });
+
+          // Pauză scurtă între traduceri pentru a evita throttling
+          await delay(350);
+      }
 
       // Actualizăm userData cu datele traduse
       translatedData.forEach(({ key, data }) => {
         userData.generalHouseTextData[key].data = data;
       });
 
-      console.log("Traducere finalizată pentru generalHouseTextData.");
+      const firstKey = keys[0];
+      if (firstKey) {
+        const sample = String(
+          userData.generalHouseTextData[firstKey].data.report || ""
+        )
+          .slice(0, 100)
+          .replace(/\s+/g, " ")
+          .trim();
+      }
     } catch (error) {
       console.error("Eroare la traducerea generalHouseTextData:", error);
     }
@@ -491,45 +548,69 @@ function AstrogramaNatala({ navigation, route }) {
         return;
       }
 
-      console.log("Limba curentă:", language);
-      console.log(
-        "Limba salvată în userData:",
-        userData.actualLanguageAstrograma
-      );
+      logNatal("start", { language, actualLanguageAstrograma: userData.actualLanguageAstrograma, isPaid });
 
       // Verificăm dacă traducerea este necesară
       if (language !== userData.actualLanguageAstrograma) {
-        console.log(
-          `Traducere necesară din ${userData.actualLanguageAstrograma} în ${language}`
-        );
+        const targetLang = (language || "").split("-")[0];
+        logNatal("translate_needed", { from: userData.actualLanguageAstrograma, to: targetLang });
 
         let translationFailed = false; // Flag pentru a urmări dacă traducerea a eșuat
         let translatedUserData = JSON.parse(JSON.stringify(userData)); // Copie profundă a datelor
 
         try {
-          translatedUserData.actualLanguageAstrograma = language;
+          translatedUserData.actualLanguageAstrograma = targetLang;
 
           // Traducerea datelor despre ascendent
-          translatedUserData.ascendantData.data.result =
-            await handleToTranslate(
-              translatedUserData.ascendantData.data.result,
-              language,
-              userData.actualLanguageAstrograma
-            );
+          const ascBeforeText = translatedUserData.ascendantData?.data?.result;
+          let ascTranslated = await handleToTranslate(
+            translatedUserData.ascendantData.data.result,
+            targetLang,
+            userData.actualLanguageAstrograma
+          );
+          // Dacă textul tradus este identic cu originalul (posibil fallback), încearcă fallback API
+          if (
+            typeof ascTranslated === "string" &&
+            typeof ascBeforeText === "string" &&
+            ascTranslated.trim() === ascBeforeText.trim()
+          ) {
+            try {
+              const fb = await gTranslateFallbackFetch(ascBeforeText, targetLang);
+              if (typeof fb === "string" && fb.trim().length > 0) {
+                ascTranslated = fb;
+              }
+            } catch {}
+          }
+          translatedUserData.ascendantData.data.result = ascTranslated;
+          logNatal("ascendant_translated", { before: preview(ascBeforeText), after: preview(translatedUserData.ascendantData?.data?.result) });
           await delay(2000); // Mic delay pentru stabilitate
 
           // Traducerea datelor despre planete
-          await translateGeneralSignTextData(translatedUserData, language);
+          await translateGeneralSignTextData(translatedUserData, targetLang);
+          try {
+            const firstKey = Object.keys(translatedUserData.generalSignTextData || {})[0];
+            if (firstKey) {
+              const d = translatedUserData.generalSignTextData[firstKey].data;
+              logNatal("planets_sample", { key: firstKey, title: preview(d.title), report: preview(d.report) });
+            }
+          } catch {}
           await delay(2000);
 
           // Traducerea caselor astrologice
-          await translateGeneralHouseTextData(translatedUserData, language);
+          await translateGeneralHouseTextData(translatedUserData, targetLang);
+          try {
+            const firstKeyH = Object.keys(translatedUserData.generalHouseTextData || {})[0];
+            if (firstKeyH) {
+              const d = translatedUserData.generalHouseTextData[firstKeyH].data;
+              logNatal("houses_sample", { key: firstKeyH, title: preview(d.title), report: preview(d.report) });
+            }
+          } catch {}
           await delay(2000);
 
-          console.log(
-            "Traducere finalizată pentru:",
-            translatedUserData.full_name
-          );
+          logNatal("translate_done", { full_name: translatedUserData.full_name });
+
+          // Aplicăm imediat în UI pentru a evita lag din AsyncStorage
+          setUserD(translatedUserData);
 
           // Salvăm datele traduse în AsyncStorage
           await AsyncStorage.setItem(
@@ -572,7 +653,7 @@ function AstrogramaNatala({ navigation, route }) {
       setMoonPhase(userData.moonPhaseData?.data || null);
       setAscendantReport(userData.ascendantData?.data || null);
 
-      console.log("Astrogramă actualizată pentru:", userData.full_name);
+      logNatal("natal_updated", { full_name: userData.full_name });
     } catch (error) {
       console.error(
         "Eroare la preluarea și procesarea astrogramei natale:",
@@ -630,8 +711,8 @@ function AstrogramaNatala({ navigation, route }) {
   const handlePayment = async () => {
     try {
       console.log("🚀 Starting handlePayment...");
-      console.log("🛠️ Address fields:", { line1, city, country });
-      if (!line1 || !city || !country) {
+      console.log("🛠️ Address fields:", { line1, city, stateCounty, country });
+      if (!line1 || !city || !stateCounty || !country) {
         Alert.alert("Eroare", "Te rugăm să completezi toate câmpurile de adresă.");
         return;
       }
@@ -732,6 +813,7 @@ function AstrogramaNatala({ navigation, route }) {
             address: {
               line1,
               city,
+              state: stateCounty,
               postal_code: postalCode,
               country,
             },
@@ -928,6 +1010,19 @@ function AstrogramaNatala({ navigation, route }) {
     }
   };
 
+  // NEW: Log UI translation outputs for interpretation tab
+  useEffect(() => {
+    try {
+      logNatal("ui_texts", {
+        isPaid,
+        personalitateText: preview(personalitateText),
+        achizitioneazaInterpretareCompletaText2: preview(achizitioneazaInterpretareCompletaText2),
+        achizitioneazaInterpretareCompletaText: preview(achizitioneazaInterpretareCompletaText),
+        descarcaPdfText: preview(descarcaPdfText),
+      });
+    } catch {}
+  }, [isPaid, personalitateText, achizitioneazaInterpretareCompletaText2, achizitioneazaInterpretareCompletaText, descarcaPdfText, language]);
+
   const getShareText = (language) => {
     if (language === 'ro') {
       return `Descarcă aplicația Cristina Zurba Tarot:\nAndroid: https://play.google.com/store/apps/details?id=com.cristina.zurba.tarot&hl=ro\niOS: https://apps.apple.com/ro/app/cristina-zurba-tarot/id6475713937`;
@@ -1070,8 +1165,8 @@ function AstrogramaNatala({ navigation, route }) {
                           return (
                             <View key={key} style={{ marginBottom: 20 }}>
                               {/* Titlul planetă + semn zodiacal */}
-                              <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 20, marginTop: '7%' }]}>
-                                {`${planetData.planet_name} is in ${planetData.sign_name}`}
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 20, marginTop: '7%' }]}> 
+                                {planetData.title || `${planetData.planet_name} is in ${planetData.sign_name}`}
                               </Text>
                               {/* Text descriptiv */}
                               <Text style={[styles.textDescription, textStyles.goldenText, {color:"#bfa76a"}]}>
@@ -1093,8 +1188,8 @@ function AstrogramaNatala({ navigation, route }) {
                           return (
                             <View key={key} style={{ marginBottom: 20 }}>
                               {/* Titlul planetă + casă astrologică */}
-                              <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 16, marginTop: '7%' }]}>
-                                {`${houseData.planet_name} is in the ${houseData.house}th house`}
+                              <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 16, marginTop: '7%' }]}> 
+                                {houseData.title || `${houseData.planet_name} is in the ${houseData.house}th house`}
                               </Text>
                               {/* Text descriptiv */}
                               <Text style={[styles.textDescription, textStyles.goldenText, {color:"#bfa76a"}]}>
@@ -1137,8 +1232,10 @@ function AstrogramaNatala({ navigation, route }) {
         setCountry={setCountry}
         setCity={setCity}
         setLine1={setLine1}
+        setStateCounty={setStateCounty}
         line1={line1}
         city={city}
+        stateCounty={stateCounty}
         country={country}
         postalCode={postalCode}
         setPostalCode={setPostalCode}
