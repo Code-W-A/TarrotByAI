@@ -82,7 +82,8 @@ import {
   useTranslate,
   useTranslation,
 } from "../../../utils/translateUtil";
-import { capturePaymentIntentTest, createInvoiceAfterPaymentTest, createPaymentIntentTest, sendPdfEmail } from "../../../utils/constant";
+import { capturePaymentIntentTest, createPaymentIntentTest, sendPdfEmail } from "../../../utils/constant";
+// Oblio invoice via Firebase Functions (no Next.js)
 import ViewShot from "react-native-view-shot";
 import ShareScreenshot from '../../../components/common/ShareScreenshot';
 
@@ -204,6 +205,9 @@ function AstrogramaNatala({ navigation, route }) {
   const [stateCounty, setStateCounty] = useState("");
   const [postalCode, setPostalCode] = useState("");
   const [country, setCountry] = useState(""); // sau un dropdown
+  const [couponCode, setCouponCode] = useState("");
+  const [couponPercent, setCouponPercent] = useState(0);
+  const [couponAllowed, setCouponAllowed] = useState(false);
 
   const [showFab, setShowFab] = useState(true);
   const viewShotRef = React.useRef();
@@ -709,10 +713,14 @@ function AstrogramaNatala({ navigation, route }) {
   );
 
   const handlePayment = async () => {
+    const runId = `pay_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+    const pfx = `[PAYMENT][AstrogramaNatala][${runId}]`;
+    const pLog = (...args) => console.log(pfx, ...args);
+    const pErr = (...args) => console.error(pfx, ...args);
     try {
-      console.log("🚀 Starting handlePayment...");
-      console.log("🛠️ Address fields:", { line1, city, stateCounty, country });
-      if (!line1 || !city || !stateCounty || !country) {
+      pLog("start handlePayment");
+      pLog("address fields", { line1, city, stateCounty, postalCode, country });
+      if (!line1 || !city || !stateCounty || !postalCode || !country) {
         Alert.alert("Eroare", "Te rugăm să completezi toate câmpurile de adresă.");
         return;
       }
@@ -721,25 +729,30 @@ function AstrogramaNatala({ navigation, route }) {
       const functions = getFunctions();
   
       // 1) Creează PaymentIntent cu capture_method: "manual"
-      console.log("⚙️ getFunctions returned:", functions);
       const createPaymentIntentFn = httpsCallable(functions, createPaymentIntentTest);
-      console.log("💳 Calling createPaymentIntentFn...");
+      pLog("calling createPaymentIntent", {
+        productCode: "astrogama_natala",
+        currency: "eur",
+        couponCode: couponAllowed ? couponCode : "",
+      });
       const resp = await createPaymentIntentFn({
-        amount: 1500, // de exemplu, 15,00 EUR (sau 3.00 RON în funcție de unități)
         currency: "eur",
         firstName,
         lastName,
         email,
         phone,
+        productCode: "astrogama_natala",
+        couponCode: couponAllowed ? couponCode : "",
       });
-      console.log("💳 PaymentIntent response:", resp);
+      pLog("createPaymentIntent response", resp?.data);
       const { clientSecret, transactionId } = resp.data;
       if (!clientSecret || !transactionId) {
         throw new Error("Lipsesc datele PaymentIntent. Verifică serverul.");
       }
+      pLog("paymentIntent ready", { transactionId });
   
       // 2) Inițializează Payment Sheet
-      console.log("🔧 Initializing Payment Sheet with clientSecret:", clientSecret);
+      pLog("initPaymentSheet");
       const { error: initError } = await initPaymentSheet({
         paymentIntentClientSecret: clientSecret,
         merchantDisplayName: "Cristina Zurba tarot",
@@ -751,36 +764,36 @@ function AstrogramaNatala({ navigation, route }) {
         },
       });
       if (initError) {
-        console.error("❌ Eroare initPaymentSheet:", initError);
+        pErr("initPaymentSheet error", initError);
         Alert.alert("Eroare", initError.message);
         return;
       }
-      console.log("🔧 Payment Sheet initialized successfully.");
+      pLog("paymentSheet initialized");
   
       // 3) Afișează Payment Sheet
-      console.log("📲 Presenting Payment Sheet...");
+      pLog("presentPaymentSheet");
       const { error: presentError } = await presentPaymentSheet();
       if (presentError) {
-        console.error("❌ Eroare la prezentarea Payment Sheet:", presentError);
+        pErr("presentPaymentSheet error", presentError);
         Alert.alert("Eroare", presentError.message);
         return;
       }
-      console.log("📲 Payment Sheet presented successfully.");
+      pLog("paymentSheet presented OK (authorized)");
       // La acest punct, plata este autorizată, dar nu este capturată.
   
       // 4) Generează conținutul PDF
       const pdfHtmlContent = generatePDFContent();
-      console.log("📝 Generated PDF HTML content.");
+      pLog("generated PDF HTML");
   
       // 5) Trimite emailul cu PDF-ul
-      console.log("📧 Calling sendPdfEmail function...");
+      pLog("calling sendPdfEmail");
       const sendPdfEmailFn = httpsCallable(functions, sendPdfEmail);
       const emailResponse = await sendPdfEmailFn({
         email: email, // sau userD.email, după caz
         pdfHtml: pdfHtmlContent,
         fullName: userD.full_name, // folosește numele real al utilizatorului
       });
-      console.log("📧 Email function response:", emailResponse);
+      pLog("sendPdfEmail response", emailResponse?.data);
   
 
 // Pentru test: simulează o eroare după trimiterea emailului
@@ -789,11 +802,11 @@ function AstrogramaNatala({ navigation, route }) {
 
       if (emailResponse.data && emailResponse.data.success) {
         // 6) Capturează plata
-        console.log("🔒 Capturing PaymentIntent...");
+        pLog("capturing PaymentIntent", { transactionId });
         const capturePaymentFn = httpsCallable(functions, capturePaymentIntentTest);
         const captureResp = await capturePaymentFn({ transactionId });
         if (captureResp.data && captureResp.data.captured) {
-          console.log("✅ Payment captured successfully.");
+          pLog("payment captured OK");
           // 7) Actualizează starea și salvează în AsyncStorage
           setIsPaid(true);
           const userDataJson = await AsyncStorage.getItem("userData");
@@ -801,11 +814,13 @@ function AstrogramaNatala({ navigation, route }) {
           userData.isPaid = true;
           await AsyncStorage.setItem("userData", JSON.stringify(userData));
   
-          // 8) Creează factura pe server
-          console.log("🧾 Creating invoice...");
-          const createInvoiceFn = httpsCallable(functions, createInvoiceAfterPaymentTest);
-          const invoiceResp = await createInvoiceFn({
+          // 8) Creează factura în Oblio via Firebase Functions
+          pLog("calling Firebase Oblio invoice function", { transactionId });
+          const createOblioInvoiceFn = httpsCallable(functions, "createOblioInvoiceAfterPayment");
+          const invoiceResp = await createOblioInvoiceFn({
             transactionId,
+            productCode: "astrogama_natala",
+            customer: {
             firstName,
             lastName,
             email,
@@ -817,9 +832,14 @@ function AstrogramaNatala({ navigation, route }) {
               postal_code: postalCode,
               country,
             },
-            analysisData: userData,
+            },
+            coupon: {
+              couponAllowed: Boolean(couponAllowed),
+              couponCode: couponAllowed ? couponCode : "",
+              discountPercent: couponAllowed ? Number(couponPercent) : 0,
+            },
           });
-          console.log("🧾 Invoice created:", invoiceResp.data);
+          pLog("Firebase Oblio invoice response", invoiceResp?.data);
           Alert.alert(achizitieCompleta1, achizitieCompleta2);
         } else {
           throw new Error("Capturarea plății a eșuat.");
@@ -833,11 +853,17 @@ function AstrogramaNatala({ navigation, route }) {
         // Opțional, poți apela o funcție backend pentru a anula PaymentIntent
       }
     } catch (error) {
-      console.error("❌ Eroare handlePayment:", error);
-      Alert.alert("Eroare", "Nu s-a putut procesa plata sau factura. Contact webdynamicx@gmail.com");
+      pErr("handlePayment error", error);
+      const msg =
+        (error && typeof error === "object" && error.message ? String(error.message) : "") ||
+        "Nu s-a putut procesa plata sau factura.";
+      Alert.alert(
+        "Eroare",
+        `${msg}\n\nDacă ți-a fost luată suma, trimite acest ID la suport: ${String(transactionId || "")}`.trim()
+      );
     } finally {
       setIsLoadingBuy(false);
-      console.log("🏁 handlePayment complete. isLoadingBuy set to false.");
+      pLog("done (isLoadingBuy=false)");
     }
   };
   
@@ -1221,6 +1247,7 @@ function AstrogramaNatala({ navigation, route }) {
       <PurchaseModal
         visible={isModalVisible}
         onDismiss={() => setModalVisible(false)}
+        baseAmountBani={1000}
         setEmail={setEmail}
         setPhone={setPhone}
         phone={phone}
@@ -1239,6 +1266,12 @@ function AstrogramaNatala({ navigation, route }) {
         country={country}
         postalCode={postalCode}
         setPostalCode={setPostalCode}
+        couponCode={couponCode}
+        setCouponCode={setCouponCode}
+        couponPercent={couponPercent}
+        setCouponPercent={setCouponPercent}
+        couponAllowed={couponAllowed}
+        setCouponAllowed={setCouponAllowed}
         onConfirm={async () => {
           setIsLoadingBuy(true);
           setModalVisible(false);

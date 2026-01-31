@@ -101,6 +101,8 @@ import MotivationalQuotes from "./src/pages/MotivationalQuotesComponent/Motivati
 import LuckyNumber from "./src/pages/LuckyNumberComponent/LuckyNumberComponent";
 import News from "./src/pages/blog/News";
 import SavedNews from "./src/pages/blog/SavedNews";
+import VideoLibraryScreen from "./src/features/video-library/screens/VideoLibraryScreen";
+import VideoPlayerScreen from "./src/features/video-library/screens/VideoPlayerScreen";
 import CeSimte from "./src/pages/doctors/CeSimte";
 import CeGandeste from "./src/pages/doctors/CeGandeste";
 import CarteaTa from "./src/pages/doctors/CarteaTa";
@@ -213,6 +215,14 @@ const HomeNavigation = (props: NavigationProps) => {
         <Stack.Screen name={"MesajeMagiceMainScreen"} component={MesajeMagiceMainScreen} />
         <Stack.Screen name={"News"} component={News} />
         <Stack.Screen name={"SavedNews"} component={SavedNews} />
+        <Stack.Screen
+          name={screenName.VideoLibrary}
+          component={VideoLibraryScreen}
+        />
+        <Stack.Screen
+          name={screenName.VideoPlayer}
+          component={VideoPlayerScreen}
+        />
 
         <Stack.Screen
           name={screenName.ForgotPasswordClinic}

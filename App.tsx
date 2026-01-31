@@ -55,6 +55,7 @@ import { handleQueryToken, handleUploadFirestore } from "./src/utils/firestoreUt
 import { useAppTrackingTransparency } from "./src/hooks/useAppTrackingTransparency";
 import { initializeTrackingServices } from "./src/utils/trackingUtils";
 import { AdsProvider, useAdsContext } from "./src/context/AdsContext";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 const App = () => {
   const [notification, setNotification] = useState(false);
@@ -189,25 +190,27 @@ const App = () => {
   }
   
   return (
-    <ErrorBoundary>
-      <NumberProvider>
-        <ApiDataProvider>
-          <LanguageProvider>
-            <NavigationProvider>
-              <NavBarVisibilityProvider>
-                <StripeProvider publishableKey="pk_live_51QA6KbFfPQUdD5PApH13dFiVdcrIcqIDRE0vDWVQRPApbE7DpAJDiHIYeeDDOMJwsUsqhvyRLayxXjEyErHLlm2O0015KzM92n">
-                  <AuthProvider>
-                    <AdsProvider>
-                      <AppContent />
-                    </AdsProvider>
-                  </AuthProvider>
-                </StripeProvider>
-              </NavBarVisibilityProvider>
-            </NavigationProvider>
-          </LanguageProvider>
-        </ApiDataProvider>
-      </NumberProvider>
-    </ErrorBoundary>
+    <SafeAreaProvider>
+      <ErrorBoundary>
+        <NumberProvider>
+          <ApiDataProvider>
+            <LanguageProvider>
+              <NavigationProvider>
+                <NavBarVisibilityProvider>
+                  <StripeProvider publishableKey="pk_live_51QA6KbFfPQUdD5PApH13dFiVdcrIcqIDRE0vDWVQRPApbE7DpAJDiHIYeeDDOMJwsUsqhvyRLayxXjEyErHLlm2O0015KzM92n">
+                    <AuthProvider>
+                      <AdsProvider>
+                        <AppContent />
+                      </AdsProvider>
+                    </AuthProvider>
+                  </StripeProvider>
+                </NavBarVisibilityProvider>
+              </NavigationProvider>
+            </LanguageProvider>
+          </ApiDataProvider>
+        </NumberProvider>
+      </ErrorBoundary>
+    </SafeAreaProvider>
   );
 };
 

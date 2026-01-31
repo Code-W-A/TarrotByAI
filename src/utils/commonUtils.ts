@@ -19,15 +19,32 @@ export const filterArticlesBeforeCurrentTime = (articlesData) => {
   const now = new Date();
 
   return articlesData.filter((article) => {
-    const scheduledDate = article?.dataProgramata || article?.firstUploadDate;
-    const scheduledTime = article?.timpProgramat || article?.firstUploadtime || "00:00";
+    const hasScheduledDate = !!article?.dataProgramata;
+    const hasScheduledTime = !!article?.timpProgramat;
 
-    if (!scheduledDate) {
-      return true; // dacă nu există dată programată, nu filtrăm articolul
-    }
+    // Dacă nu avem niciun câmp de programare, cădem pe firstUpload* (comportament existent)
+    const fallbackDate = article?.firstUploadDate || moment(now).format("YYYY-MM-DD");
+    const fallbackTime = article?.firstUploadtime || "00:00";
+
+    // Regula: dacă există oricare din câmpurile de programare, le respectăm strict.
+    // - dacă avem doar timp: folosim data de azi + timpProgramat
+    // - dacă avem doar dată: folosim ora 00:00 pentru data respectivă
+    // - dacă avem ambele: le concatenăm
+    // - dacă nu avem nimic: folosim firstUploadDate/time (comportament vechi)
+    const dateStr = hasScheduledDate
+      ? String(article.dataProgramata)
+      : hasScheduledTime
+        ? moment(now).format("YYYY-MM-DD")
+        : String(fallbackDate);
+
+    const timeStr = hasScheduledTime
+      ? String(article.timpProgramat)
+      : hasScheduledDate
+        ? "00:00"
+        : String(fallbackTime);
 
     // Încercăm parsare robustă cu moment pe formatele uzuale
-    const dateTimeStr = `${scheduledDate} ${scheduledTime}`.trim();
+    const dateTimeStr = `${dateStr} ${timeStr}`.trim();
     const m = moment(dateTimeStr, [
       "DD-MM-YYYY HH:mm",
       "YYYY-MM-DD HH:mm",
@@ -41,21 +58,27 @@ export const filterArticlesBeforeCurrentTime = (articlesData) => {
     if (m.isValid()) {
       scheduledDateTime = m.toDate();
     } else {
-      // Fallback: vechea logică bazată pe inversarea zilei-lunii-anului pentru formatul DD-MM-YYYY
+      // Fallback: încercăm un ISO aproximativ pentru formatele tipice
       try {
-        const parts = scheduledDate.split("-");
-        const isYearFirst = parts?.[0]?.length === 4;
+        // Normalizăm data dacă vine ca DD-MM-YYYY
+        const partsDash = dateStr.split("-");
+        const isYearFirst = partsDash?.[0]?.length === 4;
         const normalizedDate = isYearFirst
-          ? scheduledDate
-          : parts.reverse().join("-");
-        scheduledDateTime = new Date(`${normalizedDate}T${scheduledTime}:00`);
+          ? dateStr
+          : partsDash.reverse().join("-");
+        scheduledDateTime = new Date(`${normalizedDate}T${timeStr}:00`);
       } catch (e) {
         scheduledDateTime = null;
       }
     }
 
     if (!scheduledDateTime || isNaN(scheduledDateTime.getTime())) {
-      return true; // dacă nu putem parsa, nu ascundem articolul ca să evităm dispariții accidentale
+      // Dacă există câmpuri de programare dar nu putem parsa => nu afișăm pentru a nu încălca programarea
+      if (hasScheduledDate || hasScheduledTime) {
+        return false;
+      }
+      // Altfel, păstrăm comportamentul vechi (afișăm)
+      return true;
     }
 
     return scheduledDateTime <= now;

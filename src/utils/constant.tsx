@@ -9,6 +9,11 @@ export const sendPdfEmail = "sendPdfEmail"
 export const capturePaymentIntentTest = "capturePaymentIntent"
 export const createInvoiceAfterPaymentTest = "createInvoiceAfterPayment"
 
+// Next.js API (Oblio invoicing)
+// NOTE: Keep the shared secret out of git; set via Expo extra (preferred) or fill at build time.
+export const NEXT_OBLIO_INVOICE_API_URL = ""
+export const NEXT_OBLIO_INVOICE_SHARED_SECRET = ""
+
 export const dayOptions = [
   { name: "Mo", no: 10 },
   { name: "Tu", no: 11 },

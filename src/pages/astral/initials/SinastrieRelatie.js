@@ -93,7 +93,8 @@ import { handleLanguagei18n } from "../../../utils/handleLanguageGeneral";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { useStripe } from "@stripe/stripe-react-native";
 import { useTranslation } from "../../../utils/translateUtil";
-import { capturePaymentIntentTest, createInvoiceAfterPaymentTest, createPaymentIntentTest, sendPdfEmail } from "../../../utils/constant";
+import { capturePaymentIntentTest, createPaymentIntentTest, sendPdfEmail } from "../../../utils/constant";
+// Oblio invoice via Firebase Functions (no Next.js)
 import { textStyles } from '../../../utils/colors';
 
 export const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -191,6 +192,9 @@ function SinastrieRelatie({ navigation, route }) {
   const [stateCounty, setStateCounty] = useState("");
   const [postalCode, setPostalCode] = useState("");
   const [country, setCountry] = useState(""); // sau un dropdown
+  const [couponCode, setCouponCode] = useState("");
+  const [couponPercent, setCouponPercent] = useState(0);
+  const [couponAllowed, setCouponAllowed] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -744,9 +748,13 @@ function SinastrieRelatie({ navigation, route }) {
 
 
   const handlePayment = async () => {
+    const runId = `pay_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+    const pfx = `[PAYMENT][SinastrieRelatie][${runId}]`;
+    const pLog = (...args) => console.log(pfx, ...args);
+    const pErr = (...args) => console.error(pfx, ...args);
     try {
       // 1. Verifică câmpurile de adresă
-      if (!line1 || !city || !stateCounty || !country) {
+      if (!line1 || !city || !stateCounty || !postalCode || !country) {
         Alert.alert("Eroare", "Te rugăm să completezi toate câmpurile de adresă.");
         return;
       }
@@ -756,23 +764,29 @@ function SinastrieRelatie({ navigation, route }) {
   
       // 2. Creează PaymentIntent cu capture_method: "manual"
       const createPaymentIntentFn = httpsCallable(functions, createPaymentIntentTest);
-      console.log("💳 Calling createPaymentIntentFn...");
+      pLog("calling createPaymentIntent", {
+        productCode: "sinastrie_relatie",
+        currency: "eur",
+        couponCode: couponAllowed ? couponCode : "",
+      });
       const resp = await createPaymentIntentFn({
-        amount: 2000, // de exemplu, 20.00 EUR
         currency: "eur",
         firstName,
         lastName,
         email,
         phone,
+        productCode: "sinastrie_relatie",
+        couponCode: couponAllowed ? couponCode : "",
       });
-      console.log("💳 PaymentIntent response:", resp);
+      pLog("createPaymentIntent response", resp?.data);
       const { clientSecret, transactionId } = resp.data;
       if (!clientSecret || !transactionId) {
         throw new Error("Lipsesc datele PaymentIntent. Verifică serverul.");
       }
+      pLog("paymentIntent ready", { transactionId });
   
       // 3. Inițializează Payment Sheet
-      console.log("🔧 Initializing Payment Sheet with clientSecret:", clientSecret);
+      pLog("initPaymentSheet");
       const { error: initError } = await initPaymentSheet({
         paymentIntentClientSecret: clientSecret,
         merchantDisplayName: "Cristina Zurba tarot",
@@ -784,44 +798,44 @@ function SinastrieRelatie({ navigation, route }) {
         },
       });
       if (initError) {
-        console.error("❌ Eroare initPaymentSheet:", initError);
+        pErr("initPaymentSheet error", initError);
         Alert.alert("Eroare", initError.message);
         return;
       }
-      console.log("🔧 Payment Sheet initialized successfully.");
+      pLog("paymentSheet initialized");
   
       // 4. Prezintă Payment Sheet
-      console.log("📲 Presenting Payment Sheet...");
+      pLog("presentPaymentSheet");
       const { error: presentError } = await presentPaymentSheet();
       if (presentError) {
-        console.error("❌ Eroare la prezentarea Payment Sheet:", presentError);
+        pErr("presentPaymentSheet error", presentError);
         Alert.alert("Eroare", presentError.message);
         return;
       }
-      console.log("📲 Payment Sheet presented successfully.");
+      pLog("paymentSheet presented OK (authorized)");
       // Plata este autorizată (status: "requires_capture"), dar nu este capturată încă.
   
       // 5. Generează conținutul PDF
       const pdfHtmlContent = generatePDFContent();
-      console.log("📝 Generated PDF HTML content.");
+      pLog("generated PDF HTML");
   
       // 6. Trimite emailul cu PDF-ul
-      console.log("📧 Calling sendPdfEmail function...");
+      pLog("calling sendPdfEmail");
       const sendPdfEmailFn = httpsCallable(functions, sendPdfEmail);
       const emailResponse = await sendPdfEmailFn({
         email, // sau userD.email, după caz
         pdfHtml: pdfHtmlContent,
         fullName: userD.full_name,
       });
-      console.log("📧 Email function response:", emailResponse);
+      pLog("sendPdfEmail response", emailResponse?.data);
   
       if (emailResponse.data && emailResponse.data.success) {
         // 7. Capturează PaymentIntent (fondurile vor fi reținute definitiv)
-        console.log("🔒 Capturing PaymentIntent...");
+        pLog("capturing PaymentIntent", { transactionId });
         const capturePaymentFn = httpsCallable(functions, capturePaymentIntentTest);
         const captureResp = await capturePaymentFn({ transactionId });
         if (captureResp.data && captureResp.data.captured) {
-          console.log("✅ Payment captured successfully.");
+          pLog("payment captured OK");
   
           // 8. Actualizează analiza în AsyncStorage (personsData) – identic ca în componenta originală
           // Marchează sinastria ca plătită în starea locală
@@ -846,19 +860,26 @@ function SinastrieRelatie({ navigation, route }) {
           );
           console.log("📝 Element actualizat din AsyncStorage:", specificPerson);
   
-          // 9. Creează factura pe server
-          console.log("🧾 Creating invoice...");
-          const createInvoiceFn = httpsCallable(functions, createInvoiceAfterPaymentTest);
-          const invoiceResp = await createInvoiceFn({
+          // 9. Creează factura în Oblio via Firebase Functions
+          pLog("calling Firebase Oblio invoice function", { transactionId });
+          const createOblioInvoiceFn = httpsCallable(functions, "createOblioInvoiceAfterPayment");
+          const invoiceResp = await createOblioInvoiceFn({
             transactionId,
+            productCode: "sinastrie_relatie",
+            customer: {
             firstName,
             lastName,
             email,
             phone,
             address: { line1, city, state: stateCounty, postal_code: postalCode, country },
-            analysisData: userD,
+            },
+            coupon: {
+              couponAllowed: Boolean(couponAllowed),
+              couponCode: couponAllowed ? couponCode : "",
+              discountPercent: couponAllowed ? Number(couponPercent) : 0,
+            },
           });
-          console.log("🧾 Invoice created:", invoiceResp.data);
+          pLog("Firebase Oblio invoice response", invoiceResp?.data);
           Alert.alert(achizitieCompleta1, achizitieCompleta2);
         } else {
           throw new Error("Capturarea plății a eșuat.");
@@ -872,11 +893,17 @@ function SinastrieRelatie({ navigation, route }) {
         // (Opțional: poți anula PaymentIntent printr-o funcție backend dedicată.)
       }
     } catch (error) {
-      console.error("❌ Eroare handlePayment:", error);
-      Alert.alert("Eroare", "Nu s-a putut procesa plata sau factura.");
+      pErr("handlePayment error", error);
+      const msg =
+        (error && typeof error === "object" && error.message ? String(error.message) : "") ||
+        "Nu s-a putut procesa plata sau factura.";
+      Alert.alert(
+        "Eroare",
+        `${msg}\n\nDacă ți-a fost luată suma, trimite acest ID la suport: ${String(transactionId || "")}`.trim()
+      );
     } finally {
       setIsLoadingBuy(false);
-      console.log("🏁 handlePayment complete. isLoadingBuy set to false.");
+      pLog("done (isLoadingBuy=false)");
     }
   };
   
@@ -1108,6 +1135,7 @@ function SinastrieRelatie({ navigation, route }) {
       <PurchaseModal
         visible={isModalVisible}
         onDismiss={() => setModalVisible(false)}
+        baseAmountBani={1500}
         setEmail={setEmail}
         setPhone={setPhone}
         phone={phone}
@@ -1126,6 +1154,12 @@ function SinastrieRelatie({ navigation, route }) {
         country={country}
         postalCode={postalCode}
         setPostalCode={setPostalCode}
+        couponCode={couponCode}
+        setCouponCode={setCouponCode}
+        couponPercent={couponPercent}
+        setCouponPercent={setCouponPercent}
+        couponAllowed={couponAllowed}
+        setCouponAllowed={setCouponAllowed}
         onConfirm={async () => {
           setIsLoadingBuy(true);
           setModalVisible(false);

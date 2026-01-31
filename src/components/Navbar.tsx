@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { View, TouchableOpacity, StyleSheet, Animated, Text } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { screenName } from "../utils/screenName";
 import { colors } from "../utils/colors";
 import {
@@ -19,15 +20,14 @@ const GOLD = '#FFD700';
 const CREAM = 'rgba(250,247,242,0.95)';
 const GRAY = '#B0B0B0';
 const TAB_ICONS = [
-  { lib: Ionicons, icon: 'star', screen: screenName.ClinicDashBoard },
-  // { lib: Ionicons, icon: 'bookmark', screen: "Astral" },
-  // { lib: MaterialCommunityIcons, icon: 'cards-outline', screen: screenName.PersonalReadingDashboard },
-  // { lib: Ionicons, icon: 'newspaper-outline', screen: 'News' },
-  { lib: Ionicons, icon: 'person', screen: 'TarrotSettings' },
+  { lib: Ionicons, icon: 'star', screen: screenName.ClinicDashBoard, label: 'Acasă' },
+  { lib: Ionicons, icon: 'videocam', screen: screenName.VideoLibrary, label: 'Videoclipuri' },
+  { lib: Ionicons, icon: 'person', screen: 'TarrotSettings', label: 'Setări' },
 ];
 
 const NavBarBottom = () => {
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
   const [selected, setSelected] = useState(0);
   const { setCurrentScreen, currentScreen } = useNavigationState();
   const [firstVisit, setFirstVisit] = useState(true);
@@ -95,15 +95,25 @@ const NavBarBottom = () => {
     ]).start();
   };
 
+  const shuffleScreens = new Set([
+    "PersonalReadingDashboard",
+    "CeSimte",
+    "FutureReadingDashboard",
+  ]);
+  const shouldShowShuffleHint =
+    shuffleScreens.has(currentScreen) &&
+    shuffledCartiViitor.length === 0 &&
+    firstVisit &&
+    !loading &&
+    shuffledCartiPersonalizate.length === 0;
+
   const handlePress = (screen, index) => {
     if (loading) {
       console.log("Is loading...please wait...");
     } else {
-      if (index === 1 && selected === 1) {
-        if (
-          shuffledCartiViitor.length === 0 &&
-          shuffledCartiPersonalizate.length === 0
-        ) {
+      const shouldTriggerShuffle = index === selected && shuffleScreens.has(currentScreen);
+      if (shouldTriggerShuffle) {
+        if (shuffledCartiViitor.length === 0 && shuffledCartiPersonalizate.length === 0) {
           setLoading(true);
           updateNumber(1);
           setSendToHistory([]);
@@ -163,11 +173,7 @@ const NavBarBottom = () => {
 
   return (
     <>
-      {selected === 2 &&
-        shuffledCartiViitor.length === 0 &&
-        firstVisit &&
-        !loading &&
-        shuffledCartiPersonalizate.length === 0 && (
+      {shouldShowShuffleHint && (
           <View style={styles.shuffleTextContainer}>
             <H7fontBoldPrimary>
               {i18n.translate("touchToShuffle")}
@@ -188,7 +194,7 @@ const NavBarBottom = () => {
             </Animated.View>
           </View>
       )}
-      <View style={styles.navbarContainer}>
+      <View style={[styles.navbarContainer, { paddingBottom: insets.bottom }]}>
         <View style={styles.navbarModern}>
           {TAB_ICONS.map((tab, index) => {
             const IconLib = tab.lib;
@@ -209,6 +215,8 @@ const NavBarBottom = () => {
                   onPressOut={() => handlePressOut(index)}
                   activeOpacity={0.85}
                   style={styles.tabButtonInner}
+                  accessibilityRole="button"
+                  accessibilityLabel={tab.label ?? tab.screen}
                 >
                   <IconLib
                     name={tab.icon as any}

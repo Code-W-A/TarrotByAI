@@ -2,6 +2,7 @@ const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const {Expo} = require("expo-server-sdk");
 const stripe = require("stripe")(functions.config().stripe.secret_key);
+const https = require("https");
 
 // Creează o nouă instanță a Expo SDK
 const expo = new Expo();
@@ -9,6 +10,161 @@ const expo = new Expo();
 admin.initializeApp();
 
 const db = admin.firestore();
+
+// ----------------- OBLIO HELPERS -----------------
+/**
+ * POST to Oblio with x-www-form-urlencoded body.
+ * @param {string} url
+ * @param {Object} formObj
+ * @param {string|null} token
+ * @return {Promise<Object>}
+ */
+function oblioPostForm(url, formObj, token = null) {
+  const body = new URLSearchParams(formObj).toString();
+  return new Promise((resolve, reject) => {
+    const u = new URL(url);
+    const req = https.request(
+        {
+          method: "POST",
+          hostname: u.hostname,
+          path: u.pathname + u.search,
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Content-Length": Buffer.byteLength(body),
+            ...(token ? {Authorization: `Bearer ${token}`} : {}),
+          },
+        },
+        (res) => {
+          let data = "";
+          res.on("data", (c) => (data += c));
+          res.on("end", () => {
+            try {
+              const json = JSON.parse(data || "{}");
+              resolve({statusCode: res.statusCode, json});
+            } catch (e) {
+              resolve({statusCode: res.statusCode, json: null, raw: data});
+            }
+          });
+        },
+    );
+    req.on("error", reject);
+    req.write(body);
+    req.end();
+  });
+}
+
+/**
+ * POST to Oblio with JSON body.
+ * @param {string} url
+ * @param {Object} payload
+ * @param {string} token
+ * @return {Promise<Object>}
+ */
+function oblioPostJson(url, payload, token) {
+  const body = JSON.stringify(payload);
+  return new Promise((resolve, reject) => {
+    const u = new URL(url);
+    const req = https.request(
+        {
+          method: "POST",
+          hostname: u.hostname,
+          path: u.pathname + u.search,
+          headers: {
+            "Content-Type": "application/json",
+            "Content-Length": Buffer.byteLength(body),
+            "Authorization": `Bearer ${token}`,
+          },
+        },
+        (res) => {
+          let data = "";
+          res.on("data", (c) => (data += c));
+          res.on("end", () => {
+            try {
+              const json = JSON.parse(data || "{}");
+              resolve({statusCode: res.statusCode, json});
+            } catch (e) {
+              resolve({statusCode: res.statusCode, json: null, raw: data});
+            }
+          });
+        },
+    );
+    req.on("error", reject);
+    req.write(body);
+    req.end();
+  });
+}
+
+/**
+ * Gets OAuth access token from Oblio.
+ * @param {string} runId
+ * @return {Promise<string>}
+ */
+async function getOblioAccessToken(runId) {
+  const cfg = functions.config().oblio || {};
+  const clientId = cfg.client_id;
+  const clientSecret = cfg.client_secret;
+  if (!clientId || !clientSecret) {
+    throw new Error("Missing Oblio config: oblio.client_id / oblio.client_secret");
+  }
+  const {statusCode, json, raw} = await oblioPostForm(
+      "https://www.oblio.eu/api/authorize/token",
+      {client_id: clientId, client_secret: clientSecret},
+  );
+  if (statusCode !== 200 || !json || !json.access_token) {
+    console.error(`[${runId}] Oblio token error`, {statusCode, json, raw});
+    throw new Error("Oblio auth failed");
+  }
+  return json.access_token;
+}
+
+/**
+ * Maps productCode to product metadata and base amount (bani).
+ * @param {string} productCode
+ * @return {{name: string, description: string, baseAmountBani: number}}
+ */
+function mapProduct(productCode) {
+  switch (productCode) {
+    case "astrogama_natala":
+      // Amounts are in the smallest currency unit (cents for EUR)
+      return {name: "Analiză Astrogramă", description: "Serviciu digital - analiză astrologică", baseAmountBani: 1000};
+    case "astrogama_natala_other_person":
+      return {name: "Analiză Astrogramă (altă persoană)", description: "Serviciu digital - analiză astrologică", baseAmountBani: 1000};
+    case "sinastrie_relatie":
+      return {name: "Analiză Sinastrie", description: "Serviciu digital - analiză sinastrie", baseAmountBani: 1500};
+    case "sinastrie_relatie_others":
+      return {name: "Analiză Sinastrie (altă persoană)", description: "Serviciu digital - analiză sinastrie", baseAmountBani: 1500};
+    default:
+      return {name: "Analiză", description: "Serviciu digital", baseAmountBani: 1500};
+  }
+}
+
+/**
+ * Validates coupon from Firestore doc coupons/singleton and returns discount percent.
+ * Note: isCuponUsed === true means coupon is allowed.
+ * @param {string} runId
+ * @param {string} couponCode
+ * @return {Promise<{couponAllowed: boolean, couponCode: string, discountPercent: number}>}
+ */
+async function validateCouponAndComputeDiscount(runId, couponCode) {
+  const entered = String(couponCode || "").trim().toUpperCase();
+  if (!entered) return {couponAllowed: false, couponCode: "", discountPercent: 0};
+
+  const snap = await admin.firestore().doc("coupons/singleton").get();
+  if (!snap.exists) {
+    console.warn(`[${runId}] coupon doc missing`);
+    return {couponAllowed: false, couponCode: entered, discountPercent: 0};
+  }
+  const data = snap.data() || {};
+  const allowed = data.isCuponUsed === true;
+  const stored = String(data.cuponCode || "").trim().toUpperCase();
+  const percent = Number(data.discountPercent);
+
+  if (!allowed) return {couponAllowed: false, couponCode: entered, discountPercent: 0};
+  if (!stored || stored !== entered) return {couponAllowed: false, couponCode: entered, discountPercent: 0};
+  if (!Number.isFinite(percent) || percent <= 0 || percent >= 100) return {couponAllowed: false, couponCode: entered, discountPercent: 0};
+
+  return {couponAllowed: true, couponCode: stored, discountPercent: percent};
+}
 
 exports.checkAndSendNotifications = functions.pubsub
     .schedule("every 120 minutes")
@@ -385,7 +541,7 @@ exports.sendRegularNotificationsIos = functions.pubsub
 
 exports.sendRandomAfirmatii = functions
     .runWith({timeoutSeconds: 300, memory: "512MB"}) // 5 minute timeout
-    .pubsub.schedule("every 110 minutes")
+    .pubsub.schedule("every 60 minutes")
     .timeZone("Europe/Bucharest")
     .onRun(async () => {
       console.log(
@@ -405,6 +561,10 @@ exports.sendRandomAfirmatii = functions
 
       const randomIndex = Math.floor(Math.random() * notifications.length);
       const selectedNotification = notifications[randomIndex];
+      if (!selectedNotification || !selectedNotification.info) {
+        console.log("⚠️ Notificare selectată invalidă sau fără câmpul info.");
+        return false;
+      }
 
       const tS = await admin.firestore().collection("userTokens").get();
       const users = [];
@@ -421,19 +581,16 @@ exports.sendRandomAfirmatii = functions
         const {token, language, isIos} = user;
 
         if (selectedNotification && (isIos === undefined || isIos === false)) {
-          const langInfo =
-          selectedNotification.info[language] ||
-          selectedNotification.info["en"];
+          const info = selectedNotification.info || {};
+          const preferredLang = language || "en";
+          const langInfo = info[preferredLang] || info.en || info.ro || Object.values(info)[0];
           if (!langInfo) {
-            console.warn(
-                `⚠️ Nu există pentru limba ${language}, nici fallback pe en.`,
-            );
+            console.warn(`⚠️ Lipsesc textele pentru limbă. language=${language}`);
             return;
           }
 
-          const nume = langInfo.nume || selectedNotification.info["en"].nume;
-          const descriere =
-          langInfo.descriere || selectedNotification.info["en"].descriere;
+          const nume = langInfo.nume || (info.en && info.en.nume) || (info.ro && info.ro.nume) || "";
+          const descriere = langInfo.descriere || (info.en && info.en.descriere) || (info.ro && info.ro.descriere) || "";
 
           if (Expo.isExpoPushToken(token)) {
             messages.push({
@@ -453,39 +610,22 @@ exports.sendRandomAfirmatii = functions
         console.log("⚠️ Niciun mesaj valid pentru a trimite notificări.");
         return false;
       }
-
-      // 🔹 Împărțim notificările în loturi de max. 100
-      const chunks = expo.chunkPushNotifications(messages, 100);
-
-      // 🔹 Funcție pentru a trimite fiecare lot cu întârziere
-      const sendBatchedNotifications = async () => {
-        let totalSent = 0;
-        for (let i = 0; i < chunks.length; i++) {
-          try {
-            console.log(`📤 Trimitere batch ${i + 1}/${chunks.length}...`);
-            const tC = await expo.sendPushNotificationsAsync(chunks[i]);
-            totalSent += tC.length;
-            console.log(`✅ Batch ${i + 1} trimis. Total: ${totalSent}`);
-
-            // 🔹 Adaugă o întârziere de 1 secundă între loturi
-            if (i < chunks.length - 1) {
-              await new Promise((resolve) => setTimeout(resolve, 1000));
-            }
-          } catch (error) {
-            console.error(`❌ Eroare la trimiterea batch-ului ${i + 1}:`, error);
-          }
+      // Trimite individual pentru a evita amestecul de proiecte Expo în același request
+      let totalSent = 0;
+      for (const msg of messages) {
+        try {
+          const ticketChunk = await expo.sendPushNotificationsAsync([msg]);
+          totalSent += ticketChunk.length;
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        } catch (error) {
+          console.error("❌ Eroare la trimiterea notificării individuale:", error);
         }
-        console.log(
-            `🚀 Notificări trimise cu succes. Total trimise: ${totalSent}`,
-        );
-      };
-
-      // 🔹 Executăm trimiterea notificărilor cu întârziere
-      await sendBatchedNotifications();
+      }
+      console.log(`🚀 Notificări trimise cu succes. Total trimise: ${totalSent}`);
     });
 
 exports.sendRegularAfirmatiiIos = functions.pubsub
-    .schedule("9 */2 * * *")
+    .schedule("every 120 minutes")
     .timeZone("Europe/Bucharest")
     .onRun(async () => {
     // Obține toate notificările din Firestore
@@ -519,26 +659,25 @@ exports.sendRegularAfirmatiiIos = functions.pubsub
       users.forEach((user) => {
         const {token, language, isIos} = user;
         if (selectedNotification && isIos) {
-          if (
-            selectedNotification.info[language] === undefined ||
-          selectedNotification.info[language].nume === undefined ||
-          selectedNotification.info[language].descriere === undefined
-          ) {
-            console.log("selectN has undefined", selectedNotification.info);
+          const info = (selectedNotification && selectedNotification.info) || {};
+          const preferredLang = language || "en";
+          const langInfo = info[preferredLang] || info.en || info.ro || Object.values(info)[0];
+          if (!langInfo) {
+            console.log("selectN has undefined for all fallbacks", info);
+            return;
+          }
+          const nume = langInfo.nume || (info.en && info.en.nume) || (info.ro && info.ro.nume) || "";
+          const descriere = langInfo.descriere || (info.en && info.en.descriere) || (info.ro && info.ro.descriere) || "";
+          if (Expo.isExpoPushToken(token)) {
+            messages.push({
+              to: token,
+              sound: "default",
+              title: nume,
+              body: descriere,
+              data: {nume, descriere, type: "AfirmatiiPozitive"},
+            });
           } else {
-            if (Expo.isExpoPushToken(token)) {
-              const nume = selectedNotification.info[language].nume;
-              const descriere = selectedNotification.info[language].descriere;
-              messages.push({
-                to: token,
-                sound: "default",
-                title: nume,
-                body: descriere,
-                data: {nume, descriere, type: "AfirmatiiPozitive"},
-              });
-            } else {
-              console.error(`Token ${token} is not a valid Expo push token`);
-            }
+            console.error(`Token ${token} is not a valid Expo push token`);
           }
         }
       });
@@ -1462,10 +1601,40 @@ exports.sendManualNotificationsIos = functions.runWith({timeoutSeconds: 300, mem
 
 // -----------------PAYMENT LIVE START----------
 exports.createPaymentIntent = functions.https.onCall(async (data ) => {
-  const {amount, currency, firstName, lastName, email, phone} = data;
+  const runId = `createPaymentIntent-${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+  const {amount, currency, firstName, lastName, email, phone, productCode, couponCode} = data;
 
   try {
     let customer;
+    const product = mapProduct(productCode);
+    const coupon = await validateCouponAndComputeDiscount(runId, couponCode);
+    const baseAmountBani = typeof amount === "number" ? amount : product.baseAmountBani;
+    const finalAmountBani = coupon.couponAllowed ?
+      Math.max(1, Math.round(baseAmountBani * (100 - coupon.discountPercent) / 100)) :
+      baseAmountBani;
+    // Force EUR for all purchases (requested pricing is in EUR).
+    const finalCurrency = "eur";
+
+    if (currency && String(currency).toLowerCase() !== finalCurrency) {
+      console.warn(`[${runId}] ignoring client currency override`, {provided: currency, enforced: finalCurrency});
+    }
+
+    console.log(`[${runId}] start`, {productCode, baseAmountBani, finalAmountBani, finalCurrency, coupon});
+
+    // Stripe has minimum charge amounts per currency. Avoid opaque "amount too small" errors.
+    const minAmountByCurrency = {
+      eur: 50, // 0.50 EUR
+      usd: 50, // 0.50 USD
+      ron: 200, // 2.00 RON (typical Stripe minimum)
+    };
+    const minAmount = minAmountByCurrency[finalCurrency];
+    if (typeof minAmount === "number" && finalAmountBani < minAmount) {
+      console.warn(`[${runId}] amount below minimum`, {finalCurrency, finalAmountBani, minAmount});
+      throw new functions.https.HttpsError(
+          "failed-precondition",
+          `Suma minimă pentru ${finalCurrency.toUpperCase()} este ${(minAmount / 100).toFixed(2)}. (Ai ${(finalAmountBani / 100).toFixed(2)})`,
+      );
+    }
 
     // 🔥 Verifică dacă clientul există deja
     const existingCustomers = await stripe.customers.list({email});
@@ -1491,19 +1660,35 @@ exports.createPaymentIntent = functions.https.onCall(async (data ) => {
 
     // 🔥 Creăm PaymentIntent
     const paymentIntent = await stripe.paymentIntents.create({
-      amount, // Ex: 300 pentru 3.00 RON
-      currency: currency || "ron",
+      amount: finalAmountBani, // bani
+      currency: finalCurrency,
       customer: customer.id,
       payment_method_types: ["card"],
       capture_method: "manual", // Fondurile autorizate inițial
+      metadata: {
+        productCode: String(productCode || ""),
+        couponCode: coupon.couponAllowed ? coupon.couponCode : "",
+        couponPercent: coupon.couponAllowed ? String(coupon.discountPercent) : "0",
+      },
     });
 
     return {
       clientSecret: paymentIntent.client_secret,
       transactionId: paymentIntent.id,
+      amountBaniApplied: finalAmountBani,
+      coupon,
     };
   } catch (error) {
-    console.error("Eroare createPaymentIntent:", error);
+    const stripeDetails = error && typeof error === "object" ? {
+      type: error.type,
+      code: error.code,
+      param: error.param,
+      message: error.message,
+      rawType: error.rawType,
+      requestId: error.requestId,
+    } : null;
+    console.error(`[${runId}] Eroare createPaymentIntent:`, {stripeDetails, error});
+    if (error instanceof functions.https.HttpsError) throw error;
     throw new functions.https.HttpsError(
         "internal",
         "Nu s-a putut crea PaymentIntent.",
@@ -1614,6 +1799,158 @@ exports.capturePaymentIntent = functions.https.onCall(async (data) => {
   }
 });
 // -----------------PAYMENT LIVE end----------
+
+// -----------------OBLIO INVOICE (Firebase Functions)----------
+exports.createOblioInvoiceAfterPayment = functions
+    .runWith({timeoutSeconds: 60, memory: "512MB"})
+    .https.onCall(async (data) => {
+      const runId = `createOblioInvoice-${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+      const {transactionId, customer, productCode, coupon} = data || {};
+
+      try {
+        if (!transactionId) {
+          throw new functions.https.HttpsError("invalid-argument", "Missing transactionId");
+        }
+        if (!customer || !customer.firstName || !customer.lastName || !customer.email || !customer.phone) {
+          throw new functions.https.HttpsError("invalid-argument", "Missing customer fields");
+        }
+        if (
+          !customer.address ||
+          !customer.address.line1 ||
+          !customer.address.city ||
+          !customer.address.state ||
+          !customer.address.postal_code ||
+          !customer.address.country
+        ) {
+          throw new functions.https.HttpsError("invalid-argument", "Missing customer address fields");
+        }
+
+        const invoiceRef = admin.firestore().collection("oblioInvoices").doc(String(transactionId));
+        const existing = await invoiceRef.get();
+        if (existing.exists) {
+          console.log(`[${runId}] idempotency hit`, {transactionId});
+          return existing.data();
+        }
+
+        // Stripe verify
+        const pi = await stripe.paymentIntents.retrieve(String(transactionId));
+        console.log(`[${runId}] stripe paymentIntent`, {status: pi.status, currency: pi.currency, amount: pi.amount});
+        if (pi.status !== "succeeded") {
+          throw new functions.https.HttpsError("failed-precondition", "Payment not succeeded");
+        }
+        if ((pi.currency || "").toLowerCase() !== "eur") {
+          throw new functions.https.HttpsError("failed-precondition", "Payment currency is not EUR");
+        }
+        const grossTotal = Number(pi.amount) / 100;
+
+        const cfg = functions.config().oblio || {};
+        const oblioCif = cfg.cif;
+        const oblioSeries = cfg.series;
+        if (!oblioCif || !oblioSeries) {
+          throw new Error("Missing Oblio config: oblio.cif / oblio.series");
+        }
+
+        const token = await getOblioAccessToken(runId);
+        const issueDate = new Date().toISOString().slice(0, 10);
+        const dueDate = issueDate;
+        const product = mapProduct(productCode);
+
+        const safeCoupon = coupon && coupon.couponAllowed ? {
+          couponAllowed: true,
+          couponCode: String(coupon.couponCode || ""),
+          discountPercent: Number(coupon.discountPercent) || 0,
+        } : {couponAllowed: false};
+
+        const mentions = safeCoupon.couponAllowed ?
+          `Cupon: ${safeCoupon.couponCode} (-${safeCoupon.discountPercent}%) | STRIPE ${transactionId}` :
+          `STRIPE ${transactionId}`;
+
+        // Mark invoice as collected/paid in Oblio (so it doesn't appear as "neîncasată").
+        // Oblio supports adding a `collect` object when issuing the invoice.
+        // Reference: Oblio API docs (Incasare factura) https://www.oblio.eu/api
+        const collect = {
+          type: "Card",
+          // Some collection types require a document number; use a deterministic value tied to Stripe.
+          documentNumber: String(transactionId).replace(/[^a-zA-Z0-9]/g, "").slice(-16),
+          value: grossTotal,
+          issueDate,
+          mentions: `Plată Stripe ${transactionId}`,
+        };
+
+        // Guarantee exact totals: vatIncluded=true and price=grossTotal
+        const payload = {
+          cif: String(oblioCif),
+          seriesName: String(oblioSeries),
+          issueDate,
+          dueDate,
+          language: "RO",
+          currency: "EUR",
+          precision: 2,
+          sendEmail: 1,
+          mentions,
+          collect,
+          client: {
+            name: `${customer.firstName} ${customer.lastName}`,
+            address: customer.address.line1,
+            city: customer.address.city,
+            state: customer.address.state,
+            country: customer.address.country,
+            email: customer.email,
+            phone: customer.phone,
+            vatPayer: false,
+            save: 1,
+          },
+          products: [
+            {
+              name: product.name,
+              description: product.description,
+              quantity: 1,
+              price: grossTotal,
+              measuringUnit: "bucată",
+              productType: "Serviciu",
+              vatName: "Normala",
+              vatPercent: 21,
+              vatIncluded: true,
+            },
+          ],
+        };
+
+        console.log(`[${runId}] oblio invoice payload summary`, {
+          cif: payload.cif,
+          seriesName: payload.seriesName,
+          issueDate,
+          dueDate,
+          total: grossTotal,
+          client: {name: payload.client.name, city: payload.client.city, state: payload.client.state, country: payload.client.country},
+          productCode: String(productCode || ""),
+          mentions,
+        });
+
+        // Invoice create endpoint per Oblio docs
+        const {statusCode, json, raw} = await oblioPostJson("https://www.oblio.eu/api/docs/invoice", payload, token);
+        console.log(`[${runId}] oblio invoice response`, {statusCode, jsonPreview: json ? {status: json.status, statusMessage: json.statusMessage} : null});
+
+        if (statusCode !== 200 || !json || json.status !== 200) {
+          console.error(`[${runId}] oblio invoice failed`, {statusCode, json, raw});
+          throw new Error("Oblio invoice create failed");
+        }
+
+        const result = {
+          transactionId: String(transactionId),
+          oblio: json.data || json,
+          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+          grossTotal,
+          productCode: String(productCode || ""),
+          coupon: safeCoupon,
+        };
+        await invoiceRef.set(result);
+        return result;
+      } catch (err) {
+        console.error(`[${runId}] createOblioInvoiceAfterPayment error`, err);
+        if (err instanceof functions.https.HttpsError) throw err;
+        throw new functions.https.HttpsError("internal", "Nu am putut crea factura Oblio.");
+      }
+    });
 
 // -----------------PAYMENT test START----------
 const stripeTest = require("stripe")(functions.config().stripe.test_secret_key);
@@ -1989,4 +2326,63 @@ exports.backfillUserTokens = functions
         console.error("backfillUserTokens error", err);
         res.status(500).json({error: "internal"});
       }
+    });
+
+// Notificare când un video este publicat
+exports.sendVideoPublishedNotifications = functions.firestore
+    .document("videosVideoModule/{videoId}")
+    .onUpdate(async (change, context) => {
+      const before = change.before.exists ? change.before.data() : null;
+      const after = change.after.exists ? change.after.data() : null;
+
+      if (!before || !after) {
+        return null;
+      }
+
+      if (before.isPublished === true || after.isPublished !== true) {
+        return null;
+      }
+
+      const videoId = context.params.videoId;
+      const title = after.title || "Videoclip nou";
+      const body = "";
+
+      const userTokensSnap = await admin.firestore().collection("userTokens").get();
+      const tokens = [];
+      userTokensSnap.forEach((doc) => tokens.push(doc.data()));
+
+      if (tokens.length === 0) {
+        return null;
+      }
+
+      const messages = [];
+      tokens.forEach((user) => {
+        const {token} = user;
+        if (Expo.isExpoPushToken(token)) {
+          messages.push({
+            to: token,
+            sound: "default",
+            title,
+            body,
+            data: {type: "VideoPublished", videoId},
+          });
+        } else {
+          console.error(`[VideoPublished] Token invalid: ${token}`);
+        }
+      });
+
+      if (messages.length === 0) {
+        return null;
+      }
+
+      const chunks = expo.chunkPushNotifications(messages);
+      for (const chunk of chunks) {
+        try {
+          await expo.sendPushNotificationsAsync(chunk);
+        } catch (error) {
+          console.error("[VideoPublished] Eroare la trimitere chunk:", error);
+        }
+      }
+
+      return null;
     });

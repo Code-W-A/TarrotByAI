@@ -22,6 +22,7 @@ import {
   Modal,
   TouchableOpacity,
   TextInput,
+  RefreshControl,
 } from "react-native";
 import Constants from "expo-constants";
 import { Provider as PaperProvider } from "react-native-paper";
@@ -78,6 +79,10 @@ import { useUserDataModal } from "../../hooks/useUserDataModal";
 // NEW: Import the centralized ads system
 import { useAds } from "../../hooks/useAds";
 import { useAdsContext } from "../../context/AdsContext";
+import { getPublishedVideos } from "../../features/video-library/services/videoLibrary.service";
+import type { Video } from "../../features/video-library/types/video";
+import { WebView } from "react-native-webview";
+import { getEmbedUrl } from "../../features/video-library/utils/videoEmbed";
 
 // ADS COMPLETELY REMOVED FOR DEBUGGING
 // const adUnitId = __DEV__
@@ -99,6 +104,136 @@ interface UserDetails {
   email: string;
   phone: string;
 }
+
+const LatestVideoCard: React.FC<{ video: Video; onPress: () => void }> = ({
+  video,
+  onPress,
+}) => {
+  const [previewError, setPreviewError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const embedUrl = getEmbedUrl(video.platform, video.videoUrl);
+  const shouldShowPreview = Boolean(embedUrl && !previewError);
+
+  const BASE_URL = "https://cristinazurba.com/";
+  const previewHtml = embedUrl
+    ? `<!DOCTYPE html>
+    <html>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+        <meta name="referrer" content="strict-origin-when-cross-origin" />
+        <style>
+          html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #000; }
+          .player { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+          iframe { width: 100%; height: 100%; border: 0; }
+        </style>
+      </head>
+      <body>
+        <div class="player">
+          <iframe
+            src="${embedUrl}?autoplay=0&mute=1&controls=0&modestbranding=1&playsinline=1&origin=${encodeURIComponent(
+              BASE_URL
+            )}"
+            referrerpolicy="strict-origin-when-cross-origin"
+            allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowfullscreen
+          ></iframe>
+        </div>
+      </body>
+    </html>`
+    : null;
+
+  return (
+    <TouchableOpacity
+      activeOpacity={0.93}
+      onPress={onPress}
+      style={{
+        width: 220,
+        height: 180,
+        borderRadius: 20,
+        overflow: "hidden",
+        marginRight: 12,
+        backgroundColor: "#fff",
+        shadowColor: "#bfa76a",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.13,
+        shadowRadius: 16,
+        elevation: 7,
+      }}
+    >
+      <View style={{ flex: 1, backgroundColor: "#000" }}>
+        {shouldShowPreview ? (
+          <>
+            {isLoading && video.thumbnailUrl ? (
+              <ImageBackground
+                source={{ uri: video.thumbnailUrl }}
+                style={{ ...StyleSheet.absoluteFillObject }}
+                resizeMode="cover"
+              />
+            ) : null}
+            <WebView
+              source={{ html: previewHtml!, baseUrl: BASE_URL }}
+              style={{ flex: 1, backgroundColor: "#000" }}
+              onError={() => {
+                setPreviewError(true);
+                setIsLoading(false);
+              }}
+              onLoadEnd={() => setIsLoading(false)}
+              scrollEnabled={false}
+              bounces={false}
+              javaScriptEnabled
+              domStorageEnabled
+              mediaPlaybackRequiresUserAction={false}
+              allowsInlineMediaPlayback
+              originWhitelist={["*"]}
+            />
+          </>
+        ) : (
+          <ImageBackground
+            source={{ uri: video.thumbnailUrl ?? "https://picsum.photos/800" }}
+            style={{ flex: 1 }}
+            resizeMode="cover"
+          />
+        )}
+
+        <View
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.18)",
+            justifyContent: "center",
+            alignItems: "center",
+            padding: 12,
+          }}
+        >
+          <Ionicons
+            name="play-circle"
+            size={40}
+            color="rgba(255,255,255,0.92)"
+          />
+          <Text
+            style={{
+              color: "#ffe6b0",
+              fontWeight: "700",
+              fontSize: 15,
+              textAlign: "center",
+              textShadowColor: "#000",
+              textShadowOffset: { width: 0, height: 1 },
+              textShadowRadius: 1,
+              marginTop: 6,
+            }}
+            numberOfLines={2}
+          >
+            {video.title}
+          </Text>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+};
 
 const CATEGORIES = [
   {
@@ -197,8 +332,12 @@ const ClinicDashboard = () => {
   const [currentLanguage, setCurrentLanguage] = useState("Romanian");
   const [latestArticles, setLatestArticles] = useState([]);
   const [loadingArticles, setLoadingArticles] = useState(false);
+  const [refreshingArticles, setRefreshingArticles] = useState(false);
   const [articleModalVisible, setArticleModalVisible] = useState(false);
   const [selectedArticle, setSelectedArticle] = useState(null);
+  const [latestVideos, setLatestVideos] = useState<Video[]>([]);
+  const [loadingVideos, setLoadingVideos] = useState(false);
+  const [refreshingVideos, setRefreshingVideos] = useState(false);
 
   // Funcție pentru gestionarea navigării către Learn screen cu verificarea datelor
   const handleNavigateToLearn = async () => {
@@ -479,28 +618,65 @@ const ClinicDashboard = () => {
   };
   const flagImageSource = languages.find((l) => l.name === currentLanguage)?.flag;
 
-  useEffect(() => {
-    const fetchLatestArticles = async () => {
+  const fetchLatestArticles = async (isRefresh = false) => {
+    if (isRefresh) {
+      setRefreshingArticles(true);
+    } else {
       setLoadingArticles(true);
-      try {
-        const articlesRef = collection(db, "BlogArticole");
-        const q = query(articlesRef, orderBy("firstUploadTimestamp", "desc"), limit(3));
-        const snapshot = await getDocs(q);
-        const articles = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        const filtered = filterArticlesBeforeCurrentTime(articles);
-        setLatestArticles(filtered);
-      } catch (e) {
-        console.error("Failed to fetch latest articles", e);
-      } finally {
+    }
+    try {
+      const articlesRef = collection(db, "BlogArticole");
+      const q = query(articlesRef, orderBy("firstUploadTimestamp", "desc"), limit(3));
+      const snapshot = await getDocs(q);
+      const articles = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const filtered = filterArticlesBeforeCurrentTime(articles);
+      setLatestArticles(filtered);
+    } catch (e) {
+      console.error("Failed to fetch latest articles", e);
+    } finally {
+      if (isRefresh) {
+        setRefreshingArticles(false);
+      } else {
         setLoadingArticles(false);
       }
-    };
+    }
+  };
+
+  useEffect(() => {
     fetchLatestArticles();
+  }, []);
+
+  const fetchLatestVideos = async (isRefresh = false) => {
+    if (isRefresh) {
+      setRefreshingVideos(true);
+    } else {
+      setLoadingVideos(true);
+    }
+    try {
+      const videos = await getPublishedVideos();
+      setLatestVideos(videos.slice(0, 3));
+    } catch (e) {
+      console.error("Failed to fetch latest videos", e);
+    } finally {
+      if (isRefresh) {
+        setRefreshingVideos(false);
+      } else {
+        setLoadingVideos(false);
+      }
+    }
+  };
+
+  useEffect(() => {
+    fetchLatestVideos();
   }, []);
 
   const handlePressArticle = (article) => {
     setSelectedArticle(article);
     setArticleModalVisible(true);
+  };
+
+  const handlePressVideo = (video: Video) => {
+    navigation.navigate(screenName.VideoPlayer, { video });
   };
 
   return (
@@ -668,7 +844,19 @@ const ClinicDashboard = () => {
                   <ActivityIndicator color="#bfa76a" style={{ marginVertical: 16 }} />
                 ) : (
                   <>
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ flexDirection: 'row', gap: 12 }}>
+                    <ScrollView 
+                      horizontal 
+                      showsHorizontalScrollIndicator={false} 
+                      contentContainerStyle={{ flexDirection: 'row', gap: 12 }}
+                      refreshControl={
+                        <RefreshControl
+                          refreshing={refreshingArticles}
+                          onRefresh={() => fetchLatestArticles(true)}
+                          colors={['#bfa76a']}
+                          tintColor="#bfa76a"
+                        />
+                      }
+                    >
                       {latestArticles.map((article) => (
                         <TouchableOpacity
                           key={article.id}
@@ -708,6 +896,50 @@ const ClinicDashboard = () => {
                       onPress={() => navigation.navigate('News')}
                     >
                       <Text style={stylesNew.seeAllButtonText}>{i18n.translate('seeAllArticles')}</Text>
+                    </TouchableOpacity>
+                  </>
+                )}
+              </View>
+              {/* Ultimele videoclipuri - Video Section */}
+              <View style={stylesNew.sectionContainer}>
+                <View style={stylesNew.sectionTitleContainer}>
+                  <Text style={stylesNew.sectionTitle}>{i18n.translate('latestVideos')}</Text>
+                  <View style={stylesNew.iconBackground}>
+                    <Ionicons name="play" size={20} color="#ffe6b0" />
+                  </View>
+                </View>
+                {loadingVideos ? (
+                  <ActivityIndicator color="#bfa76a" style={{ marginVertical: 16 }} />
+                ) : (
+                  <>
+                    <ScrollView
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      contentContainerStyle={{ flexDirection: 'row', gap: 12 }}
+                      refreshControl={
+                        <RefreshControl
+                          refreshing={refreshingVideos}
+                          onRefresh={() => fetchLatestVideos(true)}
+                          colors={['#bfa76a']}
+                          tintColor="#bfa76a"
+                        />
+                      }
+                    >
+                      {latestVideos.map((video) => (
+                        <LatestVideoCard
+                          key={video.id}
+                          video={video}
+                          onPress={() => handlePressVideo(video)}
+                        />
+                      ))}
+                    </ScrollView>
+                    <TouchableOpacity
+                      style={stylesNew.seeAllButton}
+                      onPress={() => navigation.navigate(screenName.VideoLibrary)}
+                    >
+                      <Text style={stylesNew.seeAllButtonText}>
+                        {i18n.translate('seeAllVideos')}
+                      </Text>
                     </TouchableOpacity>
                   </>
                 )}

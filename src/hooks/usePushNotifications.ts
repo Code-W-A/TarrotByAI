@@ -8,6 +8,8 @@ import { Alert, Linking, Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { RouteProp, useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { screenName } from "../utils/screenName";
+import { getVideoById } from "../features/video-library/services/videoLibrary.service";
 
 export interface PushNotificationState {
   expoPushToken?: Notifications.ExpoPushToken;
@@ -166,11 +168,12 @@ export const usePushNotifications = (): PushNotificationState => {
       });
 
     responseListener.current =
-      Notifications.addNotificationResponseReceivedListener((response) => {
+      Notifications.addNotificationResponseReceivedListener(async (response) => {
         const data = response.notification.request.content.data as {
           type: string;
-          nume: string;
-          descriere: string;
+          nume?: string;
+          descriere?: string;
+          videoId?: string;
         };
 
             // Dacă există update disponibil, deschidem link-ul către Google Play
@@ -194,15 +197,22 @@ export const usePushNotifications = (): PushNotificationState => {
           );
           navigation.navigate("Learn");
         }
+        if (data.type === "VideoPublished" && data.videoId) {
+          const video = await getVideoById(data.videoId);
+          if (video) {
+            navigation.navigate(screenName.VideoPlayer, { video });
+          }
+        }
       });
 
     // Check if the app was opened from a notification
-    Notifications.getLastNotificationResponseAsync().then((response) => {
+    Notifications.getLastNotificationResponseAsync().then(async (response) => {
       if (response) {
         const data = response.notification.request.content.data as {
           type: string;
-          nume: string;
-          descriere: string;
+          nume?: string;
+          descriere?: string;
+          videoId?: string;
         };
         if (data.info?.updateAvailable === true) {
           console.log("Update disponibil! Se redirecționează către Google Play Store...");
@@ -217,6 +227,12 @@ export const usePushNotifications = (): PushNotificationState => {
         }
         if (data.type === "NotificariHoroscop") {
           navigation.navigate("Learn");
+        }
+        if (data.type === "VideoPublished" && data.videoId) {
+          const video = await getVideoById(data.videoId);
+          if (video) {
+            navigation.navigate(screenName.VideoPlayer, { video });
+          }
         }
       }
     });

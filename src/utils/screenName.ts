@@ -108,4 +108,6 @@ export const screenName = {
   Notifications: "Set notifications",
   Feedback: "Feedback",
   ClinicFeedback: "ClinicFeedback",
+  VideoLibrary: "VideoLibrary",
+  VideoPlayer: "VideoPlayer",
 };

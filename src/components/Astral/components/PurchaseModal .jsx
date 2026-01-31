@@ -11,16 +11,21 @@ import {
 } from "react-native";
 import PhoneInput from "react-native-international-phone-number";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../../../../firebase";
 import { Button } from "../../../components/commonButton";
 import { colors } from "../../../utils/colors";
 import { useTranslation } from "../../../utils/translateUtil";
 import { useLanguage } from "../../../context/LanguageContext";
 
+const COUPON_COLLECTION = "coupons";
+const COUPON_DOC_ID = "singleton";
 
 const PurchaseModal = ({
   visible,
   onDismiss,
   onConfirm,
+  baseAmountBani,
   email,
   setEmail,
   phone,
@@ -39,6 +44,12 @@ const PurchaseModal = ({
   setPostalCode,
   country,
   setCountry,
+  couponCode,
+  setCouponCode,
+  couponPercent,
+  setCouponPercent,
+  couponAllowed,
+  setCouponAllowed,
 }) => {
   const [emailError, setEmailError] = useState(false);
   const [phoneError, setPhoneError] = useState(false);
@@ -54,6 +65,94 @@ const PurchaseModal = ({
   const [selectedCountry, setSelectedCountry] = useState(null);
 
   const { language } = useLanguage();
+
+  const [couponInput, setCouponInput] = useState(couponCode || "");
+  const [couponStatus, setCouponStatus] = useState(""); // message to display
+  const [couponLoading, setCouponLoading] = useState(false);
+
+  const baseBani =
+    typeof baseAmountBani === "number" && Number.isFinite(baseAmountBani)
+      ? baseAmountBani
+      : null;
+  // Amounts are in minor units (cents) and currency is EUR.
+  const baseEurText = baseBani !== null ? (baseBani / 100).toFixed(2) : null;
+  const appliedPct = couponAllowed ? Number(couponPercent) : 0;
+  const computedFinalBani =
+    baseBani !== null && Number.isFinite(appliedPct) && appliedPct > 0
+      ? Math.max(1, Math.round((baseBani * (100 - appliedPct)) / 100))
+      : baseBani;
+  const finalEurText =
+    computedFinalBani !== null ? (computedFinalBani / 100).toFixed(2) : null;
+  const stripeMinEur = 0.5;
+  const isBelowStripeMin =
+    finalEurText !== null ? Number(finalEurText) < stripeMinEur : false;
+
+  const normalizeCoupon = (s) => String(s || "").trim().toUpperCase();
+
+  const applyCoupon = async () => {
+    try {
+      setCouponLoading(true);
+      setCouponStatus("");
+      const entered = normalizeCoupon(couponInput);
+      if (!entered) {
+        setCouponStatus("Introdu un cod de cupon.");
+        return;
+      }
+
+      console.log("[COUPON] fetching coupon doc", `${COUPON_COLLECTION}/${COUPON_DOC_ID}`);
+      const ref = doc(db, COUPON_COLLECTION, COUPON_DOC_ID);
+      const snap = await getDoc(ref);
+      if (!snap.exists()) {
+        setCouponStatus("Cupon indisponibil momentan.");
+        setCouponAllowed(false);
+        setCouponPercent(0);
+        setCouponCode("");
+        return;
+      }
+
+      const data = snap.data() || {};
+      const allowed = data.isCuponUsed === true; // as specified: true => can be used
+      const storedCode = normalizeCoupon(data.cuponCode);
+      const percent = Number(data.discountPercent);
+
+      console.log("[COUPON] doc", { allowed, storedCode, percent });
+
+      if (!allowed) {
+        setCouponStatus("Cupon dezactivat.");
+        setCouponAllowed(false);
+        setCouponPercent(0);
+        setCouponCode("");
+        return;
+      }
+      if (!storedCode || entered !== storedCode) {
+        setCouponStatus("Cod cupon invalid.");
+        setCouponAllowed(false);
+        setCouponPercent(0);
+        setCouponCode("");
+        return;
+      }
+      if (!Number.isFinite(percent) || percent <= 0 || percent >= 100) {
+        setCouponStatus("Cupon invalid (procent).");
+        setCouponAllowed(false);
+        setCouponPercent(0);
+        setCouponCode("");
+        return;
+      }
+
+      setCouponAllowed(true);
+      setCouponPercent(percent);
+      setCouponCode(entered);
+      setCouponStatus(`Cupon aplicat: -${percent}%`);
+    } catch (e) {
+      console.error("[COUPON] applyCoupon error", e);
+      setCouponStatus("Eroare la verificarea cuponului.");
+      setCouponAllowed(false);
+      setCouponPercent(0);
+      setCouponCode("");
+    } finally {
+      setCouponLoading(false);
+    }
+  };
 
   // Funcție de validare simplă
   const validateFields = () => {
@@ -80,7 +179,7 @@ const PurchaseModal = ({
       setPhoneError(false);
     }
 
-    if (!line1 || !city || !stateCounty || !country) {
+    if (!line1 || !city || !stateCounty || !postalCode || !country) {
       setAddressError(true);
       valid = false;
     } else {
@@ -112,6 +211,11 @@ const PurchaseModal = ({
           state: stateCounty,
           postalCode,
           country,
+          coupon: {
+            code: couponCode || "",
+            percent: couponPercent || 0,
+            allowed: Boolean(couponAllowed),
+          },
         };
 
         // Salvăm local, dacă dorim
@@ -189,10 +293,19 @@ const PurchaseModal = ({
       visible={visible}
       animationType="slide"
       onRequestClose={onDismiss}
+      statusBarTranslucent
+      presentationStyle="overFullScreen"
     >
       <View style={styles.overlay}>
-        {/* ScrollView ca să permită derularea dacă e prea mult conținut */}
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
+        {/* Wrapper cu înălțime limitată ca să permită scroll-ul în interiorul modalului */}
+        <View style={styles.modalWrapperCustom}>
+          <ScrollView
+            style={styles.modalScrollCustom}
+            contentContainerStyle={styles.modalScrollContentCustom}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            nestedScrollEnabled
+          >
           <View style={styles.modalContainerCustom}>
             <Text style={styles.modalTitleCustom}>{completeazaInfoText}:</Text>
 
@@ -278,8 +391,8 @@ const PurchaseModal = ({
                 setAddressError(false);
               }}
             />
-            {/* <TextInput
-              style={[styles.input, addressError && styles.errorInput]}
+            <TextInput
+              style={[styles.inputCustom, addressError && styles.errorInputCustom]}
               placeholder="Cod Poștal"
               keyboardType="numbers-and-punctuation"
               value={postalCode}
@@ -287,7 +400,7 @@ const PurchaseModal = ({
                 setPostalCode(text);
                 setAddressError(false);
               }}
-            /> */}
+            />
             <TextInput
               style={[styles.inputCustom, addressError && styles.errorInputCustom]}
               placeholder="Țară"
@@ -300,6 +413,45 @@ const PurchaseModal = ({
             {addressError && (
               <Text style={styles.errorTextCustom}>{completeazaInfoText6}</Text>
             )}
+
+            <TextInput
+              style={styles.inputCustom}
+              placeholder="Cupon reducere"
+              value={couponInput}
+              onChangeText={(text) => setCouponInput(text)}
+              autoCapitalize="characters"
+            />
+            
+            <View style={{ flexDirection: "row", gap: 10, marginBottom: 10 }}>
+              <Button
+                disabled={couponLoading}
+                funCallback={applyCoupon}
+                label={couponLoading ? "Verific..." : "Aplică cupon"}
+                success={true}
+                bgColor={colors.primary3}
+                borderColor={colors.primary3}
+                borderWidth={0.2}
+                txtColor={colors.white}
+              />
+            </View>
+            {couponStatus ? <Text style={styles.termsContentCustom}>{couponStatus}</Text> : null}
+            {baseEurText ? (
+              <View style={{ marginTop: 6 }}>
+                <Text style={styles.priceTextCustom}>Preț: {baseEurText} €</Text>
+                {couponAllowed && appliedPct > 0 && finalEurText ? (
+                  <>
+                    <Text style={styles.priceTextCustom}>
+                      Preț final: {finalEurText} € (după -{appliedPct}%)
+                    </Text>
+                    {isBelowStripeMin ? (
+                      <Text style={styles.priceWarnTextCustom}>
+                        Atenție: Stripe are sumă minimă ~{stripeMinEur.toFixed(2)} €. Alege un cupon mai mic.
+                      </Text>
+                    ) : null}
+                  </>
+                ) : null}
+              </View>
+            ) : null}
 
             <View style={styles.checkboxContainerCustom}>
               <TouchableOpacity 
@@ -351,6 +503,7 @@ const PurchaseModal = ({
             </View>
           </View>
         </ScrollView>
+        </View>
 
         <Modal
           transparent
@@ -400,12 +553,22 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.7)",
-  },
-  scrollContainer: {
-    flexGrow: 1,
     justifyContent: "center",
+    paddingVertical: 24,
+  },
+  modalWrapperCustom: {
+    width: "100%",
     alignItems: "center",
-    padding: 24,
+    justifyContent: "center",
+    paddingHorizontal: 24,
+    maxHeight: "92%",
+  },
+  modalScrollCustom: {
+    width: "100%",
+  },
+  modalScrollContentCustom: {
+    paddingBottom: 18,
+    alignItems: "center",
   },
   modalContainerCustom: {
     backgroundColor: '#FAF7F2',
@@ -505,6 +668,18 @@ const styles = StyleSheet.create({
     color: '#131523',
     fontFamily: 'Lora',
     textAlign: 'left',
+  },
+  priceTextCustom: {
+    fontSize: 14,
+    color: "#131523",
+    fontFamily: "Lora",
+    marginBottom: 4,
+  },
+  priceWarnTextCustom: {
+    fontSize: 13,
+    color: "#d9534f",
+    fontFamily: "Lora",
+    marginTop: 2,
   },
   btnMargin: {
     marginBottom: 10,

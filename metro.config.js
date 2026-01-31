@@ -14,6 +14,9 @@ defaultConfig.resolver.sourceExts = additionalExts.concat(defaultSourceExts);
 // Adăugați orice alte extensii de asset-uri necesare
 defaultConfig.resolver.assetExts.push("cjs");
 
+// Enable package.json "exports" field resolution (needed for ESM-only packages like make-plural)
+defaultConfig.resolver.unstable_enablePackageExports = true;
+
 
 
 module.exports = defaultConfig;

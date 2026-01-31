@@ -20,7 +20,10 @@ import { colors } from "../../utils/colors";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { WebView } from "react-native-webview";
 import { Video } from "expo-av";
-import { getYoutubeEmbedUrl } from "../../utils/youtubeLinkUtils";
+import {
+  getYoutubeEmbedUrl,
+  handleYotubeLinksToArray,
+} from "../../utils/youtubeLinkUtils";
 import { useLanguage } from "../../context/LanguageContext";
 
 export const NewsDetailsModal: React.FC<{
@@ -34,6 +37,7 @@ export const NewsDetailsModal: React.FC<{
   const color = "#000";
   const contentColor = useColorScheme() === "dark" ? "#bbb" : "#444";
   const readMoreBgColor = useColorScheme() === "dark" ? "#222" : "#ddd";
+  const BASE_URL = "https://cristinazurba.com/";
   const [isSaved, setIsSaved] = useState(false);
   const [webViewReady, setWebViewReady] = useState(false);
   const [headerHeight, setHeaderHeight] = useState(0);
@@ -122,15 +126,23 @@ export const NewsDetailsModal: React.FC<{
   console.log("🎥 YOUTUBE DEBUG START");
   console.log("🎥 =========================");
   console.log("🎥 Raw article object:", article);
+  const normalizedYoutubeLinks = Array.isArray(article?.youtubeLinks)
+    ? article.youtubeLinks
+    : handleYotubeLinksToArray(article?.youtubeLinks);
+
   console.log("🎥 article?.youtubeLinks:", article?.youtubeLinks);
   console.log("🎥 typeof youtubeLinks:", typeof article?.youtubeLinks);
-  console.log("🎥 Array.isArray(youtubeLinks):", Array.isArray(article?.youtubeLinks));
+  console.log(
+    "🎥 Array.isArray(youtubeLinks):",
+    Array.isArray(article?.youtubeLinks)
+  );
   console.log("🎥 youtubeLinks length:", article?.youtubeLinks?.length);
+  console.log("🎥 normalizedYoutubeLinks length:", normalizedYoutubeLinks.length);
   
   // Test each link individually
-  if (article?.youtubeLinks) {
+  if (normalizedYoutubeLinks.length > 0) {
     console.log("🎥 Processing each YouTube link:");
-    article.youtubeLinks.forEach((link, index) => {
+    normalizedYoutubeLinks.forEach((link, index) => {
       console.log(`🎯 Link ${index}:`, link);
       console.log(`🎯 Link ${index} type:`, typeof link);
       console.log(`🎯 Link ${index} length:`, link?.length);
@@ -138,9 +150,10 @@ export const NewsDetailsModal: React.FC<{
     });
   }
 
-  const youtubeEmbedHTML = article?.youtubeLinks && Array.isArray(article.youtubeLinks)
-    ? article.youtubeLinks
-        .filter(link => {
+  const youtubeEmbedHTML =
+    normalizedYoutubeLinks.length > 0
+      ? normalizedYoutubeLinks
+          .filter((link) => {
           const isValid = link && link.trim() !== "";
           console.log(`🔍 Link validation: "${link}" -> ${isValid}`);
           return isValid;
@@ -161,17 +174,25 @@ export const NewsDetailsModal: React.FC<{
             console.log(`🔗 Embed URL parts:`, embedUrl.split('/'));
             console.log(`🔗 Contains youtube.com:`, embedUrl.includes('youtube.com'));
             console.log(`🔗 Contains embed:`, embedUrl.includes('embed'));
+          } else {
+            console.log("❌ Skipping iframe, embed URL invalid");
+            return "";
           }
+
+          const embedSrc = `${embedUrl}?playsinline=1&origin=${encodeURIComponent(
+            BASE_URL
+          )}`;
           
                      const iframeHTML = `
              <div style="margin: 25px 0; text-align: center;">
                <iframe 
                  width="100%" 
                  height="250" 
-                 src="${embedUrl}" 
+                 src="${embedSrc}" 
                  frameborder="0" 
                  allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share" 
                  allowfullscreen
+                 referrerpolicy="strict-origin-when-cross-origin"
                  loading="lazy"
                  style="border-radius: 12px; max-width: 100%; border: 1px solid #ddd;"
                  title="YouTube video"
@@ -182,6 +203,7 @@ export const NewsDetailsModal: React.FC<{
           console.log(`🎬 Generated iframe HTML length:`, iframeHTML.length);
           return iframeHTML;
         })
+          .filter((html) => html)
         .join("")
     : "";
   
@@ -219,6 +241,7 @@ export const NewsDetailsModal: React.FC<{
   <html>
   <head>
       <meta charset="UTF-8">
+      <meta name="referrer" content="strict-origin-when-cross-origin" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       ${customCSS}
   </head>
@@ -417,7 +440,7 @@ export const NewsDetailsModal: React.FC<{
           }}>
             <WebView 
               originWhitelist={["*"]} 
-              source={{ html: fullHTMLContent }} 
+              source={{ html: fullHTMLContent, baseUrl: BASE_URL }} 
               style={{ 
                 backgroundColor: 'transparent',
                 height: Dimensions.get('window').height - 350,

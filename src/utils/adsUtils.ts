@@ -51,9 +51,9 @@ export const initializeAds = async (hasTrackingPermission: boolean): Promise<Ads
       console.log('Android: Initializing ads');
     }
     
-    // Pre-load doar interstitial ad (momentan nu avem banner/rewarded)
+    // Pre-load interstitial + rewarded
     loadInterstitialAd();
-    // loadRewardedAd(); // Când vei avea rewarded ads, decomentează
+    loadRewardedAd();
     
     console.log('Ads initialized successfully:', config);
   } catch (error) {
@@ -91,31 +91,32 @@ const loadInterstitialAd = () => {
   interstitialAd.load();
 };
 
-// MOMENTAN NU FOLOSIM REWARDED ADS - funcția e comentată
-// const loadRewardedAd = () => {
-//   const adUnitId = __DEV__ 
-//     ? TestIds.REWARDED 
-//     : Platform.OS === 'android' 
-//       ? AD_UNIT_IDS.android.rewarded 
-//       : AD_UNIT_IDS.ios.rewarded;
+const loadRewardedAd = () => {
+  const adUnitId = __DEV__
+    ? TestIds.REWARDED
+    : Platform.OS === 'android'
+      ? AD_UNIT_IDS.android.rewarded
+      : AD_UNIT_IDS.ios.rewarded;
 
-//   rewardedAd = RewardedAd.createForAdRequest(adUnitId);
-  
-//   rewardedAd.addAdEventListener(AdEventType.LOADED, () => {
-//     console.log('Rewarded ad loaded');
-//   });
-  
-//   rewardedAd.addAdEventListener(AdEventType.ERROR, (error) => {
-//     console.error('Rewarded ad error:', error);
-//   });
-  
-//   rewardedAd.addAdEventListener(AdEventType.CLOSED, () => {
-//     console.log('Rewarded ad closed, reloading...');
-//     loadRewardedAd(); // Reload for next use
-//   });
-  
-//   rewardedAd.load();
-// };
+  console.log('🎁 Loading rewarded ad with ID:', adUnitId);
+
+  rewardedAd = RewardedAd.createForAdRequest(adUnitId);
+
+  rewardedAd.addAdEventListener(AdEventType.LOADED, () => {
+    console.log('✅ Rewarded ad loaded and ready to show!');
+  });
+
+  rewardedAd.addAdEventListener(AdEventType.ERROR, (error) => {
+    console.error('❌ Rewarded ad error:', error);
+  });
+
+  rewardedAd.addAdEventListener(AdEventType.CLOSED, () => {
+    console.log('🔄 Rewarded ad closed, reloading for next use...');
+    loadRewardedAd();
+  });
+
+  rewardedAd.load();
+};
 
 export const showInterstitialAd = async (): Promise<boolean> => {
   try {
@@ -135,18 +136,56 @@ export const showInterstitialAd = async (): Promise<boolean> => {
 };
 
 export const showRewardedAd = async (): Promise<boolean> => {
-  try {
-    if (rewardedAd?.loaded) {
-      await rewardedAd.show();
-      return true;
-    } else {
-      console.log('Rewarded ad not loaded yet');
-      return false;
-    }
-  } catch (error) {
-    console.error('Error showing rewarded ad:', error);
+  if (!rewardedAd?.loaded) {
+    console.log('⏳ Rewarded ad not loaded yet, skipping...');
     return false;
   }
+
+  return await new Promise<boolean>(async (resolve) => {
+    let earned = false;
+    let resolved = false;
+
+    const safeResolve = (value: boolean) => {
+      if (resolved) return;
+      resolved = true;
+      resolve(value);
+    };
+
+    const unsubEarned = rewardedAd!.addAdEventListener(
+      AdEventType.EARNED_REWARD,
+      () => {
+        earned = true;
+      }
+    );
+
+    const unsubClosed = rewardedAd!.addAdEventListener(AdEventType.CLOSED, () => {
+      unsubEarned();
+      unsubClosed();
+      unsubError();
+      safeResolve(earned);
+    });
+
+    const unsubError = rewardedAd!.addAdEventListener(
+      AdEventType.ERROR,
+      (error) => {
+        console.error('❌ Rewarded ad show error:', error);
+        unsubEarned();
+        unsubClosed();
+        unsubError();
+        safeResolve(false);
+      }
+    );
+
+    try {
+      await rewardedAd!.show();
+    } catch (error) {
+      console.error('❌ Error showing rewarded ad:', error);
+      unsubEarned();
+      unsubClosed();
+      unsubError();
+      safeResolve(false);
+    }
+  });
 };
 
 export const showBannerAd = (adUnitId?: string) => {

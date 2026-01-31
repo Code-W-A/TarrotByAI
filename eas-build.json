@@ -1,0 +1,53 @@
+{
+  "id": "d6b0ee9e-7381-416f-bb96-e8db6892430e",
+  "status": "ERRORED",
+  "platform": "IOS",
+  "error": {
+    "errorCode": "XCODE_BUILD_ERROR",
+    "message": "The \"Run fastlane\" step failed because of an error in the Xcode build process. We automatically detected following errors in your Xcode build logs:\n- switch must be exhaustive\nRefer to \"Xcode Logs\" below for additional, more detailed logs."
+  },
+  "artifacts": {
+    "xcodeBuildLogsUrl": "https://job-logs.eascdn.net/production-xcode-logs/d6b0ee9e-7381-416f-bb96-e8db6892430e?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=www-production%40exponentjs.iam.gserviceaccount.com%2F20260121%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20260121T102654Z&X-Goog-Expires=900&X-Goog-SignedHeaders=host&X-Goog-Signature=5db7f89a46038c074e55611bf4eac2b88bbc4a0464438970ca01595ad3be3ddf246dec5c98f7bdd7547f27e83c4052ec7a94074626bc0277cc4882632c78bd352342157c0349141d72049231f0d4f0a9a3ac5a29a94dbf9733ce2e115de86a108b5d7576fed68b11c2c1f91842f74f989106274ed0e938f0b9c051b3af76da72268d65dcbddbbf9b2a800c0888fdd4c7a36a6e2f11e25158ba5b723d1b0912fa870a86096a8718d30c5a52b8b9a36e9fb06f934ee0558bebea9c4a19c213da5bc2debf642f8bf6cd9f5ea4bb1cf13c899311453f361e5bee71ca2864394cfdb634a1760bc26ec50870e1a90c2de55cab70d2a79a24cfda28cb6d44de5b074dc3"
+  },
+  "fingerprint": {
+    "id": "019bc825-80c0-704b-b5e4-a3bee7560e51",
+    "hash": "c799cc8be3fde907111914406b1b654053c4fe53"
+  },
+  "initiatingActor": {
+    "id": "2cc463fe-54a2-4af7-86ca-aa3032975b19",
+    "displayName": "mobitoolsro"
+  },
+  "logFiles": [
+    "https://job-logs.eascdn.net/production/d6b0ee9e-7381-416f-bb96-e8db6892430e/1768589459863-91e874fc-6ba0-476a-896a-ab93ff0d8f14.txt?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=www-production%40exponentjs.iam.gserviceaccount.com%2F20260121%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20260121T102654Z&X-Goog-Expires=900&X-Goog-SignedHeaders=host&X-Goog-Signature=8ce312956164ea7e68f1b638a3d4491b0952af05aaa0ce3ef2598bab69f8dd147777739aa17a9d6d1f52644660388ca7dcc66a79f2829f29f5089797b9d9473e667a7d7eedd9ea47970925e79beadb6297b7706d5e2b0a2bddd29e375556f54725ee4ad2dc3a4a8404c42c565ec63e3d8c28a5a31bc111961f1b057d3873d5a6b27726650e321024d46765539d5bac21209194da64a957ba2d99d108145961507a48db8957dc0716b65febc616d34ea139bb06b714070739906a083d22efd24d0b9dd371af784b55271bf0d72536480e7b5f78d04baa06e4dbb22b98f2624f95af0cc9d0bbb4007d3d92c094f0d341957853ac2912882735bc35aa61fdbe5922",
+    "https://job-logs.eascdn.net/production/d6b0ee9e-7381-416f-bb96-e8db6892430e/1768589491187-d6dabc79-78a5-464b-82c5-caa6a0de5cf9.txt?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=www-production%40exponentjs.iam.gserviceaccount.com%2F20260121%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20260121T102654Z&X-Goog-Expires=900&X-Goog-SignedHeaders=host&X-Goog-Signature=b224a9478d27290ed6c82035c73b01d1823d4dd0d083002fa6ce4a8022d3d2e4832b53e4413daad209426c765fe117e7ada9d5e5c288523616a0770d68dbcc0366de6d84ea677e732d225df5ee8cf81cd2e1ccaa4de96ea4dbafbb87141455facb3533392d742b165ead656fb250a64bb50990e133e06fa88db60799cfde6becfa86b29e94542b8d8dc70665f9474b324ed506bbd338734dc218b96e36a048620029ce7cbac1e9269e425f4c875ce527fe9b06cb41c40c75cd53cf109c792859feeca8c33189e70cb8fa51945a58d6230b03fb64ad83501efc83a0055a0ac6fdecf60adf95b1c1ab5770799efdf04071624d99840975b6a65f3b2057ed0deb6b",
+    "https://job-logs.eascdn.net/production/d6b0ee9e-7381-416f-bb96-e8db6892430e/1768589491491-081d4491-861b-4a97-a0ae-60dc45146565.txt?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=www-production%40exponentjs.iam.gserviceaccount.com%2F20260121%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20260121T102654Z&X-Goog-Expires=900&X-Goog-SignedHeaders=host&X-Goog-Signature=5125e630a23eb79ef11d65cbbcf1ed6f25c4f6ad00134741343f0f7979d79d4bca8c512838778bd1f783f2540e15bda9b8854bc93926acd571c7b89c76ef5ff21df3636ac33ada1ec335f45f0027717a2dc669dfa6c9ffe8be0a7f2af53274aa459e6bdf0c9ce45bc86994b4cc1048fd1bf72a72d6de447a50734ca486705623091ce6cff3ce0d63cc6985d9d9edd3c2cb6e9a40c5200c231333cf310fbbd37659876d0e15530ac8ac99bbc8b7600c37e61931572330561146cf7636ef843a87cb4d02ca7a87b8006556e73a98d3fadf407582c7ad491e583fda35284fea11fb6aa2217091f6a66afc42713af8822e7cae4a2ed5bf15978036567ad924652aa0",
+    "https://job-logs.eascdn.net/production/d6b0ee9e-7381-416f-bb96-e8db6892430e/1768589491677-a7e39c3c-f386-4fff-a269-6cd0c2f56771.txt?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=www-production%40exponentjs.iam.gserviceaccount.com%2F20260121%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20260121T102654Z&X-Goog-Expires=900&X-Goog-SignedHeaders=host&X-Goog-Signature=a644ce0f3c876f10e09502776cb8461b53befd49eea17615e9c75399dd9e10ac317e2245b4c4dee9de25ca23de7584f62e5f4ef6a562631aafe9ded5d9a06201118a25efee07fd56e9429dfd8837aac79c27e4c821b232bace129a76c52b44bfb1b7fdbc85b4d30e61fe7dba9b01d314fb4d05819103f47bb48348b5ffc0b01e60ab000ded5c251ee8030bbf258d7d34d680f8d8e12036dbfe01bf66f4fad42a0ecf2e5dc978a9d9aa7a30b89ef1a7714a6ff5be05b48721fd2450313f16ddc7f8a514c0f46ceacdc43ea07d56c263c5230b094ea2ead4943d507b21b39aaae2ac78d97260b2c6fbbc0dfb9deb095c2fdfdf26ed82fb668b482267157cbbd75a"
+  ],
+  "project": {
+    "id": "8a1a3d1c-744e-4f1a-86eb-04ed3a15a020",
+    "name": "TarotByAi",
+    "slug": "TarotByAi",
+    "ownerAccount": {
+      "id": "983ba1e2-1f35-48ab-a22a-e189faa7e1f8",
+      "name": "mobitoolsro"
+    }
+  },
+  "distribution": "STORE",
+  "buildProfile": "production",
+  "sdkVersion": "52.0.0",
+  "appVersion": "2.1.3",
+  "appBuildVersion": "56",
+  "gitCommitHash": "ba0a8c8ba839b092cb1e02382aa5bacc029bc57e",
+  "gitCommitMessage": "before upgrade expo",
+  "priority": "NORMAL_PLUS",
+  "createdAt": "2026-01-16T18:50:59.564Z",
+  "updatedAt": "2026-01-16T19:00:05.032Z",
+  "completedAt": "2026-01-16T19:00:00.137Z",
+  "expirationDate": "2026-02-15T18:50:59.638Z",
+  "isForIosSimulator": false,
+  "metrics": {
+    "buildWaitTime": 182,
+    "buildQueueTime": 80320,
+    "buildDuration": 455903
+  }
+}

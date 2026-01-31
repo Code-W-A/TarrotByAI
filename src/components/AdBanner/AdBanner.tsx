@@ -14,12 +14,6 @@ export const AdBanner: React.FC<AdBannerProps> = ({
   style,
   adsConfig
 }) => {
-  // MOMENTAN NU AVEM BANNER ADS - returnăm null
-  // Când vei avea banner ads, doar comentează linia de mai jos și decomentează codul
-  return null;
-  
-  /*
-  // DECOMENTEAZĂ CÂND AI BANNER ADS:
   const { getBannerAdUnitId, canShowAds } = useAds(adsConfig);
   
   if (!canShowAds) {
@@ -43,7 +37,6 @@ export const AdBanner: React.FC<AdBannerProps> = ({
       />
     </View>
   );
-  */
 };
 
 const styles = StyleSheet.create({
