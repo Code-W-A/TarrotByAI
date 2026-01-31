@@ -1,3 +1,4 @@
+import { logDebug } from "../../utils/Logger";
 import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
@@ -24,7 +25,6 @@ import {
   orderBy,
   startAfter,
   limit,
-  getDocs,
   where,
 } from "firebase/firestore";
 import styles from "./styles";
@@ -39,6 +39,7 @@ import {
   updateArticleWithTimestamp,
 } from "../../utils/firestoreUtils";
 import { filterArticlesBeforeCurrentTime } from "../../utils/commonUtils";
+import { getDocsPreferCache } from "../../utils/firestoreCache";
 
 // ADS COMPLETELY REMOVED FOR DEBUGGING
 
@@ -58,7 +59,7 @@ const News = () => {
   // const [interstitialLoaded, setInterstitialLoaded] = useState(false); // REMOVED ADS
 
   const fetchArticles = async (refresh = false) => {
-    console.log("Start fetch...");
+    logDebug("Start fetch...");
     setIsLoading(true);
     let articlesRef = collection(db, "BlogArticole");
     let q = query(
@@ -76,7 +77,7 @@ const News = () => {
       );
     }
 
-    const documentSnapshots = await getDocs(q);
+    const documentSnapshots = await getDocsPreferCache(q);
     let moreArticles = documentSnapshots.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
@@ -89,17 +90,17 @@ const News = () => {
   };
 
   // const handleQueryData = async () => {
-  //   console.log("query....");
+  //   logDebug("query....");
   //   let dataArt = await handleQueryFirestoreGeneral(
   //     "BlogArticole",
   //     "categorie",
   //     selectedCategory
   //   );
-  //   console.log("articles data...query...", dataArt[0]);
-  //   console.log("query....2");
+  //   logDebug("articles data...query...", dataArt[0]);
+  //   logDebug("query....2");
 
   //   let articlesData = filterArticlesBeforeCurrentTime(dataArt);
-  //   console.log("Articole...aici...", articlesData[0].firstUploadDate);
+  //   logDebug("Articole...aici...", articlesData[0].firstUploadDate);
 
   //   let articles = {};
   //   if (articlesData.length > 0) {
@@ -124,7 +125,7 @@ const News = () => {
 
   //     // Returnarea datelor către componenta Next.js
   //     articles = articlesData;
-  //     console.log("Articole...aici...", articles[0].firstUploadDate);
+  //     logDebug("Articole...aici...", articles[0].firstUploadDate);
   //   } else {
   //     articles = articlesData;
   //   }
@@ -132,7 +133,7 @@ const News = () => {
   // };
 
   const handleQueryData = async () => {
-    console.log("Start query...");
+    logDebug("Start query...");
 
     let articlesRef = collection(db, "BlogArticole");
 
@@ -145,7 +146,7 @@ const News = () => {
 
     try {
       setIsLoading(true);
-      const documentSnapshots = await getDocs(q);
+      const documentSnapshots = await getDocsPreferCache(q);
 
       // Convertim documentele într-un array de obiecte
       let articlesData = documentSnapshots.docs.map((doc) => ({
@@ -153,12 +154,12 @@ const News = () => {
         ...doc.data(),
       }));
 
-      console.log("Raw articles data:", articlesData);
+      logDebug("Raw articles data:", articlesData);
 
       // Aplicăm filtrul pentru a elimina articolele cu timestamp în viitor
       articlesData = filterArticlesBeforeCurrentTime(articlesData);
 
-      console.log("Filered articles:", articlesData);
+      logDebug("Filered articles:", articlesData);
 
       let articles = {};
       if (articlesData.length > 0) {
@@ -167,9 +168,9 @@ const News = () => {
         const latestFiveArticles = articlesData.slice(0, 5);
         const lastArticle = articlesData[0]; // Cel mai recent articol
 
-        console.log("Cele mai noi 2 articole:", latestArticles);
-        console.log("Cele mai noi 5 articole:", latestFiveArticles);
-        console.log("Cel mai recent articol:", lastArticle);
+        logDebug("Cele mai noi 2 articole:", latestArticles);
+        logDebug("Cele mai noi 5 articole:", latestFiveArticles);
+        logDebug("Cel mai recent articol:", lastArticle);
 
         articles = articlesData;
       } else {
@@ -186,7 +187,7 @@ const News = () => {
 
   useEffect(() => {
     // function to query firestore by category
-    console.log("filter by category", selectedCategory);
+    logDebug("filter by category", selectedCategory);
     if (selectedCategory === "All") {
       fetchArticles(true);
     } else {
@@ -225,8 +226,13 @@ const News = () => {
 
     let articles = []; // Inițializează un array gol pentru rezultatele căutării
 
-    // Obține toate documentele din colecția BlogArticole
-    const querySnapshot = await getDocs(collection(db, "BlogArticole"));
+    // Avoid scanning entire collection (expensive). Limit to recent articles.
+    const q = query(
+      collection(db, "BlogArticole"),
+      orderBy("firstUploadTimestamp", "desc"),
+      limit(200)
+    );
+    const querySnapshot = await getDocsPreferCache(q);
 
     querySnapshot.forEach((doc) => {
       const data = doc.data();
@@ -255,7 +261,7 @@ const News = () => {
     });
     // Aplică filtrul pentru programare (nu afișa cele din viitor)
     const filtered = filterArticlesBeforeCurrentTime(articles);
-    console.log("Articles after schedule filter:", filtered.length);
+    logDebug("Articles after schedule filter:", filtered.length);
     setArticles(filtered);
     setIsLoading(false);
   };
@@ -276,11 +282,11 @@ const News = () => {
       if (existingIndex !== -1) {
         // Dacă articolul există deja, îl ștergem
         savedArticles.splice(existingIndex, 1);
-        console.log("Article removed successfully");
+        logDebug("Article removed successfully");
       } else {
         // Dacă articolul nu există, îl adăugăm
         savedArticles.push(article);
-        console.log("Article added successfully");
+        logDebug("Article added successfully");
       }
 
       // Salvează lista actualizată înapoi în AsyncStorage
@@ -352,7 +358,7 @@ const News = () => {
           onEndReached={() =>
             selectedCategory === "All" && searchText.length === 0
               ? fetchArticles(false)
-              : console.log("with category or search text length > 0")
+              : logDebug("with category or search text length > 0")
           }
           onEndReachedThreshold={0.5}
           contentContainerStyle={{

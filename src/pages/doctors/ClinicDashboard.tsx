@@ -1,3 +1,4 @@
+import { logDebug } from "../../utils/Logger";
 import React, {
   Fragment,
   useCallback,
@@ -83,6 +84,7 @@ import { getPublishedVideos } from "../../features/video-library/services/videoL
 import type { Video } from "../../features/video-library/types/video";
 import { WebView } from "react-native-webview";
 import { getEmbedUrl } from "../../features/video-library/utils/videoEmbed";
+import { getDocsPreferCache } from "../../utils/firestoreCache";
 
 // ADS COMPLETELY REMOVED FOR DEBUGGING
 // const adUnitId = __DEV__
@@ -367,7 +369,7 @@ const ClinicDashboard = () => {
   useEffect(() => {
     const handleUploadToken = async () => {
       if (expoPushToken) {
-        console.log("Expo Push Token.........: ", expoPushToken.data);
+        logDebug("Expo Push Token.........: ", expoPushToken.data);
 
         const timestamp = Date.now().toString(36);
         const randomPart = Math.random().toString(36).substring(2, 8);
@@ -467,9 +469,9 @@ const ClinicDashboard = () => {
   ];
 
   useEffect(() => {
-    console.log("asdsa");
-    console.log(zilnicCitateMotivationale);
-    // console.log("asdsa");
+    logDebug("asdsa");
+    logDebug(zilnicCitateMotivationale);
+    // logDebug("asdsa");
     const screenWidth = Dimensions.get("window").width;
 
     // Inițializarea animațiilor doar dacă nu au fost setate anterior
@@ -551,7 +553,7 @@ const ClinicDashboard = () => {
   //   useCallback(() => {
   //     const manageVisibility = async () => {
   //       const userRating = await AsyncStorage.getItem("userRating");
-  //       console.log("useRating...", userRating);
+  //       logDebug("useRating...", userRating);
   //       const entryCount = parseInt(
   //         (await AsyncStorage.getItem("entryCount")) || "0",
   //         10
@@ -560,10 +562,10 @@ const ClinicDashboard = () => {
 
   //       // if ((entryCount + 1) % 5 === 0 && userRating === null) {
   //       if ((entryCount + 1) % 5 === 0) {
-  //         console.log("true....");
+  //         logDebug("true....");
   //         setVisible(true);
   //       } else {
-  //         console.log("false....");
+  //         logDebug("false....");
   //         setVisible(false);
   //       }
   //     };
@@ -627,7 +629,7 @@ const ClinicDashboard = () => {
     try {
       const articlesRef = collection(db, "BlogArticole");
       const q = query(articlesRef, orderBy("firstUploadTimestamp", "desc"), limit(3));
-      const snapshot = await getDocs(q);
+      const snapshot = await getDocsPreferCache(q);
       const articles = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       const filtered = filterArticlesBeforeCurrentTime(articles);
       setLatestArticles(filtered);
@@ -769,11 +771,11 @@ const ClinicDashboard = () => {
                       key={category.key}
                       style={stylesNew.categoryCard}
                       onPress={async () => {
-                        console.log('🎯 ClinicDashboard Category apăsat:', category.key);
+                        logDebug('🎯 ClinicDashboard Category apăsat:', category.key);
                         try {
                           // Show ads before navigation
                           const adShown = await showInterstitial();
-                          console.log('✅ ClinicDashboard Ad shown:', adShown);
+                          logDebug('✅ ClinicDashboard Ad shown:', adShown);
                         } catch (error) {
                           console.error("❌ ClinicDashboard Error showing ad:", error);
                         } finally {

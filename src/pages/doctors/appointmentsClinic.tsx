@@ -60,7 +60,8 @@ import { ControlledTooltip } from "../../components/tooltipModal";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getTutorialData, storeData } from "../../utils/asyncStorageHandler";
 import i18n from "../../../i18n";
-import { collection, doc, getDoc, getDocs } from "firebase/firestore";
+import { collection, doc, limit, query } from "firebase/firestore";
+import { getDocPreferCache, getDocsPreferCache } from "../../utils/firestoreCache";
 import { authentication, db } from "../../../firebase";
 import AppointmentFilters from "../../components/Filters/AppointmentFilters";
 import { extendMoment } from "moment-range";
@@ -187,8 +188,11 @@ const ClinicAppointments: React.FC<Props> = ({}): JSX.Element => {
 
     const auth = authentication;
 
-    const querySnapshot = await getDocs(
-      collection(db, "Users", auth.currentUser.uid, "Doctors")
+    const querySnapshot = await getDocsPreferCache(
+      query(
+        collection(db, "Users", auth.currentUser.uid, "Doctors"),
+        limit(50)
+      )
     );
     querySnapshot.forEach((doc) => {
       // doc.data() is never undefined for query doc snapshots
@@ -211,7 +215,7 @@ const ClinicAppointments: React.FC<Props> = ({}): JSX.Element => {
         "Doctors",
         clinicAppointmentsUnregistered[i].doctorId
       );
-      const doctorSnap = await getDoc(doctorRef);
+      const doctorSnap = await getDocPreferCache(doctorRef);
       if (doctorSnap.exists()) {
         delete doctorSnap.data().clinicAppointments;
 

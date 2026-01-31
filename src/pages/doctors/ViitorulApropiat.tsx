@@ -15,6 +15,7 @@ import GreetingBar from "../../components/UpperGreetingBar/GreetingBar";
 import CardLayout from "../../components/CardLayout/CardLayout";
 import CustomSpinner from "../../components/CustomSpinner/CustomSpinner";
 import { colors } from "../../utils/colors";
+import { logDebug } from "../../utils/Logger";
 import { useApiData } from "../../context/ApiContext";
 import { MainContainer } from "../../components/commonViews";
 import i18n, { languageCode } from "../../../i18n";
@@ -74,7 +75,7 @@ const ViitorulApropiat = () => {
     if (isFirstEntry.current) {
       setLoading(true);
       shuffleCartiViitor();
-      console.log("Executat doar la prima intrare în acest ecran");
+      logDebug("Executat doar la prima intrare în acest ecran");
 
       // Setează flag-ul pe false, astfel încât logica să nu se mai execute la următoarele intrări
       isFirstEntry.current = false;
@@ -162,7 +163,7 @@ const ViitorulApropiat = () => {
   }, [triggerExitAnimation, opacityAnim]); // Dependențe: triggerExitAnimation și opacityAnim
 
   useEffect(() => {
-    console.log("Tryyy...", categoriiViitor.length);
+    logDebug("Tryyy...", categoriiViitor.length);
   }, []);
 
   const renderFlipCard = (category, index) => {

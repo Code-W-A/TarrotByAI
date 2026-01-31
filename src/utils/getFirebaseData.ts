@@ -2,8 +2,6 @@ import { authentication, db, storage } from "../../firebase";
 // import { collection, query, where } from "firebase/firestore";
 import {
   doc,
-  getDoc,
-  getDocs,
   collection,
   query,
   where,
@@ -24,8 +22,17 @@ import moment from "moment";
 import { ref, getDownloadURL, listAll } from "firebase/storage";
 import { checkCollectionExists } from "./checkIfCollectionExists";
 import { getRating } from "./ratingCalc";
+import { getDocPreferCache, getDocsPreferCache } from "./firestoreCache";
+import { logDebug } from "./Logger";
 
 const auth = authentication;
+const DEFAULT_QUERY_LIMIT = 50;
+const MESSAGE_PAGE_LIMIT = 50;
+const APPOINTMENTS_PAGE_LIMIT = 50;
+const isClinicLike = (data) =>
+  Boolean(data?.isClinic) ||
+  Boolean(data?.clinicInfoData) ||
+  Boolean(data?.clinicAddressLocation);
 
 export const retrieveClinicData = async () => {
   let phoneNumber;
@@ -44,7 +51,7 @@ export const retrieveClinicData = async () => {
   let clinicMainImage = {};
 
   const docRef = doc(db, "Users", auth.currentUser.uid);
-  const docSnap = await getDoc(docRef);
+  const docSnap = await getDocPreferCache(docRef);
 
   try {
     if (docSnap.exists()) {
@@ -52,7 +59,7 @@ export const retrieveClinicData = async () => {
 
       if (docSnap.data().clinicImages) {
         oldClinicImages = docSnap.data().clinicImages;
-        console.log("old...", oldClinicImages);
+        logDebug("old...", oldClinicImages);
 
         if (
           docSnap.data().clinicImagesURI &&
@@ -81,10 +88,10 @@ export const retrieveClinicData = async () => {
       termsConditions = docSnap.data().termsConditions || "";
       clinicAddressLocation = docSnap.data().clinicAddressLocation || "";
     } else {
-      console.log("No such document!");
+      logDebug("No such document!");
     }
   } catch (err) {
-    console.log("Error retrieveClinicData...", err);
+    logDebug("Error retrieveClinicData...", err);
   }
 
   return {
@@ -108,18 +115,18 @@ export const retrieveClinicData = async () => {
 export const retrieveClinicTimeSlots = async () => {
   let allDays;
 
-  console.log("auth.currentUser", auth.currentUser.uid);
+  logDebug("auth.currentUser", auth.currentUser.uid);
 
   const docRef = doc(db, "Users", auth.currentUser.uid);
-  const docSnap = await getDoc(docRef);
+  const docSnap = await getDocPreferCache(docRef);
   try {
     if (docSnap.exists()) {
       allDays = docSnap.data().allDays;
     } else {
-      console.log("No such document!");
+      logDebug("No such document!");
     }
   } catch (err) {
-    console.log("Error retrieveClinicData...", err);
+    logDebug("Error retrieveClinicData...", err);
   }
   return {
     allDays,
@@ -154,21 +161,21 @@ export const retrieveClinicCalendarTimes = async () => {
   let allDays;
   const checkableDate = moment(new Date()).format("YYYY-MM-DD");
 
-  console.log("auth.currentUser", auth.currentUser.uid);
+  logDebug("auth.currentUser", auth.currentUser.uid);
 
   const docRef = doc(db, "Users", auth.currentUser.uid);
-  const docSnap = await getDoc(docRef);
+  const docSnap = await getDocPreferCache(docRef);
 
-  console.log("data...");
-  console.log(docSnap.data());
+  logDebug("data...");
+  logDebug(docSnap.data());
   try {
     if (docSnap.exists()) {
       allDays = docSnap.data().allDays;
     } else {
-      console.log("No such document!");
+      logDebug("No such document!");
     }
   } catch (err) {
-    console.log("Error retrieveClinicData...", err);
+    logDebug("Error retrieveClinicData...", err);
   }
 
   const date = new Date();
@@ -217,28 +224,28 @@ export const retrieveClinicCalendarTimes = async () => {
     }
   }
 
-  console.log("obj...");
-  console.log(obj);
+  logDebug("obj...");
+  logDebug(obj);
   // return obj;
 };
 
 export const retrieveDoctorCalendarTimes = async (doctorId) => {
-  console.log("doctorId...", doctorId);
+  logDebug("doctorId...", doctorId);
   let allDays;
   const checkableDate = moment(new Date()).format("YYYY-MM-DD");
 
-  // console.log('auth.currentUser', auth.currentUser.uid);
+  // logDebug('auth.currentUser', auth.currentUser.uid);
 
   const docRef = doc(db, "Users", auth.currentUser.uid, "Doctors", doctorId);
-  const docSnap = await getDoc(docRef);
+  const docSnap = await getDocPreferCache(docRef);
   try {
     if (docSnap.exists()) {
       allDays = docSnap.data().allDays;
     } else {
-      console.log("No such document!");
+      logDebug("No such document!");
     }
   } catch (err) {
-    console.log("Error retrieveClinicData...", err);
+    logDebug("Error retrieveClinicData...", err);
   }
 
   const date = new Date();
@@ -286,22 +293,22 @@ export const retrieveDoctorCalendarTimes = async (doctorId) => {
       }
     }
   }
-  // console.log(obj);
+  // logDebug(obj);
   return obj;
 };
 
 export const retrieveTypeOfUser = async (uid) => {
   let userType = "";
   const docRef = doc(db, "Users", uid);
-  const docSnap = await getDoc(docRef);
+  const docSnap = await getDocPreferCache(docRef);
   try {
-    if (docSnap.data().isClinic) {
+    if (isClinicLike(docSnap.data())) {
       userType = "isClinic";
     } else {
       userType = "isPatient";
     }
   } catch (err) {
-    console.log("Error retrieveTypeOfUser...", err);
+    logDebug("Error retrieveTypeOfUser...", err);
   }
 
   return userType;
@@ -311,79 +318,88 @@ export const retrieveClinics = async () => {
   auth.currentUser.uid;
   let linkId;
   let clinics = [];
-  const q = query(collection(db, "Users"));
-
-  const querySnapshot = await getDocs(q);
-  querySnapshot.forEach((doc) => {
-    // doc.data() is never undefined for query doc snapshots
-    if (doc.data().owner_uid === auth.currentUser.uid) {
-      linkId = doc.data().linkId;
-    }
+  const userQuery = query(
+    collection(db, "Users"),
+    where("owner_uid", "==", auth.currentUser.uid),
+    limit(1)
+  );
+  const userSnapshot = await getDocsPreferCache(userQuery);
+  userSnapshot.forEach((doc) => {
+    linkId = doc.data().linkId;
   });
 
-  const querySnapshotClinics = await getDocs(q);
-  querySnapshotClinics.forEach((doc) => {
-    // doc.data() is never undefined for query doc snapshots
-    if (doc.data().owner_uid === linkId) {
+  if (linkId) {
+    const clinicsQuery = query(
+      collection(db, "Users"),
+      where("owner_uid", "==", linkId)
+    );
+    const clinicsSnapshot = await getDocsPreferCache(clinicsQuery);
+    clinicsSnapshot.forEach((doc) => {
       clinics.push(doc.data());
-    }
-  });
-  console.log("clinics...", clinics);
+    });
+  }
+  logDebug("clinics...", clinics);
 
   return clinics;
 };
 
 export const retrieveClinicsForPatientDashboard = async (city) => {
-  console.log("start....retrieveClinicsForPatientDashboard....");
+  logDebug("start....retrieveClinicsForPatientDashboard....");
 
   let clinics = [];
   try {
 
     let startQueryClinics = Date.now() / 1000;
 
-    console.log("city....");
-    console.log(city);
+    logDebug("city....");
+    logDebug(city);
 
-    const q = query(collection(db, "Users"), where("clinicCity", "==", city));
-    console.log(
+    const q = query(
+      collection(db, "Users"),
+      where("clinicCity", "==", city),
+      limit(DEFAULT_QUERY_LIMIT)
+    );
+    logDebug(
       "END... startQueryClinics",
       Date.now() / 1000 - startQueryClinics
     );
 
     let startQuerySnapshot = Date.now() / 1000;
-    const querySnapshot = await getDocs(q);
+    const querySnapshot = await getDocsPreferCache(q);
 
-    console.log("test before querySnapshot");
+    logDebug("test before querySnapshot");
     querySnapshot.forEach((doc) => {
-      console.log("test querySnapshot");
-      console.log(doc.data());
+      logDebug("test querySnapshot");
+      logDebug(doc.data());
       // doc.data() is never undefined for query doc snapshots
   
 
-      if (doc.data().isClinic) {
+      if (isClinicLike(doc.data())) {
         let clinicImages = [];
-        
-        let ratingMedia = getRating(doc.data().clinicReviews)
+        const clinicReviews = Array.isArray(doc.data().clinicReviews)
+          ? doc.data().clinicReviews
+          : [];
+        let ratingMedia = getRating(clinicReviews);
 
-        console.log("test here rating...")
-        console.log(ratingMedia)
+        logDebug("test here rating...")
+        logDebug(ratingMedia)
 
         let data = doc.data();
         data.ratingMedia = ratingMedia;
-        data.numberOfReviews = doc.data().clinicReviews.length;
+        data.numberOfReviews = clinicReviews.length;
 
 
         clinics.push(data);
       }
     });
 
-    console.log("test after querySnapshot");
-    console.log(clinics);
+    logDebug("test after querySnapshot");
+    logDebug(clinics);
     //   for(let i = 0; i < clinics.length; i ++) {
 
     // }
 
-    console.log(
+    logDebug(
       "END... querySnapshot GET CLINICS",
       Date.now() / 1000 - startQuerySnapshot
     );
@@ -394,18 +410,21 @@ export const retrieveClinicsForPatientDashboard = async (city) => {
       let clinicImages = [];
       let clinicMainImage;
 
-      console.log("test here");
-      console.log(clinics[z].clinicImagesURI);
-      for (let i = 0; i < clinics[z].clinicImagesURI.length; i++) {
-        if (clinics[z].clinicImagesURI[i].isMainImg) {
+      const clinicImagesUri = Array.isArray(clinics[z].clinicImagesURI)
+        ? clinics[z].clinicImagesURI
+        : [];
+      logDebug("test here");
+      logDebug(clinicImagesUri);
+      for (let i = 0; i < clinicImagesUri.length; i++) {
+        if (clinicImagesUri[i].isMainImg) {
           clinicMainImage = {
-            img: clinics[z].clinicImagesURI[i].img,
-            isMainImg: clinics[z].clinicImagesURI[i].isMainImg,
+            img: clinicImagesUri[i].img,
+            isMainImg: clinicImagesUri[i].isMainImg,
           };
         } else {
           clinicImages.push({
-            img: clinics[z].clinicImagesURI[i].img,
-            isMainImg: clinics[z].clinicImagesURI[i].isMainImg,
+            img: clinicImagesUri[i].img,
+            isMainImg: clinicImagesUri[i].isMainImg,
           });
         }
       }
@@ -413,17 +432,20 @@ export const retrieveClinicsForPatientDashboard = async (city) => {
       clinics[z].clinicMainImage = clinicMainImage;
 
       //   CHECK here FOR PERFORMANCE ISSUES
-      const querySnapshot = await getDocs(
-        collection(db, "Users", clinics[z].owner_uid, "Doctors")
+      const querySnapshot = await getDocsPreferCache(
+        query(
+          collection(db, "Users", clinics[z].owner_uid, "Doctors"),
+          limit(DEFAULT_QUERY_LIMIT)
+        )
       );
       querySnapshot.forEach((doc) => {
         // doc.data() is never undefined for query doc snapshots
-        console.log(doc.id, "doctorpushed=====>", doc.data());
+        logDebug(doc.id, "doctorpushed=====>", doc.data());
         let data = doc.data();
         let ratingMedia = getRating(data.doctorReviews)
 
-        console.log("test here rating...")
-        console.log(ratingMedia)
+        logDebug("test here rating...")
+        logDebug(ratingMedia)
 
         data.ratingMedia = ratingMedia;
         data.numberOfReviews = data.doctorReviews.length;
@@ -433,12 +455,12 @@ export const retrieveClinicsForPatientDashboard = async (city) => {
       clinics[z].clinicDoctors = [...clinicDoctors];
     }
 
-    console.log(
+    logDebug(
       "END... startLoopQueryClinics",
       Date.now() / 1000 - startLoopQueryClinics
     );
   } catch (error) {
-    console.log("error on...retrieveClinicsForPatientDashboard....", error);
+    logDebug("error on...retrieveClinicsForPatientDashboard....", error);
   }
 
   return clinics;
@@ -449,23 +471,27 @@ export const retrieveDoctorsForPatientDashboard = async (city) => {
   try {
     const doctorsQuery = query(
       collection(db, "Doctors"),
-      where("clinicCity", "==", city)
+      where("clinicCity", "==", city),
+      limit(DEFAULT_QUERY_LIMIT)
     );
-    const querySnapshot = await getDocs(doctorsQuery);
+    const querySnapshot = await getDocsPreferCache(doctorsQuery);
 
     const doctorPromises = querySnapshot.docs.map(async (doc) => {
       let actualLoopDoctor = doc.data();
       let sum = 0;
       let ratingMedia;
 
-      for (let i = 0; i < actualLoopDoctor.doctorReviews.length; i++) {
-        sum += actualLoopDoctor.doctorReviews[i].rating;
+      const doctorReviews = Array.isArray(actualLoopDoctor.doctorReviews)
+        ? actualLoopDoctor.doctorReviews
+        : [];
+      for (let i = 0; i < doctorReviews.length; i++) {
+        sum += doctorReviews[i].rating;
       }
-      ratingMedia = sum / actualLoopDoctor.doctorReviews.length;
+      ratingMedia = doctorReviews.length ? sum / doctorReviews.length : 0;
 
       let data = actualLoopDoctor;
       data.ratingMedia = ratingMedia;
-      data.numberOfReviews = actualLoopDoctor.doctorReviews.length;
+      data.numberOfReviews = doctorReviews.length;
       let clinicAppointmentsUnregistered = [];
       let clinicAppointments = [];
 
@@ -490,9 +516,9 @@ export const retrieveDoctorsForPatientDashboard = async (city) => {
       );
 
       if (appointmentUnregisteredColExists) {
-        console.log("appointmentUnregisteredColExists.......");
-        const appointmentSnapshotUnregistered = await getDocs(
-          appointmentUnregisteredColRef
+        logDebug("appointmentUnregisteredColExists.......");
+        const appointmentSnapshotUnregistered = await getDocsPreferCache(
+          query(appointmentUnregisteredColRef, limit(APPOINTMENTS_PAGE_LIMIT))
         );
         appointmentSnapshotUnregistered.forEach((appointmentDoc) => {
           clinicAppointmentsUnregistered.push(appointmentDoc.data());
@@ -500,9 +526,11 @@ export const retrieveDoctorsForPatientDashboard = async (city) => {
       }
 
       if (appointmentColExists) {
-        console.log("appointmentColExists.......");
+        logDebug("appointmentColExists.......");
 
-        const appointmentSnapshot = await getDocs(appointmentColRef);
+        const appointmentSnapshot = await getDocsPreferCache(
+          query(appointmentColRef, limit(APPOINTMENTS_PAGE_LIMIT))
+        );
         appointmentSnapshot.forEach((appointmentDoc) => {
           clinicAppointments.push(appointmentDoc.data());
         });
@@ -516,7 +544,7 @@ export const retrieveDoctorsForPatientDashboard = async (city) => {
 
     allDoctors = await Promise.all(doctorPromises);
   } catch (error) {
-    console.log("Error in retrieveDoctorsForPatientDashboard:", error);
+    logDebug("Error in retrieveDoctorsForPatientDashboard:", error);
   }
 
   return allDoctors;
@@ -531,31 +559,31 @@ export const retrieveDoctorsForPatientDashboard = async (city) => {
 
 //   const q = query(collection(db, 'Users'));
 
-//   const querySnapshot = await getDocs(q);
+//   const querySnapshot = await getDocsPreferCache(q);
 //   let clinics = [];
 
 //   querySnapshot.forEach(async doc => {
-//     // console.log(doc);
+//     // logDebug(doc);
 //     // doc.data() is never undefined for query doc snapshots
 //     let sum = 0;
 //     let ratingMedia = 0;
 //     if (doc.data().isClinic) {
 //       let clinicImages = []
 //       for(let i =0; i < doc.data().clinicReviews.length; i ++){
-//         // console.log("--------------------------",doc.data())
+//         // logDebug("--------------------------",doc.data())
 //         sum = sum + doc.data().clinicReviews[i].rating;
 //       }
 //       ratingMedia = sum / doc.data().clinicReviews.length;
-//       // console.log("ratingMedia...", ratingMedia)
+//       // logDebug("ratingMedia...", ratingMedia)
 //       let data = doc.data();
 //       data.ratingMedia = ratingMedia;
 //       data.numberOfReviews = doc.data().clinicReviews.length;
-//       // console.log("data...", data);
+//       // logDebug("data...", data);
 //       sum = 0;
 //       ratingMedia = 0;
 
 //       clinics.push(data);
-//       // console.log("data...", data)
+//       // logDebug("data...", data)
 //     }
 //   });
 
@@ -582,12 +610,12 @@ export const retrieveDoctorsForPatientDashboard = async (city) => {
 //   }
 
 //   let start = Date. now() / 1000
-//   console.log("-----------------------------------------")
-//   console.log("STARTTTT retrieveClinicDoctors LOOP")
-//   console.log("LOOP LENGTH", clinics.length)
+//   logDebug("-----------------------------------------")
+//   logDebug("STARTTTT retrieveClinicDoctors LOOP")
+//   logDebug("LOOP LENGTH", clinics.length)
 
 //   for (let i = 0; i < clinics.length; i++) {
-//     console.log("LOOP NUMBER", i)
+//     logDebug("LOOP NUMBER", i)
 // const clinicDoctors = await retrieveClinicDoctors(clinics[i].owner_uid);
 
 //     for(let z=0; z < clinicDoctors.clinicDoctors.length; z ++){
@@ -612,8 +640,8 @@ export const retrieveDoctorsForPatientDashboard = async (city) => {
 
 //   }
 
-//   console.log("END retrieveClinicDoctors LOOP", Date.now() / 1000 - start )
-//   console.log("-----------------------------------------")
+//   logDebug("END retrieveClinicDoctors LOOP", Date.now() / 1000 - start )
+//   logDebug("-----------------------------------------")
 
 //   let clinicDoctors = [];
 
@@ -628,22 +656,30 @@ export const retrieveClinicDoctors = async (clinicId?: any) => {
   let docRef;
   let docSnap;
 
-  console.log(clinicId);
+  logDebug(clinicId);
   if (clinicId) {
-    querySnapshot = await getDocs(collection(db, "Users", clinicId, "Doctors"));
+    querySnapshot = await getDocsPreferCache(
+      query(
+        collection(db, "Users", clinicId, "Doctors"),
+        limit(DEFAULT_QUERY_LIMIT)
+      )
+    );
     docRef = doc(db, "Users", clinicId);
   } else {
-    querySnapshot = await getDocs(
-      collection(db, "Users", auth.currentUser.uid, "Doctors")
+    querySnapshot = await getDocsPreferCache(
+      query(
+        collection(db, "Users", auth.currentUser.uid, "Doctors"),
+        limit(DEFAULT_QUERY_LIMIT)
+      )
     );
     docRef = doc(db, "Users", auth.currentUser.uid);
   }
 
   try {
-    docSnap = await getDoc(docRef);
+    docSnap = await getDocPreferCache(docRef);
     querySnapshot.forEach((doc) => {
       // doc.data() is never undefined for query doc snapshots
-      // console.log()
+      // logDebug()
       clinicDoctors.push(doc.data());
     });
 
@@ -659,7 +695,7 @@ export const retrieveClinicDoctors = async (clinicId?: any) => {
         //   // clinicImages.push(x);
         //   doctorImage = x;
         // })
-        // console.log("doctorImage...", doctorImage)
+        // logDebug("doctorImage...", doctorImage)
         oldDoctorImage = clinicDoctors[i].doctorImg;
         clinicDoctors[i].doctorImg = clinicDoctors[i].doctorImgURI;
         clinicDoctors[i].oldDoctorImage = oldDoctorImage;
@@ -679,7 +715,7 @@ export const retrieveClinicDoctors = async (clinicId?: any) => {
         //     doctorImage = x;
         //   })
 
-        // console.log("doctorImage...", doctorImage)
+        // logDebug("doctorImage...", doctorImage)
         oldDoctorImage = clinicDoctors[i].doctorImg;
         clinicDoctors[i].doctorImg = clinicDoctors[i].doctorImgURI;
         clinicDoctors[i].oldDoctorImage = oldDoctorImage;
@@ -689,7 +725,7 @@ export const retrieveClinicDoctors = async (clinicId?: any) => {
       }
     }
   } catch (err) {
-    console.log("Error retrieveClinicDoctors...", err);
+    logDebug("Error retrieveClinicDoctors...", err);
   }
 
   return clinicDoctors;
@@ -715,8 +751,12 @@ export const retrieveClinicPatients = async (clinicId?) => {
 
       const [clinicPatientsSnapshot, clinicPatientsUnregisteredSnapshot] =
         await Promise.all([
-          getDocs(clinicPatientsRef),
-          getDocs(clinicPatientsUnregisteredRef),
+          getDocsPreferCache(
+            query(clinicPatientsRef, limit(DEFAULT_QUERY_LIMIT))
+          ),
+          getDocsPreferCache(
+            query(clinicPatientsUnregisteredRef, limit(DEFAULT_QUERY_LIMIT))
+          ),
         ]);
 
       if (!clinicPatientsSnapshot.empty) {
@@ -725,7 +765,7 @@ export const retrieveClinicPatients = async (clinicId?) => {
         );
         finalPatients = finalPatients.concat(queryClinicsPatients);
       } else {
-        console.log('Colecția "clinicsPatients" nu există sau este goală.');
+        logDebug('Colecția "clinicsPatients" nu există sau este goală.');
       }
 
       if (!clinicPatientsUnregisteredSnapshot.empty) {
@@ -733,7 +773,7 @@ export const retrieveClinicPatients = async (clinicId?) => {
           clinicPatientsUnregisteredSnapshot.docs.map((doc) => doc.data());
         finalPatients = finalPatients.concat(queryClinicsPatientsUnregistered);
       } else {
-        console.log(
+        logDebug(
           'Colecția "clinicsPatientsUnregistered" nu există sau este goală.'
         );
       }
@@ -755,8 +795,12 @@ export const retrieveClinicPatients = async (clinicId?) => {
         userClinicsPatientsSnapshot,
         userClinicsPatientsUnregisteredSnapshot,
       ] = await Promise.all([
-        getDocs(userClinicsPatientsRef),
-        getDocs(userClinicsPatientsUnregisteredRef),
+        getDocsPreferCache(
+          query(userClinicsPatientsRef, limit(DEFAULT_QUERY_LIMIT))
+        ),
+        getDocsPreferCache(
+          query(userClinicsPatientsUnregisteredRef, limit(DEFAULT_QUERY_LIMIT))
+        ),
       ]);
 
       if (!userClinicsPatientsSnapshot.empty) {
@@ -765,7 +809,7 @@ export const retrieveClinicPatients = async (clinicId?) => {
         );
         finalPatients = finalPatients.concat(queryUserClinicsPatients);
       } else {
-        console.log('Colecția "clinicsPatients" nu există sau este goală.');
+        logDebug('Colecția "clinicsPatients" nu există sau este goală.');
       }
 
       if (!userClinicsPatientsUnregisteredSnapshot.empty) {
@@ -775,16 +819,16 @@ export const retrieveClinicPatients = async (clinicId?) => {
           queryUserClinicsPatientsUnregistered
         );
       } else {
-        console.log(
+        logDebug(
           'Colecția "clinicsPatientsUnregistered" nu există sau este goală.'
         );
       }
     }
 
-    console.log("finalPatients:", finalPatients);
+    logDebug("finalPatients:", finalPatients);
     return finalPatients;
   } catch (err) {
-    console.log("Eroare în retrieveClinicPatients:", err);
+    logDebug("Eroare în retrieveClinicPatients:", err);
     return [];
   }
 };
@@ -810,17 +854,29 @@ export const retrieveInfoAboutPatientsFromClinic = async (
 
   let patientPhoneNumber;
 
-  const querySnapshot = await getDocs(collection(db, "Users"));
+  const clinicsQuery = query(
+    collection(db, "Users"),
+    where("isClinic", "==", true),
+    limit(DEFAULT_QUERY_LIMIT)
+  );
+  let querySnapshot = await getDocsPreferCache(clinicsQuery);
+  if (querySnapshot.empty) {
+    const fallbackQuery = query(
+      collection(db, "Users"),
+      limit(DEFAULT_QUERY_LIMIT)
+    );
+    querySnapshot = await getDocsPreferCache(fallbackQuery);
+  }
   querySnapshot.forEach((doc) => {
-    if (doc.data().isClinic) {
-      console.log(doc.data());
+    if (isClinicLike(doc.data())) {
+      logDebug(doc.data());
       clinicsById.push(doc.data());
     }
   });
 
   for (let i = 0; i < clinicsById.length; i++) {
-    console.log("------START SEARCH IN CLINIC----------");
-    // console.log("clinicsById[i]...", clinicsById[i].phoneNumber)
+    logDebug("------START SEARCH IN CLINIC----------");
+    // logDebug("clinicsById[i]...", clinicsById[i].phoneNumber)
     clinicPhoneNumber = clinicsById[i].phoneNumber;
     clinicInfoData = clinicsById[i].clinicInfoData;
     clinicAddressLocation = clinicsById[i].clinicAddressLocation;
@@ -830,20 +886,26 @@ export const retrieveInfoAboutPatientsFromClinic = async (
 
     let booleanCheckIsInClinics = [];
 
-    const querySnapshotDoctors = await getDocs(
-      collection(db, "Users", clinicId, "Doctors")
+    const querySnapshotDoctors = await getDocsPreferCache(
+      query(
+        collection(db, "Users", clinicId, "Doctors"),
+        limit(DEFAULT_QUERY_LIMIT)
+      )
     );
     querySnapshotDoctors.forEach((doc) => {
-      console.log("------START SEARCH IN DOCTOR----------");
-      // console.log("info about doctor...", doc.data())
+      logDebug("------START SEARCH IN DOCTOR----------");
+      // logDebug("info about doctor...", doc.data())
 
       aboutDoctor = doc.data().doctorInfoData;
       doctorId = doc.data().doctorId;
       doctorImg = doc.data().doctorImg;
 
-      if (doc.data().clinicAppointments.length > 0) {
-        doc.data().clinicAppointments.forEach((appointment) => {
-          console.log("------START SEARCH IN DOCTOR APPOINTMENT----------");
+      const clinicAppointments = Array.isArray(doc.data().clinicAppointments)
+        ? doc.data().clinicAppointments
+        : [];
+      if (clinicAppointments.length > 0) {
+        clinicAppointments.forEach((appointment) => {
+          logDebug("------START SEARCH IN DOCTOR APPOINTMENT----------");
           if (appointment.patientInfo) {
             if (appointment.patientInfo.phoneNumber === phoneN) {
               booleanCheckIsInClinics.push(true);
@@ -885,8 +947,8 @@ export const retrieveInfoAboutPatientsFromClinic = async (
     basicInfoData = patientInfo.patientInfo.basicInfoData;
   }
   // let phoneNumber = patientInfo.phoneNumber
-  // console.log(basicInfoData)
-  // console.log(appointment.patientInfo.phoneNumber)
+  // logDebug(basicInfoData)
+  // logDebug(appointment.patientInfo.phoneNumber)
 
   // ----- START CHANGE APPOINTMENT LOOK IN DOCTORS COLLECTION AND SUBCOLLECTION
 
@@ -901,11 +963,11 @@ export const retrieveInfoAboutPatientsFromClinic = async (
       "Doctors",
       appointmentsArr[i].doctorId
     );
-    const docSnap = await getDoc(docRef);
+    const docSnap = await getDocPreferCache(docRef);
 
     if (docSnap.exists()) {
       let docAppointments = docSnap.data().clinicAppointments;
-      // console.log("Document data:", docAppointments);
+      // logDebug("Document data:", docAppointments);
       for (let z = 0; z < docAppointments.length; z++) {
         if (
           docAppointments[z].appointmentId === appointmentsArr[i].appointmentId
@@ -915,16 +977,16 @@ export const retrieveInfoAboutPatientsFromClinic = async (
       }
     } else {
       // docSnap.data() will be undefined in this case
-      console.log("No such document!");
+      logDebug("No such document!");
     }
 
     //COLLECTION
     const docRefDoc = doc(db, "Doctors", appointmentsArr[i].doctorId);
-    const docSnapDoc = await getDoc(docRefDoc);
+    const docSnapDoc = await getDocPreferCache(docRefDoc);
 
     if (docSnapDoc.exists()) {
       let docAppointments = docSnapDoc.data().clinicAppointments;
-      // console.log("Document data:", docAppointments);
+      // logDebug("Document data:", docAppointments);
       for (let z = 0; z < docAppointments.length; z++) {
         if (
           docAppointments[z].appointmentId === appointmentsArr[i].appointmentId
@@ -934,7 +996,7 @@ export const retrieveInfoAboutPatientsFromClinic = async (
       }
     } else {
       // docSnap.data() will be undefined in this case
-      console.log("No such document!");
+      logDebug("No such document!");
     }
   }
 
@@ -964,9 +1026,13 @@ export const retrieveClinicMessages = async (clinicsPatient) => {
     "Messages"
   );
 
-  const q = query(collectionRef, orderBy("createdAt", "desc"));
+  const q = query(
+    collectionRef,
+    orderBy("createdAt", "desc"),
+    limit(MESSAGE_PAGE_LIMIT)
+  );
 
-  const querySnapshot = await getDocs(q);
+  const querySnapshot = await getDocsPreferCache(q);
 
   querySnapshot.forEach((doc) => {
     messages.push(doc.data());
@@ -980,7 +1046,11 @@ export const retrievePatientClinicHistory = async () => {
   const citiesRef = collection(db, "cities");
 
   // Create a query against the collection.
-  const q = query(citiesRef, where("state", "==", "CA"));
+  const q = query(
+    citiesRef,
+    where("state", "==", "CA"),
+    limit(DEFAULT_QUERY_LIMIT)
+  );
   
 }
 
@@ -999,9 +1069,9 @@ export const retrievePatientData = async (guestDetails) => {
 
   try {
     const docRef = doc(db, "Users", auth.currentUser.uid);
-    const docSnap = await getDoc(docRef);
+    const docSnap = await getDocPreferCache(docRef);
     if (docSnap.exists()) {
-      console.log(docSnap.data().patientImg);
+      logDebug(docSnap.data().patientImg);
       if (docSnap.data().patientImg) {
         oldPatientImage = docSnap.data().patientImg;
         patientImage = docSnap.data().patientImgURI;
@@ -1020,10 +1090,10 @@ export const retrievePatientData = async (guestDetails) => {
         ? docSnap.data().termsConditions
         : "";
     } else {
-      console.log("No such document!");
+      logDebug("No such document!");
     }
   } catch (err) {
-    console.log("Error retrievePatientData...", err);
+    logDebug("Error retrievePatientData...", err);
   }
 
   let obj = {
@@ -1055,12 +1125,12 @@ export const retrievePatientAppointments = async (
   let pastAppointments = [];
 
   // const docRef = doc(db, 'Users', auth.currentUser.uid);
-  // const docSnap = await getDoc(docRef);
+  // const docSnap = await getDocPreferCache(docRef);
 
-  // console.log(moment.utc().valueOf())
+  // logDebug(moment.utc().valueOf())
   let currentTime = moment().valueOf();
-  console.log("test....");
-  console.log(moment(currentTime).format("DD MM YYYY hh:mm"));
+  logDebug("test....");
+  logDebug(moment(currentTime).format("DD MM YYYY hh:mm"));
   try {
     // Query the first page of docs
     const docRef = collection(
@@ -1076,7 +1146,8 @@ export const retrievePatientAppointments = async (
       qUpcomming = query(
         docRef,
         orderBy("dateToQuery"),
-        where("dateToQuery", ">", currentTime)
+        where("dateToQuery", ">", currentTime),
+        limit(APPOINTMENTS_PAGE_LIMIT)
       );
       qPast = query(
         docRef,
@@ -1094,7 +1165,8 @@ export const retrievePatientAppointments = async (
       qPast = query(
         docRef,
         orderBy("dateToQuery"),
-        where("dateToQuery", "<", currentTime)
+        where("dateToQuery", "<", currentTime),
+        limit(APPOINTMENTS_PAGE_LIMIT)
       );
     } else {
       qUpcomming = query(
@@ -1111,17 +1183,17 @@ export const retrievePatientAppointments = async (
       );
     }
 
-    const querySnapshotUpcomming = await getDocs(qUpcomming);
+    const querySnapshotUpcomming = await getDocsPreferCache(qUpcomming);
     querySnapshotUpcomming.forEach((doc) => {
       // doc.data() is never undefined for query doc snapshots
-      // console.log(doc.id, " =====================> ", doc.data());
+      // logDebug(doc.id, " =====================> ", doc.data());
       upcommingAppointments.push(doc.data());
     });
 
-    const querySnapshotPast = await getDocs(qPast);
+    const querySnapshotPast = await getDocsPreferCache(qPast);
     querySnapshotPast.forEach((doc) => {
       // doc.data() is never undefined for query doc snapshots
-      // console.log(doc.id, " =====================> ", doc.data());
+      // logDebug(doc.id, " =====================> ", doc.data());
       pastAppointments.push(doc.data());
     });
 
@@ -1130,7 +1202,7 @@ export const retrievePatientAppointments = async (
 
       //GET PATIENT INFO
       const docRefPatient = doc(db, "Users", pastAppointments[0].patientId);
-      const docSnapPatient = await getDoc(docRefPatient);
+      const docSnapPatient = await getDocPreferCache(docRefPatient);
 
       if (docSnapPatient.exists()) {
         delete docSnapPatient.data().clinicsHistory;
@@ -1140,14 +1212,14 @@ export const retrievePatientAppointments = async (
 
       for (let i = 0; i < pastAppointments.length; i++) {
         const start = Date.now();
-        console.log("STart....");
+        logDebug("STart....");
 
         pastAppointments[i].patientInfo = patientInfo;
 
         //GET DOCTOR INFO
 
         const docRefDoctor = doc(db, "Doctors", pastAppointments[i].doctorId);
-        const docSnapDoctor = await getDoc(docRefDoctor);
+        const docSnapDoctor = await getDocPreferCache(docRefDoctor);
 
         if (docSnapDoctor.exists()) {
           let clinicAddressLocation =
@@ -1159,14 +1231,14 @@ export const retrievePatientAppointments = async (
         //GET CLINIC INFO
 
         const docRefClinic = doc(db, "Users", pastAppointments[i].clinicId);
-        const docSnapClinic = await getDoc(docRefClinic);
+        const docSnapClinic = await getDocPreferCache(docRefClinic);
 
         if (docSnapClinic.exists()) {
           pastAppointments[i].clinicInfo = docSnapClinic.data();
         }
 
         const end = Date.now();
-        console.log(`Execution time GET CLINIC INFO: ${end - start} ms`);
+        logDebug(`Execution time GET CLINIC INFO: ${end - start} ms`);
       }
     }
 
@@ -1179,7 +1251,7 @@ export const retrievePatientAppointments = async (
         "Users",
         upcommingAppointments[0].patientId
       );
-      const docSnapPatient = await getDoc(docRefPatient);
+      const docSnapPatient = await getDocPreferCache(docRefPatient);
 
       if (docSnapPatient.exists()) {
         delete docSnapPatient.data().clinicsHistory;
@@ -1189,7 +1261,7 @@ export const retrievePatientAppointments = async (
 
       for (let i = 0; i < upcommingAppointments.length; i++) {
         const start = Date.now();
-        console.log("STart....");
+        logDebug("STart....");
 
         upcommingAppointments[i].patientInfo = patientInfo;
 
@@ -1200,7 +1272,7 @@ export const retrievePatientAppointments = async (
           "Doctors",
           upcommingAppointments[i].doctorId
         );
-        const docSnapDoctor = await getDoc(docRefDoctor);
+        const docSnapDoctor = await getDocPreferCache(docRefDoctor);
 
         if (docSnapDoctor.exists()) {
           let clinicAddressLocation =
@@ -1216,25 +1288,25 @@ export const retrievePatientAppointments = async (
           "Users",
           upcommingAppointments[i].clinicId
         );
-        const docSnapClinic = await getDoc(docRefClinic);
+        const docSnapClinic = await getDocPreferCache(docRefClinic);
 
         if (docSnapClinic.exists()) {
           upcommingAppointments[i].clinicInfo = docSnapClinic.data();
         }
 
         const end = Date.now();
-        console.log(`Execution time GET CLINIC INFO: ${end - start} ms`);
+        logDebug(`Execution time GET CLINIC INFO: ${end - start} ms`);
       }
     }
 
     myAppointments = { pastAppointments, upcommingAppointments };
     // Set the "capital" field of the city 'DC'
 
-    console.log("success.....");
-    console.log(myAppointments);
+    logDebug("success.....");
+    logDebug(myAppointments);
     return myAppointments;
   } catch (err) {
-    console.log("Error retrievePatientAppointments...", err);
+    logDebug("Error retrievePatientAppointments...", err);
   }
 };
 
@@ -1243,14 +1315,18 @@ export const retrieveClinicAppointments = async () => {
     let clinicAppointments = [];
 
     const docRef = doc(db, "Users", auth.currentUser.uid);
-    const docSnap = await getDoc(docRef);
+    const docSnap = await getDocPreferCache(docRef);
 
     const doctorsRef = collection(db, "Doctors");
-    const q = query(doctorsRef, where("clinicId", "==", auth.currentUser.uid));
-    const querySnapshotDocs = await getDocs(q);
+    const q = query(
+      doctorsRef,
+      where("clinicId", "==", auth.currentUser.uid),
+      limit(DEFAULT_QUERY_LIMIT)
+    );
+    const querySnapshotDocs = await getDocsPreferCache(q);
 
     for (const docLoops of querySnapshotDocs.docs) {
-      console.log(docLoops.id, " => ", docLoops.data());
+      logDebug(docLoops.id, " => ", docLoops.data());
 
       const clinicAppointmentsUnregisteredRef = collection(
         db,
@@ -1269,17 +1345,21 @@ export const retrieveClinicAppointments = async () => {
         clinicAppointmentsUnregisteredSnapshot,
         clinicAppointmentsSnapshot,
       ] = await Promise.all([
-        getDocs(clinicAppointmentsUnregisteredRef),
-        getDocs(clinicAppointmentsRef),
+        getDocsPreferCache(
+          query(clinicAppointmentsUnregisteredRef, limit(APPOINTMENTS_PAGE_LIMIT))
+        ),
+        getDocsPreferCache(
+          query(clinicAppointmentsRef, limit(APPOINTMENTS_PAGE_LIMIT))
+        ),
       ]);
 
       if (!clinicAppointmentsUnregisteredSnapshot.empty) {
         clinicAppointmentsUnregisteredSnapshot.forEach(async (docLoop) => {
-          console.log(docLoop.id, " ========ss> ", docLoop.data());
+          logDebug(docLoop.id, " ========ss> ", docLoop.data());
 
           const clinicAppointmentsUnregistered = docLoop.data();
-          console.log("test mere here...");
-          console.log(clinicAppointmentsUnregistered);
+          logDebug("test mere here...");
+          logDebug(clinicAppointmentsUnregistered);
 
           const doctorRef = doc(
             db,
@@ -1288,28 +1368,28 @@ export const retrieveClinicAppointments = async () => {
             "Doctors",
             clinicAppointmentsUnregistered.doctorId
           );
-          const doctorSnap = await getDoc(doctorRef);
+          const doctorSnap = await getDocPreferCache(doctorRef);
           if (doctorSnap.exists()) {
             delete doctorSnap.data().clinicAppointments;
             clinicAppointmentsUnregistered.doctorInfo = doctorSnap.data();
           }
-          console.log("to push-----");
-          console.log(clinicAppointmentsUnregistered);
+          logDebug("to push-----");
+          logDebug(clinicAppointmentsUnregistered);
           clinicAppointments.push(clinicAppointmentsUnregistered);
         });
       } else {
-        console.log('Colecția "clinicAppointmentsUnregistered" este goală.');
+        logDebug('Colecția "clinicAppointmentsUnregistered" este goală.');
       }
 
       if (!clinicAppointmentsSnapshot.empty) {
         clinicAppointmentsSnapshot.forEach(async (docLoop) => {
-          console.log(docLoop.id, " => ", docLoop.data());
+          logDebug(docLoop.id, " => ", docLoop.data());
 
           const clinicAppointment = docLoop.data();
 
           // GET INFO ABOUT PATIENT
           const patientRef = doc(db, "Users", clinicAppointment.patientId);
-          const patientSnap = await getDoc(patientRef);
+          const patientSnap = await getDocPreferCache(patientRef);
           if (patientSnap.exists()) {
             delete patientSnap.data().clinicsHistory;
             delete patientSnap.data().myAppointments;
@@ -1331,7 +1411,7 @@ export const retrieveClinicAppointments = async () => {
             "Doctors",
             clinicAppointment.doctorId
           );
-          const doctorSnap = await getDoc(doctorRef);
+          const doctorSnap = await getDocPreferCache(doctorRef);
           if (doctorSnap.exists()) {
             delete doctorSnap.data().clinicAppointments;
             clinicAppointment.doctorInfo = doctorSnap.data();
@@ -1340,16 +1420,16 @@ export const retrieveClinicAppointments = async () => {
           clinicAppointments.push(clinicAppointment);
         });
       } else {
-        console.log('Colecția "clinicAppointments" este goală.');
+        logDebug('Colecția "clinicAppointments" este goală.');
       }
     }
-    console.log("clinicAppointments----");
-    console.log(clinicAppointments);
+    logDebug("clinicAppointments----");
+    logDebug(clinicAppointments);
     return {
       clinicAppointments,
     };
   } catch (err) {
-    console.log("Error retrieveClinicAppointments...", err);
+    logDebug("Error retrieveClinicAppointments...", err);
   }
 };
 
@@ -1360,11 +1440,15 @@ export const retrieveApprovedClinicAppointments = async () => {
 
   try {
     const doctorsRef = collection(db, "Doctors");
-    const q = query(doctorsRef, where("clinicId", "==", auth.currentUser.uid));
-    const querySnapshotDocs = await getDocs(q);
+    const q = query(
+      doctorsRef,
+      where("clinicId", "==", auth.currentUser.uid),
+      limit(DEFAULT_QUERY_LIMIT)
+    );
+    const querySnapshotDocs = await getDocsPreferCache(q);
 
     for (const docLoops of querySnapshotDocs.docs) {
-      console.log(docLoops.id, " => ", docLoops.data());
+      logDebug(docLoops.id, " => ", docLoops.data());
 
       const clinicAppointmentsUnregisteredRef = collection(
         db,
@@ -1373,17 +1457,20 @@ export const retrieveApprovedClinicAppointments = async () => {
         "clinicAppointmentsUnregisteredDocCol"
       );
 
-      const clinicAppointmentsUnregisteredSnapshot = await getDocs(
-        clinicAppointmentsUnregisteredRef
+      const clinicAppointmentsUnregisteredSnapshot = await getDocsPreferCache(
+        query(
+          clinicAppointmentsUnregisteredRef,
+          limit(APPOINTMENTS_PAGE_LIMIT)
+        )
       );
 
       if (!clinicAppointmentsUnregisteredSnapshot.empty) {
         clinicAppointmentsUnregisteredSnapshot.forEach(async (docLoop) => {
-          console.log(docLoop.id, " ========ss> ", docLoop.data());
+          logDebug(docLoop.id, " ========ss> ", docLoop.data());
 
           const clinicAppointmentsUnregistered = docLoop.data();
-          console.log("test mere here...");
-          console.log(clinicAppointmentsUnregistered);
+          logDebug("test mere here...");
+          logDebug(clinicAppointmentsUnregistered);
 
           const doctorRef = doc(
             db,
@@ -1392,7 +1479,7 @@ export const retrieveApprovedClinicAppointments = async () => {
             "Doctors",
             clinicAppointmentsUnregistered.doctorId
           );
-          const doctorSnap = await getDoc(doctorRef);
+          const doctorSnap = await getDocPreferCache(doctorRef);
           if (doctorSnap.exists()) {
             delete doctorSnap.data().clinicAppointments;
             clinicAppointmentsUnregistered.doctorInfo = doctorSnap.data();
@@ -1408,14 +1495,14 @@ export const retrieveApprovedClinicAppointments = async () => {
               parseInt(appointmentDateParts[0])
             );
 
-            console.log("to push-----");
-            console.log(appointmentDate);
-            console.log(currentDate);
+            logDebug("to push-----");
+            logDebug(appointmentDate);
+            logDebug(currentDate);
             approvedClinicAppointments.push(clinicAppointmentsUnregistered);
 
             if (appointmentDate > currentDate) {
-              console.log("is greater...");
-              console.log(clinicAppointmentsUnregistered);
+              logDebug("is greater...");
+              logDebug(clinicAppointmentsUnregistered);
               upcommingAppointments.push(clinicAppointmentsUnregistered);
             } else if (
               appointmentDate.toDateString() === currentDate.toDateString()
@@ -1425,16 +1512,16 @@ export const retrieveApprovedClinicAppointments = async () => {
           }
         });
       } else {
-        console.log('Colecția "clinicAppointmentsUnregistered" este goală.');
+        logDebug('Colecția "clinicAppointmentsUnregistered" este goală.');
       }
     }
 
-    console.log("approvedClinicAppointments----");
-    console.log(approvedClinicAppointments);
-    console.log("upcommingAppointments----");
-    console.log(upcommingAppointments);
-    console.log("todayAppointments----");
-    console.log(todayAppointments);
+    logDebug("approvedClinicAppointments----");
+    logDebug(approvedClinicAppointments);
+    logDebug("upcommingAppointments----");
+    logDebug(upcommingAppointments);
+    logDebug("todayAppointments----");
+    logDebug(todayAppointments);
 
     return {
       approvedClinicAppointments,
@@ -1442,7 +1529,7 @@ export const retrieveApprovedClinicAppointments = async () => {
       todayAppointments,
     };
   } catch (err) {
-    console.log("Error retrieveClinicAppointments...", err);
+    logDebug("Error retrieveClinicAppointments...", err);
   }
 };
 
@@ -1461,7 +1548,7 @@ export const retrieveApprovedDoctorAppointments = async (
   // const docRef = doc(db, 'Users', auth.currentUser.uid, "Doctors", doctorId);
 
   try {
-    console.log("Start....this");
+    logDebug("Start....this");
     const clinicAppointmentsRef = collection(
       db,
       "Users",
@@ -1481,8 +1568,15 @@ export const retrieveApprovedDoctorAppointments = async (
 
     const [clinicAppointments, clinicAppointmentsUnregistered] =
       await Promise.all([
-        getDocs(clinicAppointmentsRef),
-        getDocs(clinicAppointmentsUnregisteredRef),
+        getDocsPreferCache(
+          query(clinicAppointmentsRef, limit(APPOINTMENTS_PAGE_LIMIT))
+        ),
+        getDocsPreferCache(
+          query(
+            clinicAppointmentsUnregisteredRef,
+            limit(APPOINTMENTS_PAGE_LIMIT)
+          )
+        ),
       ]);
 
     if (!clinicAppointments.empty) {
@@ -1493,20 +1587,20 @@ export const retrieveApprovedDoctorAppointments = async (
         queryDoctorAppointments
       );
     } else {
-      console.log('Colecția "clinicAppointments" nu există sau este goală.');
+      logDebug('Colecția "clinicAppointments" nu există sau este goală.');
     }
 
     if (!clinicAppointmentsUnregistered.empty) {
       const queryDoctorAppointmentsUnregistered =
         clinicAppointmentsUnregistered.docs.map((doc) => doc.data());
-      console.log("test before error....");
-      console.log(queryDoctorAppointmentsUnregistered);
+      logDebug("test before error....");
+      logDebug(queryDoctorAppointmentsUnregistered);
       allDoctorAppointmentsUnregistered =
         allDoctorAppointmentsUnregistered.concat(
           queryDoctorAppointmentsUnregistered
         );
     } else {
-      console.log(
+      logDebug(
         'Colecția "clinicAppointmentsUnregistered" nu există sau este goală.'
       );
     }
@@ -1519,7 +1613,7 @@ export const retrieveApprovedDoctorAppointments = async (
       let patientInfo;
       if (allDoctorAppointments[i].isApproved) {
         const patientRef = doc(db, "Users", allDoctorAppointments[i].patientId);
-        const patientSnap = await getDoc(patientRef);
+        const patientSnap = await getDocPreferCache(patientRef);
         if (patientSnap.exists()) {
           patientInfo = patientSnap.data();
           delete patientInfo.clinicsHistory;
@@ -1536,7 +1630,7 @@ export const retrieveApprovedDoctorAppointments = async (
           allDoctorAppointments[i].patientInfo = patientInfo;
         }
         approvedDoctorAppointments.push(allDoctorAppointments[i]);
-        console.log("YES....");
+        logDebug("YES....");
       }
     }
 
@@ -1557,41 +1651,41 @@ export const retrieveApprovedDoctorAppointments = async (
       } else upcommingAppointments.push(approvedAppointments[i]);
     }
 
-    // console.log('todaydAppointments...', todayAppointments);
-    // console.log('upcommingAppointments...', upcommingAppointments);
+    // logDebug('todaydAppointments...', todayAppointments);
+    // logDebug('upcommingAppointments...', upcommingAppointments);
 
-    console.log("-----------------START HERE------------------");
+    logDebug("-----------------START HERE------------------");
     for (const date in doctorCalendarTimes) {
-      console.log("...date.....", date);
+      logDebug("...date.....", date);
       const newDate = moment(date).format("DD-MM-YYYY");
       const timeSPackCheck = [];
       for (let i = 0; i < approvedDoctorAppointments.length; i++) {
-        console.log(
+        logDebug(
           "------approvedDoctorAppointments[i].daySelected------",
           approvedDoctorAppointments[i].daySelected
         );
-        console.log("------newDate------", newDate);
+        logDebug("------newDate------", newDate);
         if (newDate === approvedDoctorAppointments[i].daySelected) {
           timeSPackCheck.push(approvedDoctorAppointments[i].timeSelected);
           // doctorCalendarTimes[date].selectedColor = 'red';
         }
       }
-      console.log(
+      logDebug(
         "---------------timeSPackCheck----------------",
         timeSPackCheck
       );
 
       for (let i = 0; i < allDays.length; i++) {
-        // console.log("---------------allDays----------------", allDays[i])
-        // console.log("doctorCalendarTimes[i]...", doctorCalendarTimes[i])
+        // logDebug("---------------allDays----------------", allDays[i])
+        // logDebug("doctorCalendarTimes[i]...", doctorCalendarTimes[i])
         if (timeSPackCheck.length === allDays[i].timeSPack.length) {
-          console.log("YASSS");
+          logDebug("YASSS");
           doctorCalendarTimes[date].selectedColor = "red";
         }
       }
     }
   } catch (err) {
-    console.log(
+    logDebug(
       "Error APPROVED CLINIC APPOINTMENTS RETRIEVE FROM FIREBASE...",
       err
     );
@@ -1599,7 +1693,7 @@ export const retrieveApprovedDoctorAppointments = async (
 
   // setChangedDays(doctorTimes);
 
-  // console.log("-----------doctorCalendarTimes/////", doctorCalendarTimes)
+  // logDebug("-----------doctorCalendarTimes/////", doctorCalendarTimes)
 
   return {
     doctorCalendarTimes,
@@ -1613,13 +1707,13 @@ export const retrieveClinicsOfPatient = async () => {
   let clinics = [];
 
   const docRef = doc(db, "Users", auth.currentUser.uid);
-  const docSnap = await getDoc(docRef);
+  const docSnap = await getDocPreferCache(docRef);
   try {
     if (docSnap.exists()) {
       clinics = docSnap.data().clinicsHistory;
     }
   } catch (err) {
-    console.log("Error retrieving clinics history of patient...", err);
+    logDebug("Error retrieving clinics history of patient...", err);
   }
   return clinics;
 };
@@ -1632,20 +1726,28 @@ export const retrievePatientForReviews = async (
 
   try {
     let patientsWithReviews = [];
-    const q = query(collection(db, "Users"));
-
-    const querySnapshot = await getDocs(q);
-    querySnapshot.forEach((doc) => {
-      // doc.data() is never undefined for query doc snapshots
-      for (let i = 0; i < otherReviews.length; i++) {
-        if (doc.data().owner_uid === otherReviews[i].patientId) {
-          patientsWithReviews.push({
-            ...otherReviews[i],
-            patientImg: doc.data().patientImg,
-          });
+    const patientIds = Array.from(
+      new Set(otherReviews.map((review) => review.patientId).filter(Boolean))
+    );
+    const chunkSize = 10;
+    for (let i = 0; i < patientIds.length; i += chunkSize) {
+      const chunk = patientIds.slice(i, i + chunkSize);
+      const q = query(
+        collection(db, "Users"),
+        where("owner_uid", "in", chunk)
+      );
+      const querySnapshot = await getDocsPreferCache(q);
+      querySnapshot.forEach((doc) => {
+        for (let j = 0; j < otherReviews.length; j++) {
+          if (doc.data().owner_uid === otherReviews[j].patientId) {
+            patientsWithReviews.push({
+              ...otherReviews[j],
+              patientImg: doc.data().patientImg,
+            });
+          }
         }
-      }
-    });
+      });
+    }
     for (let i = 0; i < patientsWithReviews.length; i++) {
       const reference = ref(
         storage,
@@ -1657,14 +1759,14 @@ export const retrievePatientForReviews = async (
       });
     }
 
-    console.log("-----------TEST-------------");
+    logDebug("-----------TEST-------------");
 
-    console.log(patientsWithReviews);
+    logDebug(patientsWithReviews);
     const sortedOtherReviews = patientsWithReviews.sort((a, b) => {
       return b.rating - a.rating;
     });
     return sortedOtherReviews;
   } catch (err) {
-    console.log("error retrievePatientForReviews....", err);
+    logDebug("error retrievePatientForReviews....", err);
   }
 };

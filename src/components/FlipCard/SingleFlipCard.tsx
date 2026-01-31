@@ -14,6 +14,7 @@ import { useFocusEffect, useNavigation } from "@react-navigation/native"; // Imp
 import { screenName } from "../../utils/screenName";
 import { useLanguage } from "../../context/LanguageContext";
 import { colors } from "../../utils/colors";
+import { logDebug } from "../../utils/Logger";
 import { Image } from "react-native";
 import { normalizeString } from "../../utils/stringUtils";
 import { useNumberContext } from "../../context/NumberContext";
@@ -106,7 +107,7 @@ const SingleFlipCard = ({
 
   // Simplified function without ads for debugging
   const navigateToPersonalizedReading = async (isManualNav?) => {
-    console.log("[SingleFlipCard] navigateToPersonalizedReading manual?", !!isManualNav);
+    logDebug("[SingleFlipCard] navigateToPersonalizedReading manual?", !!isManualNav);
     try {
       if (isFuture) {
         // Direct navigation without ads
@@ -114,17 +115,17 @@ const SingleFlipCard = ({
           item,
         });
       } else {
-        console.log("[SingleFlipCard] here...");
+        logDebug("[SingleFlipCard] here...");
         
         const cardNameNormalized = normalizeString(item.info.ro.nume);
         const categoryNameNormalized = normalizeString(conditieCategorie);
-        console.log("[SingleFlipCard] query VarianteCarti with:", {cardNameNormalized, categoryNameNormalized});
+        logDebug("[SingleFlipCard] query VarianteCarti with:", {cardNameNormalized, categoryNameNormalized});
         const filteredVariante = await handleQueryFirestoreVarianteCarti(
           "VarianteCarti",
           cardNameNormalized,
           categoryNameNormalized
         );
-        console.log("[SingleFlipCard] filteredVariante length:", filteredVariante.length);
+        logDebug("[SingleFlipCard] filteredVariante length:", filteredVariante.length);
 
         // Verificare dacă există elemente în array-ul filtrat
         if (filteredVariante.length > 0) {
@@ -136,17 +137,17 @@ const SingleFlipCard = ({
           
           // ---- START HISTORY ----
           if (currentNumber !== 0) {
-            console.log("sendToHistory...currentnr < 8", sendToHistory);
+            logDebug("sendToHistory...currentnr < 8", sendToHistory);
             let arr = [...sendToHistory];
             arr.push(selectedCard);
             setSendToHistory([...arr]);
           } else if (currentNumber === 0) {
-            console.log("sendToHistory...currentnr === 8", sendToHistory);
+            logDebug("sendToHistory...currentnr === 8", sendToHistory);
             let arr = [...sendToHistory];
             arr.push(selectedCard);
             const auth = authentication;
             if (auth.currentUser) {
-              console.log("Is user...saving personal reading...");
+              logDebug("Is user...saving personal reading...");
               const userLocation = `Users/${
                 auth.currentUser ? auth.currentUser.uid : ""
               }/PersonalReading`;
@@ -163,13 +164,13 @@ const SingleFlipCard = ({
             item: selectedCard,
           });
         } else {
-          console.log(
+          logDebug(
             "Nicio carte nu a fost găsită pentru criteriile specificate."
           );
         }
       }
     } catch (err) {
-      console.log("Error at navigateToPersonalizedReading...", err);
+      logDebug("Error at navigateToPersonalizedReading...", err);
     }
   };
 
@@ -184,23 +185,23 @@ const SingleFlipCard = ({
 
   // useFocusEffect(
   //   React.useCallback(() => {
-  //     console.log("focus on filp card...");
+  //     logDebug("focus on filp card...");
   //     if (number === currentNumber) {
-  //       console.log("is equal to current number", currentNumber);
-  //       console.log("number", number);
+  //       logDebug("is equal to current number", currentNumber);
+  //       logDebug("number", number);
   //     }
   //     return () => {
-  //       console.log("Unfocus on filp card...");
+  //       logDebug("Unfocus on filp card...");
   //     };
   //   }, [])
   // );
 
   useFocusEffect(
     React.useCallback(() => {
-      console.log("currentNumber in FlipCard:", currentNumber);
+      logDebug("currentNumber in FlipCard:", currentNumber);
       if (number === currentNumber && number !== 1 && currentNumber !== 1) {
-        console.log("is equal to current number.........", currentNumber);
-        console.log("number", number);
+        logDebug("is equal to current number.........", currentNumber);
+        logDebug("number", number);
         // if (number === 8) {
         //   updateNumber(1);
         // }

@@ -286,12 +286,12 @@ export const ApiDataProvider = ({ children }) => {
 
       setCartiViitor(await getDataOrFetch("Citire-Viitor", "Carti"));
       setCategoriiViitor(await getDataOrFetch("Citire-Viitor", "Categorii"));
-      // setCitateMotivationale(
-      //   await getDataOrFetch("Others", "Citate-Motivationale")
-      // );
-      // setCuloriNorocoase(await getDataOrFetch("Others", "Culori-Norocoase"));
-      // setNumereNorocoase(await getDataOrFetch("Others", "Numere-Norocoase"));
-      // setOreNorocoase(await getDataOrFetch("Others", "Ore-Norocoase"));
+      setCitateMotivationale(
+        await getDataOrFetch("Others", "Citate-Motivationale")
+      );
+      setCuloriNorocoase(await getDataOrFetch("Others", "Culori-Norocoase"));
+      setNumereNorocoase(await getDataOrFetch("Others", "Numere-Norocoase"));
+      setOreNorocoase(await getDataOrFetch("Others", "Ore-Norocoase"));
 
       setLoading(false);
     } catch (err) {

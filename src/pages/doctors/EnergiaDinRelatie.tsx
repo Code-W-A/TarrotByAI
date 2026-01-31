@@ -15,6 +15,7 @@ import GreetingBar from "../../components/UpperGreetingBar/GreetingBar";
 import CardLayout from "../../components/CardLayout/CardLayout";
 import CustomSpinner from "../../components/CustomSpinner/CustomSpinner";
 import { colors } from "../../utils/colors";
+import { logDebug } from "../../utils/Logger";
 import { useApiData } from "../../context/ApiContext";
 import { MainContainer } from "../../components/commonViews";
 import i18n, { languageCode } from "../../../i18n";
@@ -77,7 +78,7 @@ const EnergiaDinRelatie = ({ route }) => {
     if (isFirstEntry.current) {
       setLoading(true);
       shuffleCartiPersonalizate();
-      console.log("Executat doar la prima intrare în acest ecran");
+      logDebug("Executat doar la prima intrare în acest ecran");
 
       // Setează flag-ul pe false, astfel încât logica să nu se mai execute la următoarele intrări
       isFirstEntry.current = false;
@@ -86,7 +87,7 @@ const EnergiaDinRelatie = ({ route }) => {
 
   // Initialize card animations and animate cards on mount and categoriiPersonalizate change
   useEffect(() => {
-    console.log("TEst...", shuffledCartiPersonalizate.length);
+    logDebug("TEst...", shuffledCartiPersonalizate.length);
     if (shuffledCartiPersonalizate.length === 0 || triggerExitAnimation) return;
 
     const screenWidth = Dimensions.get("window").width;
@@ -111,7 +112,7 @@ const EnergiaDinRelatie = ({ route }) => {
   }, [shuffledCartiPersonalizate, triggerExitAnimation]); // Depend on shuffledCartiPersonalizate and triggerExitAnimation
 
   useEffect(() => {
-    console.log("language...", language);
+    logDebug("language...", language);
   }, [language]);
 
   // Animate cards out of view
@@ -172,7 +173,7 @@ const EnergiaDinRelatie = ({ route }) => {
   }, [triggerExitAnimation, opacityAnim]); // Dependențe: triggerExitAnimation și opacityAnim
 
   useEffect(() => {
-    console.log("Tryyy...", categoriiPersonalizate.length);
+    logDebug("Tryyy...", categoriiPersonalizate.length);
   }, []);
 
   const renderFlipCard = (category, index) => {

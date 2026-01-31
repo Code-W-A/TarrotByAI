@@ -29,8 +29,8 @@ import {
   startAfter,
   endBefore,
   limit,
-  getDocs,
 } from "firebase/firestore";
+import { getDocsPreferCache } from "../utils/firestoreCache";
 import { authentication, db } from "../../firebase";
 import { Ionicons } from "@expo/vector-icons";
 import { parseDate } from "../utils/commonUtils";
@@ -58,7 +58,7 @@ export default function HistoryTarrot() {
         orderBy("date"),
         limit(20)
       );
-      const querySnapshot = await getDocs(newQuery);
+      const querySnapshot = await getDocsPreferCache(newQuery);
 
       if (!querySnapshot.empty) {
         const newImages = querySnapshot.docs.map((doc) => doc.data());

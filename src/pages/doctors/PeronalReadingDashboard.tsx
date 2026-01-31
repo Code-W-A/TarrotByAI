@@ -17,6 +17,7 @@ import GreetingBar from "../../components/UpperGreetingBar/GreetingBar";
 import CardLayout from "../../components/CardLayout/CardLayout";
 import CustomSpinner from "../../components/CustomSpinner/CustomSpinner";
 import { colors } from "../../utils/colors";
+import { logDebug } from "../../utils/Logger";
 import { useApiData } from "../../context/ApiContext";
 import { MainContainer } from "../../components/commonViews";
 import i18n, { languageCode } from "../../../i18n";
@@ -75,10 +76,10 @@ const PersonalReadingDashboard = ({ route }) => {
 
   useEffect(() => {
     if (isFirstEntry.current) {
-      console.log("[PRD] first entry → setLoading(true) & shuffleCartiPersonalizate()");
+      logDebug("[PRD] first entry → setLoading(true) & shuffleCartiPersonalizate()");
       setLoading(true);
       shuffleCartiPersonalizate();
-      console.log("Executat doar la prima intrare în acest ecran");
+      logDebug("Executat doar la prima intrare în acest ecran");
 
       // Setează flag-ul pe false, astfel încât logica să nu se mai execute la următoarele intrări
       isFirstEntry.current = false;
@@ -87,8 +88,8 @@ const PersonalReadingDashboard = ({ route }) => {
 
   // Initialize card animations and animate cards on mount and categoriiPersonalizate change
   useEffect(() => {
-    console.log("[PRD] shuffledCartiPersonalizate length:", shuffledCartiPersonalizate.length, " triggerExitAnimation:", triggerExitAnimation);
-    console.log("[PRD] categoriiPersonalizate length:", categoriiPersonalizate ? categoriiPersonalizate.length : 0, " loading:", loading);
+    logDebug("[PRD] shuffledCartiPersonalizate length:", shuffledCartiPersonalizate.length, " triggerExitAnimation:", triggerExitAnimation);
+    logDebug("[PRD] categoriiPersonalizate length:", categoriiPersonalizate ? categoriiPersonalizate.length : 0, " loading:", loading);
     if (shuffledCartiPersonalizate.length === 0 || triggerExitAnimation) return;
 
     const screenWidth = Dimensions.get("window").width;
@@ -113,7 +114,7 @@ const PersonalReadingDashboard = ({ route }) => {
   }, [shuffledCartiPersonalizate, triggerExitAnimation]); // Depend on shuffledCartiPersonalizate and triggerExitAnimation
 
   useEffect(() => {
-    console.log("[PRD] language:", language);
+    logDebug("[PRD] language:", language);
   }, [language]);
 
   // Animate cards out of view
@@ -164,7 +165,7 @@ const PersonalReadingDashboard = ({ route }) => {
   useEffect(() => {
     // Acest useEffect va fi activat când `triggerExitAnimation` se schimbă
     if (triggerExitAnimation) {
-      console.log("[PRD] triggerExitAnimation true → fade out cards");
+      logDebug("[PRD] triggerExitAnimation true → fade out cards");
       // Inițiați animația de fade out
       Animated.timing(opacityAnim, {
         toValue: 0,
@@ -175,13 +176,13 @@ const PersonalReadingDashboard = ({ route }) => {
   }, [triggerExitAnimation, opacityAnim]); // Dependențe: triggerExitAnimation și opacityAnim
 
   useEffect(() => {
-    console.log("Tryyy...", categoriiPersonalizate.length);
+    logDebug("Tryyy...", categoriiPersonalizate.length);
   }, []);
 
   const renderFlipCard = (category, index) => {
     // Function to get the categoryName based on the language
     const getCategoryName = (category, language) => {
-      console.log("category....", category.info);
+      logDebug("category....", category.info);
 
       if (language === "hi") {
         return category.info.hu?.nume;
@@ -197,7 +198,7 @@ const PersonalReadingDashboard = ({ route }) => {
     };
 
     if (!cardAnimations[index]) {
-      console.log("[PRD] missing animation for index", index);
+      logDebug("[PRD] missing animation for index", index);
       return null;
     }
 
@@ -208,7 +209,7 @@ const PersonalReadingDashboard = ({ route }) => {
       transform: [{ translateX: cardAnimations[index] }],
     };
 
-    console.log("[PRD] renderFlipCard index=", index, " category(ro)=", category.info?.ro?.nume);
+    logDebug("[PRD] renderFlipCard index=", index, " category(ro)=", category.info?.ro?.nume);
     return (
       <View
         style={{

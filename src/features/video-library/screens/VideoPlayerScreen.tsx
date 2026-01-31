@@ -1,8 +1,9 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   ImageBackground,
   Linking,
+  Modal,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -21,7 +22,6 @@ import { useAuth } from "../../../context/AuthContext";
 import type { Video } from "../types/video";
 import { getEmbedUrl, getWatchUrl } from "../utils/videoEmbed";
 import { EmptyState } from "../components/EmptyState";
-import { PremiumPaywall } from "../components/PremiumPaywall";
 import i18n from "../../../../i18n";
 import { recordVideoInterstitialShown, shouldShowVideoInterstitial } from "../utils/videoAdPolicy";
 
@@ -43,6 +43,8 @@ const VideoPlayerScreen: React.FC = () => {
   const [adLoading, setAdLoading] = useState(false);
   const [rewardedLoading, setRewardedLoading] = useState(false);
   const [unlockedThisSession, setUnlockedThisSession] = useState(false);
+  const [unlockModalVisible, setUnlockModalVisible] = useState(false);
+  const hasPromptedRef = useRef(false);
 
   // TODO: Wire real premium status when available on userData.
   const isPremiumUser = Boolean((userData as any)?.isPremiumUser);
@@ -126,8 +128,20 @@ const VideoPlayerScreen: React.FC = () => {
     setRewardedLoading(false);
     if (earned) {
       setUnlockedThisSession(true);
+      setUnlockModalVisible(false);
     }
   };
+
+  useEffect(() => {
+    if (!video) return;
+    if (isPremiumUser) return;
+    if (!canShowAds) return;
+    if (!isVideoLocked) return;
+    if (hasPromptedRef.current) return;
+
+    hasPromptedRef.current = true;
+    setUnlockModalVisible(true);
+  }, [canShowAds, isPremiumUser, isVideoLocked, video]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -154,6 +168,50 @@ const VideoPlayerScreen: React.FC = () => {
           </Text>
         </View>
 
+        <Modal
+          visible={unlockModalVisible}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setUnlockModalVisible(false)}
+        >
+          <View style={styles.unlockModalOverlay}>
+            <View style={styles.unlockModalCard}>
+              <Text style={styles.unlockModalTitle}>
+                {i18n.translate("videoPremiumBadge")}
+              </Text>
+              <Text style={styles.unlockModalMessage}>
+                {i18n.translate("rewardedUnlockCta")}
+              </Text>
+
+              <TouchableOpacity
+                onPress={handleUnlockWithAd}
+                disabled={rewardedLoading}
+                style={styles.unlockModalPrimary}
+              >
+                {rewardedLoading ? (
+                  <ActivityIndicator size="small" color={colors.gold} />
+                ) : (
+                  <Text style={styles.unlockModalPrimaryText}>
+                    {i18n.translate("rewardedUnlockCta")}
+                  </Text>
+                )}
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => {
+                  setUnlockModalVisible(false);
+                  handleBack();
+                }}
+                style={styles.unlockModalSecondary}
+              >
+                <Text style={styles.unlockModalSecondaryText}>
+                  {i18n.translate("premiumPaywallClose")}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+
         {!video ? (
           <EmptyState
             title={i18n.translate("videoUnavailableTitle")}
@@ -163,24 +221,6 @@ const VideoPlayerScreen: React.FC = () => {
           />
         ) : (
           <View style={styles.content}>
-              {isVideoLocked ? (
-                <View style={styles.lockedContainer}>
-                  <PremiumPaywall variant="inline" />
-                  <TouchableOpacity
-                    onPress={handleUnlockWithAd}
-                    disabled={rewardedLoading}
-                    style={styles.unlockWithAdButton}
-                  >
-                    {rewardedLoading ? (
-                      <ActivityIndicator size="small" color={colors.gold} />
-                    ) : (
-                      <Text style={styles.unlockWithAdText}>
-                        {i18n.translate("rewardedUnlockCta")}
-                      </Text>
-                    )}
-                  </TouchableOpacity>
-                </View>
-              ) : (
             <View style={styles.playerContainer}>
               {!embedUrl ? (
                 <EmptyState
@@ -241,17 +281,17 @@ const VideoPlayerScreen: React.FC = () => {
                   />
                 </>
               )}
+              {isVideoLocked ? <View style={styles.playerLockOverlay} /> : null}
             </View>
-              )}
-              <Text style={styles.title}>{displayTitle}</Text>
-              {!isVideoLocked && displayDescription ? (
-                <ScrollView 
-                  style={styles.descriptionScroll}
-                  showsVerticalScrollIndicator={false}
-                >
-                  <Text style={styles.description}>{displayDescription}</Text>
-                </ScrollView>
-              ) : null}
+            <Text style={styles.title}>{displayTitle}</Text>
+            {displayDescription ? (
+              <ScrollView 
+                style={styles.descriptionScroll}
+                showsVerticalScrollIndicator={false}
+              >
+                <Text style={styles.description}>{displayDescription}</Text>
+              </ScrollView>
+            ) : null}
           </View>
         )}
         {adLoading ? (
@@ -319,32 +359,59 @@ const styles = StyleSheet.create({
     elevation: 8,
     marginBottom: 16,
   },
-  lockedContainer: {
-    width: "100%",
-    aspectRatio: 16 / 9,
-    borderRadius: 24,
-    overflow: "hidden",
-    backgroundColor: "rgba(191, 167, 106, 0.12)",
-    borderWidth: 1,
-    borderColor: "rgba(191, 167, 106, 0.3)",
-    marginBottom: 16,
+  unlockModalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.55)",
+    alignItems: "center",
     justifyContent: "center",
+    paddingHorizontal: 22,
   },
-  unlockWithAdButton: {
-    alignSelf: "center",
-    marginTop: 14,
+  unlockModalCard: {
+    width: "100%",
+    maxWidth: 420,
+    borderRadius: 20,
     paddingHorizontal: 18,
-    paddingVertical: 12,
-    borderRadius: 16,
-    backgroundColor: "rgba(0, 0, 0, 0.06)",
+    paddingVertical: 18,
+    backgroundColor: "rgba(255,255,255,0.96)",
     borderWidth: 1,
-    borderColor: "rgba(191, 167, 106, 0.45)",
+    borderColor: "rgba(191, 167, 106, 0.25)",
   },
-  unlockWithAdText: {
+  unlockModalTitle: {
+    fontSize: 18,
+    fontWeight: "800",
     color: "#5d4e37",
-    fontWeight: "700",
+    marginBottom: 6,
+  },
+  unlockModalMessage: {
     fontSize: 14,
+    color: "#6b5a44",
+    marginBottom: 14,
+  },
+  unlockModalPrimary: {
+    borderRadius: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    alignItems: "center",
+    backgroundColor: "rgba(191, 167, 106, 0.18)",
+    borderWidth: 1,
+    borderColor: "rgba(191, 167, 106, 0.55)",
+  },
+  unlockModalPrimaryText: {
+    fontSize: 14,
+    fontWeight: "800",
+    color: "#5d4e37",
     letterSpacing: -0.2,
+  },
+  unlockModalSecondary: {
+    alignSelf: "center",
+    marginTop: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+  },
+  unlockModalSecondaryText: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#8b7355",
   },
   title: {
     fontSize: 24,
@@ -400,6 +467,11 @@ const styles = StyleSheet.create({
   webview: {
     flex: 1,
     backgroundColor: colors.pureBlack,
+  },
+  playerLockOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.35)",
+    zIndex: 3,
   },
   adOverlay: {
     ...StyleSheet.absoluteFillObject,

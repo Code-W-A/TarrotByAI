@@ -1,5 +1,6 @@
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, query, where } from "firebase/firestore";
 import { authentication, db } from "../../firebase";
+import { getDocsPreferCache } from "./firestoreCache";
 
 export const handleGetUserInfo = async () => {
   let userData;
@@ -10,7 +11,7 @@ export const handleGetUserInfo = async () => {
       where("owner_uid", "==", auth.currentUser.uid)
     );
 
-    const querySnapshot = await getDocs(q);
+    const querySnapshot = await getDocsPreferCache(q);
     querySnapshot.forEach((doc) => {
       // doc.data() is never undefined for query doc snapshots
       userData = doc.data();

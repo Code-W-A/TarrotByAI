@@ -65,7 +65,8 @@ import RattingDialog from "../../components/RattingDialog/RattingDialog";
 import LongCard from "../../components/MenuCard/LongCard";
 import AutoScrollingFlatList from "../../components/MenuCard/AutoScrollingFlatList";
 import MoreInfoModal from "../../components/Astral/components/MoreInfoModal";
-import { doc, getFirestore, updateDoc, collection, query, orderBy, limit, getDocs, getDoc } from "firebase/firestore";
+import { doc, getFirestore, updateDoc, collection, query, orderBy, limit } from "firebase/firestore";
+import { getDocPreferCache, getDocsPreferCache } from "../../utils/firestoreCache";
 import { db } from "../../../firebase";
 import { filterArticlesBeforeCurrentTime } from "../../utils/commonUtils";
 import { NewsDetailsModal } from "../../components/NewsDetailsModal/NewsDetailsModal";
@@ -541,7 +542,7 @@ const TarotMaineScreen = () => {
       try {
         const articlesRef = collection(db, "BlogArticole");
         const q = query(articlesRef, orderBy("firstUploadTimestamp", "desc"), limit(3));
-        const snapshot = await getDocs(q);
+        const snapshot = await getDocsPreferCache(q);
         const articles = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         const filtered = filterArticlesBeforeCurrentTime(articles);
         setLatestArticles(filtered);
@@ -563,7 +564,7 @@ const TarotMaineScreen = () => {
     const checkUpdate = async () => {
       try {
         const docRef = doc(db, 'ShouldUpdate', 'unicde');
-        const docSnap = await getDoc(docRef);
+        const docSnap = await getDocPreferCache(docRef);
         if (docSnap.exists() && docSnap.data().update === true) {
           const lastDismissed = await AsyncStorage.getItem(UPDATE_MODAL_KEY);
           if (!lastDismissed) {

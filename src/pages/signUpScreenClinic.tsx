@@ -60,7 +60,8 @@ import { InputFields } from "../components/commonInputFields";
 
 import { authentication, db, storage } from "../../firebase";
 import { ref, uploadBytes, uploadBytesResumable } from "firebase/storage";
-import { setDoc, doc, getDoc } from "firebase/firestore";
+import { setDoc, doc } from "firebase/firestore";
+import { getDocPreferCache } from "../utils/firestoreCache";
 import {
   createUserWithEmailAndPassword,
   signOut,
@@ -207,7 +208,7 @@ const SignUpScreenClinic: React.FC<Props> = ({ navigation }): JSX.Element => {
         console.log("Start....", value);
 
         const userRef = doc(db, collectionId, documentId);
-        const docSnapshot = await getDoc(userRef);
+        const docSnapshot = await getDocPreferCache(userRef);
 
         if (!docSnapshot.exists()) {
           await setDoc(userRef, value);
@@ -280,7 +281,7 @@ const SignUpScreenClinic: React.FC<Props> = ({ navigation }): JSX.Element => {
       };
 
       const userRef = doc(db, collectionId, documentId);
-      const docSnapshot = await getDoc(userRef);
+      const docSnapshot = await getDocPreferCache(userRef);
 
       if (!docSnapshot.exists()) {
         await setDoc(userRef, value);

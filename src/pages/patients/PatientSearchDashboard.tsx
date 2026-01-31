@@ -62,7 +62,8 @@ import { getDownloadURL, ref } from "firebase/storage";
 import { db, storage } from "../../../firebase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { schedulePushNotificationOnAppointment } from "../../utils/Notification/scheduleLocalNotification";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, query, where, limit } from "firebase/firestore";
+import { getDocsPreferCache } from "../../utils/firestoreCache";
 import i18n from "../../../i18n";
 
 import {
@@ -118,6 +119,10 @@ const SpecialitiesList: React.FC<SpecialitiesList> = ({ onPressViewAll }) => {
 interface Props extends GeneralProps {
   route: Route<string, object | undefined>;
 }
+
+const CLINIC_SEARCH_LIMIT = 50;
+const DOCTOR_SEARCH_LIMIT = 50;
+const SUBCOLLECTION_LIMIT = 50;
 const PatientSearchDashboard: React.FC<Props> = ({
   navigation,
   route,
@@ -209,8 +214,12 @@ const PatientSearchDashboard: React.FC<Props> = ({
       const usersRef = collection(db, "Users");
 
       // Create a query against the collection.
-      const q = query(usersRef, where("clinicCity", "==", city));
-      const querySnapshot = await getDocs(q);
+      const q = query(
+        usersRef,
+        where("clinicCity", "==", city),
+        limit(CLINIC_SEARCH_LIMIT)
+      );
+      const querySnapshot = await getDocsPreferCache(q);
 
       for (const doc of querySnapshot.docs) {
         // doc.data() is never undefined for query doc snapshots
@@ -237,8 +246,11 @@ const PatientSearchDashboard: React.FC<Props> = ({
       for (let i = 0; i < clinicsAroundPatient.length; i++) {
         console.log("loop test");
         let clinicDoctors = [];
-        const querySnapshot = await getDocs(
-          collection(db, "Users", clinicsAroundPatient[i].owner_uid, "Doctors")
+        const querySnapshot = await getDocsPreferCache(
+          query(
+            collection(db, "Users", clinicsAroundPatient[i].owner_uid, "Doctors"),
+            limit(SUBCOLLECTION_LIMIT)
+          )
         );
 
         for (const doc of querySnapshot.docs) {
@@ -252,12 +264,15 @@ const PatientSearchDashboard: React.FC<Props> = ({
 
           // Query a reference to a subcollection
           let clinicAppointmentsUnregistered = [];
-          const subcollectionQuerySnapshot = await getDocs(
-            collection(
-              db,
-              "Doctors",
-              doc.id,
-              "clinicAppointmentsUnregisteredDocCol"
+          const subcollectionQuerySnapshot = await getDocsPreferCache(
+            query(
+              collection(
+                db,
+                "Doctors",
+                doc.id,
+                "clinicAppointmentsUnregisteredDocCol"
+              ),
+              limit(SUBCOLLECTION_LIMIT)
             )
           );
 
@@ -286,8 +301,12 @@ const PatientSearchDashboard: React.FC<Props> = ({
       const doctorsRef = collection(db, "Doctors");
 
       // Create a query against the collection.
-      const qDoctors = query(doctorsRef, where("clinicCity", "==", city));
-      const querySnapshotDoctors = await getDocs(qDoctors);
+      const qDoctors = query(
+        doctorsRef,
+        where("clinicCity", "==", city),
+        limit(DOCTOR_SEARCH_LIMIT)
+      );
+      const querySnapshotDoctors = await getDocsPreferCache(qDoctors);
 
       for (const doc of querySnapshotDoctors.docs) {
         // doc.data() is never undefined for query doc snapshots
@@ -302,12 +321,15 @@ const PatientSearchDashboard: React.FC<Props> = ({
 
         // Query a reference to a subcollection
         let clinicAppointmentsUnregistered = [];
-        const subcollectionQuerySnapshot = await getDocs(
-          collection(
-            db,
-            "Doctors",
-            doc.id,
-            "clinicAppointmentsUnregisteredDocCol"
+        const subcollectionQuerySnapshot = await getDocsPreferCache(
+          query(
+            collection(
+              db,
+              "Doctors",
+              doc.id,
+              "clinicAppointmentsUnregisteredDocCol"
+            ),
+            limit(SUBCOLLECTION_LIMIT)
           )
         );
 
@@ -430,11 +452,12 @@ const PatientSearchDashboard: React.FC<Props> = ({
 
         const q = query(
           collection(db, "Doctors"),
-          where("doctorId", "==", filterUpcomingApp[i].doctorId)
+          where("doctorId", "==", filterUpcomingApp[i].doctorId),
+          limit(1)
         );
 
         let startQuerySnapshot = Date.now() / 1000;
-        const querySnapshot = await getDocs(q);
+        const querySnapshot = await getDocsPreferCache(q);
 
         console.log("test before querySnapshot");
         let basicInfoDoctor;

@@ -17,6 +17,7 @@ import styles from "./styles";
 import { Ionicons } from "@expo/vector-icons";
 import { FontAwesome } from "@expo/vector-icons";
 import { colors } from "../../utils/colors";
+import { logDebug } from "../../utils/Logger";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { WebView } from "react-native-webview";
 import { Video } from "expo-av";
@@ -122,31 +123,31 @@ export const NewsDetailsModal: React.FC<{
 `;
 
   // Debug YouTube links - DETAILED LOGGING
-  console.log("🎥 =========================");
-  console.log("🎥 YOUTUBE DEBUG START");
-  console.log("🎥 =========================");
-  console.log("🎥 Raw article object:", article);
+  logDebug("🎥 =========================");
+  logDebug("🎥 YOUTUBE DEBUG START");
+  logDebug("🎥 =========================");
+  logDebug("🎥 Raw article object:", article);
   const normalizedYoutubeLinks = Array.isArray(article?.youtubeLinks)
     ? article.youtubeLinks
     : handleYotubeLinksToArray(article?.youtubeLinks);
 
-  console.log("🎥 article?.youtubeLinks:", article?.youtubeLinks);
-  console.log("🎥 typeof youtubeLinks:", typeof article?.youtubeLinks);
-  console.log(
+  logDebug("🎥 article?.youtubeLinks:", article?.youtubeLinks);
+  logDebug("🎥 typeof youtubeLinks:", typeof article?.youtubeLinks);
+  logDebug(
     "🎥 Array.isArray(youtubeLinks):",
     Array.isArray(article?.youtubeLinks)
   );
-  console.log("🎥 youtubeLinks length:", article?.youtubeLinks?.length);
-  console.log("🎥 normalizedYoutubeLinks length:", normalizedYoutubeLinks.length);
+  logDebug("🎥 youtubeLinks length:", article?.youtubeLinks?.length);
+  logDebug("🎥 normalizedYoutubeLinks length:", normalizedYoutubeLinks.length);
   
   // Test each link individually
   if (normalizedYoutubeLinks.length > 0) {
-    console.log("🎥 Processing each YouTube link:");
+    logDebug("🎥 Processing each YouTube link:");
     normalizedYoutubeLinks.forEach((link, index) => {
-      console.log(`🎯 Link ${index}:`, link);
-      console.log(`🎯 Link ${index} type:`, typeof link);
-      console.log(`🎯 Link ${index} length:`, link?.length);
-      console.log(`🎯 Link ${index} trimmed:`, link?.trim());
+      logDebug(`🎯 Link ${index}:`, link);
+      logDebug(`🎯 Link ${index} type:`, typeof link);
+      logDebug(`🎯 Link ${index} length:`, link?.length);
+      logDebug(`🎯 Link ${index} trimmed:`, link?.trim());
     });
   }
 
@@ -155,27 +156,27 @@ export const NewsDetailsModal: React.FC<{
       ? normalizedYoutubeLinks
           .filter((link) => {
           const isValid = link && link.trim() !== "";
-          console.log(`🔍 Link validation: "${link}" -> ${isValid}`);
+          logDebug(`🔍 Link validation: "${link}" -> ${isValid}`);
           return isValid;
         })
         .map((link, index) => {
-          console.log(`🎯 =========================`);
-          console.log(`🎯 Processing YouTube link ${index}`);
-          console.log(`🎯 Original link:`, link);
-          console.log(`🎯 Link includes "watch?v=":`, link.includes("watch?v="));
-          console.log(`🎯 Link includes "list=":`, link.includes("list="));
+          logDebug(`🎯 =========================`);
+          logDebug(`🎯 Processing YouTube link ${index}`);
+          logDebug(`🎯 Original link:`, link);
+          logDebug(`🎯 Link includes "watch?v=":`, link.includes("watch?v="));
+          logDebug(`🎯 Link includes "list=":`, link.includes("list="));
           
           const embedUrl = getYoutubeEmbedUrl(link);
-          console.log(`🔗 Generated embed URL:`, embedUrl);
-          console.log(`🔗 Embed URL valid:`, embedUrl && embedUrl.length > 0);
+          logDebug(`🔗 Generated embed URL:`, embedUrl);
+          logDebug(`🔗 Embed URL valid:`, embedUrl && embedUrl.length > 0);
           
           // Test if the URL structure is correct
           if (embedUrl) {
-            console.log(`🔗 Embed URL parts:`, embedUrl.split('/'));
-            console.log(`🔗 Contains youtube.com:`, embedUrl.includes('youtube.com'));
-            console.log(`🔗 Contains embed:`, embedUrl.includes('embed'));
+            logDebug(`🔗 Embed URL parts:`, embedUrl.split('/'));
+            logDebug(`🔗 Contains youtube.com:`, embedUrl.includes('youtube.com'));
+            logDebug(`🔗 Contains embed:`, embedUrl.includes('embed'));
           } else {
-            console.log("❌ Skipping iframe, embed URL invalid");
+            logDebug("❌ Skipping iframe, embed URL invalid");
             return "";
           }
 
@@ -200,22 +201,22 @@ export const NewsDetailsModal: React.FC<{
              </div>
            `;
           
-          console.log(`🎬 Generated iframe HTML length:`, iframeHTML.length);
+          logDebug(`🎬 Generated iframe HTML length:`, iframeHTML.length);
           return iframeHTML;
         })
           .filter((html) => html)
         .join("")
     : "";
   
-  console.log("🎬 =========================");
-  console.log("🎬 FINAL YOUTUBE HTML DEBUG");
-  console.log("🎬 =========================");
-  console.log("🎬 Final YouTube HTML length:", youtubeEmbedHTML.length);
-  console.log("🎬 Final YouTube HTML preview (first 500 chars):");
-  console.log(youtubeEmbedHTML.substring(0, 500));
-  console.log("🎬 Contains iframe tag:", youtubeEmbedHTML.includes('<iframe'));
-  console.log("🎬 Contains youtube.com:", youtubeEmbedHTML.includes('youtube.com'));
-  console.log("🎬 =========================");
+  logDebug("🎬 =========================");
+  logDebug("🎬 FINAL YOUTUBE HTML DEBUG");
+  logDebug("🎬 =========================");
+  logDebug("🎬 Final YouTube HTML length:", youtubeEmbedHTML.length);
+  logDebug("🎬 Final YouTube HTML preview (first 500 chars):");
+  logDebug(youtubeEmbedHTML.substring(0, 500));
+  logDebug("🎬 Contains iframe tag:", youtubeEmbedHTML.includes('<iframe'));
+  logDebug("🎬 Contains youtube.com:", youtubeEmbedHTML.includes('youtube.com'));
+  logDebug("🎬 =========================");
 
   const youtubeVideoId = "caWBmvhRcII"; // ID-ul videoclipului YouTube
 
@@ -227,14 +228,14 @@ export const NewsDetailsModal: React.FC<{
     ? article?.info?.rusa?.content
     : article?.info[language]?.content;
 
-  console.log("📄 =========================");
-  console.log("📄 ARTICLE CONTENT DEBUG");
-  console.log("📄 =========================");
-  console.log("📄 Current language:", language);
-  console.log("📄 Article content length:", articleContent?.length);
-  console.log("📄 Article content preview (first 200 chars):");
-  console.log(articleContent?.substring(0, 200));
-  console.log("🎬 YouTube HTML will be added:", youtubeEmbedHTML.length > 0);
+  logDebug("📄 =========================");
+  logDebug("📄 ARTICLE CONTENT DEBUG");
+  logDebug("📄 =========================");
+  logDebug("📄 Current language:", language);
+  logDebug("📄 Article content length:", articleContent?.length);
+  logDebug("📄 Article content preview (first 200 chars):");
+  logDebug(articleContent?.substring(0, 200));
+  logDebug("🎬 YouTube HTML will be added:", youtubeEmbedHTML.length > 0);
 
   const fullHTMLContent = `
   <!DOCTYPE html>
@@ -255,21 +256,21 @@ export const NewsDetailsModal: React.FC<{
   </html>
 `;
 
-  console.log("📋 =========================");
-  console.log("📋 FINAL HTML DEBUG");
-  console.log("📋 =========================");
-  console.log("📋 Full HTML length:", fullHTMLContent.length);
-  console.log("📋 HTML contains iframe:", fullHTMLContent.includes('<iframe'));
-  console.log("📋 HTML contains youtube.com:", fullHTMLContent.includes('youtube.com'));
-  console.log("📋 Number of iframes:", (fullHTMLContent.match(/<iframe/g) || []).length);
-  console.log("📋 HTML preview around YouTube section:");
+  logDebug("📋 =========================");
+  logDebug("📋 FINAL HTML DEBUG");
+  logDebug("📋 =========================");
+  logDebug("📋 Full HTML length:", fullHTMLContent.length);
+  logDebug("📋 HTML contains iframe:", fullHTMLContent.includes('<iframe'));
+  logDebug("📋 HTML contains youtube.com:", fullHTMLContent.includes('youtube.com'));
+  logDebug("📋 Number of iframes:", (fullHTMLContent.match(/<iframe/g) || []).length);
+  logDebug("📋 HTML preview around YouTube section:");
   const youtubePosition = fullHTMLContent.indexOf('📺 Video');
   if (youtubePosition > -1) {
-    console.log(fullHTMLContent.substring(youtubePosition - 100, youtubePosition + 500));
+    logDebug(fullHTMLContent.substring(youtubePosition - 100, youtubePosition + 500));
   } else {
-    console.log("❌ No YouTube section found in HTML");
+    logDebug("❌ No YouTube section found in HTML");
   }
-  console.log("📋 =========================");
+  logDebug("📋 =========================");
 
   //   const handleURLPress = useCallback(() => {
   //     Linking.openURL(article?.url);
@@ -284,7 +285,7 @@ export const NewsDetailsModal: React.FC<{
         const isArticleSaved = savedArticles.some(
           (a) => a.documentId === article.documentId
         );
-        console.log("is saved...", isArticleSaved);
+        logDebug("is saved...", isArticleSaved);
         setIsSaved(isArticleSaved);
       } catch (error) {
         console.error("Failed to check if the article is saved", error);
@@ -452,8 +453,8 @@ export const NewsDetailsModal: React.FC<{
               javaScriptEnabled={true}
               domStorageEnabled={true}
               mixedContentMode="compatibility"
-              onLoadStart={() => console.log('WebView loading started')}
-              onLoadEnd={() => console.log('WebView loading ended')}
+              onLoadStart={() => logDebug('WebView loading started')}
+              onLoadEnd={() => logDebug('WebView loading ended')}
               onError={(syntheticEvent) => {
                 const { nativeEvent } = syntheticEvent;
                 console.warn('WebView error: ', nativeEvent);

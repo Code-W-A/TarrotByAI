@@ -5,6 +5,7 @@ import mobileAds, {
   BannerAd, 
   TestIds, 
   AdEventType,
+  RewardedAdEventType,
   MaxAdContentRating 
 } from 'react-native-google-mobile-ads';
 
@@ -102,7 +103,7 @@ const loadRewardedAd = () => {
 
   rewardedAd = RewardedAd.createForAdRequest(adUnitId);
 
-  rewardedAd.addAdEventListener(AdEventType.LOADED, () => {
+  rewardedAd.addAdEventListener(RewardedAdEventType.LOADED, () => {
     console.log('✅ Rewarded ad loaded and ready to show!');
   });
 
@@ -152,7 +153,7 @@ export const showRewardedAd = async (): Promise<boolean> => {
     };
 
     const unsubEarned = rewardedAd!.addAdEventListener(
-      AdEventType.EARNED_REWARD,
+      RewardedAdEventType.EARNED_REWARD,
       () => {
         earned = true;
       }
@@ -220,13 +221,13 @@ export const getAdUnitId = (adType: 'banner' | 'interstitial' | 'rewarded'): str
 // Ad Unit IDs - REAL Production IDs
 export const AD_UNIT_IDS = {
   ios: {
-    banner: 'ca-app-pub-3940256099942544/2934735716', // Test ID (nu avem banner încă)
+    banner: 'ca-app-pub-9577714849380446/4894553547', // live ID (nu avem banner încă)
     interstitial: 'ca-app-pub-9577714849380446/5660268593', // REAL iOS Interstitial
-    rewarded: 'ca-app-pub-3940256099942544/1712485313', // Test ID (nu avem rewarded încă)
+    rewarded: 'ca-app-pub-9577714849380446/2684496636', // live ID (nu avem rewarded încă)
   },
   android: {
-    banner: 'ca-app-pub-3940256099942544/6300978111', // Test ID (nu avem banner încă)
+    banner: 'ca-app-pub-9577714849380446/1418342963', // live ID (nu avem banner încă)
     interstitial: 'ca-app-pub-9577714849380446/7080054250', // REAL Android Interstitial
-    rewarded: 'ca-app-pub-3940256099942544/5224354917', // Test ID (nu avem rewarded încă)
+    rewarded: 'ca-app-pub-9577714849380446/7936823313', // live ID (nu avem rewarded încă)
   },
 }; 

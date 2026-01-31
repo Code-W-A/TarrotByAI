@@ -14,6 +14,7 @@ import { useFocusEffect, useNavigation } from "@react-navigation/native"; // Imp
 import { screenName } from "../../utils/screenName";
 import { useLanguage } from "../../context/LanguageContext";
 import { colors } from "../../utils/colors";
+import { logDebug } from "../../utils/Logger";
 import { Image } from "react-native";
 import { normalizeString } from "../../utils/stringUtils";
 import { useNumberContext } from "../../context/NumberContext";
@@ -108,7 +109,7 @@ const DoubleFlipCard = ({
   // Funcție pentru a naviga către ecranul PersonalizedReading cu parametrul item
   const navigateToPersonalizedReading = async (isManualNav?) => {
     try {
-      // console.log(item.image.finalUri);
+      // logDebug(item.image.finalUri);
 
       // ADS REMOVED - Direct navigation
       if (isFuture) {
@@ -116,7 +117,7 @@ const DoubleFlipCard = ({
           item,
         });
       } else {
-        console.log("here...");
+        logDebug("here...");
         if (isManualNav) {
           // ADS REMOVED - Direct execution without ads
           const cardNameNormalized = normalizeString(item.info.ro.nume);
@@ -135,17 +136,17 @@ const DoubleFlipCard = ({
             const selectedCard = filteredVariante[randomIndex];
             // ---- START HISTORY ----
             if (currentNumber !== 0) {
-              console.log("sendToHistory...currentnr < 8", sendToHistory);
+              logDebug("sendToHistory...currentnr < 8", sendToHistory);
               let arr = [...sendToHistory];
               arr.push(selectedCard);
               setSendToHistory([...arr]);
             } else if (currentNumber === 0) {
-              console.log("sendToHistory...currentnr === 8", sendToHistory);
+              logDebug("sendToHistory...currentnr === 8", sendToHistory);
               let arr = [...sendToHistory];
               arr.push(selectedCard);
               const auth = authentication;
               if (auth.currentUser) {
-                console.log("Is user...saving personal reading...");
+                logDebug("Is user...saving personal reading...");
                 const userLocation = `Users/${
                   auth.currentUser ? auth.currentUser.uid : ""
                 }/PersonalReading`;
@@ -161,7 +162,7 @@ const DoubleFlipCard = ({
               item: selectedCard,
             });
           } else {
-            console.log(
+            logDebug(
               "Nicio carte nu a fost găsită pentru criteriile specificate."
             );
           }
@@ -184,17 +185,17 @@ const DoubleFlipCard = ({
 
             // ---- START HISTORY ----
             if (currentNumber !== 0) {
-              console.log("sendToHistory...currentnr < 8", sendToHistory);
+              logDebug("sendToHistory...currentnr < 8", sendToHistory);
               let arr = [...sendToHistory];
               arr.push(selectedCard);
               setSendToHistory([...arr]);
             } else if (currentNumber === 0) {
-              console.log("sendToHistory...currentnr === 8", sendToHistory);
+              logDebug("sendToHistory...currentnr === 8", sendToHistory);
               let arr = [...sendToHistory];
               arr.push(selectedCard);
               const auth = authentication;
               if (auth.currentUser) {
-                console.log("Is user...saving personal reading...");
+                logDebug("Is user...saving personal reading...");
                 const userLocation = `Users/${
                   auth.currentUser ? auth.currentUser.uid : ""
                 }/PersonalReading`;
@@ -209,14 +210,14 @@ const DoubleFlipCard = ({
             // Navigație cu cartea selectată
             navigation.navigate("PersonalizedReading", { item: selectedCard });
           } else {
-            console.log(
+            logDebug(
               "Nicio carte nu a fost găsită pentru criteriile specificate."
             );
           }
         }
       }
     } catch (err) {
-      console.log("Error at navigateToPersonalizedReading...", err);
+      logDebug("Error at navigateToPersonalizedReading...", err);
     }
   };
 
@@ -231,23 +232,23 @@ const DoubleFlipCard = ({
 
   // useFocusEffect(
   //   React.useCallback(() => {
-  //     console.log("focus on filp card...");
+  //     logDebug("focus on filp card...");
   //     if (number === currentNumber) {
-  //       console.log("is equal to current number", currentNumber);
-  //       console.log("number", number);
+  //       logDebug("is equal to current number", currentNumber);
+  //       logDebug("number", number);
   //     }
   //     return () => {
-  //       console.log("Unfocus on filp card...");
+  //       logDebug("Unfocus on filp card...");
   //     };
   //   }, [])
   // );
 
   useFocusEffect(
     React.useCallback(() => {
-      console.log("currentNumber in FlipCard:", currentNumber);
+      logDebug("currentNumber in FlipCard:", currentNumber);
       if (number === currentNumber && number !== 1 && currentNumber !== 1) {
-        console.log("is equal to current number.........", currentNumber);
-        console.log("number", number);
+        logDebug("is equal to current number.........", currentNumber);
+        logDebug("number", number);
         // if (number === 8) {
         //   updateNumber(1);
         // }

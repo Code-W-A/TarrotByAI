@@ -2,7 +2,9 @@ import {
   collection,
   doc,
   getDoc,
+  getDocFromServer,
   getDocs,
+  getDocsFromServer,
   onSnapshot,
   orderBy,
   query,
@@ -12,6 +14,8 @@ import type { Unsubscribe } from "firebase/firestore";
 import { db } from "../../../../firebase";
 import type { Video } from "../types/video";
 import type { VideoCategory } from "../types/videoCategory";
+import { getDocPreferCache } from "../../../utils/firestoreCache";
+import { logWarn } from "../../../utils/Logger";
 
 const COLLECTION_NAME = "videosVideoModule";
 const CATEGORY_COLLECTION_NAME = "videoCategories";
@@ -32,15 +36,18 @@ const sortVideos = (videos: Video[]): Video[] => {
 };
 
 const mapVideos = (docs: Awaited<ReturnType<typeof getDocs>>["docs"]): Video[] => {
-  return docs.map((doc) => ({ id: doc.id, ...(doc.data() as Omit<Video, "id">) }));
+  return docs.map((docSnap) => ({
+    ...(docSnap.data() as Omit<Video, "id">),
+    id: docSnap.id,
+  }));
 };
 
 const mapCategories = (
   docs: Awaited<ReturnType<typeof getDocs>>["docs"]
 ): VideoCategory[] => {
-  return docs.map((doc) => ({
-    id: doc.id,
-    ...(doc.data() as Omit<VideoCategory, "id">),
+  return docs.map((docSnap) => ({
+    ...(docSnap.data() as Omit<VideoCategory, "id">),
+    id: docSnap.id,
   }));
 };
 
@@ -62,24 +69,62 @@ const buildFallbackQuery = () =>
     orderBy("createdAt", "desc")
   );
 
+const buildLooseQuery = () =>
+  query(collection(db, COLLECTION_NAME), where("isPublished", "==", true));
+
 export const getPublishedVideos = async (): Promise<Video[]> => {
   try {
-    const snapshot = await getDocs(buildPrimaryQuery());
-    return mapVideos(snapshot.docs);
+    const snapshot = await getDocsFromServer(buildPrimaryQuery());
+    if (!snapshot.empty) {
+      return mapVideos(snapshot.docs);
+    }
   } catch (error) {
-    const fallbackSnapshot = await getDocs(buildFallbackQuery());
-    return sortVideos(mapVideos(fallbackSnapshot.docs));
+    logWarn("[VideoLibrary] Primary query failed, falling back.", error);
   }
+
+  try {
+    const fallbackSnapshot = await getDocsFromServer(buildFallbackQuery());
+    if (!fallbackSnapshot.empty) {
+      return sortVideos(mapVideos(fallbackSnapshot.docs));
+    }
+  } catch (error) {
+    logWarn("[VideoLibrary] Fallback query failed, trying loose query.", error);
+  }
+
+  try {
+    const looseSnapshot = await getDocsFromServer(buildLooseQuery());
+    if (!looseSnapshot.empty) {
+      return sortVideos(mapVideos(looseSnapshot.docs));
+    }
+  } catch (error) {
+    logWarn("[VideoLibrary] Loose query failed.", error);
+  }
+
+  return [];
 };
 
 export const getVideoCategories = async (): Promise<VideoCategory[]> => {
   try {
-    const snapshot = await getDocs(buildCategoriesQuery());
-    return mapCategories(snapshot.docs);
+    const snapshot = await getDocsFromServer(buildCategoriesQuery());
+    if (!snapshot.empty) {
+      return mapCategories(snapshot.docs);
+    }
   } catch (error) {
-    const fallbackSnapshot = await getDocs(collection(db, CATEGORY_COLLECTION_NAME));
-    return mapCategories(fallbackSnapshot.docs);
+    logWarn("[VideoLibrary] Categories query failed, falling back.", error);
   }
+
+  try {
+    const fallbackSnapshot = await getDocsFromServer(
+      collection(db, CATEGORY_COLLECTION_NAME) as any
+    );
+    if (!fallbackSnapshot.empty) {
+      return mapCategories(fallbackSnapshot.docs);
+    }
+  } catch (error) {
+    logWarn("[VideoLibrary] Categories fallback failed.", error);
+  }
+
+  return [];
 };
 
 export const subscribePublishedVideos = (
@@ -128,7 +173,7 @@ export const getVideoById = async (videoId: string): Promise<Video | null> => {
   }
 
   const ref = doc(db, COLLECTION_NAME, videoId);
-  const snap = await getDoc(ref);
+  const snap = await getDocFromServer(ref);
   if (!snap.exists()) {
     return null;
   }

@@ -24,7 +24,6 @@ import { useAdsContext } from "../../../context/AdsContext";
 import { EmptyState } from "../components/EmptyState";
 import { VideoCard } from "../components/VideoCard";
 import { VideoSkeleton } from "../components/VideoSkeleton";
-import { PremiumPaywall } from "../components/PremiumPaywall";
 import { getPublishedVideos, getVideoCategories } from "../services/videoLibrary.service";
 import type { VideoCategory } from "../types/videoCategory";
 import type { Video } from "../types/video";
@@ -50,7 +49,6 @@ const VideoLibraryScreen: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [adLoading, setAdLoading] = useState(false);
-  const [paywallVisible, setPaywallVisible] = useState(false);
   const locale = i18n.locale?.split("-")[0] ?? "en";
 
   // TODO: Wire real premium status when available on userData.
@@ -156,13 +154,14 @@ const VideoLibraryScreen: React.FC = () => {
   );
 
   const handlePressVideo = async (video: Video) => {
-    if (video.isPremium && !isPremiumUser) {
-      setPaywallVisible(true);
-      return;
-    }
-
     recordVideoOpen();
-    if (!isPremiumUser && canShowAds && shouldShowVideoInterstitial()) {
+    // For locked premium videos, let the user reach the player first (rewarded unlock happens there).
+    if (
+      !video.isPremium &&
+      !isPremiumUser &&
+      canShowAds &&
+      shouldShowVideoInterstitial()
+    ) {
       setAdLoading(true);
       const shown = await showInterstitial();
       if (shown) {
@@ -350,11 +349,6 @@ const VideoLibraryScreen: React.FC = () => {
               </Text>
             </View>
           ) : null}
-          <PremiumPaywall
-            visible={paywallVisible}
-            onClose={() => setPaywallVisible(false)}
-            onSubscribe={() => setPaywallVisible(false)}
-          />
         </View>
       </LinearGradient>
     </SafeAreaView>

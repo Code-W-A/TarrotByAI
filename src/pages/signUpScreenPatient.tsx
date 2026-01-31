@@ -49,7 +49,8 @@ import { InputFields } from "../components/commonInputFields";
 
 import { authentication, db, storage } from "../../firebase";
 import { ref, uploadBytes, uploadBytesResumable } from "firebase/storage";
-import { setDoc, doc, getDoc, updateDoc } from "firebase/firestore";
+import { setDoc, doc, updateDoc } from "firebase/firestore";
+import { getDocPreferCache } from "../utils/firestoreCache";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { retrieveInfoAboutPatientsFromClinic } from "../utils/getFirebaseData";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -109,7 +110,7 @@ const SignUpScreenPatient: React.FC<Props> = ({ navigation }): JSX.Element => {
 
       for (let i = 0; i < clinics.length; i++) {
         const docRef = doc(db, "Users", clinics[i]);
-        const docSnap = await getDoc(docRef);
+        const docSnap = await getDocPreferCache(docRef);
         let clinicPatientsArr;
         // let clinicPatientsArr;
         if (docSnap.exists()) {

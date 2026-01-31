@@ -6,9 +6,7 @@ import {
   setDoc,
   arrayUnion,
   arrayRemove,
-  getDoc,
   addDoc,
-  getDocs,
   deleteDoc,
   writeBatch,
   where,
@@ -18,6 +16,7 @@ import {
 } from "firebase/firestore";
 import { authentication, db } from "../../firebase";
 import { handleDeleteAccount } from "./authUtils";
+import { getDocPreferCache, getDocsPreferCache } from "./firestoreCache";
 
 const auth = authentication;
 export const userLocation = `Users/${
@@ -77,7 +76,7 @@ export const handleQueryRandom = async (location, id) => {
   let obj = {}; // Specificați tipul de obiecte pe care îl conține matricea
   const q = query(collection(db, location), where("id", "==", id));
 
-  const querySnapshot = await getDocs(q);
+  const querySnapshot = await getDocsPreferCache(q);
   querySnapshot.forEach((doc) => {
     // doc.data() is never undefined for query doc snapshots
     console.log(doc.id, " => ", doc.data());
@@ -91,7 +90,7 @@ export const handleQueryToken = async (location, token) => {
   console.log("start query firestore token...", token);
 
   const q = query(collection(db, location), where("token", "==", token));
-  const querySnapshot = await getDocs(q);
+  const querySnapshot = await getDocsPreferCache(q);
 
   // Dacă querySnapshot nu este gol, înseamnă că există documente care corespund interogării
   const exists = !querySnapshot.empty;
@@ -160,7 +159,7 @@ export const handleDeleteFirestore = async (location, currentPassword) => {
 export const handleGetFirestore = async (location) => {
   let arr = []; // Specificați tipul de obiecte pe care îl conține matricea
   try {
-    const querySnapshot = await getDocs(collection(db, location));
+    const querySnapshot = await getDocsPreferCache(collection(db, location));
     querySnapshot.forEach((doc) => {
       // doc.data() is never undefined for query doc snapshots
       console.log(doc.id, ` ${location} => `, doc.data());
@@ -188,7 +187,7 @@ export const handleQueryFirestoreVarianteCarti = async (
     where("categorie", "==", categorie)
   );
 
-  const querySnapshot = await getDocs(q);
+  const querySnapshot = await getDocsPreferCache(q);
   querySnapshot.forEach((doc) => {
     // doc.data() is never undefined for query doc snapshots
     console.log(doc.id, " => ", doc.data());
@@ -221,7 +220,7 @@ export const handleQueryFirestoreGeneral = async (
 
   const q = query(...conditions);
 
-  const querySnapshot = await getDocs(q);
+  const querySnapshot = await getDocsPreferCache(q);
   querySnapshot.forEach((doc) => {
     // doc.data() is never undefined for query doc snapshots
     // console.log(doc.id, " => ", doc.data());

@@ -14,6 +14,7 @@ import { useFocusEffect, useNavigation } from "@react-navigation/native"; // Imp
 import { screenName } from "../../utils/screenName";
 import { useLanguage } from "../../context/LanguageContext";
 import { colors } from "../../utils/colors";
+import { logDebug } from "../../utils/Logger";
 import { Image } from "react-native";
 import { normalizeString } from "../../utils/stringUtils";
 import { useNumberContext } from "../../context/NumberContext";
@@ -108,7 +109,7 @@ const FlipCard = ({
   // Funcție pentru a naviga către ecranul PersonalizedReading cu parametrul item
   const navigateToPersonalizedReading = async (isManualNav?) => {
     try {
-      // console.log(item.image.finalUri);
+      // logDebug(item.image.finalUri);
 
       // ADS REMOVED - Direct navigation
       if (isFuture) {
@@ -118,18 +119,18 @@ const FlipCard = ({
           });
         // });
       } else {
-        console.log("[FlipCard] navigateToPersonalizedReading manual?", !!isManualNav);
+        logDebug("[FlipCard] navigateToPersonalizedReading manual?", !!isManualNav);
         if (isManualNav) {
           // ADS REMOVED - Direct execution without ads
           const cardNameNormalized = normalizeString(item.info.ro.nume);
           const categoryNameNormalized = normalizeString(conditieCategorie);
-          console.log("[FlipCard] query VarianteCarti with:", {cardNameNormalized, categoryNameNormalized});
+          logDebug("[FlipCard] query VarianteCarti with:", {cardNameNormalized, categoryNameNormalized});
           const filteredVariante = await handleQueryFirestoreVarianteCarti(
             "VarianteCarti",
             cardNameNormalized,
             categoryNameNormalized
           );
-          console.log("[FlipCard] filteredVariante length:", filteredVariante.length);
+          logDebug("[FlipCard] filteredVariante length:", filteredVariante.length);
           // Verificare dacă există elemente în array-ul filtrat
           if (filteredVariante.length > 0) {
             // Selectare aleatorie a unui element
@@ -139,17 +140,17 @@ const FlipCard = ({
             const selectedCard = filteredVariante[randomIndex];
             // ---- START HISTORY ----
             if (currentNumber !== 0) {
-              console.log("sendToHistory...currentnr < 8", sendToHistory);
+              logDebug("sendToHistory...currentnr < 8", sendToHistory);
               let arr = [...sendToHistory];
               arr.push(selectedCard);
               setSendToHistory([...arr]);
             } else if (currentNumber === 0) {
-              console.log("sendToHistory...currentnr === 8", sendToHistory);
+              logDebug("sendToHistory...currentnr === 8", sendToHistory);
               let arr = [...sendToHistory];
               arr.push(selectedCard);
               const auth = authentication;
               if (auth.currentUser) {
-                console.log("Is user...saving personal reading...");
+                logDebug("Is user...saving personal reading...");
                 const userLocation = `Users/${
                   auth.currentUser ? auth.currentUser.uid : ""
                 }/PersonalReading`;
@@ -165,21 +166,21 @@ const FlipCard = ({
               item: selectedCard,
             });
           } else {
-            console.log(
+            logDebug(
               "Nicio carte nu a fost găsită pentru criteriile specificate."
             );
           }
         } else {
           const cardNameNormalized = normalizeString(item.info.ro.nume);
           const categoryNameNormalized = normalizeString(conditieCategorie);
-          console.log("[FlipCard] auto query VarianteCarti with:", {cardNameNormalized, categoryNameNormalized});
+          logDebug("[FlipCard] auto query VarianteCarti with:", {cardNameNormalized, categoryNameNormalized});
 
           const filteredVariante = await handleQueryFirestoreVarianteCarti(
             "VarianteCarti",
             cardNameNormalized,
             categoryNameNormalized
           );
-          console.log("[FlipCard] auto filteredVariante length:", filteredVariante.length);
+          logDebug("[FlipCard] auto filteredVariante length:", filteredVariante.length);
           // Verificare dacă există elemente în array-ul filtrat
           if (filteredVariante.length > 0) {
             // Selectare aleatorie a unui element
@@ -190,17 +191,17 @@ const FlipCard = ({
 
             // ---- START HISTORY ----
             if (currentNumber !== 0) {
-              console.log("sendToHistory...currentnr < 8", sendToHistory);
+              logDebug("sendToHistory...currentnr < 8", sendToHistory);
               let arr = [...sendToHistory];
               arr.push(selectedCard);
               setSendToHistory([...arr]);
             } else if (currentNumber === 0) {
-              console.log("sendToHistory...currentnr === 8", sendToHistory);
+              logDebug("sendToHistory...currentnr === 8", sendToHistory);
               let arr = [...sendToHistory];
               arr.push(selectedCard);
               const auth = authentication;
               if (auth.currentUser) {
-                console.log("Is user...saving personal reading...");
+                logDebug("Is user...saving personal reading...");
                 const userLocation = `Users/${
                   auth.currentUser ? auth.currentUser.uid : ""
                 }/PersonalReading`;
@@ -215,14 +216,14 @@ const FlipCard = ({
             // Navigație cu cartea selectată
             navigation.navigate("PersonalizedReading", { item: selectedCard });
           } else {
-            console.log(
+            logDebug(
               "Nicio carte nu a fost găsită pentru criteriile specificate."
             );
           }
         }
       }
     } catch (err) {
-      console.log("Error at navigateToPersonalizedReading...", err);
+      logDebug("Error at navigateToPersonalizedReading...", err);
     }
   };
 
@@ -237,23 +238,23 @@ const FlipCard = ({
 
   // useFocusEffect(
   //   React.useCallback(() => {
-  //     console.log("focus on filp card...");
+  //     logDebug("focus on filp card...");
   //     if (number === currentNumber) {
-  //       console.log("is equal to current number", currentNumber);
-  //       console.log("number", number);
+  //       logDebug("is equal to current number", currentNumber);
+  //       logDebug("number", number);
   //     }
   //     return () => {
-  //       console.log("Unfocus on filp card...");
+  //       logDebug("Unfocus on filp card...");
   //     };
   //   }, [])
   // );
 
   useFocusEffect(
     React.useCallback(() => {
-      console.log("currentNumber in FlipCard:", currentNumber);
+      logDebug("currentNumber in FlipCard:", currentNumber);
       if (number === currentNumber && number !== 1 && currentNumber !== 1) {
-        console.log("is equal to current number.........", currentNumber);
-        console.log("number", number);
+        logDebug("is equal to current number.........", currentNumber);
+        logDebug("number", number);
         // if (number === 8) {
         //   updateNumber(1);
         // }

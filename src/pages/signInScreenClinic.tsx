@@ -118,7 +118,8 @@ import {
 import { useAuth } from "../context/AuthContext";
 import { handleFirebaseAuthError } from "../utils/authUtils";
 import SnackBar from "../components/SnackBar";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
+import { getDocPreferCache } from "../utils/firestoreCache";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { useNavBarVisibility } from '../context/NavbarVisibilityContext';
 
@@ -276,7 +277,7 @@ const SignInScreenClinic: React.FC<Props> = ({
         console.log("Start....nou", value);
 
         const userRef = doc(db, collectionId, documentId);
-        const docSnapshot = await getDoc(userRef);
+        const docSnapshot = await getDocPreferCache(userRef);
 
         if (!docSnapshot.exists()) {
           await setDoc(userRef, value);
@@ -349,7 +350,7 @@ const SignInScreenClinic: React.FC<Props> = ({
       };
 
       const userRef = doc(db, collectionId, documentId);
-      const docSnapshot = await getDoc(userRef);
+      const docSnapshot = await getDocPreferCache(userRef);
 
       if (!docSnapshot.exists()) {
         await setDoc(userRef, value);
