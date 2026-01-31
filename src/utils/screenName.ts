@@ -110,4 +110,5 @@ export const screenName = {
   ClinicFeedback: "ClinicFeedback",
   VideoLibrary: "VideoLibrary",
   VideoPlayer: "VideoPlayer",
+  VideoFavorites: "VideoFavorites",
 };

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   ImageBackground,
@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { useFocusEffect, useNavigation, useRoute } from "@react-navigation/native";
 import { WebView } from "react-native-webview";
 import { colors } from "../../../utils/colors";
 import { useAds } from "../../../hooks/useAds";
@@ -24,6 +24,10 @@ import { getEmbedUrl, getWatchUrl } from "../utils/videoEmbed";
 import { EmptyState } from "../components/EmptyState";
 import i18n from "../../../../i18n";
 import { recordVideoInterstitialShown, shouldShowVideoInterstitial } from "../utils/videoAdPolicy";
+import {
+  isFavoriteVideo,
+  toggleFavoriteVideo,
+} from "../utils/videoFavorites";
 
 type RouteParams = {
   video?: Video;
@@ -45,6 +49,7 @@ const VideoPlayerScreen: React.FC = () => {
   const [unlockedThisSession, setUnlockedThisSession] = useState(false);
   const [unlockModalVisible, setUnlockModalVisible] = useState(false);
   const hasPromptedRef = useRef(false);
+  const [isFavorite, setIsFavorite] = useState(false);
 
   // TODO: Wire real premium status when available on userData.
   const isPremiumUser = Boolean((userData as any)?.isPremiumUser);
@@ -143,6 +148,33 @@ const VideoPlayerScreen: React.FC = () => {
     setUnlockModalVisible(true);
   }, [canShowAds, isPremiumUser, isVideoLocked, video]);
 
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
+      const loadFavorite = async () => {
+        if (!video?.id) {
+          return;
+        }
+        const fav = await isFavoriteVideo(video.id);
+        if (active) {
+          setIsFavorite(fav);
+        }
+      };
+      loadFavorite();
+      return () => {
+        active = false;
+      };
+    }, [video?.id])
+  );
+
+  const handleToggleFavorite = async () => {
+    if (!video) {
+      return;
+    }
+    const result = await toggleFavoriteVideo(video);
+    setIsFavorite(result.isFavorite);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <LinearGradient
@@ -160,12 +192,22 @@ const VideoPlayerScreen: React.FC = () => {
         <View style={styles.overlay} />
         <View style={styles.contentWrapper}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={handleBack}>
-              <Ionicons name="arrow-back" size={24} color="#5d4e37" />
+          <TouchableOpacity style={styles.headerIcon} onPress={handleBack}>
+            <Ionicons name="arrow-back" size={24} color="#5d4e37" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>
             {i18n.translate("videoPlayerBack")}
           </Text>
+          <TouchableOpacity
+            style={styles.headerIcon}
+            onPress={handleToggleFavorite}
+          >
+            <Ionicons
+              name={isFavorite ? "heart" : "heart-outline"}
+              size={22}
+              color={isFavorite ? "#d94f45" : "#5d4e37"}
+            />
+          </TouchableOpacity>
         </View>
 
         <Modal
@@ -333,14 +375,22 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
     paddingTop: 12,
     paddingBottom: 20,
+  },
+  headerIcon: {
+    width: 36,
+    height: 36,
+    alignItems: "center",
+    justifyContent: "center",
   },
   headerTitle: {
     color: "#5d4e37",
     fontSize: 17,
     fontWeight: "600",
-    marginLeft: 12,
+    flex: 1,
+    textAlign: "center",
     letterSpacing: -0.2,
   },
   content: {

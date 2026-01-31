@@ -103,6 +103,7 @@ import News from "./src/pages/blog/News";
 import SavedNews from "./src/pages/blog/SavedNews";
 import VideoLibraryScreen from "./src/features/video-library/screens/VideoLibraryScreen";
 import VideoPlayerScreen from "./src/features/video-library/screens/VideoPlayerScreen";
+import VideoFavoritesScreen from "./src/features/video-library/screens/VideoFavoritesScreen";
 import CeSimte from "./src/pages/doctors/CeSimte";
 import CeGandeste from "./src/pages/doctors/CeGandeste";
 import CarteaTa from "./src/pages/doctors/CarteaTa";
@@ -218,6 +219,10 @@ const HomeNavigation = (props: NavigationProps) => {
         <Stack.Screen
           name={screenName.VideoLibrary}
           component={VideoLibraryScreen}
+        />
+        <Stack.Screen
+          name={screenName.VideoFavorites}
+          component={VideoFavoritesScreen}
         />
         <Stack.Screen
           name={screenName.VideoPlayer}

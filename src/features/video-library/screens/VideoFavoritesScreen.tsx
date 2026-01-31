@@ -9,14 +9,11 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
   View,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
-import { useFocusEffect } from "@react-navigation/native";
-import { BannerAd, BannerAdSize } from "react-native-google-mobile-ads";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { colors } from "../../../utils/colors";
 import { screenName } from "../../../utils/screenName";
 import { useAuth } from "../../../context/AuthContext";
@@ -25,16 +22,13 @@ import { useAdsContext } from "../../../context/AdsContext";
 import { EmptyState } from "../components/EmptyState";
 import { VideoCard } from "../components/VideoCard";
 import { VideoSkeleton } from "../components/VideoSkeleton";
-import { getPublishedVideos, getVideoCategories } from "../services/videoLibrary.service";
+import { getVideoCategories } from "../services/videoLibrary.service";
 import type { VideoCategory } from "../types/videoCategory";
 import type { Video } from "../types/video";
 import i18n from "../../../../i18n";
-import { AdBanner } from "../../../components/AdBanner/AdBanner";
 import {
-  recordVideoAppOpenShown,
   recordVideoInterstitialShown,
   recordVideoOpen,
-  shouldShowVideoAppOpen,
   shouldShowVideoInterstitial,
 } from "../utils/videoAdPolicy";
 import {
@@ -42,12 +36,12 @@ import {
   toggleFavoriteVideo,
 } from "../utils/videoFavorites";
 
-const VideoLibraryScreen: React.FC = () => {
+const VideoFavoritesScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const { userData } = useAuth() as { userData?: unknown };
   const { adsConfig } = useAdsContext();
-  const { showInterstitial, canShowAds, getBannerAdUnitId } = useAds(adsConfig);
-  const [videos, setVideos] = useState<Video[]>([]);
+  const { showInterstitial, canShowAds } = useAds(adsConfig);
+  const [favorites, setFavorites] = useState<Video[]>([]);
   const [categoriesData, setCategoriesData] = useState<VideoCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -57,10 +51,21 @@ const VideoLibraryScreen: React.FC = () => {
   const [favoriteMap, setFavoriteMap] = useState<Record<string, boolean>>({});
   const locale = i18n.locale?.split("-")[0] ?? "en";
 
-  // TODO: Wire real premium status when available on userData.
   const isPremiumUser = Boolean((userData as any)?.isPremiumUser);
 
-  const loadVideos = useCallback(async (isRefresh = false) => {
+  const syncFavorites = useCallback(async () => {
+    const list = await getFavoriteVideos();
+    setFavorites(list);
+    const map: Record<string, boolean> = {};
+    list.forEach((item) => {
+      if (item?.id) {
+        map[item.id] = true;
+      }
+    });
+    setFavoriteMap(map);
+  }, []);
+
+  const loadFavorites = useCallback(async (isRefresh = false) => {
     if (isRefresh) {
       setRefreshing(true);
     } else {
@@ -69,27 +74,21 @@ const VideoLibraryScreen: React.FC = () => {
     setErrorMessage(null);
 
     try {
-      console.log("[VideoLibrary] Fetching videos/categories...");
-      const [videoData, categoryData] = await Promise.all([
-        getPublishedVideos(),
+      const [favoriteData, categoryData] = await Promise.all([
+        getFavoriteVideos(),
         getVideoCategories(),
       ]);
-      console.log("[VideoLibrary] Videos fetched:", videoData.length);
-      console.log("[VideoLibrary] Categories fetched:", categoryData.length);
-      console.log(
-        "[VideoLibrary] Published videos:",
-        videoData.map((v) => ({
-          id: v.id,
-          title: v.title,
-          isPublished: v.isPublished,
-          category: v.category,
-        }))
-      );
-      setVideos(videoData);
+      setFavorites(favoriteData);
       setCategoriesData(categoryData);
+      const map: Record<string, boolean> = {};
+      favoriteData.forEach((item) => {
+        if (item?.id) {
+          map[item.id] = true;
+        }
+      });
+      setFavoriteMap(map);
     } catch (error) {
-      console.error("[VideoLibrary] Failed to load videos/categories:", error);
-      setErrorMessage(i18n.translate("videoLibraryLoadError"));
+      setErrorMessage(i18n.translate("videoFavoritesLoadError"));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -97,39 +96,14 @@ const VideoLibraryScreen: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    loadVideos();
-  }, [loadVideos]);
-
-  const loadFavorites = useCallback(async () => {
-    const favorites = await getFavoriteVideos();
-    const map: Record<string, boolean> = {};
-    favorites.forEach((item) => {
-      if (item?.id) {
-        map[item.id] = true;
-      }
-    });
-    setFavoriteMap(map);
-  }, []);
+    loadFavorites();
+  }, [loadFavorites]);
 
   useFocusEffect(
     useCallback(() => {
-      loadFavorites();
-    }, [loadFavorites])
+      syncFavorites();
+    }, [syncFavorites])
   );
-
-  const videosByCategory = useMemo(() => {
-    const grouped: Record<string, Video[]> = {};
-    
-    videos.forEach((video) => {
-      const cat = video.category || i18n.translate("videoLibraryOtherCategory");
-      if (!grouped[cat]) {
-        grouped[cat] = [];
-      }
-      grouped[cat].push(video);
-    });
-    
-    return grouped;
-  }, [videos]);
 
   const getLocalizedVideo = useCallback(
     (video: Video) => {
@@ -146,27 +120,6 @@ const VideoLibraryScreen: React.FC = () => {
     [locale]
   );
 
-  const filteredVideosByCategory = useMemo(() => {
-    if (!searchQuery.trim()) {
-      return videosByCategory;
-    }
-    
-    const normalizedQuery = searchQuery.trim().toLowerCase();
-    const filtered: Record<string, Video[]> = {};
-    
-    Object.keys(videosByCategory).forEach((cat) => {
-      const matchingVideos = videosByCategory[cat].filter((video) => {
-        const localizedVideo = getLocalizedVideo(video);
-        return localizedVideo.title.toLowerCase().includes(normalizedQuery);
-      });
-      if (matchingVideos.length > 0) {
-        filtered[cat] = matchingVideos;
-      }
-    });
-    
-    return filtered;
-  }, [videosByCategory, searchQuery, getLocalizedVideo]);
-
   const getLocalizedCategoryName = useCallback(
     (categoryName: string) => {
       const category = categoriesData.find((item) => item.name === categoryName);
@@ -176,9 +129,41 @@ const VideoLibraryScreen: React.FC = () => {
     [categoriesData, locale]
   );
 
+  const videosByCategory = useMemo(() => {
+    const grouped: Record<string, Video[]> = {};
+    favorites.forEach((video) => {
+      const cat = video.category || i18n.translate("videoLibraryOtherCategory");
+      if (!grouped[cat]) {
+        grouped[cat] = [];
+      }
+      grouped[cat].push(video);
+    });
+    return grouped;
+  }, [favorites]);
+
+  const filteredVideosByCategory = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return videosByCategory;
+    }
+
+    const normalizedQuery = searchQuery.trim().toLowerCase();
+    const filtered: Record<string, Video[]> = {};
+
+    Object.keys(videosByCategory).forEach((cat) => {
+      const matchingVideos = videosByCategory[cat].filter((video) => {
+        const localizedVideo = getLocalizedVideo(video);
+        return localizedVideo.title.toLowerCase().includes(normalizedQuery);
+      });
+      if (matchingVideos.length > 0) {
+        filtered[cat] = matchingVideos;
+      }
+    });
+
+    return filtered;
+  }, [videosByCategory, searchQuery, getLocalizedVideo]);
+
   const handlePressVideo = async (video: Video) => {
     recordVideoOpen();
-    // For locked premium videos, let the user reach the player first (rewarded unlock happens there).
     if (
       !video.isPremium &&
       !isPremiumUser &&
@@ -195,33 +180,11 @@ const VideoLibraryScreen: React.FC = () => {
     navigation.navigate(screenName.VideoPlayer, { video });
   };
 
-  useFocusEffect(
-    useCallback(() => {
-      let cancelled = false;
-
-      const maybeShowAppOpen = async () => {
-        if (cancelled) return;
-        if (isPremiumUser || !canShowAds) return;
-        if (!shouldShowVideoAppOpen()) return;
-
-        // Using interstitial as an “app-open” surrogate, with strict frequency cap.
-        const shown = await showInterstitial();
-        if (shown) {
-          recordVideoAppOpenShown();
-        }
-      };
-
-      maybeShowAppOpen();
-
-      return () => {
-        cancelled = true;
-      };
-    }, [canShowAds, isPremiumUser, showInterstitial])
-  );
-
   const renderCategorySection = (categoryName: string, categoryVideos: Video[]) => (
     <View key={categoryName} style={styles.categorySection}>
-      <Text style={styles.categoryTitle}>{categoryName}</Text>
+      <Text style={styles.categoryTitle}>
+        {getLocalizedCategoryName(categoryName)}
+      </Text>
       <FlatList
         horizontal
         data={categoryVideos}
@@ -239,6 +202,7 @@ const VideoLibraryScreen: React.FC = () => {
                 isFavorite={Boolean(favoriteMap[item.id])}
                 onToggleFavorite={async () => {
                   const result = await toggleFavoriteVideo(item);
+                  setFavorites(result.favorites);
                   const nextMap: Record<string, boolean> = {};
                   result.favorites.forEach((fav) => {
                     if (fav?.id) {
@@ -260,28 +224,6 @@ const VideoLibraryScreen: React.FC = () => {
     </View>
   );
 
-  const SponsoredAdCard = useCallback(() => {
-    if (!canShowAds || isPremiumUser) {
-      return null;
-    }
-
-    return (
-      <View style={styles.sponsoredContainer}>
-        <BannerAd
-          unitId={getBannerAdUnitId()}
-          size={BannerAdSize.MEDIUM_RECTANGLE}
-          requestOptions={{
-            requestNonPersonalizedAdsOnly: !adsConfig?.isPersonalized,
-          }}
-          onAdLoaded={() => console.log("[VideoLibrary] Sponsored ad loaded")}
-          onAdFailedToLoad={(error) =>
-            console.error("[VideoLibrary] Sponsored ad failed:", error)
-          }
-        />
-      </View>
-    );
-  }, [adsConfig?.isPersonalized, canShowAds, getBannerAdUnitId, isPremiumUser]);
-
   return (
     <SafeAreaView style={styles.container}>
       <LinearGradient
@@ -298,28 +240,19 @@ const VideoLibraryScreen: React.FC = () => {
         />
         <View style={styles.overlay} />
         <View style={styles.content}>
-          {/* Fixed Header */}
           <View style={styles.header}>
-            <View style={styles.headerRow}>
-              <Text style={styles.title}>
-                {i18n.translate("videoLibraryTitle")}
-              </Text>
-              <TouchableOpacity
-                onPress={() => navigation.navigate(screenName.VideoFavorites)}
-                style={styles.headerAction}
-              >
-                <Ionicons name="heart" size={20} color="#bfa76a" />
-              </TouchableOpacity>
-            </View>
+            <Text style={styles.title}>
+              {i18n.translate("videoFavoritesTitle")}
+            </Text>
             <View style={styles.searchContainer}>
-              <Ionicons 
-                name="search" 
-                size={20} 
-                color="#8b7355" 
-                style={styles.searchIcon} 
+              <Ionicons
+                name="search"
+                size={20}
+                color="#8b7355"
+                style={styles.searchIcon}
               />
               <TextInput
-                placeholder={i18n.translate("videoLibrarySearchPlaceholder")}
+                placeholder={i18n.translate("videoFavoritesSearchPlaceholder")}
                 placeholderTextColor="#8b7355"
                 style={styles.searchInput}
                 value={searchQuery}
@@ -332,7 +265,6 @@ const VideoLibraryScreen: React.FC = () => {
             ) : null}
           </View>
 
-          {/* Scrollable Content */}
           {loading ? (
             <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
               <View style={styles.skeletonContainer}>
@@ -344,10 +276,10 @@ const VideoLibraryScreen: React.FC = () => {
           ) : Object.keys(filteredVideosByCategory).length === 0 ? (
             <View style={styles.emptyContainer}>
               <EmptyState
-                title={i18n.translate("videoLibraryEmptyTitle")}
-                message={i18n.translate("videoLibraryEmptyMessage")}
-                actionLabel={i18n.translate("videoLibraryRetry")}
-                onAction={() => loadVideos(true)}
+                title={i18n.translate("videoFavoritesEmptyTitle")}
+                message={i18n.translate("videoFavoritesEmptyMessage")}
+                actionLabel={i18n.translate("videoFavoritesRetry")}
+                onAction={() => loadFavorites(true)}
               />
             </View>
           ) : (
@@ -357,32 +289,17 @@ const VideoLibraryScreen: React.FC = () => {
               refreshControl={
                 <RefreshControl
                   refreshing={refreshing}
-                  onRefresh={() => loadVideos(true)}
+                  onRefresh={() => loadFavorites(true)}
                   tintColor={colors.gold}
                 />
               }
             >
-              {Object.keys(filteredVideosByCategory).map((categoryName, index) => {
-                const displayName = getLocalizedCategoryName(categoryName);
-                return (
-                  <React.Fragment key={categoryName}>
-                    {index === 1 ? <SponsoredAdCard /> : null}
-                    {renderCategorySection(
-                      displayName,
-                      filteredVideosByCategory[categoryName]
-                    )}
-                  </React.Fragment>
-                );
-              })}
-
-              {!isPremiumUser ? (
-                <AdBanner
-                  adsConfig={adsConfig}
-                  size={BannerAdSize.ADAPTIVE_BANNER}
-                  style={styles.bannerContainer}
-                />
-              ) : null}
-
+              {Object.keys(filteredVideosByCategory).map((categoryName) =>
+                renderCategorySection(
+                  categoryName,
+                  filteredVideosByCategory[categoryName]
+                )
+              )}
               <View style={styles.bottomSpacer} />
             </ScrollView>
           )}
@@ -439,21 +356,6 @@ const styles = StyleSheet.create({
     color: "#5d4e37",
     marginBottom: 20,
     letterSpacing: -0.5,
-  },
-  headerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  headerAction: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "rgba(191, 167, 106, 0.12)",
-    borderWidth: 1,
-    borderColor: "rgba(191, 167, 106, 0.35)",
   },
   searchContainer: {
     flexDirection: "row",
@@ -517,16 +419,6 @@ const styles = StyleSheet.create({
   bottomSpacer: {
     height: 100,
   },
-  sponsoredContainer: {
-    paddingHorizontal: 20,
-    marginBottom: 32,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  bannerContainer: {
-    marginTop: 8,
-    marginBottom: 18,
-  },
   adOverlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(0, 0, 0, 0.6)",
@@ -541,4 +433,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default VideoLibraryScreen;
+export default VideoFavoritesScreen;

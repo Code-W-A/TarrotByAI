@@ -13,6 +13,8 @@ interface Props {
   onPress: () => void;
   showPreview?: boolean;
   isLocked?: boolean;
+  isFavorite?: boolean;
+  onToggleFavorite?: () => void;
 }
 
 export const VideoCard: React.FC<Props> = ({
@@ -20,6 +22,8 @@ export const VideoCard: React.FC<Props> = ({
   onPress,
   showPreview = true,
   isLocked = false,
+  isFavorite = false,
+  onToggleFavorite,
 }) => {
   const durationLabel = formatDuration(video.durationSeconds);
   const [previewError, setPreviewError] = useState(false);
@@ -117,6 +121,19 @@ export const VideoCard: React.FC<Props> = ({
             <Text style={styles.durationText}>{durationLabel}</Text>
           </View>
         ) : null}
+        {onToggleFavorite ? (
+          <TouchableOpacity
+            onPress={onToggleFavorite}
+            activeOpacity={0.9}
+            style={styles.favoriteButton}
+          >
+            <Ionicons
+              name={isFavorite ? "heart" : "heart-outline"}
+              size={22}
+              color={isFavorite ? "#d94f45" : colors.white}
+            />
+          </TouchableOpacity>
+        ) : null}
         {video.isPremium ? (
           <View style={styles.premiumBadge}>
             <Ionicons name="sparkles" size={12} color={colors.white} />
@@ -192,6 +209,19 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     letterSpacing: 0.5,
   },
+  favoriteButton: {
+    position: "absolute",
+    right: 12,
+    bottom: 12,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+    zIndex: 4,
+    elevation: 6,
+  },
   premiumBadge: {
     position: "absolute",
     top: 12,
@@ -235,7 +265,9 @@ const styles = StyleSheet.create({
     right: 0,
     backgroundColor: "rgba(0, 0, 0, 0.75)",
     paddingHorizontal: 14,
+    paddingRight: 56,
     paddingVertical: 12,
+    zIndex: 2,
   },
   title: {
     fontSize: 15,

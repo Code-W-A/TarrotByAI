@@ -85,6 +85,11 @@ import type { Video } from "../../features/video-library/types/video";
 import { WebView } from "react-native-webview";
 import { getEmbedUrl } from "../../features/video-library/utils/videoEmbed";
 import { getDocsPreferCache } from "../../utils/firestoreCache";
+import {
+  recordVideoInterstitialShown,
+  recordVideoOpen,
+  shouldShowVideoInterstitial,
+} from "../../features/video-library/utils/videoAdPolicy";
 
 // ADS COMPLETELY REMOVED FOR DEBUGGING
 // const adUnitId = __DEV__
@@ -198,6 +203,33 @@ const LatestVideoCard: React.FC<{ video: Video; onPress: () => void }> = ({
           />
         )}
 
+        {video.isPremium ? (
+          <View
+            style={{
+              position: "absolute",
+              top: 10,
+              left: 10,
+              backgroundColor: "rgba(255, 215, 0, 0.92)",
+              borderRadius: 12,
+              paddingHorizontal: 10,
+              paddingVertical: 4,
+              borderWidth: 1,
+              borderColor: "rgba(125, 95, 46, 0.35)",
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 11,
+                fontWeight: "700",
+                color: "#5d4e37",
+                letterSpacing: 0.3,
+              }}
+            >
+              {i18n.translate("videoPremiumBadge")}
+            </Text>
+          </View>
+        ) : null}
+
         <View
           style={{
             position: "absolute",
@@ -234,6 +266,94 @@ const LatestVideoCard: React.FC<{ video: Video; onPress: () => void }> = ({
         </View>
       </View>
     </TouchableOpacity>
+  );
+};
+
+const LatestSkeletonCard: React.FC = () => {
+  const CARD_WIDTH = 220;
+  const shimmerAnim = useRef(new Animated.Value(-1)).current;
+
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.timing(shimmerAnim, {
+        toValue: 1,
+        duration: 1400,
+        useNativeDriver: true,
+      })
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [shimmerAnim]);
+
+  const translateX = shimmerAnim.interpolate({
+    inputRange: [-1, 1],
+    outputRange: [-CARD_WIDTH, CARD_WIDTH],
+  });
+
+  return (
+    <View
+      style={{
+        width: CARD_WIDTH,
+        height: 180,
+        borderRadius: 20,
+        marginRight: 12,
+        backgroundColor: "rgba(255, 255, 255, 0.9)",
+        overflow: "hidden",
+        borderWidth: 1,
+        borderColor: "rgba(191, 167, 106, 0.25)",
+        shadowColor: "#bfa76a",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.08,
+        shadowRadius: 12,
+        elevation: 4,
+      }}
+    >
+      <View style={{ flex: 1, backgroundColor: "#f1e7d4" }} />
+      <View
+        style={{
+          position: "absolute",
+          left: 12,
+          right: 12,
+          bottom: 16,
+          height: 16,
+          borderRadius: 8,
+          backgroundColor: "#e6d8be",
+        }}
+      />
+      <View
+        style={{
+          position: "absolute",
+          left: 12,
+          bottom: 40,
+          width: "60%",
+          height: 12,
+          borderRadius: 8,
+          backgroundColor: "#eadcc1",
+        }}
+      />
+      <Animated.View
+        pointerEvents="none"
+        style={{
+          position: "absolute",
+          top: 0,
+          bottom: 0,
+          left: -CARD_WIDTH,
+          width: CARD_WIDTH,
+          transform: [{ translateX }],
+        }}
+      >
+        <LinearGradient
+          colors={[
+            "rgba(255,255,255,0)",
+            "rgba(255,255,255,0.35)",
+            "rgba(255,255,255,0)",
+          ]}
+          start={{ x: 0, y: 0.5 }}
+          end={{ x: 1, y: 0.5 }}
+          style={{ flex: 1 }}
+        />
+      </Animated.View>
+    </View>
   );
 };
 
@@ -307,6 +427,7 @@ const ClinicDashboard = () => {
   const navigation: any = useNavigation();
   const { expoPushToken } = usePushNotifications();
   const { currentUser, userData, isGuestUser, setUserData } = useAuth();
+  const isPremiumUser = Boolean((userData as any)?.isPremiumUser);
   
   // Hook pentru gestionarea verificării datelor utilizatorului
   const {
@@ -677,7 +798,19 @@ const ClinicDashboard = () => {
     setArticleModalVisible(true);
   };
 
-  const handlePressVideo = (video: Video) => {
+  const handlePressVideo = async (video: Video) => {
+    recordVideoOpen();
+    if (
+      !isPremiumUser &&
+      !video.isPremium &&
+      canShowAds &&
+      shouldShowVideoInterstitial()
+    ) {
+      const shown = await showInterstitial();
+      if (shown) {
+        recordVideoInterstitialShown();
+      }
+    }
     navigation.navigate(screenName.VideoPlayer, { video });
   };
 
@@ -843,7 +976,15 @@ const ClinicDashboard = () => {
                   </View>
                 </View>
                 {loadingArticles ? (
-                  <ActivityIndicator color="#bfa76a" style={{ marginVertical: 16 }} />
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{ flexDirection: "row", gap: 12 }}
+                  >
+                    {Array.from({ length: 3 }).map((_, index) => (
+                      <LatestSkeletonCard key={`article-skeleton-${index}`} />
+                    ))}
+                  </ScrollView>
                 ) : (
                   <>
                     <ScrollView 
@@ -911,7 +1052,15 @@ const ClinicDashboard = () => {
                   </View>
                 </View>
                 {loadingVideos ? (
-                  <ActivityIndicator color="#bfa76a" style={{ marginVertical: 16 }} />
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{ flexDirection: "row", gap: 12 }}
+                  >
+                    {Array.from({ length: 3 }).map((_, index) => (
+                      <LatestSkeletonCard key={`video-skeleton-${index}`} />
+                    ))}
+                  </ScrollView>
                 ) : (
                   <>
                     <ScrollView
