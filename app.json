@@ -42,7 +42,7 @@
         "config": {},
         "softwareKeyboardLayoutMode": "pan",
         "package": "com.cristina.zurba.tarot",
-        "versionCode": 110,
+        "versionCode": 111,
         "permissions": [
           "android.permission.RECORD_AUDIO",
           "com.google.android.gms.permission.AD_ID"
