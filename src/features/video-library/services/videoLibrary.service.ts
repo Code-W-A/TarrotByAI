@@ -35,6 +35,17 @@ const sortVideos = (videos: Video[]): Video[] => {
   });
 };
 
+const isVideoVisible = (video: Video, nowMs = Date.now()): boolean => {
+  if (!video.publishAt) {
+    return true;
+  }
+  const publishMs = video.publishAt?.toMillis?.();
+  if (!publishMs) {
+    return true;
+  }
+  return publishMs <= nowMs;
+};
+
 const mapVideos = (docs: Awaited<ReturnType<typeof getDocs>>["docs"]): Video[] => {
   return docs.map((docSnap) => ({
     ...(docSnap.data() as Omit<Video, "id">),
@@ -76,7 +87,10 @@ export const getPublishedVideos = async (): Promise<Video[]> => {
   try {
     const snapshot = await getDocsFromServer(buildPrimaryQuery());
     if (!snapshot.empty) {
-      return mapVideos(snapshot.docs);
+      const nowMs = Date.now();
+      return mapVideos(snapshot.docs).filter((video) =>
+        isVideoVisible(video, nowMs)
+      );
     }
   } catch (error) {
     logWarn("[VideoLibrary] Primary query failed, falling back.", error);
@@ -85,7 +99,12 @@ export const getPublishedVideos = async (): Promise<Video[]> => {
   try {
     const fallbackSnapshot = await getDocsFromServer(buildFallbackQuery());
     if (!fallbackSnapshot.empty) {
-      return sortVideos(mapVideos(fallbackSnapshot.docs));
+      const nowMs = Date.now();
+      return sortVideos(
+        mapVideos(fallbackSnapshot.docs).filter((video) =>
+          isVideoVisible(video, nowMs)
+        )
+      );
     }
   } catch (error) {
     logWarn("[VideoLibrary] Fallback query failed, trying loose query.", error);
@@ -94,7 +113,12 @@ export const getPublishedVideos = async (): Promise<Video[]> => {
   try {
     const looseSnapshot = await getDocsFromServer(buildLooseQuery());
     if (!looseSnapshot.empty) {
-      return sortVideos(mapVideos(looseSnapshot.docs));
+      const nowMs = Date.now();
+      return sortVideos(
+        mapVideos(looseSnapshot.docs).filter((video) =>
+          isVideoVisible(video, nowMs)
+        )
+      );
     }
   } catch (error) {
     logWarn("[VideoLibrary] Loose query failed.", error);
@@ -142,7 +166,14 @@ export const subscribePublishedVideos = (
     fallbackUnsubscribe = onSnapshot(
       buildFallbackQuery(),
       (snapshot) => {
-        onUpdate(sortVideos(mapVideos(snapshot.docs)));
+        const nowMs = Date.now();
+        onUpdate(
+          sortVideos(
+            mapVideos(snapshot.docs).filter((video) =>
+              isVideoVisible(video, nowMs)
+            )
+          )
+        );
       },
       (error) => {
         onError?.(error);
@@ -153,7 +184,12 @@ export const subscribePublishedVideos = (
   primaryUnsubscribe = onSnapshot(
     buildPrimaryQuery(),
     (snapshot) => {
-      onUpdate(mapVideos(snapshot.docs));
+      const nowMs = Date.now();
+      onUpdate(
+        mapVideos(snapshot.docs).filter((video) =>
+          isVideoVisible(video, nowMs)
+        )
+      );
     },
     (error) => {
       onError?.(error);
@@ -180,6 +216,9 @@ export const getVideoById = async (videoId: string): Promise<Video | null> => {
 
   const data = snap.data() as Omit<Video, "id">;
   if (!data.isPublished) {
+    return null;
+  }
+  if (!isVideoVisible({ id: snap.id, ...data })) {
     return null;
   }
 

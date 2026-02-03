@@ -4,7 +4,7 @@
       "slug": "TarotByAi",
       "scheme": "com.cristina.zurba.tarot",
       "platforms": ["ios", "android", "web"],
-      "version": "2.1.5",
+      "version": "2.1.6",
       "orientation": "portrait",
       "plugins": [
         [
@@ -15,8 +15,9 @@
               "compileSdkVersion": 35,
               "targetSdkVersion": 35,
               "buildToolsVersion": "35.0.0",
-              "useAndroidX": true,
-              "enableProguardInReleaseBuilds": false
+            "useAndroidX": true,
+            "enableProguardInReleaseBuilds": false,
+            "ndkVersion": "26.1.10909125"
             }
           }
         ],
@@ -41,7 +42,7 @@
         "config": {},
         "softwareKeyboardLayoutMode": "pan",
         "package": "com.cristina.zurba.tarot",
-        "versionCode": 108,
+        "versionCode": 110,
         "permissions": [
           "android.permission.RECORD_AUDIO",
           "com.google.android.gms.permission.AD_ID"

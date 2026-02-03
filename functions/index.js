@@ -2328,61 +2328,85 @@ exports.backfillUserTokens = functions
       }
     });
 
-// Notificare când un video este publicat
-exports.sendVideoPublishedNotifications = functions.firestore
-    .document("videosVideoModule/{videoId}")
-    .onUpdate(async (change, context) => {
-      const before = change.before.exists ? change.before.data() : null;
-      const after = change.after.exists ? change.after.data() : null;
+// Notificare când un video devine vizibil (publishAt)
+exports.sendVideoPublishedNotifications = functions.pubsub
+    .schedule("every 5 minutes")
+    .timeZone("Europe/Bucharest")
+    .onRun(async () => {
+      const runId = `sendVideoPublishedNotifications-${Date.now().toString(36)}`;
+      const now = admin.firestore.Timestamp.now();
 
-      if (!before || !after) {
+      const videosSnap = await admin
+          .firestore()
+          .collection("videosVideoModule")
+          .where("isPublished", "==", true)
+          .where("publishAt", "<=", now)
+          .where("notificationSentAt", "==", null)
+          .get();
+
+      if (videosSnap.empty) {
+        console.log(`[${runId}] no scheduled videos`);
         return null;
       }
-
-      if (before.isPublished === true || after.isPublished !== true) {
-        return null;
-      }
-
-      const videoId = context.params.videoId;
-      const title = after.title || "Videoclip nou";
-      const body = "";
 
       const userTokensSnap = await admin.firestore().collection("userTokens").get();
       const tokens = [];
       userTokensSnap.forEach((doc) => tokens.push(doc.data()));
 
       if (tokens.length === 0) {
+        console.log(`[${runId}] no user tokens`);
         return null;
       }
 
-      const messages = [];
-      tokens.forEach((user) => {
-        const {token} = user;
-        if (Expo.isExpoPushToken(token)) {
-          messages.push({
-            to: token,
-            sound: "default",
-            title,
-            body,
-            data: {type: "VideoPublished", videoId},
-          });
-        } else {
-          console.error(`[VideoPublished] Token invalid: ${token}`);
-        }
-      });
+      let batch = admin.firestore().batch();
+      let batchCount = 0;
 
-      if (messages.length === 0) {
-        return null;
+      for (const videoDoc of videosSnap.docs) {
+        const videoData = videoDoc.data() || {};
+        const title = videoData.title || "Videoclip nou";
+        const body = "";
+
+        const messages = [];
+        tokens.forEach((user) => {
+          const {token} = user;
+          if (Expo.isExpoPushToken(token)) {
+            messages.push({
+              to: token,
+              sound: "default",
+              title,
+              body,
+              data: {type: "VideoPublished", videoId: videoDoc.id},
+            });
+          } else {
+            console.error(`[VideoPublished] Token invalid: ${token}`);
+          }
+        });
+
+        if (messages.length > 0) {
+          const chunks = expo.chunkPushNotifications(messages);
+          for (const chunk of chunks) {
+            try {
+              await expo.sendPushNotificationsAsync(chunk);
+            } catch (error) {
+              console.error("[VideoPublished] Eroare la trimitere chunk:", error);
+            }
+          }
+        }
+
+        batch.update(videoDoc.ref, {notificationSentAt: now});
+        batchCount += 1;
+
+        if (batchCount >= 450) {
+          await batch.commit();
+          batch = admin.firestore().batch();
+          batchCount = 0;
+        }
       }
 
-      const chunks = expo.chunkPushNotifications(messages);
-      for (const chunk of chunks) {
-        try {
-          await expo.sendPushNotificationsAsync(chunk);
-        } catch (error) {
-          console.error("[VideoPublished] Eroare la trimitere chunk:", error);
-        }
+      if (batchCount > 0) {
+        await batch.commit();
       }
 
+      console.log(`[${runId}] notified videos: ${videosSnap.size}`);
       return null;
     });

@@ -18,6 +18,8 @@ export interface VideoDoc {
   category?: string;
   createdAt?: Timestamp | null;
   updatedAt?: Timestamp;
+  publishAt?: Timestamp | null;
+  notificationSentAt?: Timestamp | null;
   isPublished: boolean;
   isPremium?: boolean;
   order?: number | null;

@@ -25,7 +25,7 @@ export async function getDocPreferCache<T = unknown>(
 ): Promise<DocumentSnapshot<T>> {
   const LOCAL_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
   const LOCAL_CACHE_MAX_READS = await getRefreshModulo();
-  const cacheKey = `fs:doc:${ref.path}`;
+  const cacheKey = `fs:v2:doc:${ref.path}`;
 
   const cached = await getLocalCache<any>(
     cacheKey,
@@ -54,7 +54,24 @@ export async function getDocsPreferCache<T = unknown>(
 ): Promise<QuerySnapshot<T>> {
   const LOCAL_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
   const LOCAL_CACHE_MAX_READS = await getRefreshModulo();
-  const queryKey = `fs:query:${q.toString?.() ?? "unknown"}`;
+  const queryKey = getQueryCacheKey(q);
+
+  // If we can't compute a stable cache key, don't cache this query.
+  // This avoids cache collisions that can show wrong data across screens.
+  if (!queryKey) {
+    return await getDocsFromServer(q);
+  }
+
+  // Safety cleanup for an older bug where many queries shared `fs:query:unknown`
+  // (and would overwrite each other). Remove it so an app update self-heals.
+  if (queryKey === "fs:query:unknown") {
+    try {
+      await AsyncStorage.removeItem(queryKey);
+    } catch {
+      // ignore
+    }
+    return await getDocsFromServer(q);
+  }
 
   const cached = await getLocalCache<any[]>(
     queryKey,
@@ -100,6 +117,47 @@ const serializeValue = (value: any): any => {
     return result;
   }
   return value;
+};
+
+const getQueryCacheKey = (q: Query<any>): string | null => {
+  // Firebase modular SDK doesn't guarantee a public, stable `toString()` for Query.
+  // We build a best-effort stable key from internal fields, and if we can't,
+  // we refuse to cache to avoid collisions.
+  try {
+    const anyQ: any = q as any;
+    const internal = anyQ?._query;
+    const path =
+      internal?.path?.canonicalString?.() ??
+      internal?.path?.canonicalString ??
+      internal?.path?.toString?.() ??
+      internal?.path?.toString ??
+      null;
+
+    const filters = internal?.filters ?? null;
+    const explicitOrderBy = internal?.explicitOrderBy ?? null;
+    const limit = internal?.limit ?? null;
+    const limitType = internal?.limitType ?? null;
+    const startAt = internal?.startAt ?? null;
+    const endAt = internal?.endAt ?? null;
+
+    if (!path) {
+      return null;
+    }
+
+    const signature = JSON.stringify({
+      path,
+      filters,
+      explicitOrderBy,
+      limit,
+      limitType,
+      startAt,
+      endAt,
+    });
+
+    return `fs:v2:query:${signature}`;
+  } catch {
+    return null;
+  }
 };
 
 const deserializeValue = (value: any): any => {

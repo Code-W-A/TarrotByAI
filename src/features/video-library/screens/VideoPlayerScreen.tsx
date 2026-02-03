@@ -2,10 +2,11 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
   ActivityIndicator,
   ImageBackground,
-  Linking,
   Modal,
+  Platform,
   SafeAreaView,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -19,11 +20,13 @@ import { colors } from "../../../utils/colors";
 import { useAds } from "../../../hooks/useAds";
 import { useAdsContext } from "../../../context/AdsContext";
 import { useAuth } from "../../../context/AuthContext";
+import { logDebug, logError } from "../../../utils/Logger";
 import type { Video } from "../types/video";
-import { getEmbedUrl, getWatchUrl } from "../utils/videoEmbed";
+import { getEmbedUrl } from "../utils/videoEmbed";
 import { EmptyState } from "../components/EmptyState";
 import i18n from "../../../../i18n";
 import { recordVideoInterstitialShown, shouldShowVideoInterstitial } from "../utils/videoAdPolicy";
+import { AdBanner } from "../../../components/AdBanner/AdBanner";
 import {
   isFavoriteVideo,
   toggleFavoriteVideo,
@@ -65,7 +68,7 @@ const VideoPlayerScreen: React.FC = () => {
       return null;
     }
     const url = getEmbedUrl(video.platform, video.videoUrl);
-    console.log("[VideoPlayer] video:", {
+    logDebug("[VideoPlayer] video:", {
       id: video.id,
       title: video.title,
       platform: video.platform,
@@ -75,20 +78,44 @@ const VideoPlayerScreen: React.FC = () => {
     return url;
   }, [video]);
 
-  const watchUrl = useMemo(() => {
+  const isAndroid = Platform.OS === "android";
+  const isYoutube = video?.platform === "youtube";
+
+  const embedUrlWithParams = useMemo(() => {
+    if (!embedUrl) {
+      return null;
+    }
+    if (video?.platform !== "youtube") {
+      return embedUrl;
+    }
+    // Keep the player-only UI (no YouTube page title/metadata) and no recommendations.
+    const hasQuery = embedUrl.includes("?");
+    const sep = hasQuery ? "&" : "?";
+    return (
+      embedUrl +
+      sep +
+      `playsinline=1&controls=1&modestbranding=1&rel=0&hl=${encodeURIComponent(locale)}`
+    );
+  }, [embedUrl, locale, video?.platform]);
+
+  const preferredPlayerUrl = useMemo(() => {
     if (!video) {
       return null;
     }
-    return getWatchUrl(video.platform, video.videoUrl);
-  }, [video]);
+    // For YouTube, keep embed to avoid showing recommendations / page UI.
+    if (video.platform === "youtube") {
+      return embedUrlWithParams ?? embedUrl;
+    }
+    return embedUrl;
+  }, [embedUrl, embedUrlWithParams, video]);
 
   const webViewSource = useMemo(() => {
     const REFERER = "https://cristinazurba.com/";
-    if (embedUrl) {
-      return { uri: embedUrl, headers: { Referer: REFERER } };
+    if (preferredPlayerUrl) {
+      return { uri: preferredPlayerUrl, headers: { Referer: REFERER } };
     }
     return { html: "<html></html>", baseUrl: REFERER };
-  }, [embedUrl]);
+  }, [preferredPlayerUrl]);
 
   const handleRetry = () => {
     setHasError(false);
@@ -109,19 +136,8 @@ const VideoPlayerScreen: React.FC = () => {
   };
 
   const handleWebViewError = (event: any, label: string) => {
-    console.error(`[VideoPlayer] WebView ${label}:`, event.nativeEvent);
+    logError(`[VideoPlayer] WebView ${label}:`, event.nativeEvent);
     setHasError(true);
-  };
-
-  const handleOpenExternal = async () => {
-    if (!watchUrl) {
-      return;
-    }
-    try {
-      await Linking.openURL(watchUrl);
-    } catch (error) {
-      console.error("[VideoPlayer] Failed to open external URL:", error);
-    }
   };
 
   const handleUnlockWithAd = async () => {
@@ -191,7 +207,7 @@ const VideoPlayerScreen: React.FC = () => {
         />
         <View style={styles.overlay} />
         <View style={styles.contentWrapper}>
-        <View style={styles.header}>
+        <View style={styles.header} pointerEvents="box-none">
           <TouchableOpacity style={styles.headerIcon} onPress={handleBack}>
             <Ionicons name="arrow-back" size={24} color="#5d4e37" />
           </TouchableOpacity>
@@ -263,8 +279,14 @@ const VideoPlayerScreen: React.FC = () => {
           />
         ) : (
           <View style={styles.content}>
-            <View style={styles.playerContainer}>
-              {!embedUrl ? (
+            <View
+              style={[
+                styles.playerContainer,
+                styles.playerContainerAspect,
+                isAndroid && isYoutube ? styles.playerContainerNoClip : null,
+              ]}
+            >
+              {!preferredPlayerUrl ? (
                 <EmptyState
                   title={i18n.translate("videoInvalidLinkTitle")}
                   message={i18n.translate("videoInvalidLinkMessage")}
@@ -279,21 +301,11 @@ const VideoPlayerScreen: React.FC = () => {
                   actionLabel={i18n.translate("videoRetry")}
                   onAction={handleRetry}
                 />
-                      {watchUrl ? (
-                        <TouchableOpacity
-                          onPress={handleOpenExternal}
-                          style={styles.externalButton}
-                        >
-                          <Text style={styles.externalButtonText}>
-                            {i18n.translate("videoOpenExternal")}
-                          </Text>
-                        </TouchableOpacity>
-                      ) : null}
                     </View>
               ) : (
                 <>
                   {isLoading ? (
-                    <View style={styles.loader}>
+                    <View style={styles.loader} pointerEvents="none">
                       <ActivityIndicator size="large" color={colors.gold} />
                     </View>
                   ) : null}
@@ -301,30 +313,33 @@ const VideoPlayerScreen: React.FC = () => {
                     key={`video-webview-${retryKey}`}
                         source={webViewSource}
                     allowsFullscreenVideo
-                        onError={(event) => handleWebViewError(event, "error")}
-                        onHttpError={(event) => handleWebViewError(event, "HTTP error")}
+                        onError={(event) => {
+                          handleWebViewError(event, "error");
+                        }}
+                        onHttpError={(event) => {
+                          handleWebViewError(event, "HTTP error");
+                        }}
                     onLoadStart={() => setIsLoading(true)}
                     onLoadEnd={() => {
-                      console.log("[VideoPlayer] WebView loaded");
+                      logDebug("[VideoPlayer] WebView loaded");
                       setIsLoading(false);
                     }}
                     onLoadProgress={(event) => {
-                      console.log(
-                        "[VideoPlayer] WebView progress:",
-                        event.nativeEvent.progress
-                      );
+                      logDebug("[VideoPlayer] WebView progress:", event.nativeEvent.progress);
                     }}
                     javaScriptEnabled
                     domStorageEnabled
                     originWhitelist={["*"]}
                     allowsInlineMediaPlayback
                     mediaPlaybackRequiresUserAction={false}
+                    androidLayerType={isAndroid ? "hardware" : undefined}
                     style={styles.webview}
                   />
                 </>
               )}
               {isVideoLocked ? <View style={styles.playerLockOverlay} /> : null}
             </View>
+            <AdBanner style={styles.banner} adsConfig={adsConfig} />
             <Text style={styles.title}>{displayTitle}</Text>
             {displayDescription ? (
               <ScrollView 
@@ -371,6 +386,7 @@ const styles = StyleSheet.create({
     flex: 1,
     zIndex: 3,
     paddingHorizontal: 20,
+    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight ?? 0 : 0,
   },
   header: {
     flexDirection: "row",
@@ -398,7 +414,6 @@ const styles = StyleSheet.create({
   },
   playerContainer: {
     width: "100%",
-    aspectRatio: 16 / 9,
     backgroundColor: colors.pureBlack,
     borderRadius: 24,
     overflow: "hidden",
@@ -407,7 +422,18 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 16,
     elevation: 8,
+    // On Android, keep a small gap from the header so the YouTube top-right controls
+    // (settings gear) aren't under any overlapping touch hitboxes.
+    marginTop: Platform.OS === "android" ? 8 : 0,
     marginBottom: 16,
+  },
+  playerContainerNoClip: {
+    // Android WebView + overflow:hidden/borderRadius can make taps unreliable (e.g., YouTube settings gear).
+    borderRadius: 0,
+    overflow: "visible",
+  },
+  playerContainerAspect: {
+    aspectRatio: 16 / 9,
   },
   unlockModalOverlay: {
     flex: 1,
@@ -473,7 +499,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   descriptionScroll: {
-    flex: 1,
+    flexGrow: 0,
     paddingHorizontal: 4,
   },
   description: {
@@ -482,6 +508,10 @@ const styles = StyleSheet.create({
     color: "#5d4e37",
     lineHeight: 22,
     paddingBottom: 20,
+  },
+  banner: {
+    marginTop: 6,
+    marginBottom: 8,
   },
   loader: {
     position: "absolute",
