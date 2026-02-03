@@ -118,7 +118,10 @@ android {
     }
     packagingOptions {
         jniLibs {
-            useLegacyPackaging (findProperty('expo.useLegacyPackaging')?.toBoolean() ?: false)
+            // IMPORTANT: Use explicit assignment. Some Groovy DSL forms like `prop(value)`
+            // can be interpreted as a method call and silently not apply.
+            // When true, native libs are extracted at install time (workaround for Play Console 16KB page-size validation).
+            useLegacyPackaging = (findProperty('expo.useLegacyPackaging')?.toBoolean() ?: false)
         }
     }
     androidResources {
