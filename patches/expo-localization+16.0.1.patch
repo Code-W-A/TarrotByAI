@@ -1,0 +1,14 @@
+diff --git a/node_modules/expo-localization/ios/LocalizationModule.swift b/node_modules/expo-localization/ios/LocalizationModule.swift
+index 6c4b7f1..1b2c3d4 100644
+--- a/node_modules/expo-localization/ios/LocalizationModule.swift
++++ b/node_modules/expo-localization/ios/LocalizationModule.swift
+@@
+   static func getUnicodeCalendarIdentifier(calendar: Calendar) -> String {
+     switch calendar.identifier {
+@@
+     case .iso8601:
+       return "iso8601"
++    @unknown default:
++      return "gregory"
+     }
+   }
