@@ -76,6 +76,10 @@ export const langObj = {
     latestArticles: "Latest Articles",
     latestVideos: "Latest Videos",
     seeAllVideos: "See all videos",
+    latestCourses: "Latest Courses",
+    seeAllCourses: "See all courses",
+    noCoursesAvailable: "No courses available at the moment.",
+    featuredBadge: "Featured",
 
     informatiiCalcule: "For accurate calculations we need some information",
     Adresa: "Address",
@@ -399,6 +403,10 @@ export const langObj = {
     latestArticles: "Ultimele articole",
     latestVideos: "Ultimele videoclipuri",
     seeAllVideos: "Vezi toate videoclipurile",
+    latestCourses: "Ultimele cursuri video",
+    seeAllCourses: "Vezi toate cursurile",
+    noCoursesAvailable: "Nu există cursuri disponibile momentan.",
+    featuredBadge: "Recomandat",
 
     informatiiCalcule:
       "Pentru a face calcule exacte avem nevoie de câteva informații",

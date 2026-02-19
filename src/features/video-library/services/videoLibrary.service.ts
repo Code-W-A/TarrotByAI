@@ -20,17 +20,29 @@ import { logWarn } from "../../../utils/Logger";
 const COLLECTION_NAME = "videosVideoModule";
 const CATEGORY_COLLECTION_NAME = "videoCategories";
 
-const sortVideos = (videos: Video[]): Video[] => {
+const getVideoSortTimestamp = (video: Video): number => {
+  const publishMs = video.publishAt?.toMillis?.();
+  if (typeof publishMs === "number") {
+    return publishMs;
+  }
+
+  const createdMs = video.createdAt?.toMillis?.();
+  if (typeof createdMs === "number") {
+    return createdMs;
+  }
+
+  const updatedMs = video.updatedAt?.toMillis?.();
+  if (typeof updatedMs === "number") {
+    return updatedMs;
+  }
+
+  return 0;
+};
+
+const sortVideosNewestFirst = (videos: Video[]): Video[] => {
   return [...videos].sort((a, b) => {
-    const orderA = a.order ?? Number.MAX_SAFE_INTEGER;
-    const orderB = b.order ?? Number.MAX_SAFE_INTEGER;
-
-    if (orderA !== orderB) {
-      return orderA - orderB;
-    }
-
-    const timeA = a.createdAt?.toMillis?.() ?? 0;
-    const timeB = b.createdAt?.toMillis?.() ?? 0;
+    const timeA = getVideoSortTimestamp(a);
+    const timeB = getVideoSortTimestamp(b);
     return timeB - timeA;
   });
 };
@@ -69,18 +81,10 @@ const buildPrimaryQuery = () =>
   query(
     collection(db, COLLECTION_NAME),
     where("isPublished", "==", true),
-    orderBy("order", "asc"),
     orderBy("createdAt", "desc")
   );
 
 const buildFallbackQuery = () =>
-  query(
-    collection(db, COLLECTION_NAME),
-    where("isPublished", "==", true),
-    orderBy("createdAt", "desc")
-  );
-
-const buildLooseQuery = () =>
   query(collection(db, COLLECTION_NAME), where("isPublished", "==", true));
 
 export const getPublishedVideos = async (): Promise<Video[]> => {
@@ -88,8 +92,10 @@ export const getPublishedVideos = async (): Promise<Video[]> => {
     const snapshot = await getDocsFromServer(buildPrimaryQuery());
     if (!snapshot.empty) {
       const nowMs = Date.now();
-      return mapVideos(snapshot.docs).filter((video) =>
-        isVideoVisible(video, nowMs)
+      return sortVideosNewestFirst(
+        mapVideos(snapshot.docs).filter((video) =>
+          isVideoVisible(video, nowMs)
+        )
       );
     }
   } catch (error) {
@@ -100,28 +106,14 @@ export const getPublishedVideos = async (): Promise<Video[]> => {
     const fallbackSnapshot = await getDocsFromServer(buildFallbackQuery());
     if (!fallbackSnapshot.empty) {
       const nowMs = Date.now();
-      return sortVideos(
+      return sortVideosNewestFirst(
         mapVideos(fallbackSnapshot.docs).filter((video) =>
           isVideoVisible(video, nowMs)
         )
       );
     }
   } catch (error) {
-    logWarn("[VideoLibrary] Fallback query failed, trying loose query.", error);
-  }
-
-  try {
-    const looseSnapshot = await getDocsFromServer(buildLooseQuery());
-    if (!looseSnapshot.empty) {
-      const nowMs = Date.now();
-      return sortVideos(
-        mapVideos(looseSnapshot.docs).filter((video) =>
-          isVideoVisible(video, nowMs)
-        )
-      );
-    }
-  } catch (error) {
-    logWarn("[VideoLibrary] Loose query failed.", error);
+    logWarn("[VideoLibrary] Fallback query failed.", error);
   }
 
   return [];
@@ -168,7 +160,7 @@ export const subscribePublishedVideos = (
       (snapshot) => {
         const nowMs = Date.now();
         onUpdate(
-          sortVideos(
+          sortVideosNewestFirst(
             mapVideos(snapshot.docs).filter((video) =>
               isVideoVisible(video, nowMs)
             )
@@ -186,8 +178,10 @@ export const subscribePublishedVideos = (
     (snapshot) => {
       const nowMs = Date.now();
       onUpdate(
-        mapVideos(snapshot.docs).filter((video) =>
-          isVideoVisible(video, nowMs)
+        sortVideosNewestFirst(
+          mapVideos(snapshot.docs).filter((video) =>
+            isVideoVisible(video, nowMs)
+          )
         )
       );
     },

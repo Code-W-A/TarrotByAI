@@ -91,8 +91,8 @@ android {
         applicationId 'com.cristina.zurba.tarot'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 112
-        versionName "2.1.8"
+        versionCode 122
+        versionName "2.2.2"
     }
     signingConfigs {
         debug {
@@ -120,7 +120,7 @@ android {
         jniLibs {
             // IMPORTANT: Use explicit assignment. Some Groovy DSL forms like `prop(value)`
             // can be interpreted as a method call and silently not apply.
-            // When true, native libs are extracted at install time (workaround for Play Console 16KB page-size validation).
+            // Keep false for modern Play/App Bundle native library delivery.
             useLegacyPackaging = (findProperty('expo.useLegacyPackaging')?.toBoolean() ?: false)
         }
     }

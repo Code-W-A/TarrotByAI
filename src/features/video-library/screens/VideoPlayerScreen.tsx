@@ -16,10 +16,12 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useNavigation, useRoute } from "@react-navigation/native";
 import { WebView } from "react-native-webview";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "../../../utils/colors";
 import { useAds } from "../../../hooks/useAds";
 import { useAdsContext } from "../../../context/AdsContext";
 import { useAuth } from "../../../context/AuthContext";
+import { useNavBarVisibility } from "../../../context/NavbarVisibilityContext";
 import { logDebug, logError } from "../../../utils/Logger";
 import type { Video } from "../types/video";
 import { getEmbedUrl } from "../utils/videoEmbed";
@@ -41,6 +43,8 @@ const VideoPlayerScreen: React.FC = () => {
   const route = useRoute();
   const params = route.params as RouteParams | undefined;
   const video = params?.video;
+  const insets = useSafeAreaInsets();
+  const { setIsNavBarVisible } = useNavBarVisibility();
   const { userData } = useAuth() as { userData?: unknown };
   const { adsConfig } = useAdsContext();
   const { showInterstitial, showRewarded, canShowAds } = useAds(adsConfig);
@@ -80,6 +84,10 @@ const VideoPlayerScreen: React.FC = () => {
 
   const isAndroid = Platform.OS === "android";
   const isYoutube = video?.platform === "youtube";
+  const descriptionBottomPadding = Math.max(
+    isAndroid ? 72 : 28,
+    insets.bottom + (isAndroid ? 24 : 12)
+  );
 
   const embedUrlWithParams = useMemo(() => {
     if (!embedUrl) {
@@ -163,6 +171,15 @@ const VideoPlayerScreen: React.FC = () => {
     hasPromptedRef.current = true;
     setUnlockModalVisible(true);
   }, [canShowAds, isPremiumUser, isVideoLocked, video]);
+
+  useFocusEffect(
+    useCallback(() => {
+      setIsNavBarVisible(false);
+      return () => {
+        setIsNavBarVisible(true);
+      };
+    }, [setIsNavBarVisible])
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -344,6 +361,10 @@ const VideoPlayerScreen: React.FC = () => {
             {displayDescription ? (
               <ScrollView 
                 style={styles.descriptionScroll}
+                contentContainerStyle={[
+                  styles.descriptionScrollContent,
+                  { paddingBottom: descriptionBottomPadding },
+                ]}
                 showsVerticalScrollIndicator={false}
               >
                 <Text style={styles.description}>{displayDescription}</Text>
@@ -502,12 +523,14 @@ const styles = StyleSheet.create({
     flexGrow: 0,
     paddingHorizontal: 4,
   },
+  descriptionScrollContent: {
+    paddingBottom: 0,
+  },
   description: {
     fontSize: 15,
     fontWeight: "400",
     color: "#5d4e37",
     lineHeight: 22,
-    paddingBottom: 20,
   },
   banner: {
     marginTop: 6,

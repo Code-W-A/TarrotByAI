@@ -104,6 +104,9 @@ import SavedNews from "./src/pages/blog/SavedNews";
 import VideoLibraryScreen from "./src/features/video-library/screens/VideoLibraryScreen";
 import VideoPlayerScreen from "./src/features/video-library/screens/VideoPlayerScreen";
 import VideoFavoritesScreen from "./src/features/video-library/screens/VideoFavoritesScreen";
+import { CourseListScreen } from "./src/features/courses/screens/CourseListScreen";
+import { CourseDetailScreen } from "./src/features/courses/screens/CourseDetailScreen";
+import { PurchasedCoursesScreen } from "./src/features/courses/screens/PurchasedCoursesScreen";
 import CeSimte from "./src/pages/doctors/CeSimte";
 import CeGandeste from "./src/pages/doctors/CeGandeste";
 import CarteaTa from "./src/pages/doctors/CarteaTa";
@@ -227,6 +230,21 @@ const HomeNavigation = (props: NavigationProps) => {
         <Stack.Screen
           name={screenName.VideoPlayer}
           component={VideoPlayerScreen}
+        />
+        <Stack.Screen
+          name="CoursesList"
+          component={CourseListScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="CoursesDetail"
+          component={CourseDetailScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="CoursesPurchased"
+          component={PurchasedCoursesScreen}
+          options={{ headerShown: false }}
         />
 
         <Stack.Screen

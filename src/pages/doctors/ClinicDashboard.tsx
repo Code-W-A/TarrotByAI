@@ -3,6 +3,7 @@ import React, {
   Fragment,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -90,6 +91,8 @@ import {
   recordVideoOpen,
   shouldShowVideoInterstitial,
 } from "../../features/video-library/utils/videoAdPolicy";
+import { createCoursesApi, normalizeLocale } from "../../services/coursesApi";
+import type { SafeCourse } from "../../types/courses";
 
 // ADS COMPLETELY REMOVED FOR DEBUGGING
 // const adUnitId = __DEV__
@@ -262,6 +265,171 @@ const LatestVideoCard: React.FC<{ video: Video; onPress: () => void }> = ({
             numberOfLines={2}
           >
             {video.title}
+          </Text>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+};
+
+const LatestCourseCard: React.FC<{
+  course: SafeCourse;
+  locale: string;
+  featuredLabel: string;
+  onPress: () => void;
+}> = ({ course, locale, featuredLabel, onPress }) => {
+  const [previewError, setPreviewError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const previewUrl =
+    course.hasVimeoPreview && course.previewVimeoId
+      ? `https://player.vimeo.com/video/${encodeURIComponent(
+          course.previewVimeoId
+        )}?autoplay=1&muted=1&loop=1&background=1&controls=0&title=0&byline=0&portrait=0`
+      : null;
+
+  const showPreview = Boolean(previewUrl && !course.hasCustomThumbnail && !previewError);
+
+  const priceLabel = (() => {
+    try {
+      return new Intl.NumberFormat(locale || "ro", {
+        style: "currency",
+        currency: course.currency,
+        maximumFractionDigits: 2,
+      }).format(course.price);
+    } catch {
+      return `${course.price} ${course.currency}`;
+    }
+  })();
+
+  return (
+    <TouchableOpacity
+      activeOpacity={0.93}
+      onPress={onPress}
+      style={{
+        width: 220,
+        height: 180,
+        borderRadius: 20,
+        overflow: "hidden",
+        marginRight: 12,
+        backgroundColor: "#fff",
+        shadowColor: "#bfa76a",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.13,
+        shadowRadius: 16,
+        elevation: 7,
+      }}
+    >
+      <View style={{ flex: 1, backgroundColor: "#000" }}>
+        {showPreview ? (
+          <>
+            {isLoading && course.thumbnailUrl ? (
+              <ImageBackground
+                source={{ uri: course.thumbnailUrl }}
+                style={{ ...StyleSheet.absoluteFillObject }}
+                resizeMode="cover"
+              />
+            ) : null}
+            <WebView
+              source={{ uri: previewUrl! }}
+              style={{ flex: 1, backgroundColor: "#000" }}
+              onError={() => {
+                setPreviewError(true);
+                setIsLoading(false);
+              }}
+              onLoadEnd={() => setIsLoading(false)}
+              scrollEnabled={false}
+              bounces={false}
+              javaScriptEnabled
+              domStorageEnabled
+              mediaPlaybackRequiresUserAction={false}
+              allowsInlineMediaPlayback
+              originWhitelist={["*"]}
+            />
+          </>
+        ) : (
+          <ImageBackground
+            source={{ uri: course.thumbnailUrl ?? "https://picsum.photos/800" }}
+            style={{ flex: 1 }}
+            resizeMode="cover"
+          />
+        )}
+
+        {course.featuredOnHome ? (
+          <View
+            style={{
+              position: "absolute",
+              top: 10,
+              left: 10,
+              backgroundColor: "rgba(255, 215, 0, 0.92)",
+              borderRadius: 12,
+              paddingHorizontal: 10,
+              paddingVertical: 4,
+              borderWidth: 1,
+              borderColor: "rgba(125, 95, 46, 0.35)",
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 11,
+                fontWeight: "700",
+                color: "#5d4e37",
+                letterSpacing: 0.3,
+              }}
+            >
+              {featuredLabel}
+            </Text>
+          </View>
+        ) : null}
+
+        <View
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.2)",
+            justifyContent: "center",
+            alignItems: "center",
+            padding: 12,
+          }}
+        >
+          <Ionicons
+            name="school"
+            size={34}
+            color="rgba(255,255,255,0.92)"
+          />
+          <Text
+            style={{
+              color: "#ffe6b0",
+              fontWeight: "700",
+              fontSize: 15,
+              textAlign: "center",
+              textShadowColor: "#000",
+              textShadowOffset: { width: 0, height: 1 },
+              textShadowRadius: 1,
+              marginTop: 6,
+            }}
+            numberOfLines={2}
+          >
+            {course.title}
+          </Text>
+        </View>
+
+        <View
+          style={{
+            position: "absolute",
+            bottom: 10,
+            right: 10,
+            backgroundColor: "rgba(255, 248, 230, 0.95)",
+            borderRadius: 10,
+            paddingHorizontal: 8,
+            paddingVertical: 4,
+          }}
+        >
+          <Text style={{ color: "#5d4e37", fontSize: 12, fontWeight: "700" }}>
+            {priceLabel}
           </Text>
         </View>
       </View>
@@ -461,6 +629,26 @@ const ClinicDashboard = () => {
   const [latestVideos, setLatestVideos] = useState<Video[]>([]);
   const [loadingVideos, setLoadingVideos] = useState(false);
   const [refreshingVideos, setRefreshingVideos] = useState(false);
+  const [latestCourses, setLatestCourses] = useState<SafeCourse[]>([]);
+  const [loadingCourses, setLoadingCourses] = useState(false);
+  const [refreshingCourses, setRefreshingCourses] = useState(false);
+
+  const coursesApi = useMemo(() => {
+    try {
+      return createCoursesApi({
+        baseUrl: process.env.EXPO_PUBLIC_API_BASE_URL,
+        getAuthToken: async () => {
+          if (currentUser?.getIdToken) {
+            return currentUser.getIdToken();
+          }
+          return null;
+        },
+      });
+    } catch (error) {
+      console.error("[ClinicDashboard] Courses API init failed", error);
+      return null;
+    }
+  }, [currentUser]);
 
   // Funcție pentru gestionarea navigării către Learn screen cu verificarea datelor
   const handleNavigateToLearn = async () => {
@@ -793,6 +981,80 @@ const ClinicDashboard = () => {
     fetchLatestVideos();
   }, []);
 
+  const fetchLatestCourses = useCallback(async (isRefresh = false) => {
+    if (isRefresh) {
+      setRefreshingCourses(true);
+    } else {
+      setLoadingCourses(true);
+    }
+
+    try {
+      if (!coursesApi) {
+        setLatestCourses([]);
+        return;
+      }
+
+      const localeForBackend = normalizeLocale(language || i18n.locale || "ro");
+      const localeCandidates = Array.from(
+        new Set([localeForBackend, "ro", "en"].map((candidate) => normalizeLocale(candidate)))
+      );
+
+      let safeCourses: SafeCourse[] = [];
+      let resolvedLocale = localeForBackend;
+
+      for (let index = 0; index < localeCandidates.length; index += 1) {
+        const candidateLocale = localeCandidates[index];
+        const result = await coursesApi.listCourses({
+          locale: candidateLocale,
+          limit: 6,
+        });
+        const candidateCourses = result.courses || [];
+
+        logDebug("[ClinicDashboard] Latest courses locale candidate", {
+          requestedLocale: localeForBackend,
+          candidateLocale,
+          count: candidateCourses.length,
+        });
+
+        const isLastLocale = index === localeCandidates.length - 1;
+        if (candidateCourses.length > 0 || isLastLocale) {
+          safeCourses = candidateCourses;
+          resolvedLocale = candidateLocale;
+          break;
+        }
+      }
+
+      const sortedLatest = [...safeCourses]
+        .sort((a, b) => {
+          const timeA = a.updatedAt ? Date.parse(a.updatedAt) : 0;
+          const timeB = b.updatedAt ? Date.parse(b.updatedAt) : 0;
+          return (Number.isNaN(timeB) ? 0 : timeB) - (Number.isNaN(timeA) ? 0 : timeA);
+        })
+        .slice(0, 3);
+
+      setLatestCourses(sortedLatest);
+      logDebug("[ClinicDashboard] Latest courses fetched", {
+        requestedLocale: localeForBackend,
+        resolvedLocale,
+        fallbackUsed: resolvedLocale !== localeForBackend,
+        count: sortedLatest.length,
+      });
+    } catch (error) {
+      console.error("[ClinicDashboard] Failed to fetch latest courses", error);
+      setLatestCourses([]);
+    } finally {
+      if (isRefresh) {
+        setRefreshingCourses(false);
+      } else {
+        setLoadingCourses(false);
+      }
+    }
+  }, [coursesApi, language]);
+
+  useEffect(() => {
+    void fetchLatestCourses();
+  }, [fetchLatestCourses]);
+
   const handlePressArticle = (article) => {
     setSelectedArticle(article);
     setArticleModalVisible(true);
@@ -813,6 +1075,36 @@ const ClinicDashboard = () => {
     }
     navigation.navigate(screenName.VideoPlayer, { video });
   };
+
+  const handlePressCourse = (course: SafeCourse) => {
+    navigation.navigate("CoursesDetail", { courseId: course.id });
+  };
+
+  const handleOpenCoursesCatalog = () => {
+    navigation.navigate("CoursesList");
+  };
+
+  const latestCoursesTitleRaw = i18n.translate("latestCourses");
+  const latestCoursesTitle =
+    latestCoursesTitleRaw === "latestCourses"
+      ? "Latest Courses"
+      : latestCoursesTitleRaw;
+  const seeAllCoursesRaw = i18n.translate("seeAllCourses");
+  const seeAllCoursesLabel =
+    seeAllCoursesRaw === "seeAllCourses" ? "See all courses" : seeAllCoursesRaw;
+  const noCoursesAvailableRaw = i18n.translate("noCoursesAvailable");
+  const noCoursesAvailableLabel =
+    noCoursesAvailableRaw === "noCoursesAvailable"
+      ? "No courses available at the moment."
+      : noCoursesAvailableRaw;
+  const featuredBadgeRaw = i18n.translate("featuredBadge");
+  const featuredBadgeLabel =
+    featuredBadgeRaw === "featuredBadge" ? "Featured" : featuredBadgeRaw;
+  const closeLabelRaw = i18n.translate("close");
+  const closeLabel = closeLabelRaw === "close" ? "Close" : closeLabelRaw;
+  const consultationsTitleRaw = i18n.translate("sessionsCategory");
+  const consultationsTitle =
+    consultationsTitleRaw === "sessionsCategory" ? "Consultations" : consultationsTitleRaw;
 
   return (
     <Fragment>
@@ -884,7 +1176,7 @@ const ClinicDashboard = () => {
                       style={stylesNew.modalItemCancel}
                       onPress={() => setLangModalVisible(false)}
                     >
-                      <Text style={stylesNew.modalTextCancel}>Cancel</Text>
+                      <Text style={stylesNew.modalTextCancel}>{closeLabel}</Text>
                     </TouchableOpacity>
                   </View>
                 </TouchableOpacity>
@@ -1043,6 +1335,64 @@ const ClinicDashboard = () => {
                   </>
                 )}
               </View>
+              {/* Ultimele cursuri video - Courses Section */}
+              <View style={stylesNew.sectionContainer}>
+                <View style={stylesNew.sectionTitleContainer}>
+                  <Text style={stylesNew.sectionTitle}>{latestCoursesTitle}</Text>
+                  <View style={stylesNew.iconBackground}>
+                    <Ionicons name="school" size={20} color="#ffe6b0" />
+                  </View>
+                </View>
+                {loadingCourses ? (
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{ flexDirection: "row", gap: 12 }}
+                  >
+                    {Array.from({ length: 3 }).map((_, index) => (
+                      <LatestSkeletonCard key={`course-skeleton-${index}`} />
+                    ))}
+                  </ScrollView>
+                ) : (
+                  <>
+                    <ScrollView
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      contentContainerStyle={{ flexDirection: "row", gap: 12 }}
+                      refreshControl={
+                        <RefreshControl
+                          refreshing={refreshingCourses}
+                          onRefresh={() => fetchLatestCourses(true)}
+                          colors={["#bfa76a"]}
+                          tintColor="#bfa76a"
+                        />
+                      }
+                    >
+                      {latestCourses.map((course) => (
+                        <LatestCourseCard
+                          key={course.id}
+                          course={course}
+                          locale={normalizeLocale(language || i18n.locale || "ro")}
+                          featuredLabel={featuredBadgeLabel}
+                          onPress={() => handlePressCourse(course)}
+                        />
+                      ))}
+                    </ScrollView>
+                    {latestCourses.length === 0 ? (
+                      <Text style={{ color: "#8b7355", marginTop: 8 }}>
+                        {noCoursesAvailableLabel}
+                      </Text>
+                    ) : null}
+                    <TouchableOpacity
+                      style={stylesNew.seeAllButton}
+                      onPress={handleOpenCoursesCatalog}
+                    >
+                      <Text style={stylesNew.seeAllButtonText}>{seeAllCoursesLabel}</Text>
+                    </TouchableOpacity>
+                  </>
+                )}
+              </View>
+
               {/* Ultimele videoclipuri - Video Section */}
               <View style={stylesNew.sectionContainer}>
                 <View style={stylesNew.sectionTitleContainer}>
@@ -1098,7 +1448,7 @@ const ClinicDashboard = () => {
               {/* Consultatii - categorie nouă */}
               <View style={stylesNew.sectionContainer}>
                 <View style={stylesNew.sectionTitleContainer}>
-                  <Text style={stylesNew.sectionTitle}>Consultatii</Text>
+                  <Text style={stylesNew.sectionTitle}>{consultationsTitle}</Text>
                   <View style={stylesNew.iconBackground}>
                     <Image source={require('../../../assets/clinicdashboard/Consultatii.png')} style={{ width: 32, height: 32 }} />
                   </View>

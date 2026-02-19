@@ -4,7 +4,7 @@
       "slug": "TarotByAi",
       "scheme": "com.cristina.zurba.tarot",
       "platforms": ["ios", "android", "web"],
-      "version": "2.1.6",
+      "version": "2.2.0",
       "orientation": "portrait",
       "plugins": [
         [
@@ -42,7 +42,8 @@
         "config": {},
         "softwareKeyboardLayoutMode": "pan",
         "package": "com.cristina.zurba.tarot",
-        "versionCode": 111,
+        
+        "versionCode": 120,
         "permissions": [
           "android.permission.RECORD_AUDIO",
           "com.google.android.gms.permission.AD_ID"

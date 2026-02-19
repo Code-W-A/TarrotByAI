@@ -2329,6 +2329,72 @@ exports.backfillUserTokens = functions
     });
 
 // Notificare când un video devine vizibil (publishAt)
+const normalizeLangCode = (language) => {
+  if (typeof language !== "string") {
+    return "";
+  }
+  const cleaned = language.trim().toLowerCase();
+  if (!cleaned) {
+    return "";
+  }
+  return cleaned.split(/[-_]/)[0];
+};
+
+const safeText = (value) => {
+  if (typeof value !== "string") {
+    return "";
+  }
+  return value.trim();
+};
+
+const resolveVideoNotificationCopy = (videoData, userLanguage) => {
+  const normalizedUserLanguage = normalizeLangCode(userLanguage);
+  const languageOrder = [normalizedUserLanguage, "ro", "en"].filter(
+      (lang, index, arr) => Boolean(lang) && arr.indexOf(lang) === index,
+  );
+
+  const locales = videoData && typeof videoData.locales === "object" ?
+    videoData.locales :
+    {};
+
+  let localizedFields = null;
+  let resolvedLanguage = "base";
+
+  for (const lang of languageOrder) {
+    const exactFields = locales[lang];
+    if (exactFields && typeof exactFields === "object") {
+      localizedFields = exactFields;
+      resolvedLanguage = lang;
+      break;
+    }
+
+    const fallbackKey = Object.keys(locales).find(
+        (key) => normalizeLangCode(key) === lang,
+    );
+    if (fallbackKey) {
+      const fallbackFields = locales[fallbackKey];
+      if (fallbackFields && typeof fallbackFields === "object") {
+        localizedFields = fallbackFields;
+        resolvedLanguage = lang;
+        break;
+      }
+    }
+  }
+
+  const localizedTitle = safeText(localizedFields && localizedFields.title);
+  const localizedBody = safeText(
+      localizedFields && localizedFields.description,
+  );
+  const fallbackTitle = safeText(videoData && videoData.title);
+  const fallbackBody = safeText(videoData && videoData.description);
+
+  return {
+    title: localizedTitle || fallbackTitle || "Videoclip nou",
+    body: localizedBody || fallbackBody || "",
+    resolvedLanguage,
+  };
+};
+
 exports.sendVideoPublishedNotifications = functions.pubsub
     .schedule("every 5 minutes")
     .timeZone("Europe/Bucharest")
@@ -2363,13 +2429,17 @@ exports.sendVideoPublishedNotifications = functions.pubsub
 
       for (const videoDoc of videosSnap.docs) {
         const videoData = videoDoc.data() || {};
-        const title = videoData.title || "Videoclip nou";
-        const body = "";
-
         const messages = [];
+        const languageDistribution = {};
         tokens.forEach((user) => {
-          const {token} = user;
+          const {token, language} = user;
           if (Expo.isExpoPushToken(token)) {
+            const {title, body, resolvedLanguage} = resolveVideoNotificationCopy(
+                videoData,
+                language,
+            );
+            languageDistribution[resolvedLanguage] =
+              (languageDistribution[resolvedLanguage] || 0) + 1;
             messages.push({
               to: token,
               sound: "default",
@@ -2381,6 +2451,10 @@ exports.sendVideoPublishedNotifications = functions.pubsub
             console.error(`[VideoPublished] Token invalid: ${token}`);
           }
         });
+
+        console.log(
+            `[${runId}] video=${videoDoc.id} messages=${messages.length} langDistribution=${JSON.stringify(languageDistribution)}`,
+        );
 
         if (messages.length > 0) {
           const chunks = expo.chunkPushNotifications(messages);

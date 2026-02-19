@@ -7,7 +7,7 @@
       "android",
       "web"
     ],
-    "version": "2.1.4",
+    "version": "2.1.5",
     "orientation": "portrait",
           "scheme": "com.cristina.zurba.tarot",
       "plugins": [
@@ -45,6 +45,7 @@
       "config": {},
       "softwareKeyboardLayoutMode": "pan",
       "package": "com.cristina.zurba.tarot",
+      
       "versionCode": 37,
       "permissions": [
         "android.permission.RECORD_AUDIO",
@@ -69,7 +70,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.cristina.zurba.tarotai",
-      "buildNumber": "57",
+      "buildNumber": "58",
       "infoPlist": {
         "NSUserTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you.",
         "ITSAppUsesNonExemptEncryption": false
