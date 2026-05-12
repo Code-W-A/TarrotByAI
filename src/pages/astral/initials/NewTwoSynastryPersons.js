@@ -57,6 +57,7 @@ import { useLanguage } from "../../../context/LanguageContext";
 import { capitalizeFirstLetter } from "../../../utils/stringUtils";
 import { fetchSinastrieData } from "../../../utils/AstralUtils/fetchSinastrieDate";
 import { useTranslation } from "../../../utils/translateUtil";
+import { mergeAnalysisWithPreservedMeta } from "../../../utils/analysisIdentityUtils";
 import DayPickerModal from '../../../components/DayPickerModal';
 import MonthPickerModal from '../../../components/MonthPickerModal';
 import YearPickerModal from '../../../components/YearPickerModal';
@@ -238,6 +239,10 @@ function NewTwoSyanstryPersons({ navigation, route }) {
       // Obține datele existente din AsyncStorage
       const personsD = await AsyncStorage.getItem("personsDataOthers");
       const parsedDataPersons = personsD ? JSON.parse(personsD) : [];
+      const existingAnalysis =
+        isEditMode && route.params?.analysisIndex !== undefined
+          ? parsedDataPersons[route.params.analysisIndex]
+          : route.params?.analysisData || null;
 
       // Helper pentru construirea datelor pentru o persoană
       const buildPersonData = async (person, selectedTime) => {
@@ -298,24 +303,36 @@ function NewTwoSyanstryPersons({ navigation, route }) {
 
       const generateUniqueId = () =>
         "_" + Math.random().toString(36).substr(2, 9);
-      const newAnalysis = {
-        type: "othersSinastry",
-        id: generateUniqueId(), // Adaugă un ID unic
-        person1: person1FinalData,
-        person2: person2FinalData,
-        synastry: {}, // Rezultatele sinastriei vor fi adăugate ulterior
-        createdAt: new Date().toISOString(),
-        actualLanguage: "en",
-        actualLanguageAstrograma: "en",
-        actualLanguageSinastrie: "en",
-      };
+      const generatedId = generateUniqueId();
+      const newAnalysis = mergeAnalysisWithPreservedMeta(
+        {
+          type: "othersSinastry",
+          id: generatedId, // Adaugă un ID unic doar pentru creare
+          person1: person1FinalData,
+          person2: person2FinalData,
+          synastry: {}, // Rezultatele sinastriei vor fi adăugate ulterior
+          createdAt: new Date().toISOString(),
+          actualLanguage: "en",
+          actualLanguageAstrograma: "en",
+          actualLanguageSinastrie: "en",
+        },
+        existingAnalysis,
+        {
+          id: generatedId,
+          type: "othersSinastry",
+          createdAt: new Date().toISOString(),
+        }
+      );
 
+      let currentAnalysisIndex;
       if (isEditMode && route.params?.analysisIndex !== undefined) {
         // Dacă suntem în modul de editare, actualizăm analiza existentă
-        parsedDataPersons[route.params.analysisIndex] = newAnalysis;
+        currentAnalysisIndex = route.params.analysisIndex;
+        parsedDataPersons[currentAnalysisIndex] = newAnalysis;
       } else {
         // Dacă suntem în modul de adăugare, adăugăm analiza la lista existentă
         parsedDataPersons.push(newAnalysis);
+        currentAnalysisIndex = parsedDataPersons.length - 1;
       }
 
       // Configurați URL-urile pentru analizele de sinastrie
@@ -387,21 +404,34 @@ function NewTwoSyanstryPersons({ navigation, route }) {
         financialCompatibility,
       ] = results;
 
-      newAnalysis.synastry = {
-        natalWheelChart,
-        houseCusps,
-        planetaryPositions,
-        aspect,
-        harmoniousAspectReading,
-        conflictingAspectReading,
-        contrastingAspectReading,
-        intenseCompatibility,
-        physicalCompatibility,
-        emotionalCompatibility,
-        sexualCompatibility,
-        spiritualCompatibility,
-        financialCompatibility,
-      };
+      parsedDataPersons[currentAnalysisIndex] = mergeAnalysisWithPreservedMeta(
+        {
+          ...parsedDataPersons[currentAnalysisIndex],
+          synastry: {
+            natalWheelChart,
+            houseCusps,
+            planetaryPositions,
+            aspect,
+            harmoniousAspectReading,
+            conflictingAspectReading,
+            contrastingAspectReading,
+            intenseCompatibility,
+            physicalCompatibility,
+            emotionalCompatibility,
+            sexualCompatibility,
+            spiritualCompatibility,
+            financialCompatibility,
+          },
+          id: generatedId,
+          type: "othersSinastry",
+        },
+        existingAnalysis,
+        {
+          id: generatedId,
+          type: "othersSinastry",
+          createdAt: newAnalysis.createdAt,
+        }
+      );
 
       // Salvăm array-ul actualizat în AsyncStorage
       await AsyncStorage.setItem(

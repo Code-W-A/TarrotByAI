@@ -1,13 +1,9 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { handleLanguagei18n } from "./handleLanguageGeneral"; // Adjust path if needed
 import {
-  collection,
-  query,
-  where,
-  getDocs,
-  updateDoc,
-  getFirestore,
-} from "firebase/firestore";
+  syncUserProfileAppLanguageForNotifications,
+  upsertUserTokenMetadata,
+} from "./firestoreUtils";
 
 /**
  * Actualizează limba utilizatorului în aplicație.
@@ -97,6 +93,8 @@ export const updateLanguage = async (
   expoPushToken
 ) => {
   try {
+    console.log("[LanguageUtils] updateLanguage start", { langCode });
+
     // Actualizează limba în i18n
     const newLangCode = await handleLanguagei18n(langCode);
     changeLanguage(newLangCode);
@@ -113,17 +111,22 @@ export const updateLanguage = async (
 
     // Actualizează limba în Firestore
     if (expoPushToken && expoPushToken.data) {
-      const db = getFirestore();
-      const q = query(
-        collection(db, "userTokens"),
-        where("token", "==", expoPushToken.data)
-      );
-      const querySnapshot = await getDocs(q);
-
-      for (const doc of querySnapshot.docs) {
-        await updateDoc(doc.ref, { language: langCode });
-      }
+      const result = await upsertUserTokenMetadata(expoPushToken.data, {
+        language: langCode,
+        source: "LanguageUtils.updateLanguage",
+      });
+      console.log("[LanguageUtils] synced userTokens language", {
+        langCode,
+        result,
+      });
+    } else {
+      console.log("[LanguageUtils] skip userTokens language sync - missing expoPushToken");
     }
+
+    void syncUserProfileAppLanguageForNotifications(
+      langCode,
+      "LanguageUtils.updateLanguage"
+    );
 
     return languageInfo;
   } catch (error) {

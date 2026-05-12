@@ -9,10 +9,13 @@ import {
   getDocsFromServer,
   Timestamp,
   doc,
-  getDoc,
 } from "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { db } from "../../firebase";
+import {
+  trackFirestoreRead,
+  trackedGetDoc,
+} from "./firestoreReadTelemetry";
 
 /**
  * Cache-first Firestore reads (no real-time).
@@ -32,7 +35,16 @@ export async function getDocPreferCache<T = unknown>(
     LOCAL_CACHE_TTL_MS,
     LOCAL_CACHE_MAX_READS
   );
+  trackFirestoreRead({
+    target: ref,
+    logicalReadCalls: 1,
+    docReadCalls: 1,
+  });
   if (cached) {
+    trackFirestoreRead({
+      target: ref,
+      cacheHits: 1,
+    });
     return {
       id: ref.id,
       ref,
@@ -42,6 +54,11 @@ export async function getDocPreferCache<T = unknown>(
   }
 
   const serverSnapshot = await getDocFromServer(ref);
+  trackFirestoreRead({
+    target: ref,
+    serverReadCalls: 1,
+    estimatedServerDocReads: 1,
+  });
   const data = serverSnapshot.data?.();
   if (data) {
     await setLocalCache(cacheKey, serializeValue(data));
@@ -59,7 +76,18 @@ export async function getDocsPreferCache<T = unknown>(
   // If we can't compute a stable cache key, don't cache this query.
   // This avoids cache collisions that can show wrong data across screens.
   if (!queryKey) {
-    return await getDocsFromServer(q);
+    trackFirestoreRead({
+      target: q,
+      logicalReadCalls: 1,
+      queryReadCalls: 1,
+    });
+    const uncachedSnapshot = await getDocsFromServer(q);
+    trackFirestoreRead({
+      target: q,
+      serverReadCalls: 1,
+      estimatedServerDocReads: uncachedSnapshot.size,
+    });
+    return uncachedSnapshot;
   }
 
   // Safety cleanup for an older bug where many queries shared `fs:query:unknown`
@@ -70,7 +98,18 @@ export async function getDocsPreferCache<T = unknown>(
     } catch {
       // ignore
     }
-    return await getDocsFromServer(q);
+    trackFirestoreRead({
+      target: q,
+      logicalReadCalls: 1,
+      queryReadCalls: 1,
+    });
+    const unknownKeySnapshot = await getDocsFromServer(q);
+    trackFirestoreRead({
+      target: q,
+      serverReadCalls: 1,
+      estimatedServerDocReads: unknownKeySnapshot.size,
+    });
+    return unknownKeySnapshot;
   }
 
   const cached = await getLocalCache<any[]>(
@@ -78,7 +117,16 @@ export async function getDocsPreferCache<T = unknown>(
     LOCAL_CACHE_TTL_MS,
     LOCAL_CACHE_MAX_READS
   );
+  trackFirestoreRead({
+    target: q,
+    logicalReadCalls: 1,
+    queryReadCalls: 1,
+  });
   if (Array.isArray(cached) && cached.length > 0) {
+    trackFirestoreRead({
+      target: q,
+      cacheHits: 1,
+    });
     const docs = cached.map((item) => ({
       id: item.id,
       data: () => deserializeValue(item.data),
@@ -92,6 +140,11 @@ export async function getDocsPreferCache<T = unknown>(
   }
 
   const serverSnapshot = await getDocsFromServer(q);
+  trackFirestoreRead({
+    target: q,
+    serverReadCalls: 1,
+    estimatedServerDocReads: serverSnapshot.size,
+  });
   if (!serverSnapshot.empty) {
     const payload = serverSnapshot.docs.map((docSnap) => ({
       id: docSnap.id,
@@ -207,7 +260,7 @@ const getRefreshModulo = async (): Promise<number> => {
   refreshModuloPromise = (async () => {
     try {
       const configRef = doc(db, "AppConfig", "DataRefresh");
-      const snapshot = await getDoc(configRef);
+      const snapshot = await trackedGetDoc(configRef);
       if (snapshot.exists()) {
         const data = snapshot.data() || {};
         const rawCandidate =

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -27,20 +27,33 @@ import type { VideoCategory } from "../types/videoCategory";
 import type { Video } from "../types/video";
 import i18n from "../../../../i18n";
 import {
+  ensureRewardedPolicyHydrated,
+  getPremiumBonusRewardUnlocksRemainingToday,
+  recordPremiumBonusRewardUnlockConsumed,
   recordVideoInterstitialShown,
   recordVideoOpen,
   shouldShowVideoInterstitial,
 } from "../utils/videoAdPolicy";
+import { RewardedAdGate } from "../components/RewardedAdGate";
+import { NativeAdCard } from "../components/NativeAdCard";
 import {
   getFavoriteVideos,
   toggleFavoriteVideo,
 } from "../utils/videoFavorites";
+import { getLocalizedVideoForDisplay } from "../utils/videoPlayback";
+import { hasPremiumAccess } from "../utils/premiumAccess";
 
 const VideoFavoritesScreen: React.FC = () => {
   const navigation = useNavigation<any>();
-  const { userData } = useAuth() as { userData?: unknown };
+  const { userData, refreshUserDataFromServer } = useAuth() as { 
+    userData?: unknown;
+    refreshUserDataFromServer?: () => Promise<unknown>;
+  };
+  const isPremiumUser = hasPremiumAccess(userData);
   const { adsConfig } = useAdsContext();
-  const { showInterstitial, canShowAds } = useAds(adsConfig);
+  const { showInterstitial, showRewarded, canShowAds, isRewardedLoaded } = useAds(adsConfig, {
+    userHasPremiumAccess: isPremiumUser,
+  });
   const [favorites, setFavorites] = useState<Video[]>([]);
   const [categoriesData, setCategoriesData] = useState<VideoCategory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -49,9 +62,34 @@ const VideoFavoritesScreen: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [adLoading, setAdLoading] = useState(false);
   const [favoriteMap, setFavoriteMap] = useState<Record<string, boolean>>({});
+  const [premiumCheckInProgress, setPremiumCheckInProgress] = useState(false);
+  const [rewardedGateVideo, setRewardedGateVideo] = useState<Video | null>(null);
+  const [rewardedPolicyEpoch, setRewardedPolicyEpoch] = useState(0);
   const locale = i18n.locale?.split("-")[0] ?? "en";
 
-  const isPremiumUser = Boolean((userData as any)?.isPremiumUser);
+  // Refresh user data from server on focus to ensure premium status is up-to-date
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
+      const refreshPremiumStatus = async () => {
+        if (!refreshUserDataFromServer) return;
+        try {
+          const fresh = await refreshUserDataFromServer();
+          if (active && fresh && __DEV__) {
+            console.log("[VideoFavorites] Refreshed user premium status from server", {
+              hasPremium: hasPremiumAccess(fresh),
+            });
+          }
+        } catch (err) {
+          console.warn("[VideoFavorites] Failed to refresh user premium status", err);
+        }
+      };
+      refreshPremiumStatus();
+      return () => {
+        active = false;
+      };
+    }, [refreshUserDataFromServer])
+  );
 
   const syncFavorites = useCallback(async () => {
     const list = await getFavoriteVideos();
@@ -99,23 +137,39 @@ const VideoFavoritesScreen: React.FC = () => {
     loadFavorites();
   }, [loadFavorites]);
 
+  /** Re-fetch favorites list when premium flips on so canPlay/embedSrc reflect new entitlements. */
+  const prevIsPremiumRef = useRef(isPremiumUser);
+  useEffect(() => {
+    if (!prevIsPremiumRef.current && isPremiumUser) {
+      console.log("[VideoFavorites] Premium activated - reloading favorites to refresh entitlements");
+      loadFavorites(true);
+    }
+    prevIsPremiumRef.current = isPremiumUser;
+  }, [isPremiumUser, loadFavorites]);
+
   useFocusEffect(
     useCallback(() => {
       syncFavorites();
     }, [syncFavorites])
   );
 
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
+      ensureRewardedPolicyHydrated().then(() => {
+        if (active) {
+          setRewardedPolicyEpoch((e) => e + 1);
+        }
+      });
+      return () => {
+        active = false;
+      };
+    }, [])
+  );
+
   const getLocalizedVideo = useCallback(
     (video: Video) => {
-      const localizedFields = video.locales?.[locale];
-      const localizedTitle = localizedFields?.title?.trim();
-      const localizedDescription = localizedFields?.description?.trim();
-
-      return {
-        ...video,
-        title: localizedTitle || video.title,
-        description: localizedDescription || video.description,
-      };
+      return getLocalizedVideoForDisplay(video, locale);
     },
     [locale]
   );
@@ -162,14 +216,46 @@ const VideoFavoritesScreen: React.FC = () => {
     return filtered;
   }, [videosByCategory, searchQuery, getLocalizedVideo]);
 
-  const handlePressVideo = async (video: Video) => {
+  const handlePressVideo = useCallback(async (video: Video) => {
     recordVideoOpen();
-    if (
-      !video.isPremium &&
-      !isPremiumUser &&
-      canShowAds &&
-      shouldShowVideoInterstitial()
-    ) {
+    await ensureRewardedPolicyHydrated();
+
+    let effectiveIsPremiumUser = isPremiumUser;
+    if (video.isPremium && !isPremiumUser && video.canPlay !== true && refreshUserDataFromServer) {
+      try {
+        setPremiumCheckInProgress(true);
+        const fresh = await refreshUserDataFromServer();
+        if (fresh && hasPremiumAccess(fresh)) {
+          effectiveIsPremiumUser = true;
+        }
+      } catch {
+        // ignore
+      } finally {
+        setPremiumCheckInProgress(false);
+      }
+    }
+
+    const isPremiumLocked = video.isPremium && !effectiveIsPremiumUser && video.canPlay !== true;
+
+    if (isPremiumLocked) {
+      const bonusUnlocksLeft = getPremiumBonusRewardUnlocksRemainingToday();
+      const canOfferRewarded =
+        canShowAds && isRewardedLoaded && bonusUnlocksLeft > 0;
+
+      if (canOfferRewarded) {
+        setRewardedGateVideo(video);
+        return;
+      }
+      if (bonusUnlocksLeft === 0) {
+        setRewardedGateVideo(video);
+        return;
+      }
+
+      navigation.navigate(screenName.VideoPremiumSubscription, { video });
+      return;
+    }
+
+    if (!video.isPremium && !effectiveIsPremiumUser && canShowAds && shouldShowVideoInterstitial()) {
       setAdLoading(true);
       const shown = await showInterstitial();
       if (shown) {
@@ -178,51 +264,112 @@ const VideoFavoritesScreen: React.FC = () => {
       setAdLoading(false);
     }
     navigation.navigate(screenName.VideoPlayer, { video });
+  }, [canShowAds, isPremiumUser, isRewardedLoaded, navigation, refreshUserDataFromServer, showInterstitial]);
+
+  const handleToggleFavorite = useCallback(async (video: Video) => {
+    const result = await toggleFavoriteVideo(video);
+    setFavorites(result.favorites);
+    const nextMap: Record<string, boolean> = {};
+    result.favorites.forEach((fav) => {
+      if (fav?.id) {
+        nextMap[fav.id] = true;
+      }
+    });
+    setFavoriteMap(nextMap);
+  }, []);
+
+  const handleWatchRewardedAd = async (): Promise<boolean> => {
+    if (!rewardedGateVideo) return false;
+    const videoToPlay = rewardedGateVideo;
+
+    const success = await showRewarded();
+    if (success) {
+      await recordPremiumBonusRewardUnlockConsumed();
+      setRewardedPolicyEpoch((e) => e + 1);
+      setRewardedGateVideo(null);
+      navigation.navigate(screenName.VideoPlayer, {
+        video: videoToPlay,
+        unlockedViaRewardedAd: true,
+      });
+      return true;
+    }
+    return false;
   };
 
-  const renderCategorySection = (categoryName: string, categoryVideos: Video[]) => (
-    <View key={categoryName} style={styles.categorySection}>
-      <Text style={styles.categoryTitle}>
-        {getLocalizedCategoryName(categoryName)}
-      </Text>
-      <FlatList
-        horizontal
-        data={categoryVideos}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item, index }) => {
-          const localizedVideo = getLocalizedVideo(item);
-          return (
-            <View
-              style={index === categoryVideos.length - 1 ? styles.lastCard : null}
-            >
-              <VideoCard
-                video={localizedVideo}
-                onPress={() => handlePressVideo(localizedVideo)}
-                isLocked={Boolean(item.isPremium && !isPremiumUser)}
-                isFavorite={Boolean(favoriteMap[item.id])}
-                onToggleFavorite={async () => {
-                  const result = await toggleFavoriteVideo(item);
-                  setFavorites(result.favorites);
-                  const nextMap: Record<string, boolean> = {};
-                  result.favorites.forEach((fav) => {
-                    if (fav?.id) {
-                      nextMap[fav.id] = true;
-                    }
-                  });
-                  setFavoriteMap(nextMap);
-                }}
-              />
-            </View>
-          );
-        }}
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={[
-          styles.horizontalList,
-          categoryVideos.length <= 2 && styles.horizontalListCentered,
-        ]}
-      />
-    </View>
-  );
+  const handleSubscribeFromGate = () => {
+    if (rewardedGateVideo) {
+      setRewardedGateVideo(null);
+      navigation.navigate(screenName.VideoPremiumSubscription, { video: rewardedGateVideo });
+    }
+  };
+
+  const renderCategorySection = useCallback((categoryName: string, categoryVideos: Video[]) => {
+    const shouldShowNativeAds = canShowAds && !isPremiumUser;
+    type ListItem = { type: "video"; video: Video } | { type: "ad"; key: string };
+    const listItems: ListItem[] = [];
+    
+    categoryVideos.forEach((video, i) => {
+      listItems.push({ type: "video", video });
+      if (shouldShowNativeAds && (i + 1) % 4 === 0 && i < categoryVideos.length - 1) {
+        listItems.push({ type: "ad", key: `ad-${categoryName}-${i}` });
+      }
+    });
+
+    return (
+      <View key={categoryName} style={styles.categorySection}>
+        <Text style={styles.categoryTitle}>
+          {getLocalizedCategoryName(categoryName)}
+        </Text>
+        <FlatList
+          horizontal
+          data={listItems}
+          extraData={{ favoriteMap, isPremiumUser }}
+          keyExtractor={(item) => (item.type === "video" ? item.video.id : item.key)}
+          renderItem={({ item, index }) => {
+            if (item.type === "ad") {
+              return <NativeAdCard adsConfig={adsConfig} />;
+            }
+            const localizedVideo = getLocalizedVideo(item.video);
+            const isLastItem = index === listItems.length - 1;
+            return (
+              <View style={isLastItem ? styles.lastCard : undefined}>
+                <VideoCard
+                  video={localizedVideo}
+                  onPress={() => handlePressVideo(localizedVideo)}
+                  isLocked={Boolean(
+                    item.video.isPremium &&
+                      !isPremiumUser &&
+                      item.video.canPlay !== true
+                  )}
+                  isFavorite={Boolean(favoriteMap[item.video.id])}
+                  onToggleFavorite={() => handleToggleFavorite(item.video)}
+                />
+              </View>
+            );
+          }}
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={[
+            styles.horizontalList,
+            categoryVideos.length <= 2 && styles.horizontalListCentered,
+          ]}
+          initialNumToRender={10}
+          maxToRenderPerBatch={8}
+          windowSize={10}
+          nestedScrollEnabled
+          removeClippedSubviews={false}
+        />
+      </View>
+    );
+  }, [
+    adsConfig,
+    canShowAds,
+    favoriteMap,
+    getLocalizedCategoryName,
+    getLocalizedVideo,
+    handlePressVideo,
+    handleToggleFavorite,
+    isPremiumUser,
+  ]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -286,6 +433,7 @@ const VideoFavoritesScreen: React.FC = () => {
             <ScrollView
               style={styles.scrollView}
               showsVerticalScrollIndicator={false}
+              nestedScrollEnabled
               refreshControl={
                 <RefreshControl
                   refreshing={refreshing}
@@ -304,16 +452,28 @@ const VideoFavoritesScreen: React.FC = () => {
             </ScrollView>
           )}
 
-          {adLoading ? (
+          {adLoading || premiumCheckInProgress ? (
             <View style={styles.adOverlay}>
               <ActivityIndicator size="large" color={colors.gold} />
               <Text style={styles.adOverlayText}>
-                {i18n.translate("videoAdLoading")}
+                {premiumCheckInProgress
+                  ? i18n.translate("checkoutAccessCheckingToast", "Verifying access...")
+                  : i18n.translate("videoAdLoading")}
               </Text>
             </View>
           ) : null}
         </View>
       </LinearGradient>
+
+      <RewardedAdGate
+        key={`rewarded-${rewardedPolicyEpoch}`}
+        visible={rewardedGateVideo !== null}
+        videoId={rewardedGateVideo?.id ?? ""}
+        videoTitle={rewardedGateVideo?.title || ""}
+        onWatchAd={handleWatchRewardedAd}
+        onSubscribe={handleSubscribeFromGate}
+        onClose={() => setRewardedGateVideo(null)}
+      />
     </SafeAreaView>
   );
 };

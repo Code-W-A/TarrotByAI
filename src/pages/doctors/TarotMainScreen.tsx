@@ -48,17 +48,13 @@ import { useApiData } from "../../context/ApiContext";
 import { colors, textStyles } from "../../utils/colors";
 import { handleLanguagei18n } from "../../utils/handleLanguageGeneral";
 
-// ADS - Now using centralized ads system
-import { useAds } from "../../hooks/useAds";
-import { useAdsContext } from "../../context/AdsContext";
-import { AdBanner } from "../../components/AdBanner/AdBanner";
-
 import { usePushNotifications } from "../../hooks/usePushNotifications";
+import { useAppUpdatePrompt } from "../../hooks/useAppUpdatePrompt";
 import { useAuth } from "../../context/AuthContext";
 import {
   handleQueryRandom,
-  handleQueryToken,
-  handleUploadFirestore,
+  syncUserProfileAppLanguageForNotifications,
+  upsertUserTokenMetadata,
 } from "../../utils/firestoreUtils";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import RattingDialog from "../../components/RattingDialog/RattingDialog";
@@ -66,7 +62,7 @@ import LongCard from "../../components/MenuCard/LongCard";
 import AutoScrollingFlatList from "../../components/MenuCard/AutoScrollingFlatList";
 import MoreInfoModal from "../../components/Astral/components/MoreInfoModal";
 import { doc, getFirestore, updateDoc, collection, query, orderBy, limit } from "firebase/firestore";
-import { getDocPreferCache, getDocsPreferCache } from "../../utils/firestoreCache";
+import { getDocsPreferCache } from "../../utils/firestoreCache";
 import { db } from "../../../firebase";
 import { filterArticlesBeforeCurrentTime } from "../../utils/commonUtils";
 import { NewsDetailsModal } from "../../components/NewsDetailsModal/NewsDetailsModal";
@@ -126,19 +122,12 @@ const languages = [
   { name: "Albania", code: "sq", flag: require("../../../assets/flags/albania.png") },
 ];
 
-const UPDATE_MODAL_KEY = 'updateModalLastDismissed';
-const UPDATE_MODAL_DELAY_DAYS = 3;
-
 const TarotMaineScreen = () => {
   const [loaded, setLoaded] = useState(false);
   const [cardAnimations, setCardAnimations] = useState([]);
   const initialAnimations = useRef(Array(4).fill(null)).current; // Utilizarea useRef pentru a păstra starea inițială
   const { language, changeLanguage } = useLanguage();
   
-  // ADS Integration
-  const { adsConfig } = useAdsContext();
-  const { showInterstitial, isInterstitialLoaded, canShowAds } = useAds(adsConfig);
-
   const [visible, setVisible] = useState(false);
   const navigation: any = useNavigation();
   const { expoPushToken } = usePushNotifications();
@@ -155,8 +144,7 @@ const TarotMaineScreen = () => {
   const [loadingArticles, setLoadingArticles] = useState(false);
   const [articleModalVisible, setArticleModalVisible] = useState(false);
   const [selectedArticle, setSelectedArticle] = useState(null);
-  const [showUpdateModal, setShowUpdateModal] = useState(false);
-
+  const { visible: showUpdateModal, onClose: onCloseAppUpdateModal } = useAppUpdatePrompt();
   useEffect(() => {
     const checkAndLoadData = async () => {
       try {
@@ -284,28 +272,18 @@ const TarotMaineScreen = () => {
   useEffect(() => {
     const handleUploadToken = async () => {
       if (expoPushToken) {
-        console.log("Expo Push Token.........: ", expoPushToken.data);
-
-        const timestamp = Date.now().toString(36);
-        const randomPart = Math.random().toString(36).substring(2, 8);
-        let uniqueId = timestamp + randomPart;
-        let tokenExists = await handleQueryToken(
-          "userTokens",
-          expoPushToken.data
-        );
-        // Logica pentru utilizatori autentificați
-        if (!tokenExists) {
-          await handleUploadFirestore(
-            { token: expoPushToken.data, language, isIos: Platform.OS === "ios", projectId: Constants.expoConfig?.extra?.eas.projectId },
-            `userTokens/${uniqueId}`
-          );
-        }
+        await upsertUserTokenMetadata(expoPushToken.data, {
+          language,
+          isIos: Platform.OS === "ios",
+          projectId: Constants.expoConfig?.extra?.eas.projectId,
+          source: "TarotMainScreen",
+        });
       }
     };
     if (expoPushToken) {
       handleUploadToken(); // Apelarea funcției
     }
-  }, [expoPushToken, isGuestUser, userData]);
+  }, [expoPushToken, isGuestUser, userData, language]);
   // useEffect(() => {
   //   const screen =
   //     userData.actualLanguage && userData.actualLanguageAstrograma
@@ -533,6 +511,10 @@ const TarotMaineScreen = () => {
     changeLanguage(newLangCode);
     AsyncStorage.setItem("@userLanguage", langCode);
     setLangModalVisible(false);
+    void syncUserProfileAppLanguageForNotifications(
+      langCode,
+      "TarotMainScreen.handleLanguageSelect"
+    );
   };
   const flagImageSource = languages.find((l) => l.name === currentLanguage)?.flag;
 
@@ -559,31 +541,6 @@ const TarotMaineScreen = () => {
     setSelectedArticle(article);
     setArticleModalVisible(true);
   };
-
-  useEffect(() => {
-    const checkUpdate = async () => {
-      try {
-        const docRef = doc(db, 'ShouldUpdate', 'unicde');
-        const docSnap = await getDocPreferCache(docRef);
-        if (docSnap.exists() && docSnap.data().update === true) {
-          const lastDismissed = await AsyncStorage.getItem(UPDATE_MODAL_KEY);
-          if (!lastDismissed) {
-            setShowUpdateModal(true);
-          } else {
-            const last = new Date(parseInt(lastDismissed, 10));
-            const now = new Date();
-            const diffDays = (now - last) / (1000 * 60 * 60 * 24);
-            if (diffDays >= UPDATE_MODAL_DELAY_DAYS) {
-              setShowUpdateModal(true);
-            }
-          }
-        }
-      } catch (e) {
-        console.log('Eroare la verificarea update-ului:', e);
-      }
-    };
-    checkUpdate();
-  }, []);
 
   return (
     <Fragment>
@@ -752,10 +709,7 @@ const TarotMaineScreen = () => {
               onClose={() => setArticleModalVisible(false)}
               saveArticle={() => {}}
             />
-            <UpdateAppModal visible={showUpdateModal} onClose={async () => {
-              await AsyncStorage.setItem(UPDATE_MODAL_KEY, Date.now().toString());
-              setShowUpdateModal(false);
-            }} />
+            <UpdateAppModal visible={showUpdateModal} onClose={onCloseAppUpdateModal} />
           </View>
         </LinearGradient>
       </SafeAreaView>

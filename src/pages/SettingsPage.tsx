@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   StyleSheet,
   SafeAreaView,
@@ -34,6 +34,11 @@ import i18n from "../../i18n";
 import { handleSignOut } from "../utils/handleSignOut";
 import { LinearGradient } from "expo-linear-gradient";
 import { H6fontBoldPrimary } from "../components/commonText";
+import { useAuth } from "../context/AuthContext";
+import {
+  getAuthEmailForAdminCheck,
+  isAdminEmail,
+} from "../features/adminPdf/adminAccess";
 
 interface Props {}
 
@@ -41,10 +46,12 @@ export const SettingsPage: React.FC<Props> = ({}): JSX.Element => {
   const [modalVisible, setModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [doctorsImages, setDoctorsImages] = useState([]);
+  const adminTapTimestampsRef = useRef<number[]>([]);
 
   const navigation = useNavigation();
   const route = useRoute();
   const params = route.params;
+  const { currentUser, userData } = useAuth();
 
   const patientInfoDB = useSelector((state) => state.patientInfoData);
   const { patientInformation } = patientInfoDB;
@@ -60,6 +67,33 @@ export const SettingsPage: React.FC<Props> = ({}): JSX.Element => {
   const auth = authentication;
   useEffect(() => {}, []);
 
+  const adminEmail = useMemo(
+    () => getAuthEmailForAdminCheck(currentUser?.email, userData?.email),
+    [currentUser?.email, userData?.email]
+  );
+  const showHiddenAdminTrigger = useMemo(
+    () => isAdminEmail(adminEmail),
+    [adminEmail]
+  );
+
+  const handleHiddenAdminTap = () => {
+    if (!showHiddenAdminTrigger) {
+      return;
+    }
+
+    const now = Date.now();
+    const recentTaps = adminTapTimestampsRef.current.filter(
+      (timestamp) => now - timestamp <= 1000
+    );
+    recentTaps.push(now);
+    adminTapTimestampsRef.current = recentTaps;
+
+    if (recentTaps.length >= 3) {
+      adminTapTimestampsRef.current = [];
+      (navigation as any).navigate(screenName.AdminPdfGate);
+    }
+  };
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <CustomLoader isLoading={isLoading} />
@@ -70,7 +104,9 @@ export const SettingsPage: React.FC<Props> = ({}): JSX.Element => {
 
       <ScrollView contentContainerStyle={styles.container}>
       <View style={{display: "flex", justifyContent: "center", alignItems: "center"}}>
-       <H6fontBoldPrimary>{i18n.translate("settings")}</H6fontBoldPrimary> 
+        <View style={styles.titleRow}>
+          <H6fontBoldPrimary>{i18n.translate("settings")}</H6fontBoldPrimary>
+        </View>
               
   <Image
     source={require('../../assets/headerIcon.png')}
@@ -211,6 +247,15 @@ export const SettingsPage: React.FC<Props> = ({}): JSX.Element => {
             </View>
           ))}
       </ScrollView>
+      {showHiddenAdminTrigger ? (
+        <TouchableOpacity
+          onPress={handleHiddenAdminTap}
+          activeOpacity={0.8}
+          style={styles.floatingAdminButton}
+        >
+          <MaterialIcons name="settings" size={22} color="#FFD700" />
+        </TouchableOpacity>
+      ) : null}
       <CheckCurrentPasswordModal
         setIsModalVisible={setModalVisible}
         isModalVisible={modalVisible}
@@ -345,5 +390,24 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     flexShrink: 1,
     flexBasis: 0,
+  },
+  titleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  floatingAdminButton: {
+    position: "absolute",
+    top: 14,
+    right: 14,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: "#FFD700",
+    backgroundColor: "rgba(0, 0, 0, 0.45)",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 1000,
   },
 });

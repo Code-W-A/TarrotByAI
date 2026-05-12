@@ -62,14 +62,16 @@ import { handleLanguagei18n } from "../../utils/handleLanguageGeneral";
 // } from "react-native-google-mobile-ads";
 
 import { usePushNotifications } from "../../hooks/usePushNotifications";
+import { useAppUpdatePrompt } from "../../hooks/useAppUpdatePrompt";
 import { useAuth } from "../../context/AuthContext";
 import {
   handleQueryRandom,
-  handleQueryToken,
-  handleUploadFirestore,
+  syncUserProfileAppLanguageForNotifications,
+  upsertUserTokenMetadata,
 } from "../../utils/firestoreUtils";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import RattingDialog from "../../components/RattingDialog/RattingDialog";
+import UpdateAppModal from "../../components/UpdateAppModal";
 import LongCard from "../../components/MenuCard/LongCard";
 import AutoScrollingFlatList from "../../components/MenuCard/AutoScrollingFlatList";
 import MoreInfoModal from "../../components/Astral/components/MoreInfoModal";
@@ -84,15 +86,22 @@ import { useAdsContext } from "../../context/AdsContext";
 import { getPublishedVideos } from "../../features/video-library/services/videoLibrary.service";
 import type { Video } from "../../features/video-library/types/video";
 import { WebView } from "react-native-webview";
-import { getEmbedUrl } from "../../features/video-library/utils/videoEmbed";
+import { getEmbedUrl, getRemoteThumbnailSource } from "../../features/video-library/utils/videoEmbed";
+import { getLocalizedVideoForDisplay, getVideoThumbnailUrl } from "../../features/video-library/utils/videoPlayback";
+import { hasPremiumAccess } from "../../features/video-library/utils/premiumAccess";
 import { getDocsPreferCache } from "../../utils/firestoreCache";
 import {
+  ensureRewardedPolicyHydrated,
+  getPremiumBonusRewardUnlocksRemainingToday,
+  recordPremiumBonusRewardUnlockConsumed,
   recordVideoInterstitialShown,
   recordVideoOpen,
   shouldShowVideoInterstitial,
 } from "../../features/video-library/utils/videoAdPolicy";
+import { RewardedAdGate } from "../../features/video-library/components/RewardedAdGate";
 import { createCoursesApi, normalizeLocale } from "../../services/coursesApi";
 import type { SafeCourse } from "../../types/courses";
+import { IOS_COURSES_FREE_MODE_ENABLED } from "../../features/courses/iosCoursesFreeMode";
 
 // ADS COMPLETELY REMOVED FOR DEBUGGING
 // const adUnitId = __DEV__
@@ -124,8 +133,10 @@ const LatestVideoCard: React.FC<{ video: Video; onPress: () => void }> = ({
 
   const embedUrl = getEmbedUrl(video.platform, video.videoUrl);
   const shouldShowPreview = Boolean(embedUrl && !previewError);
+  const thumbnailUrl = getVideoThumbnailUrl(video);
 
   const BASE_URL = "https://cristinazurba.com/";
+  const embedParamsSeparator = embedUrl?.includes("?") ? "&" : "?";
   const previewHtml = embedUrl
     ? `<!DOCTYPE html>
     <html>
@@ -141,7 +152,7 @@ const LatestVideoCard: React.FC<{ video: Video; onPress: () => void }> = ({
       <body>
         <div class="player">
           <iframe
-            src="${embedUrl}?autoplay=0&mute=1&controls=0&modestbranding=1&playsinline=1&origin=${encodeURIComponent(
+            src="${embedUrl}${embedParamsSeparator}autoplay=0&mute=1&controls=0&modestbranding=1&playsinline=1&origin=${encodeURIComponent(
               BASE_URL
             )}"
             referrerpolicy="strict-origin-when-cross-origin"
@@ -174,9 +185,9 @@ const LatestVideoCard: React.FC<{ video: Video; onPress: () => void }> = ({
       <View style={{ flex: 1, backgroundColor: "#000" }}>
         {shouldShowPreview ? (
           <>
-            {isLoading && video.thumbnailUrl ? (
+            {isLoading && thumbnailUrl ? (
               <ImageBackground
-                source={{ uri: video.thumbnailUrl }}
+                source={getRemoteThumbnailSource(thumbnailUrl)}
                 style={{ ...StyleSheet.absoluteFillObject }}
                 resizeMode="cover"
               />
@@ -200,7 +211,11 @@ const LatestVideoCard: React.FC<{ video: Video; onPress: () => void }> = ({
           </>
         ) : (
           <ImageBackground
-            source={{ uri: video.thumbnailUrl ?? "https://picsum.photos/800" }}
+            source={
+              thumbnailUrl
+                ? getRemoteThumbnailSource(thumbnailUrl)
+                : { uri: "https://picsum.photos/800" }
+            }
             style={{ flex: 1 }}
             resizeMode="cover"
           />
@@ -417,21 +432,23 @@ const LatestCourseCard: React.FC<{
           </Text>
         </View>
 
-        <View
-          style={{
-            position: "absolute",
-            bottom: 10,
-            right: 10,
-            backgroundColor: "rgba(255, 248, 230, 0.95)",
-            borderRadius: 10,
-            paddingHorizontal: 8,
-            paddingVertical: 4,
-          }}
-        >
-          <Text style={{ color: "#5d4e37", fontSize: 12, fontWeight: "700" }}>
-            {priceLabel}
-          </Text>
-        </View>
+        {!IOS_COURSES_FREE_MODE_ENABLED ? (
+          <View
+            style={{
+              position: "absolute",
+              bottom: 10,
+              right: 10,
+              backgroundColor: "rgba(255, 248, 230, 0.95)",
+              borderRadius: 10,
+              paddingHorizontal: 8,
+              paddingVertical: 4,
+            }}
+          >
+            <Text style={{ color: "#5d4e37", fontSize: 12, fontWeight: "700" }}>
+              {priceLabel}
+            </Text>
+          </View>
+        ) : null}
       </View>
     </TouchableOpacity>
   );
@@ -525,41 +542,6 @@ const LatestSkeletonCard: React.FC = () => {
   );
 };
 
-const CATEGORIES = [
-  {
-    key: 'astrology',
-    label: i18n.translate('astroSectionTitle'),
-    icon: <Image source={require('../../../assets/clinicdashboard/astrology.png')} style={{ width: 55, height: 55 }} />,
-    screen: "Learn",
-    description: i18n.translate('Descoperă astrograma natală, sinastria și articole astrologice.'),
-    image: require('../../../assets/card-back.png'),
-  },
-  {
-    key: 'tarot',
-    label: i18n.translate('Tarot'),
-    icon: <Image source={require('../../../assets/clinicdashboard/Tarot.png')} style={{ width: 38, height: 38 }} />,
-    screen: 'TarotMaineScreen',
-    description: i18n.translate('Citiri de tarot personalizate pentru tine.'),
-    image: require('../../../assets/card-back.png'),
-  },
-  {
-    key: 'luck',
-    label: i18n.translate('Noroc'),
-    icon: <Image source={require('../../../assets/clinicdashboard/Noroc.png')} style={{ width: 38, height: 38 }} />,
-    screen: 'NorocMaineScreen',
-    description: i18n.translate('Numere, culori și ore norocoase.'),
-    image: require('../../../assets/card-back.png'),
-  },
-  {
-    key: 'magic',
-    label: i18n.translate('MesajeMagice'),
-    icon: <Image source={require('../../../assets/clinicdashboard/Mesajemagice.png')} style={{ width: 38, height: 38 }} />,
-    screen: 'MesajeMagiceMainScreen',
-    description: i18n.translate('Afirmații pozitive și ghidare spirituală.'),
-    image: require('../../../assets/card-back.png'),
-  },
-];
-
 const languages = [
   { name: "Romanian", code: "ro", flag: require("../../../assets/flags/romania.png") },
   { name: "English", code: "en", flag: require("../../../assets/flags/english.png") },
@@ -587,15 +569,17 @@ const ClinicDashboard = () => {
   const initialAnimations = useRef(Array(4).fill(null)).current; // Utilizarea useRef pentru a păstra starea inițială
   const { language, changeLanguage } = useLanguage();
   
-  // ADS Integration
+  // ADS Integration (after userData — need isPremiumUser for subscriber ad suppression)
   const { adsConfig } = useAdsContext();
-  const { showInterstitial, isInterstitialLoaded, canShowAds } = useAds(adsConfig);
-
   const [visible, setVisible] = useState(false);
   const navigation: any = useNavigation();
   const { expoPushToken } = usePushNotifications();
-  const { currentUser, userData, isGuestUser, setUserData } = useAuth();
-  const isPremiumUser = Boolean((userData as any)?.isPremiumUser);
+  const { currentUser, userData, isGuestUser, setUserData, refreshUserDataFromServer } = useAuth();
+  const isPremiumUser = hasPremiumAccess(userData);
+  const { showInterstitial, canShowAds, showRewarded, isRewardedLoaded } = useAds(adsConfig, {
+    userHasPremiumAccess: isPremiumUser,
+  });
+  const { visible: showAppUpdateModal, onClose: onCloseAppUpdateModal } = useAppUpdatePrompt();
   
   // Hook pentru gestionarea verificării datelor utilizatorului
   const {
@@ -629,9 +613,89 @@ const ClinicDashboard = () => {
   const [latestVideos, setLatestVideos] = useState<Video[]>([]);
   const [loadingVideos, setLoadingVideos] = useState(false);
   const [refreshingVideos, setRefreshingVideos] = useState(false);
+  const [rewardedGateVideo, setRewardedGateVideo] = useState<Video | null>(null);
+  const [rewardedPolicyEpoch, setRewardedPolicyEpoch] = useState(0);
   const [latestCourses, setLatestCourses] = useState<SafeCourse[]>([]);
   const [loadingCourses, setLoadingCourses] = useState(false);
   const [refreshingCourses, setRefreshingCourses] = useState(false);
+
+  const dashboardVideoLocale = i18n.locale?.split("-")[0] ?? "ro";
+
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
+      void ensureRewardedPolicyHydrated().then(() => {
+        if (active) setRewardedPolicyEpoch((e) => e + 1);
+      });
+      return () => {
+        active = false;
+      };
+    }, [])
+  );
+
+  const categories = useMemo(
+    () => [
+      {
+        key: "astrology",
+        label: i18n.translate("astroSectionTitle"),
+        icon: (
+          <Image
+            source={require("../../../assets/clinicdashboard/astrology.png")}
+            style={{ width: 55, height: 55 }}
+          />
+        ),
+        screen: "Learn",
+        description: i18n.translate(
+          "Descoperă astrograma natală, sinastria și articole astrologice."
+        ),
+        image: require("../../../assets/card-back.png"),
+      },
+      {
+        key: "tarot",
+        label: i18n.translate("Tarot"),
+        icon: (
+          <Image
+            source={require("../../../assets/clinicdashboard/Tarot.png")}
+            style={{ width: 38, height: 38 }}
+          />
+        ),
+        screen: "TarotMaineScreen",
+        description: i18n.translate(
+          "Citiri de tarot personalizate pentru tine."
+        ),
+        image: require("../../../assets/card-back.png"),
+      },
+      {
+        key: "luck",
+        label: i18n.translate("Noroc"),
+        icon: (
+          <Image
+            source={require("../../../assets/clinicdashboard/Noroc.png")}
+            style={{ width: 38, height: 38 }}
+          />
+        ),
+        screen: "NorocMaineScreen",
+        description: i18n.translate("Numere, culori și ore norocoase."),
+        image: require("../../../assets/card-back.png"),
+      },
+      {
+        key: "magic",
+        label: i18n.translate("MesajeMagice"),
+        icon: (
+          <Image
+            source={require("../../../assets/clinicdashboard/Mesajemagice.png")}
+            style={{ width: 38, height: 38 }}
+          />
+        ),
+        screen: "MesajeMagiceMainScreen",
+        description: i18n.translate(
+          "Afirmații pozitive și ghidare spirituală."
+        ),
+        image: require("../../../assets/card-back.png"),
+      },
+    ],
+    [language]
+  );
 
   const coursesApi = useMemo(() => {
     try {
@@ -678,28 +742,18 @@ const ClinicDashboard = () => {
   useEffect(() => {
     const handleUploadToken = async () => {
       if (expoPushToken) {
-        logDebug("Expo Push Token.........: ", expoPushToken.data);
-
-        const timestamp = Date.now().toString(36);
-        const randomPart = Math.random().toString(36).substring(2, 8);
-        let uniqueId = timestamp + randomPart;
-        let tokenExists = await handleQueryToken(
-          "userTokens",
-          expoPushToken.data
-        );
-        // Logica pentru utilizatori autentificați
-        if (!tokenExists) {
-          await handleUploadFirestore(
-            { token: expoPushToken.data, language, isIos: Platform.OS === "ios", projectId: Constants.expoConfig?.extra?.eas.projectId },
-            `userTokens/${uniqueId}`
-          );
-        }
+        await upsertUserTokenMetadata(expoPushToken.data, {
+          language,
+          isIos: Platform.OS === "ios",
+          projectId: Constants.expoConfig?.extra?.eas.projectId,
+          source: "ClinicDashboard",
+        });
       }
     };
     if (expoPushToken) {
       handleUploadToken(); // Apelarea funcției
     }
-  }, [expoPushToken, isGuestUser, userData]);
+  }, [expoPushToken, isGuestUser, userData, language]);
   // useEffect(() => {
   //   const screen =
   //     userData.actualLanguage && userData.actualLanguageAstrograma
@@ -926,6 +980,10 @@ const ClinicDashboard = () => {
     changeLanguage(newLangCode);
     AsyncStorage.setItem("@userLanguage", langCode);
     setLangModalVisible(false);
+    void syncUserProfileAppLanguageForNotifications(
+      langCode,
+      "ClinicDashboard.handleLanguageSelect"
+    );
   };
   const flagImageSource = languages.find((l) => l.name === currentLanguage)?.flag;
 
@@ -1062,8 +1120,50 @@ const ClinicDashboard = () => {
 
   const handlePressVideo = async (video: Video) => {
     recordVideoOpen();
+    await ensureRewardedPolicyHydrated();
+
+    let effectiveIsPremiumUser = isPremiumUser;
     if (
+      video.isPremium &&
       !isPremiumUser &&
+      video.canPlay !== true &&
+      refreshUserDataFromServer
+    ) {
+      try {
+        const fresh = await refreshUserDataFromServer();
+        if (fresh && hasPremiumAccess(fresh)) {
+          effectiveIsPremiumUser = true;
+        }
+      } catch {
+        // ignore
+      }
+    }
+
+    const isPremiumLocked =
+      video.isPremium &&
+      !effectiveIsPremiumUser &&
+      video.canPlay !== true;
+
+    if (isPremiumLocked) {
+      const bonusUnlocksLeft = getPremiumBonusRewardUnlocksRemainingToday();
+      const canOfferRewarded =
+        canShowAds && isRewardedLoaded && bonusUnlocksLeft > 0;
+
+      if (canOfferRewarded) {
+        setRewardedGateVideo(video);
+        return;
+      }
+      if (bonusUnlocksLeft === 0) {
+        setRewardedGateVideo(video);
+        return;
+      }
+
+      navigation.navigate(screenName.VideoPremiumSubscription, { video });
+      return;
+    }
+
+    if (
+      !effectiveIsPremiumUser &&
       !video.isPremium &&
       canShowAds &&
       shouldShowVideoInterstitial()
@@ -1074,6 +1174,32 @@ const ClinicDashboard = () => {
       }
     }
     navigation.navigate(screenName.VideoPlayer, { video });
+  };
+
+  const handleWatchRewardedAdDashboard = async (): Promise<boolean> => {
+    if (!rewardedGateVideo) return false;
+    const videoToPlay = rewardedGateVideo;
+
+    const success = await showRewarded();
+    if (success) {
+      await recordPremiumBonusRewardUnlockConsumed();
+      setRewardedPolicyEpoch((e) => e + 1);
+      setRewardedGateVideo(null);
+      navigation.navigate(screenName.VideoPlayer, {
+        video: videoToPlay,
+        unlockedViaRewardedAd: true,
+      });
+      return true;
+    }
+    return false;
+  };
+
+  const handleSubscribeFromRewardGateDashboard = () => {
+    const v = rewardedGateVideo;
+    setRewardedGateVideo(null);
+    if (v) {
+      navigation.navigate(screenName.VideoPremiumSubscription, { video: v });
+    }
   };
 
   const handlePressCourse = (course: SafeCourse) => {
@@ -1191,7 +1317,7 @@ const ClinicDashboard = () => {
               {/* Section: Acces rapid și istoric (carusel) */}
               <View style={stylesNew.sectionContainer}>
                 <View style={stylesNew.categoriesContainer}>
-                  {CATEGORIES.map((category, index) => (
+                  {categories.map((category, index) => (
                     <TouchableOpacity
                       key={category.key}
                       style={stylesNew.categoryCard}
@@ -1496,9 +1622,26 @@ const ClinicDashboard = () => {
               setLastName={setModalLastName}
               onCompleteCallback={onCompleteCallback}
             />
+            <UpdateAppModal visible={showAppUpdateModal} onClose={onCloseAppUpdateModal} />
           </View>
         </LinearGradient>
       </SafeAreaView>
+      <RewardedAdGate
+        key={`rewarded-dash-${rewardedPolicyEpoch}`}
+        visible={rewardedGateVideo !== null}
+        videoId={rewardedGateVideo?.id ?? ""}
+        videoTitle={
+          rewardedGateVideo
+            ? getLocalizedVideoForDisplay(
+                rewardedGateVideo,
+                dashboardVideoLocale
+              ).title
+            : ""
+        }
+        onWatchAd={handleWatchRewardedAdDashboard}
+        onSubscribe={handleSubscribeFromRewardGateDashboard}
+        onClose={() => setRewardedGateVideo(null)}
+      />
     </Fragment>
   );
 };

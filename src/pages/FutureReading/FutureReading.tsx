@@ -36,8 +36,8 @@ const FutureReading = ({ route }) => {
   const { setIsNavBarVisible } = useNavBarVisibility();
 
   React.useEffect(() => {
-    setIsNavBarVisible();
-    return () => setIsNavBarVisible(); // Restabilește vizibilitatea la ieșirea din componentă
+    setIsNavBarVisible(false);
+    return () => setIsNavBarVisible(true); // Restabilește vizibilitatea la ieșirea din componentă
   }, []);
 
   // Funcții pentru titlu și descriere, ca în PersonalizedReading

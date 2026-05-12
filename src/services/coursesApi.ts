@@ -9,6 +9,7 @@ import type {
   PlaybackResponse,
   PurchasedCoursesResponse,
 } from "../types/courses";
+import { normalizeExpoApiBaseUrl } from "../utils/expoPublicApiBaseUrl";
 import { logError, logInfo, logWarn } from "../utils/Logger";
 
 export interface ListCoursesParams {
@@ -53,13 +54,15 @@ export const normalizeLocale = (value?: string | null): string => {
 const ensureBaseUrl = (baseUrl?: string): string => {
   const envBaseUrl =
     typeof process !== "undefined" ? process.env.EXPO_PUBLIC_API_BASE_URL : undefined;
-  const resolved = (baseUrl || envBaseUrl || "").trim();
+  const resolved = normalizeExpoApiBaseUrl(
+    (baseUrl || envBaseUrl || "").trim().replace(/\/+$/, "")
+  );
 
   if (!resolved) {
     throw new Error("Missing EXPO_PUBLIC_API_BASE_URL");
   }
 
-  return resolved.replace(/\/+$/, "");
+  return resolved;
 };
 
 const joinUrl = (baseUrl: string, path: string): string => {
@@ -67,6 +70,22 @@ const joinUrl = (baseUrl: string, path: string): string => {
     return `${baseUrl}/${path}`;
   }
   return `${baseUrl}${path}`;
+};
+
+const getAlternateBaseUrl = (baseUrl: string): string | null => {
+  if (baseUrl.includes("://www.")) {
+    return baseUrl.replace("://www.", "://");
+  }
+
+  const httpsPrefix = "https://";
+  if (baseUrl.startsWith(httpsPrefix)) {
+    const rest = baseUrl.slice(httpsPrefix.length);
+    if (rest.length > 0 && !rest.startsWith("www.")) {
+      return `${httpsPrefix}www.${rest}`;
+    }
+  }
+
+  return null;
 };
 
 const withQuery = (
@@ -220,16 +239,19 @@ const extractFileNameFromDisposition = (disposition?: string | null): string | n
 
 class CoursesApi {
   private readonly baseUrl: string;
+  private readonly alternateBaseUrl: string | null;
   private readonly getAuthToken?: () => Promise<string | null>;
   private readonly fetchImpl: typeof fetch;
 
   constructor(config: CoursesApiConfig = {}) {
     this.baseUrl = ensureBaseUrl(config.baseUrl);
+    this.alternateBaseUrl = getAlternateBaseUrl(this.baseUrl);
     this.getAuthToken = config.getAuthToken;
     this.fetchImpl = config.fetchImpl ?? fetch;
 
     logInfo("[CoursesApi] Initialized", {
       baseUrl: this.baseUrl,
+      alternateBaseUrl: this.alternateBaseUrl,
       hasAuthTokenProvider: Boolean(this.getAuthToken),
     });
   }
@@ -259,6 +281,7 @@ class CoursesApi {
     authMode?: AuthMode;
     query?: Record<string, string | number | boolean | undefined | null>;
     body?: unknown;
+    baseUrlOverride?: string;
   }): Promise<T> {
     const {
       method,
@@ -266,19 +289,22 @@ class CoursesApi {
       authMode = "none",
       query,
       body,
+      baseUrlOverride,
     } = options;
 
     const requestId = `courses-${++requestSeq}-${Date.now().toString(36)}`;
     const startedAt = Date.now();
+    const requestBaseUrl = (baseUrlOverride || this.baseUrl).replace(/\/+$/, "");
 
     try {
-      const url = withQuery(joinUrl(this.baseUrl, path), query);
+      const url = withQuery(joinUrl(requestBaseUrl, path), query);
       const authorization = await this.getAuthorizationHeader(authMode);
 
       logInfo("[CoursesApi] Request start", {
         requestId,
         method,
         path,
+        baseUrl: requestBaseUrl,
         url,
         authMode,
         hasAuthorization: Boolean(authorization),
@@ -334,6 +360,7 @@ class CoursesApi {
         requestId,
         method,
         path,
+        baseUrl: requestBaseUrl,
         status: response.status,
         durationMs: Date.now() - startedAt,
         payloadSummary: summarizePayload(payload),
@@ -346,6 +373,7 @@ class CoursesApi {
         requestId,
         method,
         path,
+        baseUrl: requestBaseUrl,
         status: apiError.status,
         message: apiError.message,
         durationMs: Date.now() - startedAt,
@@ -371,23 +399,98 @@ class CoursesApi {
       query.featuredOnly = true;
     }
 
-    return this.request<CoursesListResponse>({
-      method: "GET",
-      path: "/api/courses",
-      authMode: "none",
-      query,
-    });
+    return (async () => {
+      const primary = await this.request<CoursesListResponse>({
+        method: "GET",
+        path: "/api/courses",
+        authMode: "optional",
+        query,
+      });
+
+      if ((primary.courses?.length ?? 0) > 0 || !this.alternateBaseUrl) {
+        return primary;
+      }
+
+      logWarn("[CoursesApi] listCourses empty on primary host, retrying alternate host", {
+        baseUrl: this.baseUrl,
+        alternateBaseUrl: this.alternateBaseUrl,
+        locale,
+        limit,
+      });
+
+      const alternate = await this.request<CoursesListResponse>({
+        method: "GET",
+        path: "/api/courses",
+        authMode: "optional",
+        query,
+        baseUrlOverride: this.alternateBaseUrl,
+      });
+
+      if ((alternate.courses?.length ?? 0) > 0) {
+        logInfo("[CoursesApi] listCourses fallback host returned data", {
+          baseUrl: this.baseUrl,
+          alternateBaseUrl: this.alternateBaseUrl,
+          locale,
+          limit,
+          coursesCount: alternate.courses.length,
+        });
+        return alternate;
+      }
+
+      return primary;
+    })();
   }
 
   homeCourses(locale?: string): Promise<CoursesHomeResponse> {
-    return this.request<CoursesHomeResponse>({
-      method: "GET",
-      path: "/api/courses/home",
-      authMode: "none",
-      query: {
-        locale: normalizeLocale(locale),
-      },
-    });
+    const normalizedLocale = normalizeLocale(locale);
+
+    return (async () => {
+      const primary = await this.request<CoursesHomeResponse>({
+        method: "GET",
+        path: "/api/courses/home",
+        authMode: "optional",
+        query: {
+          locale: normalizedLocale,
+        },
+      });
+
+      const primaryCount =
+        (primary.latestCourses?.length ?? 0) + (primary.featuredCourses?.length ?? 0);
+      if (primaryCount > 0 || !this.alternateBaseUrl) {
+        return primary;
+      }
+
+      logWarn("[CoursesApi] homeCourses empty on primary host, retrying alternate host", {
+        baseUrl: this.baseUrl,
+        alternateBaseUrl: this.alternateBaseUrl,
+        locale: normalizedLocale,
+      });
+
+      const alternate = await this.request<CoursesHomeResponse>({
+        method: "GET",
+        path: "/api/courses/home",
+        authMode: "optional",
+        query: {
+          locale: normalizedLocale,
+        },
+        baseUrlOverride: this.alternateBaseUrl,
+      });
+
+      const alternateCount =
+        (alternate.latestCourses?.length ?? 0) + (alternate.featuredCourses?.length ?? 0);
+      if (alternateCount > 0) {
+        logInfo("[CoursesApi] homeCourses fallback host returned data", {
+          baseUrl: this.baseUrl,
+          alternateBaseUrl: this.alternateBaseUrl,
+          locale: normalizedLocale,
+          latestCoursesCount: alternate.latestCourses?.length ?? 0,
+          featuredCoursesCount: alternate.featuredCourses?.length ?? 0,
+        });
+        return alternate;
+      }
+
+      return primary;
+    })();
   }
 
   getCourseState(courseId: string, locale?: string): Promise<CourseStateResponse> {

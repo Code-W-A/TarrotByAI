@@ -1,4 +1,6 @@
 import { useDispatch } from "react-redux";
+import { Platform } from "react-native";
+import Constants from "expo-constants";
 import { authentication, db, storage } from "../../firebase";
 import {
   collection,
@@ -8,9 +10,7 @@ import {
   setDoc,
   arrayUnion,
   arrayRemove,
-  getDoc,
   addDoc,
-  getDocs,
   deleteDoc,
   writeBatch,
   where,
@@ -22,6 +22,11 @@ import {
   handleLoginAsGuest,
 } from "./loginAsGuestHelper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import {
+  syncPushTokenMetadataWithStoredLanguage,
+  upsertUserTokenMetadata,
+} from "./firestoreUtils";
+import { trackedGetDoc, trackedGetDocs } from "./firestoreReadTelemetry";
 
 const auth = authentication;
 
@@ -47,7 +52,7 @@ export const uploadClinicProfile = async (
     console.log("--- START --- ADD CITY TO DOCTORS");
     let allDoctorIds = [];
 
-    const querySnapshot = await getDocs(
+    const querySnapshot = await trackedGetDocs(
       collection(db, "Users", auth.currentUser.uid, "Doctors")
     );
     querySnapshot.forEach((document) => {
@@ -123,7 +128,7 @@ export const uploadDoctorProfile = async (
     // GET THE CLINIC CITY FROM CLINIC REFERENCE TO ADD TO DOCTOR
     console.log("one...");
     const docRefClinic = doc(db, "Users", auth.currentUser.uid);
-    const docSnap = await getDoc(docRefClinic);
+    const docSnap = await trackedGetDoc(docRefClinic);
     let clinicCity = docSnap.data().clinicCity;
     let clinicAddressLocation = docSnap.data().clinicAddressLocation;
     let clinicAddress = docSnap.data().clinicAddressLocation.clinicAddress;
@@ -236,7 +241,10 @@ export const uploadClinicTimeSlots = async (allDays) => {
 
 export const uploadExpoPushToken = async (expoToken) => {
   console.log("---------------");
-  console.log("expoToken uploading....", expoToken);
+  console.log("expoToken uploading....", {
+    hasToken: Boolean(expoToken),
+    tokenLength: typeof expoToken === "string" ? expoToken.length : null,
+  });
 
   try {
     const docRef = doc(db, "Users", auth.currentUser.uid);
@@ -245,6 +253,23 @@ export const uploadExpoPushToken = async (expoToken) => {
     });
   } catch (err) {
     console.log("error uploading expoToken", err);
+    return;
+  }
+
+  const tokenStr =
+    typeof expoToken === "string" ? expoToken : (expoToken && expoToken.data);
+  if (!tokenStr) {
+    return;
+  }
+
+  try {
+    await syncPushTokenMetadataWithStoredLanguage(tokenStr, {
+      isIos: Platform.OS === "ios",
+      projectId: Constants.expoConfig?.extra?.eas?.projectId,
+      source: "UploadFirebaseData.uploadExpoPushToken",
+    });
+  } catch (syncErr) {
+    console.log("uploadExpoPushToken userTokens language sync", syncErr);
   }
 };
 
@@ -256,14 +281,11 @@ export const uploadGuestExpoToken = async (
 ) => {
   try {
     if (!token) return;
-    const userTokensRef = collection(db, "userTokens");
-    const existing = await getDocs(query(userTokensRef, where("token", "==", token)));
-    if (!existing.empty) {
-      const ref = existing.docs[0].ref;
-      await updateDoc(ref, { language: languageCode, isIos });
-      return;
-    }
-    await addDoc(userTokensRef, { token, language: languageCode, isIos });
+    await upsertUserTokenMetadata(token, {
+      language: languageCode,
+      isIos,
+      source: "UploadFirebaseData.uploadGuestExpoToken",
+    });
   } catch (err) {
     console.log("error uploading guest expoToken", err);
   }
@@ -305,14 +327,14 @@ export const uploadApprovedAppointment = async (patientData, hasOwnerUid) => {
     //Get patients appointments
 
     const docRef = doc(db, "Users", patientData.patientId);
-    const docSnap = await getDoc(docRef);
+    const docSnap = await trackedGetDoc(docRef);
 
     console.log("patientData.patientId...");
     console.log(patientData.patientId);
     try {
       if (docSnap.exists()) {
         // Query a reference to a subcollection
-        const querySnapshot = await getDocs(
+        const querySnapshot = await trackedGetDocs(
           collection(db, "Users", patientData.patientId, "myAppointments")
         );
         querySnapshot.forEach((doc) => {
@@ -392,7 +414,7 @@ export const uploadApprovedAppointment = async (patientData, hasOwnerUid) => {
     "Doctors",
     patientData.doctorId
   );
-  const docSnapDoc = await getDoc(docRefDoc);
+  const docSnapDoc = await trackedGetDoc(docRefDoc);
 
   try {
     if (docSnapDoc.exists()) {
@@ -458,10 +480,10 @@ export const uploadApprovedUnregisteredAppointment = async (patientData) => {
     "Doctors",
     patientData.doctorId
   );
-  const docSnapDoc = await getDoc(docRefDoc);
+  const docSnapDoc = await trackedGetDoc(docRefDoc);
 
   try {
-    const querySnapshot = await getDocs(
+    const querySnapshot = await trackedGetDocs(
       collection(
         db,
         "Users",
@@ -810,7 +832,7 @@ export const uploadAppointmentDataToPatient = async (
       // change CLINICS in PATIENT CLINIC HISTORY
       let clinicsHistory = [];
       const docRefDoc = doc(db, "Users", auth.currentUser.uid);
-      const docSnapDoc = await getDoc(docRefDoc);
+      const docSnapDoc = await trackedGetDoc(docRefDoc);
       if (docSnapDoc.exists() && docSnapDoc.data().clinicsHistory) {
         if (docSnapDoc.data().clinicsHistory.length === 0) {
           await updateDoc(docRefDoc, {
@@ -1068,7 +1090,7 @@ export const uploadCreateAppointmentToClinic = async (
         collectionGroup(db, "clinicAppointmentsUnregisteredDocCol"),
         where("phoneNumber", "==", oldPhoneNumber)
       );
-      const querySnapshot = await getDocs(museums);
+      const querySnapshot = await trackedGetDocs(museums);
       const batch = writeBatch(db);
 
       querySnapshot.forEach((doc) => {
@@ -1087,7 +1109,7 @@ export const uploadCreateAppointmentToClinic = async (
         collectionGroup(db, "clinicAppointmentsUnregistered"),
         where("phoneNumber", "==", oldPhoneNumber)
       );
-      const querySnapshotCol = await getDocs(museumsCol);
+      const querySnapshotCol = await trackedGetDocs(museumsCol);
       const batchCol = writeBatch(db);
 
       querySnapshotCol.forEach((doc) => {

@@ -35,6 +35,7 @@ import { CourseSidebarCurriculum } from "../components/CourseSidebarCurriculum";
 import { CourseTabs, type CourseTabKey } from "../components/CourseTabs";
 import { CourseVideoCard } from "../components/CourseVideoCard";
 import { courseT } from "../courseI18n";
+import { IOS_COURSES_FREE_MODE_ENABLED } from "../iosCoursesFreeMode";
 import { useCourses } from "../useCourses";
 
 const ROUTE_COURSE_LIST = "CoursesList";
@@ -334,10 +335,12 @@ export const CourseDetailScreen: React.FC = () => {
 
   const course = courseState?.course || null;
   const isIos = Platform.OS === "ios";
-  const effectiveHasAccess = isIos ? Boolean(currentUser) : Boolean(courseState?.hasAccess);
+  const isIosCoursesFreeMode = IOS_COURSES_FREE_MODE_ENABLED;
+  const effectiveHasAccess = isIosCoursesFreeMode ? true : Boolean(courseState?.hasAccess);
+  const shouldAttemptPlaybackLoad = !isIosCoursesFreeMode || Boolean(currentUser);
   const isWideLayout = width >= 980;
   const floatingButtonVisible =
-    !isIos && Boolean(courseState?.isVisible === true && effectiveHasAccess === false);
+    !isIosCoursesFreeMode && Boolean(courseState?.isVisible === true && effectiveHasAccess === false);
   const floatingBottom = Math.max(insets.bottom, Platform.OS === "android" ? 16 : 12) + 12;
   const floatingButtonHeight = 52;
   const contentBottomPadding =
@@ -406,14 +409,14 @@ export const CourseDetailScreen: React.FC = () => {
   }, [courseId, language, loadCourseState, params.cancel, params.checkout, params.success]);
 
   useEffect(() => {
-    if (!courseId || !courseState || !effectiveHasAccess) {
+    if (!courseId || !courseState || !effectiveHasAccess || !shouldAttemptPlaybackLoad) {
       return;
     }
 
     logInfo("[CourseDetailScreen] Load playback after access granted", {
       courseId,
       platform: Platform.OS,
-      forcedAccess: isIos && courseState?.hasAccess !== true,
+      forcedAccess: isIosCoursesFreeMode && courseState?.hasAccess !== true,
     });
     void loadPlayback(courseId).catch((error) => {
       logError("[CourseDetailScreen] Load playback failed", {
@@ -421,7 +424,14 @@ export const CourseDetailScreen: React.FC = () => {
         message: error instanceof Error ? error.message : String(error),
       });
     });
-  }, [courseId, courseState, effectiveHasAccess, isIos, loadPlayback]);
+  }, [
+    courseId,
+    courseState,
+    effectiveHasAccess,
+    isIosCoursesFreeMode,
+    loadPlayback,
+    shouldAttemptPlaybackLoad,
+  ]);
 
   useEffect(() => {
     const checkoutParam = params.checkout;
@@ -892,7 +902,7 @@ export const CourseDetailScreen: React.FC = () => {
       return;
     }
 
-    if (isIos) {
+    if (isIosCoursesFreeMode) {
       logInfo("[CourseDetailScreen] Checkout blocked on iOS", {
         courseId: course.id,
       });
@@ -1083,7 +1093,7 @@ export const CourseDetailScreen: React.FC = () => {
       return;
     }
 
-    if (isIos) {
+    if (isIosCoursesFreeMode) {
       logInfo("[CourseDetailScreen] Floating purchase blocked on iOS", { courseId });
       return;
     }
@@ -1105,17 +1115,8 @@ export const CourseDetailScreen: React.FC = () => {
       return null;
     }
 
-    if (isIos) {
-      if (currentUser) {
-        return null;
-      }
-
-      return (
-        <View style={[styles.statusBox, styles.statusBoxNeutral]}>
-          <Text style={styles.statusTitle}>{t("loginRequiredTitle")}</Text>
-          <Text style={styles.statusText}>{t("loginRequiredDescription")}</Text>
-        </View>
-      );
+    if (isIosCoursesFreeMode) {
+      return null;
     }
 
     if (!courseState.isVisible && !courseState.hasAccess) {
@@ -1150,7 +1151,7 @@ export const CourseDetailScreen: React.FC = () => {
     course,
     courseState,
     currentUser,
-    isIos,
+    isIosCoursesFreeMode,
     t,
   ]);
 
@@ -1411,19 +1412,17 @@ export const CourseDetailScreen: React.FC = () => {
         scrollIndicatorInsets={{ bottom: contentBottomPadding }}
       >
         <View style={styles.topBar}>
-          {course ? (
+          {course && !isIosCoursesFreeMode ? (
             <View style={styles.priceChip}>
               <Text style={styles.priceChipText}>
                 {effectiveHasAccess
                   ? t("accessGrantedTitle")
-                  : isIos
-                    ? t("loginRequiredTitle")
-                    : formatPrice(course.price, course.currency, language)}
+                  : formatPrice(course.price, course.currency, language)}
               </Text>
             </View>
           ) : null}
 
-          {!isIos ? (
+          {!isIosCoursesFreeMode ? (
             <TouchableOpacity
               style={styles.purchasedLink}
               onPress={() => navigation.navigate(ROUTE_COURSE_PURCHASED)}
@@ -1461,9 +1460,13 @@ export const CourseDetailScreen: React.FC = () => {
                 playbackLoading={playbackLoading}
                 playbackError={playbackError?.message || null}
                 lockedMessage={
-                  isIos && !currentUser ? t("loginRequiredDescription") : undefined
+                  isIosCoursesFreeMode
+                    ? undefined
+                    : isIos && !currentUser
+                      ? t("loginRequiredDescription")
+                      : undefined
                 }
-                allowPreviewFallbackWhenUnlocked={isIos}
+                allowPreviewFallbackWhenUnlocked={isIosCoursesFreeMode}
                 onRetryPlayback={handleRetryPlayback}
               />
 
@@ -1513,12 +1516,12 @@ export const CourseDetailScreen: React.FC = () => {
                     <CourseSidebarCurriculum
                       locale={language}
                       lessons={course.curriculumLessons || []}
-                      hasAccess={!!courseState?.hasAccess}
+                      hasAccess={effectiveHasAccess}
                       onPressCertificate={() => {
                         void handleDownloadCertificate();
                       }}
                       certificateLoading={certificateDownloading}
-                      certificateEnabled={!!courseState?.hasAccess}
+                      certificateEnabled={effectiveHasAccess}
                     />
                   </View>
                 ) : null}

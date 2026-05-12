@@ -1,0 +1,95 @@
+{
+  "expo": {
+    "name": "Cristina Zurba",
+    "slug": "TarotByAi",
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
+    "version": "2.2.2",
+    "orientation": "portrait",
+    "scheme": "com.cristina.zurba.tarot",
+    "plugins": [
+      [
+        "expo-tracking-transparency",
+        {
+          "userTrackingPermission": "This identifier will be used to deliver personalized ads to you."
+        }
+      ],
+      [
+        "react-native-google-mobile-ads",
+        {
+          "androidAppId": "ca-app-pub-9577714849380446~4870228858",
+          "iosAppId": "ca-app-pub-9577714849380446~1181241188",
+          "userTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you."
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static"
+          }
+        }
+      ],
+      "expo-font",
+      "expo-localization",
+      "expo-apple-authentication"
+    ],
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png"
+      },
+      "googleServicesFile": "./google-services.json",
+      "config": {},
+      "softwareKeyboardLayoutMode": "pan",
+      "package": "com.cristina.zurba.tarot",
+      "versionCode": 37,
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "com.google.android.gms.permission.AD_ID"
+      ]
+    },
+    "web": {
+      "config": {
+        "firebase": {
+          "apiKey": "AIzaSyB4zVjD4zGNdjXw90cMudPB74mE-FHRXkE",
+          "measurementId": "G-YJNE2J0837"
+        }
+      }
+    },
+    "icon": "./assets/icon.png",
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "usesAppleSignIn": true,
+      "bundleIdentifier": "com.cristina.zurba.tarotai",
+      "buildNumber": "60",
+      "infoPlist": {
+        "NSUserTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you.",
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "entitlements": {
+        "com.apple.developer.applesignin": [
+          "Default"
+        ]
+      },
+      "googleServicesFile": "./GoogleService-Info.plist"
+    },
+    "description": "Get personalized readings",
+    "extra": {
+      "bugsnag": {
+        "apiKey": "99c24cfa4f8bba7556be3971a0b42300"
+      },
+      "eas": {
+        "projectId": "8a1a3d1c-744e-4f1a-86eb-04ed3a15a020"
+      }
+    }
+  }
+}

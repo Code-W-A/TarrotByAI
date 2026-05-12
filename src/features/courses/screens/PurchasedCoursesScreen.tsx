@@ -19,6 +19,7 @@ import { logError, logInfo } from "../../../utils/Logger";
 import type { PurchasedCourseItem } from "../../../types/courses";
 import { PurchasedCardSkeleton } from "../components/CourseSkeletons";
 import { courseT } from "../courseI18n";
+import { IOS_COURSES_FREE_MODE_ENABLED } from "../iosCoursesFreeMode";
 import { useCourses } from "../useCourses";
 
 const ROUTE_COURSE_LIST = "CoursesList";
@@ -60,7 +61,8 @@ const PurchasedCard: React.FC<{
     params?: Record<string, string | number>
   ) => string;
   onOpenCourse: (courseId: string) => void;
-}> = ({ item, locale, t, onOpenCourse }) => {
+  hideAmount?: boolean;
+}> = ({ item, locale, t, onOpenCourse, hideAmount = false }) => {
   const course = item.course;
   const isUnavailable = item.courseMissing || !course;
 
@@ -96,10 +98,12 @@ const PurchasedCard: React.FC<{
           <Text style={styles.metaLabel}>{t("purchasedLabel")}</Text>
           <Text style={styles.metaValue}>{formatDate(item.purchasedAt, locale)}</Text>
         </View>
-        <View style={styles.metaRow}>
-          <Text style={styles.metaLabel}>{t("amountLabel")}</Text>
-          <Text style={styles.metaValue}>{formatAmount(item.amountPaid, item.currency, locale)}</Text>
-        </View>
+        {!hideAmount ? (
+          <View style={styles.metaRow}>
+            <Text style={styles.metaLabel}>{t("amountLabel")}</Text>
+            <Text style={styles.metaValue}>{formatAmount(item.amountPaid, item.currency, locale)}</Text>
+          </View>
+        ) : null}
 
         {course ? (
           <TouchableOpacity style={styles.openButton} onPress={() => onOpenCourse(course.id)}>
@@ -119,6 +123,7 @@ export const PurchasedCoursesScreen: React.FC = () => {
   const { language } = useLanguage() as { language: string };
   const { currentUser } = useAuth() as { currentUser?: { getIdToken?: () => Promise<string> } };
   const didRedirectRef = useRef(false);
+  const isIosCoursesFreeMode = IOS_COURSES_FREE_MODE_ENABLED;
   const t = (
     key: Parameters<typeof courseT>[1],
     params?: Record<string, string | number>
@@ -144,6 +149,15 @@ export const PurchasedCoursesScreen: React.FC = () => {
   });
 
   useEffect(() => {
+    if (isIosCoursesFreeMode) {
+      if (!didRedirectRef.current) {
+        didRedirectRef.current = true;
+        logInfo("[PurchasedCoursesScreen] Redirect to course list on iOS free mode");
+        navigation.navigate(ROUTE_COURSE_LIST);
+      }
+      return;
+    }
+
     if (!currentUser) {
       if (!didRedirectRef.current) {
         didRedirectRef.current = true;
@@ -165,7 +179,7 @@ export const PurchasedCoursesScreen: React.FC = () => {
         message: error instanceof Error ? error.message : String(error),
       });
     });
-  }, [currentUser, language, loadPurchased, navigation]);
+  }, [currentUser, isIosCoursesFreeMode, language, loadPurchased, navigation]);
 
   const openCourse = (courseId: string) => {
     logInfo("[PurchasedCoursesScreen] Open purchased course", { courseId });
@@ -188,6 +202,17 @@ export const PurchasedCoursesScreen: React.FC = () => {
 
     navigation.navigate(ROUTE_COURSE_LIST);
   };
+
+  if (isIosCoursesFreeMode) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.centeredState}>
+          <ActivityIndicator size="small" color="#c79f4a" />
+          <Text style={styles.centeredText}>{t("loadingCourses")}</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   if (!currentUser) {
     return (
@@ -274,7 +299,15 @@ export const PurchasedCoursesScreen: React.FC = () => {
             return <PurchasedCardSkeleton />;
           }
 
-          return <PurchasedCard item={item} locale={language} t={t} onOpenCourse={openCourse} />;
+          return (
+            <PurchasedCard
+              item={item}
+              locale={language}
+              t={t}
+              onOpenCourse={openCourse}
+              hideAmount={isIosCoursesFreeMode}
+            />
+          );
         }}
       />
     </SafeAreaView>

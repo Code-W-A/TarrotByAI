@@ -10,6 +10,8 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { colors } from "../../utils/colors";
 import { useNavigationState } from "../../context/NavigationContext";
+import { useAuth } from "../../context/AuthContext";
+import { hasPremiumAccess } from "../../features/video-library/utils/premiumAccess";
 import {
   H7fontBoldPrimary,
   H8fontBoldPrimary,
@@ -23,10 +25,14 @@ import { useAdsContext } from "../../context/AdsContext";
 const Card = ({ text, screen, image }) => {
   const navigation = useNavigation();
   const { setCurrentScreen } = useNavigationState();
-  
+  const { userData } = useAuth();
+  const subscriberNoAds = hasPremiumAccess(userData);
+
   // NEW: Use centralized ads system
   const { adsConfig } = useAdsContext();
-  const { showInterstitial, isInterstitialLoaded } = useAds(adsConfig);
+  const { showInterstitial, isInterstitialLoaded } = useAds(adsConfig, {
+    userHasPremiumAccess: subscriberNoAds,
+  });
 
   const onCardPress = async () => {
     console.log('🎯 Card apăsat! Încerc să afișez reclama...');

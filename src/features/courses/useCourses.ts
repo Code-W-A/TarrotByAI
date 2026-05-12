@@ -205,6 +205,7 @@ export const useCourses = (options: UseCoursesOptions): UseCoursesResult => {
   const hasLoadedHomeRef = useRef(false);
   const lastCourseIdRef = useRef<string | null>(null);
   const hasLoadedPurchasedRef = useRef(false);
+  const previousApiRef = useRef(api);
 
   useEffect(() => {
     logInfo("[useCourses] Hook initialized", {
@@ -225,6 +226,22 @@ export const useCourses = (options: UseCoursesOptions): UseCoursesResult => {
     pollingIntervalMs,
     pollingTimeoutMs,
   ]);
+
+  useEffect(() => {
+    if (previousApiRef.current === api) {
+      return;
+    }
+
+    const sizeBeforeClear = cacheRef.current.size;
+    cacheRef.current.clear();
+    previousApiRef.current = api;
+
+    logInfo("[useCourses] Cache cleared after api context change", {
+      hookTag,
+      sizeBeforeClear,
+      remaining: cacheRef.current.size,
+    });
+  }, [api, hookTag]);
 
   const invalidateCourseCaches = useCallback((targetLocale?: string) => {
     if (!targetLocale) {

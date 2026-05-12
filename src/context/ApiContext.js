@@ -3,8 +3,9 @@ import firebase from "firebase/app";
 
 import { getData } from "../utils/realtimeUtils";
 import { handleUploadFirestoreSubcollection } from "../utils/firestoreUtils";
+import { trackedGetDoc } from "../utils/firestoreReadTelemetry";
 import { authentication, db } from "../../firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { doc } from "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ApiDataContext = createContext();
@@ -221,7 +222,7 @@ export const ApiDataProvider = ({ children }) => {
           const configRef = doc(db, "AppConfig", "DataRefresh");
           const configPath = "AppConfig/DataRefresh";
           console.log(`[RefreshConfig] Reading config from ${configPath}`);
-          const snapshot = await getDoc(configRef);
+          const snapshot = await trackedGetDoc(configRef);
           if (snapshot.exists()) {
             const data = snapshot.data() || {};
             console.log("[RefreshConfig] Snapshot exists. Data:", data);

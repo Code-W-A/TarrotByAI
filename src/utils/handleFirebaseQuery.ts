@@ -1,4 +1,4 @@
-import { collection, query, where } from "firebase/firestore";
+import { collection, query, where, getDocsFromServer } from "firebase/firestore";
 import { authentication, db } from "../../firebase";
 import { getDocsPreferCache } from "./firestoreCache";
 
@@ -19,5 +19,27 @@ export const handleGetUserInfo = async () => {
     return userData;
   } catch (err) {
     console.log("error...handleGetUserInfo...", err);
+  }
+};
+
+export const handleGetUserInfoFromServer = async () => {
+  let userData;
+  let auth = authentication;
+  try {
+    if (!auth.currentUser?.uid) {
+      return undefined;
+    }
+    const q = query(
+      collection(db, "Users"),
+      where("owner_uid", "==", auth.currentUser.uid)
+    );
+
+    const querySnapshot = await getDocsFromServer(q);
+    querySnapshot.forEach((doc) => {
+      userData = doc.data();
+    });
+    return userData;
+  } catch (err) {
+    console.log("error...handleGetUserInfoFromServer...", err);
   }
 };

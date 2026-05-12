@@ -1,115 +1,68 @@
-import React, { useState } from "react";
+import React, { memo, useEffect, useRef, useState } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { WebView } from "react-native-webview";
 import { colors } from "../../../utils/colors";
 import i18n from "../../../../i18n";
 import type { Video } from "../types/video";
 import { formatDuration } from "../utils/formatters";
-import { getEmbedUrl } from "../utils/videoEmbed";
+import { getAllVideoThumbnailUrls } from "../utils/videoPlayback";
+import { getRemoteThumbnailSource } from "../utils/videoEmbed";
 
 interface Props {
   video: Video;
   onPress: () => void;
-  showPreview?: boolean;
   isLocked?: boolean;
   isFavorite?: boolean;
   onToggleFavorite?: () => void;
 }
 
-export const VideoCard: React.FC<Props> = ({
+const VideoCardComponent: React.FC<Props> = ({
   video,
   onPress,
-  showPreview = true,
   isLocked = false,
   isFavorite = false,
   onToggleFavorite,
 }) => {
   const durationLabel = formatDuration(video.durationSeconds);
-  const [previewError, setPreviewError] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  
-  const embedUrl = getEmbedUrl(video.platform, video.videoUrl);
-  const shouldShowPreview = showPreview && embedUrl && !previewError;
+  const allThumbnailUrls = getAllVideoThumbnailUrls(video, i18n.locale);
+  const thumbIndexRef = useRef(0);
+  const [displayUri, setDisplayUri] = useState<string | undefined>(
+    allThumbnailUrls[0]
+  );
 
-  const BASE_URL = "https://cristinazurba.com/";
-  
-  const previewHtml = embedUrl ? `
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-        <meta name="referrer" content="strict-origin-when-cross-origin" />
-        <style>
-          html, body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background-color: #000;
-          }
-          .player {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-          }
-          iframe {
-            width: 100%;
-            height: 100%;
-            border: 0;
-          }
-        </style>
-      </head>
-      <body>
-        <div class="player">
-          <iframe
-            src="${embedUrl}?autoplay=0&mute=1&controls=0&modestbranding=1&playsinline=1&origin=${encodeURIComponent(BASE_URL)}"
-            referrerpolicy="strict-origin-when-cross-origin"
-            allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowfullscreen
-          ></iframe>
-        </div>
-      </body>
-    </html>
-  ` : null;
+  useEffect(() => {
+    const urls = getAllVideoThumbnailUrls(video, i18n.locale);
+    thumbIndexRef.current = 0;
+    setDisplayUri(urls[0]);
+  }, [
+    video.id,
+    video.thumbnailUrl,
+    video.videoUrl,
+    video.embedSrc,
+    video.platform,
+    i18n.locale,
+  ]);
+
+  const handleImageError = () => {
+    const urls = getAllVideoThumbnailUrls(video, i18n.locale);
+    const nextIndex = thumbIndexRef.current + 1;
+    if (nextIndex < urls.length) {
+      thumbIndexRef.current = nextIndex;
+      setDisplayUri(urls[nextIndex]);
+    } else {
+      setDisplayUri(undefined);
+    }
+  };
 
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.9}>
       <View style={styles.videoWrapper}>
-        {shouldShowPreview ? (
-          <>
-            {isLoading && video.thumbnailUrl && (
-              <Image
-                source={{ uri: video.thumbnailUrl }}
-                style={[styles.video, StyleSheet.absoluteFill]}
-                resizeMode="cover"
-              />
-            )}
-            <WebView
-              source={{ html: previewHtml!, baseUrl: BASE_URL }}
-              style={styles.video}
-              onError={() => {
-                setPreviewError(true);
-                setIsLoading(false);
-              }}
-              onLoadEnd={() => setIsLoading(false)}
-              scrollEnabled={false}
-              bounces={false}
-              javaScriptEnabled
-              domStorageEnabled
-              mediaPlaybackRequiresUserAction={false}
-              allowsInlineMediaPlayback
-              originWhitelist={["*"]}
-            />
-          </>
-        ) : video.thumbnailUrl ? (
+        {displayUri ? (
           <Image
-            source={{ uri: video.thumbnailUrl }}
-            style={styles.video}
+            source={getRemoteThumbnailSource(displayUri)}
+            style={[styles.video, styles.thumbnailImage]}
             resizeMode="cover"
+            onError={handleImageError}
           />
         ) : (
           <View style={styles.videoPlaceholder}>
@@ -136,7 +89,7 @@ export const VideoCard: React.FC<Props> = ({
         ) : null}
         {video.isPremium ? (
           <View style={styles.premiumBadge}>
-            <Ionicons name="sparkles" size={12} color={colors.white} />
+            <Ionicons name="star" size={12} color={colors.white} />
             <Text style={styles.premiumText}>
               {i18n.translate("videoPremiumBadge")}
             </Text>
@@ -160,6 +113,19 @@ export const VideoCard: React.FC<Props> = ({
   );
 };
 
+export const VideoCard = memo(VideoCardComponent, (prev, next) => {
+  return (
+    prev.video.id === next.video.id &&
+    prev.isLocked === next.isLocked &&
+    prev.isFavorite === next.isFavorite &&
+    prev.video.title === next.video.title &&
+    prev.video.thumbnailUrl === next.video.thumbnailUrl &&
+    prev.video.videoUrl === next.video.videoUrl &&
+    prev.video.embedSrc === next.video.embedSrc &&
+    prev.video.platform === next.video.platform
+  );
+});
+
 const styles = StyleSheet.create({
   card: {
     width: 320,
@@ -182,6 +148,10 @@ const styles = StyleSheet.create({
   video: {
     width: "100%",
     height: "100%",
+    overflow: "hidden",
+  },
+  thumbnailImage: {
+    ...StyleSheet.absoluteFillObject,
   },
   videoPlaceholder: {
     flex: 1,

@@ -88,7 +88,6 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
-import { usePushNotifications } from "../../../hooks/usePushNotifications";
 import { handleLanguagei18n } from "../../../utils/handleLanguageGeneral";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { useStripe } from "@stripe/stripe-react-native";
@@ -96,8 +95,42 @@ import { useTranslation } from "../../../utils/translateUtil";
 import { capturePaymentIntentTest, createPaymentIntentTest, sendPdfEmail } from "../../../utils/constant";
 // Oblio invoice via Firebase Functions (no Next.js)
 import { textStyles } from '../../../utils/colors';
+import { useAnalysisBackNavigation } from "../../../hooks/useAnalysisBackNavigation";
+import {
+  applySinastrieTranslationPatch,
+  buildAnalysisCacheKey,
+  countLikelyWrongLanguageSinastrieContent,
+  extractSinastrieTranslationPatch,
+  getCachedTranslationPatch,
+  hasLikelyWrongLanguageSinastrieContent,
+  isLikelyFailedTranslationResult,
+  removeCachedTranslationPatch,
+  setCachedTranslationPatch,
+} from "../../../utils/analysisTranslationCache";
+import {
+  refreshLocalAnalysisAccessFromEntitlements,
+} from "../../../utils/backupAnalysisUtils";
+import {
+  appendPurchaseSupportMessage,
+  getLocalizedSupportCopy,
+  showLocalizedSupportErrorAlert,
+} from "../../../utils/supportErrorReporter";
+import {
+  findMatchingAnalysisByIdentity,
+  markAnalysisPaidInCollection,
+} from "../../../utils/analysisIdentityUtils";
 
 export const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const TRANSLATION_ITEM_DELAY_MS = 120;
+const SINASTRY_TRANSLATION_TIMEOUT_MS = 6000;
+const SINASTRY_TRANSLATION_MAX_ATTEMPTS = 1;
+const SINASTRY_TRANSLATION_ABORT_AFTER_FAILED_DESCRIPTIONS = 2;
+const SINASTRY_TRANSLATION_MAX_SESSION_MS = 20000;
+const normalizeLanguageCode = (lang) =>
+  String(lang || "")
+    .trim()
+    .toLowerCase()
+    .split("-")[0];
 
 const { width } = Dimensions.get("window");
 
@@ -145,6 +178,7 @@ const signAndDegreeToPosition = (sign, degree) => {
  * @constructor
  */
 function SinastrieRelatie({ navigation, route }) {
+  useAnalysisBackNavigation(navigation, "PersonsList");
   const dataIndex = daily.findIndex(
     (item) =>
       item.day.split("-")[2].toString() === new Date().getDate().toString()
@@ -539,6 +573,7 @@ function SinastrieRelatie({ navigation, route }) {
   const handleNatalChart = async () => {
     try {
       console.log("tesdasdasdsadsads");
+      await refreshLocalAnalysisAccessFromEntitlements();
       // Extrage datele persoanei din route.params sau fallback la AsyncStorage
       const personIndex = route.params?.personIndex;
 
@@ -552,7 +587,13 @@ function SinastrieRelatie({ navigation, route }) {
       
       // Determină persoana selectată pentru sinastrie
       let selectedPerson = null;
-      if (personData) {
+      const matchedStoredPerson = findMatchingAnalysisByIdentity(
+        personsData,
+        personData
+      );
+      if (matchedStoredPerson) {
+        selectedPerson = matchedStoredPerson;
+      } else if (personData) {
         // Dacă avem personData din route.params, folosește-l
         selectedPerson = personData;
       } else if (personsData && personIndex !== undefined) {
@@ -571,6 +612,7 @@ function SinastrieRelatie({ navigation, route }) {
       // Setează datele utilizatorului curent (pentru prima persoană în sinastrie)
       setUData(currentUserData);
       setCurrentUserData(currentUserData);
+      setIsPaid(Boolean(selectedPerson?.isPaid || personData?.isPaid));
       
       // Setează datele persoanei selectate (pentru a doua persoană în sinastrie)
       setUserD(selectedPerson);
@@ -583,12 +625,81 @@ function SinastrieRelatie({ navigation, route }) {
       }
 
       // Verifică dacă traducerea este necesară
-      if (language !== selectedPerson.actualLanguageSinastrie) {
+      const targetLang = normalizeLanguageCode(language);
+      const sourceLang = normalizeLanguageCode(selectedPerson.actualLanguageSinastrie);
+      const needsLanguageRepair = hasLikelyWrongLanguageSinastrieContent(
+        selectedPerson,
+        targetLang
+      );
+      const forceAutoDetectSource = needsLanguageRepair && targetLang === sourceLang;
+      if (targetLang && (targetLang !== sourceLang || needsLanguageRepair)) {
+        if (needsLanguageRepair && targetLang === sourceLang) {
+          console.warn("[Sinastrie] retranslate_due_to_wrong_language_content", {
+            person: selectedPerson?.full_name,
+            lang: targetLang,
+            wrongLanguageCount: countLikelyWrongLanguageSinastrieContent(
+              selectedPerson,
+              targetLang
+            ),
+          });
+        }
         setIsLoading(true);
+        const analysisCacheKey = buildAnalysisCacheKey("sinastrie_personal", {
+          id: selectedPerson?.id || "",
+          owner_uid: selectedPerson?.owner_uid || "",
+          full_name: selectedPerson?.full_name || "",
+          day: selectedPerson?.day || "",
+          month: selectedPerson?.month || "",
+          year: selectedPerson?.year || "",
+          selectedTime: selectedPerson?.selectedTime || "",
+          place: selectedPerson?.place || "",
+        });
 
-        try {
-          // Creează o copie temporară a datelor persoanei
-          const translatedPerson = { ...selectedPerson };
+        let usedCache = false;
+        const cachedPatch = await getCachedTranslationPatch(
+          analysisCacheKey,
+          targetLang
+        );
+        if (cachedPatch) {
+          const cachedTranslatedPerson = applySinastrieTranslationPatch(
+            selectedPerson,
+            cachedPatch
+          );
+          if (cachedTranslatedPerson) {
+            const cacheLooksInvalid = hasLikelyWrongLanguageSinastrieContent(
+              cachedTranslatedPerson,
+              targetLang
+            );
+            if (cacheLooksInvalid) {
+              console.warn("[Sinastrie] invalid translation cache detected", {
+                person: cachedTranslatedPerson?.full_name,
+                to: targetLang,
+              });
+              await removeCachedTranslationPatch(analysisCacheKey, targetLang);
+            } else {
+              usedCache = true;
+              selectedPerson = cachedTranslatedPerson;
+              setUserD(cachedTranslatedPerson);
+              if (personsData && personIndex !== undefined) {
+                personsData[personIndex] = cachedTranslatedPerson;
+                await AsyncStorage.setItem("personsData", JSON.stringify(personsData));
+              }
+              console.log("[Sinastrie] translation cache hit", {
+                person: cachedTranslatedPerson.full_name,
+                to: targetLang,
+              });
+            }
+          }
+        }
+
+        if (!usedCache) {
+          console.log("[Sinastrie] translation cache miss -> retranslate", {
+            person: selectedPerson?.full_name,
+            to: targetLang,
+          });
+          try {
+          // Creează o copie profundă pentru a evita mutații parțiale la fallback/error
+          const translatedPerson = JSON.parse(JSON.stringify(selectedPerson));
 
           const categories = [
             "harmoniousAspectReading",
@@ -602,68 +713,157 @@ function SinastrieRelatie({ navigation, route }) {
             "financialCompatibility",
           ];
 
-          // Parcurge și traduce fiecare categorie
-          await Promise.all(
-            categories.map(async (category) => {
-              const categoryData = translatedPerson.synastry?.[category]?.data;
-              if (categoryData && Array.isArray(categoryData)) {
-                await Promise.all(
-                  categoryData.map(async (item) => {
-                    if (item.reading) {
-                      await Promise.all(
-                        item.reading.map(async (reading) => {
-                          try {
-                            if (reading.description) {
-                              reading.description = await handleToTranslate(
-                                reading.description,
-                                language,
-                                translatedPerson.actualLanguageSinastrie
-                              );
-                            }
-                            if (reading.title) {
-                              reading.title = await handleToTranslate(
-                                reading.title,
-                                language,
-                                translatedPerson.actualLanguageSinastrie
-                              );
-                            }
-                          } catch (error) {
-                            
-                            // Setează o valoare implicită sau fallback
-                            reading.description =
-                              reading.description ||
-                              "Traducerea nu este disponibilă.";
-                            reading.title =
-                              reading.title || "Titlul nu este disponibil.";
-                          }
-                        })
-                      );
+          const translationSourceLang = forceAutoDetectSource ?
+            "" :
+            sourceLang || translatedPerson.actualLanguageSinastrie;
+          const translationDiagnosticsSourceLang =
+            translationSourceLang || "auto";
+          const translationRequestOptions = {
+            timeoutMs: SINASTRY_TRANSLATION_TIMEOUT_MS,
+            maxAttempts: SINASTRY_TRANSLATION_MAX_ATTEMPTS,
+          };
+          const translationStartedAt = Date.now();
+          let failedDescriptionCount = 0;
+          let attemptedDescriptionCount = 0;
+
+          // Parcurge și traduce fiecare categorie cu debit redus pentru a evita timeout/rate limit
+          for (const category of categories) {
+            const categoryData = translatedPerson.synastry?.[category]?.data;
+            if (!Array.isArray(categoryData)) {
+              continue;
+            }
+
+            for (const item of categoryData) {
+              const readings = Array.isArray(item?.reading) ? item.reading : [];
+              for (const reading of readings) {
+                try {
+                  if (reading.description) {
+                    const originalDescription = reading.description;
+                    const translatedDescription = await handleToTranslate(
+                      originalDescription,
+                      targetLang,
+                      translationSourceLang,
+                      translationRequestOptions
+                    );
+                    reading.description = translatedDescription;
+                    attemptedDescriptionCount += 1;
+                    if (
+                      isLikelyFailedTranslationResult({
+                        sourceText: originalDescription,
+                        translatedText: translatedDescription,
+                        sourceLang: translationDiagnosticsSourceLang,
+                        targetLang,
+                      })
+                    ) {
+                      failedDescriptionCount += 1;
                     }
-                  })
-                );
+                    if (attemptedDescriptionCount % 5 === 0) {
+                      console.log("[Sinastrie] translation progress", {
+                        person: translatedPerson?.full_name,
+                        to: targetLang,
+                        attemptedDescriptionCount,
+                        failedDescriptionCount,
+                        elapsedMs: Date.now() - translationStartedAt,
+                      });
+                    }
+                    if (
+                      failedDescriptionCount >=
+                        SINASTRY_TRANSLATION_ABORT_AFTER_FAILED_DESCRIPTIONS ||
+                      Date.now() - translationStartedAt >=
+                        SINASTRY_TRANSLATION_MAX_SESSION_MS
+                    ) {
+                      const abortError = new Error(
+                        "Translation session aborted due to degraded translation service."
+                      );
+                      abortError.code = "TRANSLATION_ABORTED_DEGRADED";
+                      throw abortError;
+                    }
+                    await delay(TRANSLATION_ITEM_DELAY_MS);
+                  }
+                  if (reading.title) {
+                    reading.title = await handleToTranslate(
+                      reading.title,
+                      targetLang,
+                      translationSourceLang,
+                      translationRequestOptions
+                    );
+                    await delay(TRANSLATION_ITEM_DELAY_MS);
+                  }
+                } catch (error) {
+                  if (error?.code === "TRANSLATION_ABORTED_DEGRADED") {
+                    throw error;
+                  }
+                  reading.description =
+                    reading.description || "Traducerea nu este disponibilă.";
+                  reading.title =
+                    reading.title || "Titlul nu este disponibil.";
+                }
               }
-            })
-          );
-
-          // Actualizează limba curentă pentru persoană
-          translatedPerson.actualLanguageSinastrie = language;
-
-          // Actualizează persoana tradusă în lista persoanelor (dacă există)
-          if (personsData && personIndex !== undefined) {
-            personsData[personIndex] = translatedPerson;
-            await AsyncStorage.setItem("personsData", JSON.stringify(personsData));
+            }
           }
 
-          // Setează persoana tradusă în starea locală
-          setUserD(translatedPerson);
-        } catch (error) {
-          
-          Alert.alert("Eroare", "A apărut o problemă la traducerea datelor.");
-        } finally {
+          const hasWrongLanguageAfterTranslation =
+            hasLikelyWrongLanguageSinastrieContent(translatedPerson, targetLang);
+          const canPersistTranslation =
+            failedDescriptionCount === 0 && !hasWrongLanguageAfterTranslation;
+
+          if (!canPersistTranslation) {
+            console.warn("[Sinastrie] translation incomplete, keeping source", {
+              person: translatedPerson?.full_name,
+              to: targetLang,
+              attemptedDescriptionCount,
+              failedDescriptionCount,
+              hasWrongLanguageAfterTranslation,
+            });
+            setUserD(selectedPerson);
+          } else {
+            // Actualizează limba curentă pentru persoană doar când traducerea pare completă
+            translatedPerson.actualLanguageSinastrie = targetLang;
+
+            const translationPatch = extractSinastrieTranslationPatch(
+              translatedPerson,
+              targetLang
+            );
+            await setCachedTranslationPatch(
+              analysisCacheKey,
+              targetLang,
+              translationPatch
+            );
+            console.log("[Sinastrie] translation cache saved", {
+              person: translatedPerson?.full_name,
+              to: targetLang,
+            });
+
+            // Actualizează persoana tradusă în lista persoanelor (dacă există)
+            if (personsData && personIndex !== undefined) {
+              personsData[personIndex] = translatedPerson;
+              await AsyncStorage.setItem("personsData", JSON.stringify(personsData));
+            }
+
+            // Setează persoana tradusă în starea locală
+            selectedPerson = translatedPerson;
+            setUserD(translatedPerson);
+          }
+          } catch (error) {
+          console.warn("[Sinastrie] translation aborted/fallback", {
+            person: selectedPerson?.full_name,
+            to: targetLang,
+            code: error?.code || "",
+            message: error?.message || String(error),
+          });
+          if (error?.code !== "TRANSLATION_ABORTED_DEGRADED") {
+            Alert.alert("Eroare", "A apărut o problemă la traducerea datelor.");
+          }
+          setUserD(selectedPerson);
+          } finally {
           setIsLoading(false);
+          }
         }
       } else {
-        
+        console.log("[Sinastrie] translation skipped (same language)", {
+          person: selectedPerson?.full_name,
+          lang: targetLang || sourceLang || selectedPerson?.actualLanguageSinastrie,
+        });
         setUserD(selectedPerson); // Folosește datele existente dacă traducerea nu este necesară
       }
 
@@ -745,41 +945,84 @@ function SinastrieRelatie({ navigation, route }) {
     language,
     "SinastrieRelatieOthers"
   );
+  const supportCopy = getLocalizedSupportCopy(language);
 
 
-  const handlePayment = async () => {
+  const handlePayment = async (purchaseDetails = null) => {
     const runId = `pay_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
     const pfx = `[PAYMENT][SinastrieRelatie][${runId}]`;
     const pLog = (...args) => console.log(pfx, ...args);
     const pErr = (...args) => console.error(pfx, ...args);
+    let transactionId = "";
+    const resolvedFirstName = purchaseDetails?.firstName || firstName;
+    const resolvedLastName = purchaseDetails?.lastName || lastName;
+    const resolvedEmail = purchaseDetails?.email || email;
+    const resolvedPhone = purchaseDetails?.phone || phone;
+    const resolvedLine1 = purchaseDetails?.line1 || line1;
+    const resolvedCity = purchaseDetails?.city || city;
+    const resolvedStateCounty = purchaseDetails?.state || stateCounty;
+    const resolvedPostalCode = purchaseDetails?.postalCode || postalCode;
+    const resolvedCountry = purchaseDetails?.country || country;
+    const resolvedCouponAllowed =
+      typeof purchaseDetails?.coupon?.allowed === "boolean" ?
+        Boolean(purchaseDetails.coupon.allowed) :
+        Boolean(couponAllowed);
+    const resolvedCouponCode = resolvedCouponAllowed ?
+      purchaseDetails?.coupon?.code || couponCode :
+      "";
+    const resolvedCouponPercent = resolvedCouponAllowed ?
+      Number(
+          purchaseDetails?.coupon?.percent ??
+          couponPercent ??
+          0,
+      ) :
+      0;
+    const legalAcceptance = purchaseDetails?.legalAcceptance || null;
     try {
       // 1. Verifică câmpurile de adresă
-      if (!line1 || !city || !stateCounty || !postalCode || !country) {
+      if (!resolvedLine1 || !resolvedCity || !resolvedStateCounty || !resolvedPostalCode || !resolvedCountry) {
         Alert.alert("Eroare", "Te rugăm să completezi toate câmpurile de adresă.");
         return;
       }
   
       setIsLoadingBuy(true);
       const functions = getFunctions();
+      const purchaseContext = {
+        analysisId: userD?.id || personData?.id || "",
+        analysisType: userD?.type || personData?.type || "personalSinastry",
+        ownerUid: currentUser?.uid || userData?.owner_uid || "",
+      };
   
       // 2. Creează PaymentIntent cu capture_method: "manual"
       const createPaymentIntentFn = httpsCallable(functions, createPaymentIntentTest);
       pLog("calling createPaymentIntent", {
         productCode: "sinastrie_relatie",
         currency: "eur",
-        couponCode: couponAllowed ? couponCode : "",
+        couponCode: resolvedCouponAllowed ? resolvedCouponCode : "",
       });
       const resp = await createPaymentIntentFn({
         currency: "eur",
-        firstName,
-        lastName,
-        email,
-        phone,
+        firstName: resolvedFirstName,
+        lastName: resolvedLastName,
+        email: resolvedEmail,
+        phone: resolvedPhone,
         productCode: "sinastrie_relatie",
-        couponCode: couponAllowed ? couponCode : "",
+        couponCode: resolvedCouponAllowed ? resolvedCouponCode : "",
+        termsVersion: legalAcceptance?.termsVersion || "",
+        privacyVersion: legalAcceptance?.privacyVersion || "",
+        digitalContentWaiverAccepted: Boolean(
+          legalAcceptance?.digitalContentWaiverAccepted
+        ),
+        legalAcceptedAt: legalAcceptance?.legalAcceptedAt || "",
+        immediateExecutionAcceptedAt:
+          legalAcceptance?.immediateExecutionAcceptedAt || "",
+        withdrawalWaiverAcceptedAt:
+          legalAcceptance?.withdrawalWaiverAcceptedAt || "",
+        ...purchaseContext,
       });
       pLog("createPaymentIntent response", resp?.data);
-      const { clientSecret, transactionId } = resp.data;
+      const { clientSecret, transactionId: createdTransactionId } = resp.data;
+      transactionId = String(createdTransactionId || "");
       if (!clientSecret || !transactionId) {
         throw new Error("Lipsesc datele PaymentIntent. Verifică serverul.");
       }
@@ -799,7 +1042,26 @@ function SinastrieRelatie({ navigation, route }) {
       });
       if (initError) {
         pErr("initPaymentSheet error", initError);
-        Alert.alert("Eroare", initError.message);
+        showLocalizedSupportErrorAlert({
+          language,
+          screenName: "SinastrieRelatie",
+          error: initError,
+          publicMessage: supportCopy.paymentInitPublicMessage,
+          technicalMessage: initError?.message || "initPaymentSheet failed",
+          transactionId,
+          productCode: "sinastrie_relatie",
+          analysisId: purchaseContext.analysisId,
+          analysisType: purchaseContext.analysisType,
+          contactEmail: resolvedEmail,
+          contactPhone: resolvedPhone,
+          fullName:
+            userD?.full_name ||
+            personData?.full_name ||
+            `${resolvedFirstName} ${resolvedLastName}`.trim(),
+          extraContext: {
+            phase: "initPaymentSheet",
+          },
+        });
         return;
       }
       pLog("paymentSheet initialized");
@@ -809,7 +1071,30 @@ function SinastrieRelatie({ navigation, route }) {
       const { error: presentError } = await presentPaymentSheet();
       if (presentError) {
         pErr("presentPaymentSheet error", presentError);
-        Alert.alert("Eroare", presentError.message);
+        if (String(presentError?.code || "").toLowerCase() === "canceled") {
+          pLog("presentPaymentSheet canceled by user");
+          return;
+        }
+        showLocalizedSupportErrorAlert({
+          language,
+          screenName: "SinastrieRelatie",
+          error: presentError,
+          publicMessage: supportCopy.paymentFlowPublicMessage,
+          technicalMessage: presentError?.message || "presentPaymentSheet failed",
+          transactionId,
+          productCode: "sinastrie_relatie",
+          analysisId: purchaseContext.analysisId,
+          analysisType: purchaseContext.analysisType,
+          contactEmail: resolvedEmail,
+          contactPhone: resolvedPhone,
+          fullName:
+            userD?.full_name ||
+            personData?.full_name ||
+            `${resolvedFirstName} ${resolvedLastName}`.trim(),
+          extraContext: {
+            phase: "presentPaymentSheet",
+          },
+        });
         return;
       }
       pLog("paymentSheet presented OK (authorized)");
@@ -823,7 +1108,7 @@ function SinastrieRelatie({ navigation, route }) {
       pLog("calling sendPdfEmail");
       const sendPdfEmailFn = httpsCallable(functions, sendPdfEmail);
       const emailResponse = await sendPdfEmailFn({
-        email, // sau userD.email, după caz
+        email: resolvedEmail, // sau userD.email, după caz
         pdfHtml: pdfHtmlContent,
         fullName: userD.full_name,
       });
@@ -833,7 +1118,15 @@ function SinastrieRelatie({ navigation, route }) {
         // 7. Capturează PaymentIntent (fondurile vor fi reținute definitiv)
         pLog("capturing PaymentIntent", { transactionId });
         const capturePaymentFn = httpsCallable(functions, capturePaymentIntentTest);
-        const captureResp = await capturePaymentFn({ transactionId });
+        const captureResp = await capturePaymentFn({
+          transactionId,
+          productCode: "sinastrie_relatie",
+          firstName: resolvedFirstName,
+          lastName: resolvedLastName,
+          email: resolvedEmail,
+          phone: resolvedPhone,
+          ...purchaseContext,
+        });
         if (captureResp.data && captureResp.data.captured) {
           pLog("payment captured OK");
   
@@ -843,20 +1136,18 @@ function SinastrieRelatie({ navigation, route }) {
           // Obține datele salvate
           const personsDataString = await AsyncStorage.getItem("personsData");
           let personsData = personsDataString ? JSON.parse(personsDataString) : [];
-          personsData = [personData]
-          // Găsește și actualizează persoana corespunzătoare
-          const updatedPersons = personsData.map((person) =>
-            person.full_name === userD.full_name
-              ? { ...person, isPaid: true }
-              : person
+          const updatedPersons = markAnalysisPaidInCollection(
+            personsData,
+            userD || personData
           );
           // Salvează lista actualizată în AsyncStorage
           await AsyncStorage.setItem("personsData", JSON.stringify(updatedPersons));
           // Verifică în consolă dacă s-a salvat corect:
           const verifyPersonsData = await AsyncStorage.getItem("personsData");
           const parsedData = JSON.parse(verifyPersonsData);
-          const specificPerson = parsedData.find(
-            (person) => person.full_name === userD.full_name
+          const specificPerson = findMatchingAnalysisByIdentity(
+            parsedData,
+            userD || personData
           );
           console.log("📝 Element actualizat din AsyncStorage:", specificPerson);
   
@@ -866,30 +1157,58 @@ function SinastrieRelatie({ navigation, route }) {
           const invoiceResp = await createOblioInvoiceFn({
             transactionId,
             productCode: "sinastrie_relatie",
+            ...purchaseContext,
             customer: {
-            firstName,
-            lastName,
-            email,
-            phone,
-            address: { line1, city, state: stateCounty, postal_code: postalCode, country },
+            firstName: resolvedFirstName,
+            lastName: resolvedLastName,
+            email: resolvedEmail,
+            phone: resolvedPhone,
+            address: {
+              line1: resolvedLine1,
+              city: resolvedCity,
+              state: resolvedStateCounty,
+              postal_code: resolvedPostalCode,
+              country: resolvedCountry,
+            },
             },
             coupon: {
-              couponAllowed: Boolean(couponAllowed),
-              couponCode: couponAllowed ? couponCode : "",
-              discountPercent: couponAllowed ? Number(couponPercent) : 0,
+              couponAllowed: resolvedCouponAllowed,
+              couponCode: resolvedCouponAllowed ? resolvedCouponCode : "",
+              discountPercent: resolvedCouponAllowed ? resolvedCouponPercent : 0,
             },
           });
           pLog("Firebase Oblio invoice response", invoiceResp?.data);
-          Alert.alert(achizitieCompleta1, achizitieCompleta2);
+          Alert.alert(
+            achizitieCompleta1,
+            appendPurchaseSupportMessage(achizitieCompleta2, language)
+          );
         } else {
           throw new Error("Capturarea plății a eșuat.");
         }
       } else {
         // Dacă trimiterea emailului a eșuat, nu se capturează plata
-        Alert.alert(
-          "Eroare",
-          "Email-ul cu PDF nu a putut fi trimis. Plata nu va fi finalizată. Te rugăm să reîncerci."
-        );
+        showLocalizedSupportErrorAlert({
+          language,
+          screenName: "SinastrieRelatie",
+          publicMessage: supportCopy.pdfEmailFailedPublicMessage,
+          technicalMessage:
+            emailResponse?.data?.message || "sendPdfEmail returned success=false",
+          error: emailResponse?.data || null,
+          transactionId,
+          productCode: "sinastrie_relatie",
+          analysisId: purchaseContext.analysisId,
+          analysisType: purchaseContext.analysisType,
+          contactEmail: resolvedEmail,
+          contactPhone: resolvedPhone,
+          fullName:
+            userD?.full_name ||
+            personData?.full_name ||
+            `${resolvedFirstName} ${resolvedLastName}`.trim(),
+          extraContext: {
+            phase: "sendPdfEmail",
+            emailSuccess: Boolean(emailResponse?.data?.success),
+          },
+        });
         // (Opțional: poți anula PaymentIntent printr-o funcție backend dedicată.)
       }
     } catch (error) {
@@ -897,10 +1216,27 @@ function SinastrieRelatie({ navigation, route }) {
       const msg =
         (error && typeof error === "object" && error.message ? String(error.message) : "") ||
         "Nu s-a putut procesa plata sau factura.";
-      Alert.alert(
-        "Eroare",
-        `${msg}\n\nDacă ți-a fost luată suma, trimite acest ID la suport: ${String(transactionId || "")}`.trim()
-      );
+      showLocalizedSupportErrorAlert({
+        language,
+        screenName: "SinastrieRelatie",
+        error,
+        publicMessage: supportCopy.paymentFlowPublicMessage,
+        technicalMessage: msg,
+        transactionId,
+        productCode: "sinastrie_relatie",
+        analysisId: userD?.id || personData?.id || "",
+        analysisType: userD?.type || personData?.type || "personalSinastry",
+        contactEmail: resolvedEmail,
+        contactPhone: resolvedPhone,
+        fullName:
+          userD?.full_name ||
+          personData?.full_name ||
+          `${resolvedFirstName} ${resolvedLastName}`.trim(),
+        extraContext: {
+          phase: "handlePaymentCatch",
+        },
+        showTransactionRetryWarning: Boolean(transactionId),
+      });
     } finally {
       setIsLoadingBuy(false);
       pLog("done (isLoadingBuy=false)");
@@ -1160,12 +1496,12 @@ function SinastrieRelatie({ navigation, route }) {
         setCouponPercent={setCouponPercent}
         couponAllowed={couponAllowed}
         setCouponAllowed={setCouponAllowed}
-        onConfirm={async () => {
+        onConfirm={async (updatedUserDetails) => {
           setIsLoadingBuy(true);
           setModalVisible(false);
 
           try {
-            await handlePayment(); // Apelează funcția `handlePayment`
+            await handlePayment(updatedUserDetails);
           } catch (error) {
             console.error("Eroare la procesarea plății:", error);
             Alert.alert(

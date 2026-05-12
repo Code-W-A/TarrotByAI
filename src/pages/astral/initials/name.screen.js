@@ -56,6 +56,7 @@ import i18n from "../../../../i18n";
 import { useLanguage } from "../../../context/LanguageContext";
 import { capitalizeFirstLetter } from "../../../utils/stringUtils";
 import { fetchSinastrieData } from "../../../utils/AstralUtils/fetchSinastrieDate";
+import { mergeAnalysisWithPreservedMeta } from "../../../utils/analysisIdentityUtils";
 import DayPickerModal from '../../../components/DayPickerModal';
 import MonthPickerModal from '../../../components/MonthPickerModal';
 import YearPickerModal from '../../../components/YearPickerModal';
@@ -329,6 +330,10 @@ function NameScreen({ navigation, route }) {
     try {
       const personsD = await AsyncStorage.getItem("personsData");
       const parsedDataPersons = personsD ? JSON.parse(personsD) : [];
+      const existingUserDataString = await AsyncStorage.getItem("userData");
+      const existingUserData = existingUserDataString
+        ? JSON.parse(existingUserDataString)
+        : null;
 
       setIsLoading(true);
       const birthDate = moment(selectedDate, "DD-MM-YYYY");
@@ -356,38 +361,46 @@ function NameScreen({ navigation, route }) {
       // const currentDate = new Date(2020, 7, 12, 10, 0, 0);
       const generateUniqueId = () =>
         "_" + Math.random().toString(36).substr(2, 9);
-      const userData = {
-        isPaid: false,
-        type: "personalAstrograma",
-        id: generateUniqueId(),
-        full_name: name,
-        day: day,
-        month: month, // months are zero-indexed in moment.js
-        year: year,
-        hour: birthTime.hour(),
-        min: birthTime.minute(),
-        sec: birthTime.second(),
-        selectedDate: "--",
-        selectedTime: selectedTime,
-        gender,
-        place,
-        adress,
-        localitate,
-        tara,
-        lat: lat, // placeholder, should be replaced with actual latitude
-        lon: long, // placeholder, should be replaced with actual longitude
-        tzone: timezoneOffset,
-        // tzone: timezoneOffset + 1,
-        // timeZoneData.data.timeZoneId === "Europe/Bucharest"
-        //   ? timezoneOffset + 1
-        //   : timezoneOffset,
-        actualLanguage: "en",
-        actualLanguageAstrograma: "en",
-        actualLanguageSinastrie: "en",
-        zodiacSign,
-        zodiacSignFristUpperCase,
-        dataHoroscop: formattedDate,
-      };
+      const generatedId = generateUniqueId();
+      const userData = mergeAnalysisWithPreservedMeta(
+        {
+          isPaid: false,
+          type: "personalAstrograma",
+          id: generatedId,
+          full_name: name,
+          day: day,
+          month: month, // months are zero-indexed in moment.js
+          year: year,
+          hour: birthTime.hour(),
+          min: birthTime.minute(),
+          sec: birthTime.second(),
+          selectedDate: "--",
+          selectedTime: selectedTime,
+          gender,
+          place,
+          adress,
+          localitate,
+          tara,
+          lat: lat, // placeholder, should be replaced with actual latitude
+          lon: long, // placeholder, should be replaced with actual longitude
+          tzone: timezoneOffset,
+          // tzone: timezoneOffset + 1,
+          // timeZoneData.data.timeZoneId === "Europe/Bucharest"
+          //   ? timezoneOffset + 1
+          //   : timezoneOffset,
+          actualLanguage: "en",
+          actualLanguageAstrograma: "en",
+          actualLanguageSinastrie: "en",
+          zodiacSign,
+          zodiacSignFristUpperCase,
+          dataHoroscop: formattedDate,
+        },
+        isEditMode ? existingUserData : null,
+        {
+          id: generatedId,
+          type: "personalAstrograma",
+        }
+      );
       // console.log("user....data", userData);
 
       // ------HOROSCOPE-----

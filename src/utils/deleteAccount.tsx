@@ -1,4 +1,4 @@
-import { collection, deleteDoc, doc, getDocs } from "firebase/firestore";
+import { collection, deleteDoc, doc } from "firebase/firestore";
 import { authentication, db, storage } from "../../firebase";
 import { deleteObject, ref } from "firebase/storage";
 import {
@@ -12,6 +12,7 @@ import { Alert } from "react-native";
 import { handleSignOut } from "./handleSignOut";
 import { useNavigation } from "@react-navigation/native";
 import i18n from "../../i18n";
+import { trackedGetDocs } from "./firestoreReadTelemetry";
 
 const handleRecentLoginAndDelete = async (
   isPatient,
@@ -102,7 +103,7 @@ const handleRecentLoginAndDelete = async (
     //DELETE DOCTORS FROM CLINIC FROM COLLECTIONS
     if (!isPatient) {
       let doctorIdsToDelete = [];
-      const querySnapshot = await getDocs(
+      const querySnapshot = await trackedGetDocs(
         collection(db, "Users", user.uid, "Doctors")
       );
       querySnapshot.forEach((doc) => {
@@ -122,7 +123,7 @@ const handleRecentLoginAndDelete = async (
           doctorIdsToDelete[i],
           "clinicAppointmentsUnregistered"
         );
-        const querySnapshotAppointments = await getDocs(
+        const querySnapshotAppointments = await trackedGetDocs(
           subcollectionRefAppointments
         );
         for (const doc of querySnapshotAppointments.docs) {
@@ -136,7 +137,7 @@ const handleRecentLoginAndDelete = async (
           user.uid,
           "Doctors"
         );
-        const querySnapshotDoctors = await getDocs(subcollectionRefDoctors);
+        const querySnapshotDoctors = await trackedGetDocs(subcollectionRefDoctors);
         for (const doc of querySnapshotDoctors.docs) {
           await deleteDoc(doc.ref);
         }
@@ -148,7 +149,7 @@ const handleRecentLoginAndDelete = async (
           doctorIdsToDelete[i],
           "clinicAppointmentsUnregisteredDocCol"
         );
-        const querySnapshotAppointmentsDoctors = await getDocs(
+        const querySnapshotAppointmentsDoctors = await trackedGetDocs(
           subcollectionRefAppointmentsDoctors
         );
         for (const doc of querySnapshotAppointmentsDoctors.docs) {
@@ -162,7 +163,7 @@ const handleRecentLoginAndDelete = async (
           user.uid,
           "Chats"
         );
-        const querySnapshotChats = await getDocs(subcollectionRefChats);
+        const querySnapshotChats = await trackedGetDocs(subcollectionRefChats);
         for (const doc of querySnapshotChats.docs) {
           await deleteDoc(doc.ref);
         }
@@ -185,7 +186,7 @@ const handleRecentLoginAndDelete = async (
     ); // Replace with your actual collection and document ID
 
     try {
-      const querySnapshotClinics = await getDocs(subcollectionRefClinics);
+      const querySnapshotClinics = await trackedGetDocs(subcollectionRefClinics);
 
       for (const doc of querySnapshotClinics.docs) {
         await deleteDoc(doc.ref);

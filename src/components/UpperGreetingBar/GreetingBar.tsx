@@ -21,18 +21,12 @@ import { useNumberContext } from "../../context/NumberContext";
 import {
   handleQueryToken,
   handleUploadFirestoreSubcollection,
+  syncUserProfileAppLanguageForNotifications,
+  upsertUserTokenMetadata,
 } from "../../utils/firestoreUtils";
 import { authentication } from "../../../firebase";
 import { useApiData } from "../../context/ApiContext";
 import { usePushNotifications } from "../../hooks/usePushNotifications";
-import {
-  collection,
-  query,
-  where,
-  getDocs,
-  updateDoc,
-  getFirestore,
-} from "firebase/firestore";
 
 const languages = [
   {
@@ -175,29 +169,22 @@ const GreetingBar = ({ isGoBack, isPersonalGoBack }) => {
     AsyncStorage.setItem("@userLanguage", langCode);
     setModalVisible(false);
 
-    // Firestore db instance
-    const db = getFirestore();
-
-    // Creează o interogare pentru a găsi documentul după token
+    // Sincronizează limba în userTokens (după expo token) pentru notificări
     if (expoToken) {
-      const q = query(
-        collection(db, "userTokens"),
-        where("token", "==", expoToken)
-      );
-
       try {
-        const querySnapshot = await getDocs(q);
-        querySnapshot.forEach(async (doc) => {
-          // Actualizează campul `language` pentru fiecare document găsit
-          await updateDoc(doc.ref, {
-            language: langCode,
-          });
+        const result = await upsertUserTokenMetadata(expoToken, {
+          language: langCode,
+          source: "GreetingBar.handleLanguageSelect",
         });
-        console.log("Language updated in Firestore successfully");
+        console.log("[GreetingBar] synced userTokens language", { langCode, result });
       } catch (error) {
         console.error("Error updating language in Firestore:", error);
       }
     }
+    void syncUserProfileAppLanguageForNotifications(
+      langCode,
+      "GreetingBar.handleLanguageSelect"
+    );
   };
 
   const flagImageSource = languages.find(

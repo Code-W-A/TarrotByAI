@@ -53,6 +53,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 import { useAuth } from "../../../context/AuthContext";
 import MoreInfoModal from "../../../components/Astral/components/MoreInfoModal";
+import PurchaseSupportModal from "../../../components/Astral/components/PurchaseSupportModal";
 import { doc, getFirestore, updateDoc } from "firebase/firestore";
 import { screenName } from "../../../utils/screenName";
 
@@ -127,6 +128,7 @@ function LearnScreen({ navigation }) {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [isModalVisible, setModalVisible] = useState(false);
+  const [supportModalVisible, setSupportModalVisible] = useState(false);
   const { currentUser, userData, isGuestUser, setUserData } = useAuth();
 
   useEffect(() => {
@@ -387,6 +389,25 @@ function LearnScreen({ navigation }) {
                   <Text style={{ fontSize: 28, fontWeight: '700', color: '#FFD700', flex: 1 }}>{i18n.translate("sinasUpdate") || "Update Info"}</Text>
                 </TouchableOpacity>
               </View>
+              {/* Card 5: Contact support */}
+              <View style={{
+                backgroundColor: 'rgba(255,255,255,0.97)',
+                borderRadius: 18,
+                paddingVertical: 24,
+                paddingHorizontal: 24,
+                marginBottom: 18,
+                shadowColor: '#bfa76a',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.13,
+                shadowRadius: 16,
+                elevation: 7,
+                width: '100%',
+              }}>
+                <TouchableOpacity onPress={() => setSupportModalVisible(true)} activeOpacity={0.85} style={{ flexDirection: 'row', alignItems: 'center', width: '100%' }}>
+                  <MaterialCommunityIcons name="lifebuoy" size={48} color="#FFD700" style={{ marginRight: 18 }} />
+                  <Text style={{ fontSize: 28, fontWeight: '700', color: '#FFD700', flex: 1 }}>{i18n.translate("contactSupportCta")}</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </ScrollView>
@@ -405,6 +426,12 @@ function LearnScreen({ navigation }) {
             setLastName={setLastName}
           />
         )}
+        <PurchaseSupportModal
+          visible={supportModalVisible}
+          onDismiss={() => setSupportModalVisible(false)}
+          defaultProductCode="natal_astrogram"
+          language={userD?.actualLanguage || i18n.locale || "ro"}
+        />
       </SafeAreaView>
     </ImageBackground>
   );

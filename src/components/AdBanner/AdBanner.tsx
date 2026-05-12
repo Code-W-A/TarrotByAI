@@ -1,7 +1,9 @@
 import React from 'react';
-import { View, StyleSheet, Platform } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { BannerAd, BannerAdSize } from 'react-native-google-mobile-ads';
 import { useAds } from '../../hooks/useAds';
+import { useAuth } from '../../context/AuthContext';
+import { hasPremiumAccess } from '../../features/video-library/utils/premiumAccess';
 
 interface AdBannerProps {
   size?: BannerAdSize;
@@ -14,7 +16,10 @@ export const AdBanner: React.FC<AdBannerProps> = ({
   style,
   adsConfig
 }) => {
-  const { getBannerAdUnitId, canShowAds } = useAds(adsConfig);
+  const { userData } = useAuth();
+  const { getBannerAdUnitId, canShowAds } = useAds(adsConfig, {
+    userHasPremiumAccess: hasPremiumAccess(userData),
+  });
   
   if (!canShowAds) {
     return null;

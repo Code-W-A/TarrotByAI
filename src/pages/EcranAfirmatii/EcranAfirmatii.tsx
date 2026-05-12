@@ -88,8 +88,8 @@ const EcranAfirmatii = () => {
   }, []);
 
   React.useEffect(() => {
-    setIsNavBarVisible();
-    return () => setIsNavBarVisible(); // Restabilește vizibilitatea la ieșirea din componentă
+    setIsNavBarVisible(false);
+    return () => setIsNavBarVisible(true); // Restabilește vizibilitatea la ieșirea din componentă
   }, []);
 
   // Generăm array-ul automat

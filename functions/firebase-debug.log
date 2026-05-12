@@ -1,0 +1,49 @@
+[debug] [2026-03-15T13:44:07.430Z] ----------------------------------------------------------------------
+[debug] [2026-03-15T13:44:07.431Z] Command:       /opt/homebrew/Cellar/node/25.6.1/bin/node /opt/homebrew/bin/firebase emulators:start --only functions
+[debug] [2026-03-15T13:44:07.431Z] CLI Version:   14.11.0
+[debug] [2026-03-15T13:44:07.431Z] Platform:      darwin
+[debug] [2026-03-15T13:44:07.431Z] Node Version:  v25.6.1
+[debug] [2026-03-15T13:44:07.431Z] Time:          Sun Mar 15 2026 15:44:07 GMT+0200 (Eastern European Standard Time)
+[debug] [2026-03-15T13:44:07.431Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-03-15T13:44:07.528Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-03-15T13:44:07.528Z] > authorizing via signed-in user (mobitoolsro@gmail.com)
+[info] i  emulators: Starting emulators: functions {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: functions"}}
+[debug] [2026-03-15T13:44:07.616Z] [logging] Logging Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-03-15T13:44:07.616Z] assigned listening specs for emulators {"user":{"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400},{"address":"::1","family":"IPv6","port":4400}],"ui":[{"address":"127.0.0.1","family":"IPv4","port":4000},{"address":"::1","family":"IPv6","port":4000}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}]},"metadata":{"message":"assigned listening specs for emulators"}}
+[debug] [2026-03-15T13:44:07.618Z] [hub] writing locator at /var/folders/57/w83hfs491_b5k_d4sw7tq1jh0000gn/T/hub-tarrot-590ee.json
+[debug] [2026-03-15T13:44:07.702Z] [functions] Functions Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-03-15T13:44:07.702Z] [eventarc] Eventarc Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-03-15T13:44:07.702Z] [tasks] Cloud Tasks Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-03-15T13:44:07.702Z] late-assigned ports for functions and eventarc emulators {"user":{"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400},{"address":"::1","family":"IPv6","port":4400}],"ui":[{"address":"127.0.0.1","family":"IPv4","port":4000},{"address":"::1","family":"IPv6","port":4000}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}],"functions":[{"address":"127.0.0.1","family":"IPv4","port":5001}],"eventarc":[{"address":"127.0.0.1","family":"IPv4","port":9299}],"tasks":[{"address":"127.0.0.1","family":"IPv4","port":9499}]},"metadata":{"message":"late-assigned ports for functions and eventarc emulators"}}
+[warn] ⚠  functions: The following emulators are not running, calls to these services from the Functions emulator will affect production: apphosting, auth, firestore, database, hosting, pubsub, storage, dataconnect {"metadata":{"emulator":{"name":"functions"},"message":"The following emulators are not running, calls to these services from the Functions emulator will affect production: \u001b[1mapphosting, auth, firestore, database, hosting, pubsub, storage, dataconnect\u001b[22m"}}
+[debug] [2026-03-15T13:44:07.712Z] defaultcredentials: writing to file /Users/code-with-a/.config/firebase/mobitoolsro_gmail_com_application_default_credentials.json
+[debug] [2026-03-15T13:44:07.713Z] Setting GAC to /Users/code-with-a/.config/firebase/mobitoolsro_gmail_com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to /Users/code-with-a/.config/firebase/mobitoolsro_gmail_com_application_default_credentials.json"}}
+[debug] [2026-03-15T13:44:07.713Z] Checked if tokens are valid: true, expires at: 1773585147375
+[debug] [2026-03-15T13:44:07.714Z] Checked if tokens are valid: true, expires at: 1773585147375
+[debug] [2026-03-15T13:44:07.714Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/tarrot-590ee/adminSdkConfig [none]
+[debug] [2026-03-15T13:44:08.627Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/tarrot-590ee/adminSdkConfig 200
+[debug] [2026-03-15T13:44:08.628Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/tarrot-590ee/adminSdkConfig {"projectId":"tarrot-590ee","databaseURL":"https://tarrot-590ee-default-rtdb.europe-west1.firebasedatabase.app","storageBucket":"tarrot-590ee.appspot.com","locationId":"europe-west"}
+[info] i  ui: downloading ui-v1.15.0.zip... {"metadata":{"emulator":{"name":"ui"},"message":"downloading ui-v1.15.0.zip..."}}
+[debug] [2026-03-15T13:44:08.654Z] Could not find VSCode notification endpoint: FetchError: request to http://localhost:40001/vscode/notify failed, reason: . If you are not running the Firebase Data Connect VSCode extension, this is expected and not an issue.
+[info] i  emulators: Shutting down emulators. {"metadata":{"emulator":{"name":"hub"},"message":"Shutting down emulators."}}
+[info] i  ui: Stopping Emulator UI {"metadata":{"emulator":{"name":"ui"},"message":"Stopping Emulator UI"}}
+[info] i  functions: Stopping Functions Emulator {"metadata":{"emulator":{"name":"functions"},"message":"Stopping Functions Emulator"}}
+[info] i  eventarc: Stopping Eventarc Emulator {"metadata":{"emulator":{"name":"eventarc"},"message":"Stopping Eventarc Emulator"}}
+[info] i  tasks: Stopping Cloud Tasks Emulator {"metadata":{"emulator":{"name":"tasks"},"message":"Stopping Cloud Tasks Emulator"}}
+[info] i  hub: Stopping emulator hub {"metadata":{"emulator":{"name":"hub"},"message":"Stopping emulator hub"}}
+[info] i  logging: Stopping Logging Emulator {"metadata":{"emulator":{"name":"logging"},"message":"Stopping Logging Emulator"}}
+[debug] [2026-03-15T13:44:08.659Z] Could not find VSCode notification endpoint: FetchError: request to http://localhost:40001/vscode/notify failed, reason: . If you are not running the Firebase Data Connect VSCode extension, this is expected and not an issue.
+[debug] [2026-03-15T13:44:08.770Z] Error: EACCES: permission denied, mkdir '/Users/code-with-a/.cache/firebase/emulators'
+    at Object.mkdirSync (node:fs:1333:26)
+    at module.exports.makeDirSync (/opt/homebrew/Cellar/firebase-cli/14.11.0/libexec/lib/node_modules/firebase-tools/node_modules/fs-extra/lib/mkdirs/make-dir.js:23:13)
+    at downloadEmulator (/opt/homebrew/Cellar/firebase-cli/14.11.0/libexec/lib/node_modules/firebase-tools/lib/emulator/download.js:21:8)
+    at Object.downloadIfNecessary (/opt/homebrew/Cellar/firebase-cli/14.11.0/libexec/lib/node_modules/firebase-tools/lib/emulator/downloadableEmulators.js:369:47)
+    at EmulatorUI.createExpressApp (/opt/homebrew/Cellar/firebase-cli/14.11.0/libexec/lib/node_modules/firebase-tools/lib/emulator/ui.js:36:37)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async EmulatorUI.start (/opt/homebrew/Cellar/firebase-cli/14.11.0/libexec/lib/node_modules/firebase-tools/lib/emulator/ExpressBasedEmulator.js:33:21)
+    at async EmulatorUI.start (/opt/homebrew/Cellar/firebase-cli/14.11.0/libexec/lib/node_modules/firebase-tools/lib/emulator/ui.js:25:9)
+    at async EmulatorRegistry.start (/opt/homebrew/Cellar/firebase-cli/14.11.0/libexec/lib/node_modules/firebase-tools/lib/emulator/registry.js:19:9)
+    at async Object.startAll (/opt/homebrew/Cellar/firebase-cli/14.11.0/libexec/lib/node_modules/firebase-tools/lib/emulator/controller.js:679:9)
+[error] 
+[error] Error: An unexpected error has occurred.

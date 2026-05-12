@@ -56,6 +56,7 @@ import i18n from "../../../../i18n";
 import { useLanguage } from "../../../context/LanguageContext";
 import { capitalizeFirstLetter } from "../../../utils/stringUtils";
 import { fetchSinastrieData } from "../../../utils/AstralUtils/fetchSinastrieDate";
+import { mergeAnalysisWithPreservedMeta } from "../../../utils/analysisIdentityUtils";
 import DayPickerModal from '../../../components/DayPickerModal';
 import MonthPickerModal from '../../../components/MonthPickerModal';
 import YearPickerModal from '../../../components/YearPickerModal';
@@ -205,6 +206,10 @@ function NewPersonScreen({ navigation, route }) {
       } catch (e) {
         parsedDataPersons = [];
       }
+      const existingPersonData =
+        isEditMode && route.params?.personIndex !== undefined
+          ? parsedDataPersons[route.params.personIndex]
+          : null;
 
       // Construiește datele pentru noua persoană
       const birthTime = selectedTime ? moment(selectedTime, "HH:mm") : moment();
@@ -222,6 +227,9 @@ function NewPersonScreen({ navigation, route }) {
       console.log("time zone....timezoneOffset", timezoneOffset);
       const zodiacSign = getZodiacSign(day, month);
       const formattedDate = new Date().toISOString().split("T")[0];
+      const generateUniqueId = () =>
+        "_" + Math.random().toString(36).substr(2, 9);
+      const generatedId = generateUniqueId();
 
       // Validează dacă toate câmpurile importante sunt completate
       const isValid = validatePersonData({
@@ -243,33 +251,42 @@ function NewPersonScreen({ navigation, route }) {
         return;
       }
 
-      const newPersonData = {
-        full_name: name,
-        day,
-        month,
-        year,
-        hour: birthTime.hour(),
-        min: birthTime.minute(),
-        sec: birthTime.second(),
-        selectedDate,
-        selectedTime,
-        gender,
-        place,
-        adress,
-        localitate,
-        tara,
-        lat,
-        lon: long,
-        tzone: timezoneOffset,
-        actualLanguage: "en",
-        actualLanguageAstrograma: "en",
-        actualLanguageSinastrie: "en",
-        zodiacSign,
-        zodiacSignFristUpperCase: capitalizeFirstLetter(
-          zodiacSign.toLowerCase()
-        ),
-        dataHoroscop: formattedDate,
-      };
+      const newPersonData = mergeAnalysisWithPreservedMeta(
+        {
+          full_name: name,
+          day,
+          month,
+          year,
+          hour: birthTime.hour(),
+          min: birthTime.minute(),
+          sec: birthTime.second(),
+          selectedDate,
+          selectedTime,
+          gender,
+          place,
+          adress,
+          localitate,
+          tara,
+          lat,
+          lon: long,
+          tzone: timezoneOffset,
+          actualLanguage: "en",
+          actualLanguageAstrograma: "en",
+          actualLanguageSinastrie: "en",
+          zodiacSign,
+          zodiacSignFristUpperCase: capitalizeFirstLetter(
+            zodiacSign.toLowerCase()
+          ),
+          dataHoroscop: formattedDate,
+          id: generatedId,
+          type: "personalSinastry",
+        },
+        existingPersonData,
+        {
+          id: generatedId,
+          type: "personalSinastry",
+        }
+      );
 
       // Adaugă sau actualizează datele persoanei
       let currentPersonIndex;
@@ -370,26 +387,33 @@ function NewPersonScreen({ navigation, route }) {
       ] = results;
 
       // Salvează analizele în datele sinastriei persoanei curente
-      parsedDataPersons[currentPersonIndex].synastry = {
-        natalWheelChart,
-        houseCusps,
-        planetaryPositions,
-        aspect,
-        harmoniousAspectReading,
-        conflictingAspectReading,
-        contrastingAspectReading,
-        intenseCompatibility,
-        physicalCompatibility,
-        emotionalCompatibility,
-        sexualCompatibility,
-        spiritualCompatibility,
-        financialCompatibility,
-      };
-
-      const generateUniqueId = () =>
-        "_" + Math.random().toString(36).substr(2, 9);
-      parsedDataPersons[currentPersonIndex].id = generateUniqueId();
-      parsedDataPersons[currentPersonIndex].type = "personalSinastry";
+      parsedDataPersons[currentPersonIndex] = mergeAnalysisWithPreservedMeta(
+        {
+          ...parsedDataPersons[currentPersonIndex],
+          synastry: {
+            natalWheelChart,
+            houseCusps,
+            planetaryPositions,
+            aspect,
+            harmoniousAspectReading,
+            conflictingAspectReading,
+            contrastingAspectReading,
+            intenseCompatibility,
+            physicalCompatibility,
+            emotionalCompatibility,
+            sexualCompatibility,
+            spiritualCompatibility,
+            financialCompatibility,
+          },
+          id: generatedId,
+          type: "personalSinastry",
+        },
+        existingPersonData,
+        {
+          id: generatedId,
+          type: "personalSinastry",
+        }
+      );
 
       // Salvează `personsData` actualizat
       await AsyncStorage.setItem(

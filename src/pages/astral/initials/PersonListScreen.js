@@ -34,8 +34,13 @@ import LoadingOverlay from "../../../components/Astral/components/zodiac/Loading
 import { useTranslation } from "../../../utils/translateUtil";
 import { useLanguage } from "../../../context/LanguageContext";
 import {
+  applyEntitlementsToAnalyses,
   backupAnalizeSinastrieOnePersonToFirestore,
   backupAnalizeSinastrieOthersToFirestore,
+  refreshLocalAnalysisAccessFromEntitlements,
+  loadLocalSinastrieAnalyses,
+  mergeAnalysesById,
+  retrievePurchaseEntitlementsByContact,
   retrieveAnalizeSinastrieOnePersonByPhone,
   retrieveAnalizeSinastrieOthersByPhone,
 } from "../../../utils/backupAnalysisUtils";
@@ -98,72 +103,81 @@ const PersonListScreen = ({ navigation }) => {
     }
     return false;
   };
+
+  const shouldDisplaySinastrieAnalysis = (analysis) => {
+    if (!analysis || typeof analysis !== "object") {
+      return false;
+    }
+
+    if (analysis.isPaid) {
+      return true;
+    }
+
+    const synastry = analysis?.synastry;
+    if (!synastry) {
+      return false;
+    }
+    if (synastry.natalWheelChart === null) {
+      return false;
+    }
+    if (synastry.aspect === null) {
+      return false;
+    }
+    if (containsServiceUnavailable(synastry)) {
+      return false;
+    }
+
+    return true;
+  };
   
 
   const synchronizeData = async () => {
+    let localOnePersonDocs = [];
+    let localOtherDocs = [];
+
     try {
       setIsLoading(true);
+      await refreshLocalAnalysisAccessFromEntitlements();
+      const localAnalyses = await loadLocalSinastrieAnalyses();
+      localOnePersonDocs = localAnalyses.onePersonDocs;
+      localOtherDocs = localAnalyses.othersDocs;
+      setPersons(localOnePersonDocs.filter(shouldDisplaySinastrieAnalysis));
+      setOtherPersons(localOtherDocs.filter(shouldDisplaySinastrieAnalysis));
+
       // Apelăm separat funcțiile de backup:
       await backupAnalizeSinastrieOnePersonToFirestore();
       await backupAnalizeSinastrieOthersToFirestore();
       console.log("✅ [Sinastrie] Backup-ul s-a efectuat.");
   
       // Recuperăm documentele din Firestore:
-      const onePersonDocs = await retrieveAnalizeSinastrieOnePersonByPhone();
-      const othersDocs = await retrieveAnalizeSinastrieOthersByPhone();
+      const [onePersonDocs, othersDocs, entitlements] = await Promise.all([
+        retrieveAnalizeSinastrieOnePersonByPhone(),
+        retrieveAnalizeSinastrieOthersByPhone(),
+        retrievePurchaseEntitlementsByContact(),
+      ]);
+
+      const mergedOnePersonDocs = applyEntitlementsToAnalyses(
+        mergeAnalysesById(onePersonDocs, localOnePersonDocs),
+        entitlements
+      );
+      const mergedOthersDocs = applyEntitlementsToAnalyses(
+        mergeAnalysesById(othersDocs, localOtherDocs),
+        entitlements
+      );
   
-      // Filtrăm documentele din onePersonDocs:
-      const filteredOnePersonDocs = Array.isArray(onePersonDocs)
-        ? onePersonDocs.filter(doc => {
-            const synastry = doc?.synastry;
-            if (!synastry) return false;
-            if (synastry.natalWheelChart === null) return false;
-            if (synastry.aspect === null) return false;
-            // Verificăm dacă emotionalCompatibility și mesajul există și dacă mesajul este "Service Unavailable"
-            if (
-              synastry.emotionalCompatibility &&
-              synastry.emotionalCompatibility.message &&
-              synastry.emotionalCompatibility.message === "Service Unavailable"
-            ) {
-              return false;
-            }
-            return true;
-          })
-        : (
-            onePersonDocs?.synastry &&
-            onePersonDocs?.synastry.natalWheelChart !== null &&
-            onePersonDocs?.synastry.aspect !== null &&
-            (
-              !onePersonDocs?.synastry.emotionalCompatibility ||
-              onePersonDocs?.synastry.emotionalCompatibility.message !== "Service Unavailable"
-            )
-            ? [onePersonDocs]
-            : []
-          );
-  
-  // Filtrăm documentele din othersDocs:
-  const filteredOthersDocs = Array.isArray(othersDocs)
-  ? othersDocs.filter(doc => {
-      const synastry = doc?.synastry;
-      if (!synastry) return false;
-      if (synastry.natalWheelChart === null) return false;
-      if (synastry.aspect === null) return false;
-      if (containsServiceUnavailable(synastry)) return false;
-      return true;
-    })
-  : (
-      othersDocs?.synastry &&
-      othersDocs?.synastry.natalWheelChart !== null &&
-      othersDocs?.synastry.aspect !== null &&
-      (!containsServiceUnavailable(othersDocs?.synastry))
-      ? [othersDocs]
-      : []
-    );
+      const filteredOnePersonDocs = mergedOnePersonDocs.filter(
+        shouldDisplaySinastrieAnalysis
+      );
+      const filteredOthersDocs = mergedOthersDocs.filter(
+        shouldDisplaySinastrieAnalysis
+      );
 
       setPersons(filteredOnePersonDocs);
       setOtherPersons(filteredOthersDocs);
     } catch (error) {
       console.error("Eroare la sincronizarea datelor sinastrie:", error);
+      setPersons(localOnePersonDocs.filter(shouldDisplaySinastrieAnalysis));
+      setOtherPersons(localOtherDocs.filter(shouldDisplaySinastrieAnalysis));
     } finally {
       setIsLoading(false);
     }

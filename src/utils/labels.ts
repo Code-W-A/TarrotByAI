@@ -63,6 +63,51 @@ export const langObj = {
     updateYourInformationToReceiveTheMostAccurateAnalyses:
       "Update your information to receive the most accurate analyses",
     update: "Update",
+    contactSupportCta: "Contact support",
+    purchaseSupportTitle: "Purchase support",
+    purchaseSupportIntro:
+      "If you have problems with your purchases, fill in the form below.",
+    settingsSupportButton: "Contact support",
+    settingsSupportModalTitle: "App support",
+    settingsSupportModalIntro:
+      "Describe your issue (account, app, premium, astrology, or purchases). We will reply by email.",
+    purchaseSupportNameField: "Name",
+    purchaseSupportPhoneField: "Phone",
+    purchaseSupportProductField: "Affected product",
+    purchaseSupportProductPlaceholder: "Select a product",
+    purchaseSupportTransactionIdField: "Stripe transaction ID",
+    purchaseSupportAnalysisIdField: "Analysis ID",
+    purchaseSupportErrorRefField: "Error code / reference code",
+    purchaseSupportIssueDescriptionField: "Problem description",
+    purchaseSupportIssueDescriptionPlaceholder:
+      "Describe what happened and what you expected.",
+    purchaseSupportGdprConsent:
+      "I agree that my data may be used to handle this support request.",
+    purchaseSupportSubmit: "Send",
+    purchaseSupportSending: "Sending...",
+    purchaseSupportCancel: "Cancel",
+    purchaseSupportEmailRequired:
+      "Enter an email address so we can reply.",
+    purchaseSupportEmailInvalid: "Enter a valid email address.",
+    purchaseSupportDescriptionRequired:
+      "Describe the problem before sending.",
+    purchaseSupportDescriptionTooShort:
+      "The description must contain at least 10 characters.",
+    purchaseSupportGdprRequired:
+      "You must accept GDPR processing to send the request.",
+    purchaseSupportSuccessTitle: "Request sent",
+    purchaseSupportSuccessMessage:
+      "Your request was sent successfully. Reference code:",
+    purchaseSupportFailureTitle: "Request not sent",
+    purchaseSupportFailureMessage:
+      "We could not send your request. Please email webdynamicx@gmail.com manually.",
+    purchaseSupportProductNatal: "Natal astrogram",
+    purchaseSupportProductOtherNatal: "Natal astrogram for another person",
+    purchaseSupportProductSynastryPersonal: "Personal synastry",
+    purchaseSupportProductSynastryOthers: "Synastry for two other people",
+    purchaseSupportProductDailyHoroscope: "Daily horoscope",
+    purchaseSupportProductPremiumVideoSubscription: "Premium video subscription",
+    purchaseSupportProductOther: "Other",
 
     astrology: "Astrology",
     yourAstrogram: "Your Astrogram",
@@ -271,8 +316,25 @@ export const langObj = {
     premiumPaywallMessage: "This video is available only to subscribers.",
     premiumPaywallCta: "Subscribe",
     premiumPaywallClose: "Not now",
+    premiumPricePerMonth: "/month",
+    premiumBenefitNewVideos: "New videos added frequently",
+    premiumBenefitAllAccess: "Access to all video content",
+    premiumBenefitNoAds: "Ad-free experience",
+    premiumAuthRequiredTitle: "Authentication required",
+    premiumAuthRequiredMessage: "You must be signed in to subscribe and access premium content.",
+    premiumAuthSignIn: "Sign in",
+    checkoutSuccessTitle: "Payment successful!",
+    checkoutSuccessMessage: "Thank you for your subscription! Your premium access is now active.",
+    checkoutActivatedMessage: "Premium access activated! Enjoy your videos.",
+    checkoutActivatingMessage: "Your premium access is being processed. It should be ready within a few minutes.",
+    checkoutActivatingAccess: "Activating access...",
+    checkoutWatchVideo: "Watch the video",
+    checkoutGoToVideos: "Go to videos",
+    checkoutCanceledToast: "Checkout canceled.",
+    checkoutErrorToast: "Checkout failed",
     rewardedUnlockCta: "Watch an ad to unlock",
     videoPlayerBack: "Back",
+    videoPlaybackLanguage: "Playback language",
     videoUnavailableTitle: "Video unavailable",
     videoUnavailableMessage: "We couldn't load the video.",
     videoRetry: "Try again",
@@ -296,6 +358,43 @@ export const langObj = {
     videoFavoritesEmptyTitle: "No favorites",
     videoFavoritesEmptyMessage: "You haven't saved any videos yet.",
     videoFavoritesRetry: "Refresh",
+    checkoutAccessCheckingToast: "Verifying access...",
+    checkoutSuccessToast: "Payment confirmed. Access is updating.",
+    rewardedAdGateTitle: "Premium video",
+    rewardedAdGateMessage:
+      "Watch one short ad to unlock one premium video today, or subscribe for unlimited access without ads.",
+    rewardedAdGateDailyLimitIntro:
+      "You have already used today's free unlock for bonus videos.",
+    rewardedAdGateWatch: "Watch ad to unlock",
+    rewardedAdGateRemainingDaily:
+      "Without a subscription: one bonus video per day unlocked by watching an ad.",
+    rewardedAdGateDailyLimitReached:
+      "Come back tomorrow for another unlock, or subscribe now for unlimited bonus videos without ads on all clips.",
+    rewardedAdGateRemaining:
+      "Premium videos require an ad each time you play (unless you subscribe).",
+    rewardedAdGateNoMore:
+      "Come back anytime with an ad to watch again, or subscribe for full access.",
+    rewardedAdGateSubscribe: "Get premium access",
+    adLoading: "Loading ad…",
+    adSponsored: "Ad",
+    profilePremiumSubscriptionTitle: "Premium subscription",
+    premiumCancelAccessUntilPeriodEnd:
+      "After changes in Stripe, this screen may update after you return or refresh. If you cancel, you keep premium access until the current paid period ends.",
+    settingsPremiumRenewHint: "You don't have an active premium subscription.",
+    settingsPremiumActiveUntil: "Premium is active until %{date}.",
+    settingsPremiumRenewCta: "Subscribe again",
+    settingsPremiumScheduledCancelTitle: "Your subscription will end after the current period",
+    settingsPremiumScheduledCancelBody:
+      "It will not renew automatically. You keep premium access until %{date}. You can turn renewal back on anytime before then.",
+    settingsPremiumReactivateCta: "Reactivate subscription",
+    settingsPremiumOpenBillingPortal: "Open Stripe billing portal",
+    settingsPremiumCanceledAccessUntil:
+      "Your subscription is canceled. Premium access remains until %{date}.",
+    premiumCancelSubscription: "Cancel subscription",
+    premiumManageLoading: "Opening portal…",
+    premiumManageSubscription: "Manage subscription",
+    premiumManageError: "We could not open the billing portal.",
+    premiumManageErrorTitle: "Billing portal",
   },
   ro: {
     slowLoading: "Încărcare lentă..",
@@ -361,12 +460,75 @@ export const langObj = {
     updateYourInformationToReceiveTheMostAccurateAnalyses:
       "Actualizează informațiile tale pentru a primi cele mai precise analize",
     update: "Actualizează",
+    contactSupportCta: "Contactează suport",
+    purchaseSupportTitle: "Suport achiziții",
+    purchaseSupportIntro:
+      "Dacă ai probleme cu achizițiile, completează formularul de mai jos.",
+    settingsSupportButton: "Contactează suportul",
+    settingsSupportModalTitle: "Suport aplicație",
+    settingsSupportModalIntro:
+      "Descrie problema (cont, aplicație, premium, astrologie sau achiziții). Îți răspundem pe email.",
+    purchaseSupportNameField: "Nume",
+    purchaseSupportPhoneField: "Telefon",
+    purchaseSupportProductField: "Produs afectat",
+    purchaseSupportProductPlaceholder: "Selectează un produs",
+    purchaseSupportTransactionIdField: "ID tranzacție Stripe",
+    purchaseSupportAnalysisIdField: "Analysis ID",
+    purchaseSupportErrorRefField: "Cod eroare / cod referință",
+    purchaseSupportIssueDescriptionField: "Descriere problemă",
+    purchaseSupportIssueDescriptionPlaceholder:
+      "Descrie ce s-a întâmplat și ce ar fi trebuit să se întâmple.",
+    purchaseSupportGdprConsent:
+      "Sunt de acord ca datele mele să fie folosite pentru soluționarea acestei cereri de suport.",
+    purchaseSupportSubmit: "Trimite",
+    purchaseSupportSending: "Se trimite...",
+    purchaseSupportCancel: "Anulează",
+    purchaseSupportEmailRequired:
+      "Introdu o adresă de email pentru a putea primi răspuns.",
+    purchaseSupportEmailInvalid: "Introdu o adresă de email validă.",
+    purchaseSupportDescriptionRequired:
+      "Descrie problema înainte de trimitere.",
+    purchaseSupportDescriptionTooShort:
+      "Descrierea trebuie să conțină cel puțin 10 caractere.",
+    purchaseSupportGdprRequired:
+      "Trebuie să accepți prelucrarea GDPR pentru a trimite cererea.",
+    purchaseSupportSuccessTitle: "Cerere trimisă",
+    purchaseSupportSuccessMessage:
+      "Cererea ta a fost trimisă cu succes. Cod de referință:",
+    purchaseSupportFailureTitle: "Cererea nu a fost trimisă",
+    purchaseSupportFailureMessage:
+      "Nu am putut trimite cererea. Te rugăm să scrii manual la webdynamicx@gmail.com.",
+    purchaseSupportProductNatal: "Astrogramă natală",
+    purchaseSupportProductOtherNatal: "Astrogramă natală pentru altă persoană",
+    purchaseSupportProductSynastryPersonal: "Sinastrie personală",
+    purchaseSupportProductSynastryOthers:
+      "Sinastrie pentru alte două persoane",
+    purchaseSupportProductDailyHoroscope: "Horoscop zilnic",
+    purchaseSupportProductPremiumVideoSubscription: "Abonament premium videoclipuri",
+    purchaseSupportProductOther: "Altul",
     premiumPaywallTitle: "Conținut Premium",
     premiumPaywallMessage: "Acest videoclip este disponibil doar pentru abonați.",
     premiumPaywallCta: "Abonează-te",
     premiumPaywallClose: "Nu acum",
+    premiumPricePerMonth: "/lună",
+    premiumBenefitNewVideos: "Videouri noi adăugate frecvent",
+    premiumBenefitAllAccess: "Acces la toate videoclipurile",
+    premiumBenefitNoAds: "Fără reclame",
+    premiumAuthRequiredTitle: "Autentificare necesară",
+    premiumAuthRequiredMessage: "Trebuie să fii autentificat pentru a te abona și a accesa conținutul premium.",
+    premiumAuthSignIn: "Autentifică-te",
+    checkoutSuccessTitle: "Plată reușită!",
+    checkoutSuccessMessage: "Mulțumim pentru abonament! Accesul tău premium este acum activ.",
+    checkoutActivatedMessage: "Acces premium activat! Bucură-te de videoclipuri.",
+    checkoutActivatingMessage: "Accesul premium se procesează. Ar trebui să fie gata în câteva minute.",
+    checkoutActivatingAccess: "Se activează accesul...",
+    checkoutWatchVideo: "Vizionează videoul",
+    checkoutGoToVideos: "Mergi la videoclipuri",
+    checkoutCanceledToast: "Checkout anulat.",
+    checkoutErrorToast: "Checkout eșuat",
     rewardedUnlockCta: "Vezi o reclamă ca să deblochezi",
     videoPlayerBack: "Înapoi",
+    videoPlaybackLanguage: "Limba redării",
     videoUnavailableTitle: "Videoclip indisponibil",
     videoUnavailableMessage: "Nu am putut încărca videoclipul.",
     videoRetry: "Reîncearcă",
@@ -390,6 +552,43 @@ export const langObj = {
     videoFavoritesEmptyTitle: "Niciun favorit",
     videoFavoritesEmptyMessage: "Nu ai salvat încă niciun videoclip.",
     videoFavoritesRetry: "Reîncarcă",
+    checkoutAccessCheckingToast: "Verificăm accesul...",
+    checkoutSuccessToast: "Plata a fost confirmată. Actualizăm accesul.",
+    rewardedAdGateTitle: "Videoclip premium",
+    rewardedAdGateMessage:
+      "Urmărește o reclamă scurtă pentru a debloca un singur videoclip premium astăzi, sau abonează-te pentru acces nelimitat fără reclame.",
+    rewardedAdGateDailyLimitIntro:
+      "Ai folosit deja deblocarea gratuită pentru videoclipurile bonus azi.",
+    rewardedAdGateWatch: "Vezi reclama pentru deblocare",
+    rewardedAdGateRemainingDaily:
+      "Fără abonament: maxim un videoclip bonus pe zi, deblocat cu o reclamă.",
+    rewardedAdGateDailyLimitReached:
+      "Revino mâine pentru o nouă deblocare sau abonează-te acum pentru acces nelimitat la videoclipurile bonus, fără reclame.",
+    rewardedAdGateRemaining:
+      "La fiecare redare a unui videoclip premium e nevoie de reclamă (dacă nu ești abonat).",
+    rewardedAdGateNoMore:
+      "Poți urmări din nou reclama când vrei să vezi videoclipul, sau abonează-te pentru acces complet.",
+    rewardedAdGateSubscribe: "Abonament premium",
+    adLoading: "Se încarcă reclama…",
+    adSponsored: "Reclamă",
+    profilePremiumSubscriptionTitle: "Abonament premium",
+    premiumCancelAccessUntilPeriodEnd:
+      "După modificări în Stripe, această pagină se poate actualiza după ce revii sau reîncarci. Dacă anulezi, păstrezi accesul premium până la sfârșitul perioadei plătite.",
+    settingsPremiumRenewHint: "Nu ai un abonament premium activ.",
+    settingsPremiumActiveUntil: "Premium este activ până la %{date}.",
+    settingsPremiumRenewCta: "Abonează-te din nou",
+    settingsPremiumScheduledCancelTitle: "Abonamentul tău se încheie după perioada curentă",
+    settingsPremiumScheduledCancelBody:
+      "Nu se va reînnoi automat. Păstrezi accesul premium până la %{date}. Poți relua reînnoirea oricând până atunci.",
+    settingsPremiumReactivateCta: "Reactivează abonamentul",
+    settingsPremiumOpenBillingPortal: "Deschide portalul Stripe de facturare",
+    settingsPremiumCanceledAccessUntil:
+      "Abonamentul tău este anulat. Accesul premium rămâne până la %{date}.",
+    premiumCancelSubscription: "Dezactivează abonamentul",
+    premiumManageLoading: "Se deschide portalul…",
+    premiumManageSubscription: "Gestionează abonamentul",
+    premiumManageError: "Nu am putut deschide portalul de facturare.",
+    premiumManageErrorTitle: "Portal facturare",
 
     astrology: "Astrologie",
     yourAstrogram: "Astrograma ta",
@@ -667,6 +866,54 @@ export const langObj = {
     updateYourInformationToReceiveTheMostAccurateAnalyses:
       "Actualiza tu información para recibir los análisis más precisos",
     update: "Actualizar",
+    contactSupportCta: "Contactar soporte",
+    purchaseSupportTitle: "Soporte de compras",
+    purchaseSupportIntro:
+      "Si tienes problemas con tus compras, completa el siguiente formulario.",
+    settingsSupportButton: "Contact support",
+    settingsSupportModalTitle: "App support",
+    settingsSupportModalIntro:
+      "Describe your issue (account, app, premium, astrology, or purchases). We will reply by email.",
+    purchaseSupportNameField: "Nombre",
+    purchaseSupportPhoneField: "Teléfono",
+    purchaseSupportProductField: "Producto afectado",
+    purchaseSupportProductPlaceholder: "Selecciona un producto",
+    purchaseSupportTransactionIdField: "ID de transacción de Stripe",
+    purchaseSupportAnalysisIdField: "ID de análisis",
+    purchaseSupportErrorRefField: "Código de error / código de referencia",
+    purchaseSupportIssueDescriptionField: "Descripción del problema",
+    purchaseSupportIssueDescriptionPlaceholder:
+      "Describe lo que ocurrió y lo que esperabas.",
+    purchaseSupportGdprConsent:
+      "Acepto que mis datos se utilicen para gestionar esta solicitud de soporte.",
+    purchaseSupportSubmit: "Enviar",
+    purchaseSupportSending: "Enviando...",
+    purchaseSupportCancel: "Cancelar",
+    purchaseSupportEmailRequired:
+      "Introduce una dirección de correo para que podamos responder.",
+    purchaseSupportEmailInvalid:
+      "Introduce una dirección de correo válida.",
+    purchaseSupportDescriptionRequired:
+      "Describe el problema antes de enviar.",
+    purchaseSupportDescriptionTooShort:
+      "La descripción debe contener al menos 10 caracteres.",
+    purchaseSupportGdprRequired:
+      "Debes aceptar el tratamiento GDPR para enviar la solicitud.",
+    purchaseSupportSuccessTitle: "Solicitud enviada",
+    purchaseSupportSuccessMessage:
+      "Tu solicitud se envió correctamente. Código de referencia:",
+    purchaseSupportFailureTitle: "Solicitud no enviada",
+    purchaseSupportFailureMessage:
+      "No pudimos enviar tu solicitud. Escribe manualmente a webdynamicx@gmail.com.",
+    purchaseSupportProductNatal: "Astrograma natal",
+    purchaseSupportProductOtherNatal:
+      "Astrograma natal para otra persona",
+    purchaseSupportProductSynastryPersonal: "Sinastría personal",
+    purchaseSupportProductSynastryOthers:
+      "Sinastría para otras dos personas",
+    purchaseSupportProductDailyHoroscope: "Horóscopo diario",
+    purchaseSupportProductPremiumVideoSubscription: "Premium video subscription",
+    purchaseSupportProductOther: "Otro",
 
     astrology: "Astrología",
     yourAstrogram: "Tu Astrograma",
@@ -879,8 +1126,16 @@ export const langObj = {
     premiumPaywallMessage: "Este video está disponible solo para suscriptores.",
     premiumPaywallCta: "Suscribirse",
     premiumPaywallClose: "Ahora no",
+    premiumPricePerMonth: "/mes",
+    premiumBenefitNewVideos: "Nuevos videos añadidos frecuentemente",
+    premiumBenefitAllAccess: "Acceso a todo el contenido de video",
+    premiumBenefitNoAds: "Experiencia sin anuncios",
+    premiumAuthRequiredTitle: "Autenticación necesaria",
+    premiumAuthRequiredMessage: "Debes iniciar sesión para suscribirte y acceder al contenido premium.",
+    premiumAuthSignIn: "Iniciar sesión",
     rewardedUnlockCta: "Ver un anuncio para desbloquear",
     videoPlayerBack: "Volver",
+    videoPlaybackLanguage: "Idioma de reproducción",
     videoUnavailableTitle: "Video no disponible",
     videoUnavailableMessage: "No pudimos cargar el video.",
     videoRetry: "Reintentar",
@@ -904,6 +1159,19 @@ export const langObj = {
     videoFavoritesEmptyTitle: "Sin favoritos",
     videoFavoritesEmptyMessage: "Aún no has guardado ningún video.",
     videoFavoritesRetry: "Reintentar",
+    checkoutAccessCheckingToast: "Verificando acceso...",
+    checkoutSuccessToast: "Pago confirmado. Actualizando acceso.",
+    rewardedAdGateTitle: "Video premium",
+    rewardedAdGateMessage:
+      "Mira un anuncio corto para desbloquear este video una vez gratis hoy, o suscríbete para acceso ilimitado.",
+    rewardedAdGateWatch: "Ver anuncio para desbloquear",
+    rewardedAdGateRemaining:
+      "Cada video premium se puede desbloquear con un anuncio una vez al día.",
+    rewardedAdGateNoMore:
+      "Ya desbloqueaste este video hoy. Vuelve mañana o suscríbete para acceso completo.",
+    rewardedAdGateSubscribe: "Obtener acceso premium",
+    adLoading: "Cargando anuncio…",
+    adSponsored: "Anuncio",
   },
   it: {
     slowLoading: "Caricamento lento..",
@@ -969,6 +1237,53 @@ export const langObj = {
     updateYourInformationToReceiveTheMostAccurateAnalyses:
       "Aggiorna le tue informazioni per ricevere le analisi più accurate",
     update: "Aggiorna",
+    contactSupportCta: "Contatta il supporto",
+    purchaseSupportTitle: "Supporto acquisti",
+    purchaseSupportIntro:
+      "Se hai problemi con i tuoi acquisti, compila il modulo qui sotto.",
+    settingsSupportButton: "Contact support",
+    settingsSupportModalTitle: "App support",
+    settingsSupportModalIntro:
+      "Describe your issue (account, app, premium, astrology, or purchases). We will reply by email.",
+    purchaseSupportNameField: "Nome",
+    purchaseSupportPhoneField: "Telefono",
+    purchaseSupportProductField: "Prodotto interessato",
+    purchaseSupportProductPlaceholder: "Seleziona un prodotto",
+    purchaseSupportTransactionIdField: "ID transazione Stripe",
+    purchaseSupportAnalysisIdField: "ID analisi",
+    purchaseSupportErrorRefField: "Codice errore / codice di riferimento",
+    purchaseSupportIssueDescriptionField: "Descrizione del problema",
+    purchaseSupportIssueDescriptionPlaceholder:
+      "Descrivi cosa è successo e cosa ti aspettavi.",
+    purchaseSupportGdprConsent:
+      "Accetto che i miei dati vengano utilizzati per gestire questa richiesta di supporto.",
+    purchaseSupportSubmit: "Invia",
+    purchaseSupportSending: "Invio in corso...",
+    purchaseSupportCancel: "Annulla",
+    purchaseSupportEmailRequired:
+      "Inserisci un indirizzo email per permetterci di rispondere.",
+    purchaseSupportEmailInvalid: "Inserisci un indirizzo email valido.",
+    purchaseSupportDescriptionRequired:
+      "Descrivi il problema prima dell'invio.",
+    purchaseSupportDescriptionTooShort:
+      "La descrizione deve contenere almeno 10 caratteri.",
+    purchaseSupportGdprRequired:
+      "Devi accettare il trattamento GDPR per inviare la richiesta.",
+    purchaseSupportSuccessTitle: "Richiesta inviata",
+    purchaseSupportSuccessMessage:
+      "La tua richiesta è stata inviata con successo. Codice di riferimento:",
+    purchaseSupportFailureTitle: "Richiesta non inviata",
+    purchaseSupportFailureMessage:
+      "Non siamo riusciti a inviare la richiesta. Scrivi manualmente a webdynamicx@gmail.com.",
+    purchaseSupportProductNatal: "Astrogramma natale",
+    purchaseSupportProductOtherNatal:
+      "Astrogramma natale per un'altra persona",
+    purchaseSupportProductSynastryPersonal: "Sinastria personale",
+    purchaseSupportProductSynastryOthers:
+      "Sinastria per altre due persone",
+    purchaseSupportProductDailyHoroscope: "Oroscopo quotidiano",
+    purchaseSupportProductPremiumVideoSubscription: "Premium video subscription",
+    purchaseSupportProductOther: "Altro",
 
     astrology: "Astrologia",
     yourAstrogram: "Il tuo Astrogramma",
@@ -1148,8 +1463,16 @@ export const langObj = {
     premiumPaywallMessage: "Questo video è disponibile solo per gli abbonati.",
     premiumPaywallCta: "Abbonati",
     premiumPaywallClose: "Non ora",
+    premiumPricePerMonth: "/mese",
+    premiumBenefitNewVideos: "Nuovi video aggiunti frequentemente",
+    premiumBenefitAllAccess: "Accesso a tutti i contenuti video",
+    premiumBenefitNoAds: "Esperienza senza pubblicità",
+    premiumAuthRequiredTitle: "Autenticazione necessaria",
+    premiumAuthRequiredMessage: "Devi effettuare l'accesso per abbonarti e accedere ai contenuti premium.",
+    premiumAuthSignIn: "Accedi",
     rewardedUnlockCta: "Guarda un annuncio per sbloccare",
     videoPlayerBack: "Indietro",
+    videoPlaybackLanguage: "Lingua di riproduzione",
     videoUnavailableTitle: "Video non disponibile",
     videoUnavailableMessage: "Non siamo riusciti a caricare il video.",
     videoRetry: "Riprova",
@@ -1173,6 +1496,19 @@ export const langObj = {
     videoFavoritesEmptyTitle: "Nessun preferito",
     videoFavoritesEmptyMessage: "Non hai ancora salvato alcun video.",
     videoFavoritesRetry: "Ricarica",
+    checkoutAccessCheckingToast: "Verifica dell'accesso...",
+    checkoutSuccessToast: "Pagamento confermato. Aggiornamento accesso.",
+    rewardedAdGateTitle: "Video premium",
+    rewardedAdGateMessage:
+      "Guarda una breve pubblicità per sbloccare oggi questo video una volta gratis, o abbonati per accesso illimitato.",
+    rewardedAdGateWatch: "Guarda l'annuncio per sbloccare",
+    rewardedAdGateRemaining:
+      "Ogni video premium si può sbloccare con una pubblicità una volta al giorno.",
+    rewardedAdGateNoMore:
+      "Hai già sbloccato questo video oggi. Riprova domani o abbonati per l'accesso completo.",
+    rewardedAdGateSubscribe: "Abbonamento premium",
+    adLoading: "Caricamento annuncio…",
+    adSponsored: "Pubblicità",
     
     // Zodiac Signs
     Aries: "Ariete",
@@ -1266,6 +1602,53 @@ export const langObj = {
     updateYourInformationToReceiveTheMostAccurateAnalyses:
       "Aktualizuj swoje informacje, aby otrzymać najdokładniejsze analizy",
     update: "Aktualizuj",
+    contactSupportCta: "Skontaktuj się ze wsparciem",
+    purchaseSupportTitle: "Wsparcie zakupów",
+    purchaseSupportIntro:
+      "Jeśli masz problemy z zakupami, wypełnij poniższy formularz.",
+    settingsSupportButton: "Contact support",
+    settingsSupportModalTitle: "App support",
+    settingsSupportModalIntro:
+      "Describe your issue (account, app, premium, astrology, or purchases). We will reply by email.",
+    purchaseSupportNameField: "Imię i nazwisko",
+    purchaseSupportPhoneField: "Telefon",
+    purchaseSupportProductField: "Produkt, którego dotyczy problem",
+    purchaseSupportProductPlaceholder: "Wybierz produkt",
+    purchaseSupportTransactionIdField: "ID transakcji Stripe",
+    purchaseSupportAnalysisIdField: "ID analizy",
+    purchaseSupportErrorRefField: "Kod błędu / kod referencyjny",
+    purchaseSupportIssueDescriptionField: "Opis problemu",
+    purchaseSupportIssueDescriptionPlaceholder:
+      "Opisz, co się stało i czego oczekiwałeś.",
+    purchaseSupportGdprConsent:
+      "Wyrażam zgodę na wykorzystanie moich danych do obsługi tego zgłoszenia wsparcia.",
+    purchaseSupportSubmit: "Wyślij",
+    purchaseSupportSending: "Wysyłanie...",
+    purchaseSupportCancel: "Anuluj",
+    purchaseSupportEmailRequired:
+      "Podaj adres email, abyśmy mogli odpowiedzieć.",
+    purchaseSupportEmailInvalid: "Podaj prawidłowy adres email.",
+    purchaseSupportDescriptionRequired:
+      "Opisz problem przed wysłaniem.",
+    purchaseSupportDescriptionTooShort:
+      "Opis musi zawierać co najmniej 10 znaków.",
+    purchaseSupportGdprRequired:
+      "Aby wysłać zgłoszenie, musisz zaakceptować przetwarzanie GDPR.",
+    purchaseSupportSuccessTitle: "Zgłoszenie wysłane",
+    purchaseSupportSuccessMessage:
+      "Twoje zgłoszenie zostało wysłane. Kod referencyjny:",
+    purchaseSupportFailureTitle: "Zgłoszenie nie zostało wysłane",
+    purchaseSupportFailureMessage:
+      "Nie udało się wysłać zgłoszenia. Napisz ręcznie na webdynamicx@gmail.com.",
+    purchaseSupportProductNatal: "Astrogram natalny",
+    purchaseSupportProductOtherNatal:
+      "Astrogram natalny dla innej osoby",
+    purchaseSupportProductSynastryPersonal: "Synastria osobista",
+    purchaseSupportProductSynastryOthers:
+      "Synastria dla dwóch innych osób",
+    purchaseSupportProductDailyHoroscope: "Horoskop dzienny",
+    purchaseSupportProductPremiumVideoSubscription: "Premium video subscription",
+    purchaseSupportProductOther: "Inne",
 
     astrology: "Astrologia",
     yourAstrogram: "Twój Astrogram",
@@ -1444,8 +1827,16 @@ export const langObj = {
     premiumPaywallMessage: "Ten film jest dostępny tylko dla subskrybentów.",
     premiumPaywallCta: "Subskrybuj",
     premiumPaywallClose: "Nie teraz",
+    premiumPricePerMonth: "/miesiąc",
+    premiumBenefitNewVideos: "Nowe filmy dodawane regularnie",
+    premiumBenefitAllAccess: "Dostęp do wszystkich treści wideo",
+    premiumBenefitNoAds: "Bez reklam",
+    premiumAuthRequiredTitle: "Wymagane logowanie",
+    premiumAuthRequiredMessage: "Musisz się zalogować, aby subskrybować i uzyskać dostęp do treści premium.",
+    premiumAuthSignIn: "Zaloguj się",
     rewardedUnlockCta: "Obejrzyj reklamę, aby odblokować",
     videoPlayerBack: "Wróć",
+    videoPlaybackLanguage: "Język odtwarzania",
     videoUnavailableTitle: "Film niedostępny",
     videoUnavailableMessage: "Nie mogliśmy wczytać filmu.",
     videoRetry: "Spróbuj ponownie",
@@ -1469,6 +1860,19 @@ export const langObj = {
     videoFavoritesEmptyTitle: "Brak ulubionych",
     videoFavoritesEmptyMessage: "Nie masz jeszcze zapisanych filmów.",
     videoFavoritesRetry: "Odśwież",
+    checkoutAccessCheckingToast: "Sprawdzanie dostępu...",
+    checkoutSuccessToast: "Płatność potwierdzona. Aktualizujemy dostęp.",
+    rewardedAdGateTitle: "Film premium",
+    rewardedAdGateMessage:
+      "Obejrzyj krótką reklamę, aby dziś raz odblokować ten film za darmo, lub wykup subskrypcję z nieograniczonym dostępem.",
+    rewardedAdGateWatch: "Obejrzyj reklamę, by odblokować",
+    rewardedAdGateRemaining:
+      "Każdy film premium można odblokować reklamą raz dziennie.",
+    rewardedAdGateNoMore:
+      "Odblokowałeś już ten film dziś. Wróć jutro lub wykup subskrypcję, by mieć pełny dostęp.",
+    rewardedAdGateSubscribe: "Subskrypcja premium",
+    adLoading: "Ładowanie reklamy…",
+    adSponsored: "Reklama",
     
     // Zodiac Signs
     Aries: "Baran",
@@ -1562,6 +1966,53 @@ export const langObj = {
     updateYourInformationToReceiveTheMostAccurateAnalyses:
       "Актуализирайте вашата информация, за да получите най-точните анализи",
     update: "Актуализирай",
+    contactSupportCta: "Свържи се с поддръжката",
+    purchaseSupportTitle: "Поддръжка за покупки",
+    purchaseSupportIntro:
+      "Ако имате проблеми с покупките си, попълнете формуляра по-долу.",
+    settingsSupportButton: "Contact support",
+    settingsSupportModalTitle: "App support",
+    settingsSupportModalIntro:
+      "Describe your issue (account, app, premium, astrology, or purchases). We will reply by email.",
+    purchaseSupportNameField: "Име",
+    purchaseSupportPhoneField: "Телефон",
+    purchaseSupportProductField: "Засегнат продукт",
+    purchaseSupportProductPlaceholder: "Изберете продукт",
+    purchaseSupportTransactionIdField: "ID на Stripe транзакция",
+    purchaseSupportAnalysisIdField: "ID на анализ",
+    purchaseSupportErrorRefField: "Код за грешка / референтен код",
+    purchaseSupportIssueDescriptionField: "Описание на проблема",
+    purchaseSupportIssueDescriptionPlaceholder:
+      "Опишете какво се е случило и какво сте очаквали.",
+    purchaseSupportGdprConsent:
+      "Съгласен съм данните ми да бъдат използвани за обработка на тази заявка за поддръжка.",
+    purchaseSupportSubmit: "Изпрати",
+    purchaseSupportSending: "Изпращане...",
+    purchaseSupportCancel: "Отказ",
+    purchaseSupportEmailRequired:
+      "Въведете имейл адрес, за да можем да отговорим.",
+    purchaseSupportEmailInvalid: "Въведете валиден имейл адрес.",
+    purchaseSupportDescriptionRequired:
+      "Опишете проблема преди изпращане.",
+    purchaseSupportDescriptionTooShort:
+      "Описанието трябва да съдържа поне 10 знака.",
+    purchaseSupportGdprRequired:
+      "Трябва да приемете GDPR обработката, за да изпратите заявката.",
+    purchaseSupportSuccessTitle: "Заявката е изпратена",
+    purchaseSupportSuccessMessage:
+      "Вашата заявка беше изпратена успешно. Референтен код:",
+    purchaseSupportFailureTitle: "Заявката не е изпратена",
+    purchaseSupportFailureMessage:
+      "Не успяхме да изпратим заявката. Моля, пишете ръчно на webdynamicx@gmail.com.",
+    purchaseSupportProductNatal: "Натална астрограма",
+    purchaseSupportProductOtherNatal:
+      "Натална астрограма за друг човек",
+    purchaseSupportProductSynastryPersonal: "Лична синастрия",
+    purchaseSupportProductSynastryOthers:
+      "Синастрия за други двама души",
+    purchaseSupportProductDailyHoroscope: "Дневен хороскоп",
+    purchaseSupportProductPremiumVideoSubscription: "Premium video subscription",
+    purchaseSupportProductOther: "Друго",
 
     astrology: "Астрология",
     yourAstrogram: "Твоят Астрограм",
@@ -1738,8 +2189,16 @@ export const langObj = {
     premiumPaywallMessage: "Това видео е достъпно само за абонати.",
     premiumPaywallCta: "Абонирай се",
     premiumPaywallClose: "Не сега",
+    premiumPricePerMonth: "/месец",
+    premiumBenefitNewVideos: "Нови видеа се добавят редовно",
+    premiumBenefitAllAccess: "Достъп до цялото видео съдържание",
+    premiumBenefitNoAds: "Без реклами",
+    premiumAuthRequiredTitle: "Необходима е автентификация",
+    premiumAuthRequiredMessage: "Трябва да влезете в акаунта си, за да се абонирате и получите достъп до премиум съдържание.",
+    premiumAuthSignIn: "Вход",
     rewardedUnlockCta: "Гледай реклама, за да отключиш",
     videoPlayerBack: "Назад",
+    videoPlaybackLanguage: "Език на възпроизвеждане",
     videoUnavailableTitle: "Видеото не е налично",
     videoUnavailableMessage: "Не успяхме да заредим видеото.",
     videoRetry: "Опитай отново",
@@ -1763,6 +2222,19 @@ export const langObj = {
     videoFavoritesEmptyTitle: "Няма любими",
     videoFavoritesEmptyMessage: "Още нямаш запазени видеа.",
     videoFavoritesRetry: "Презареди",
+    checkoutAccessCheckingToast: "Проверка на достъпа...",
+    checkoutSuccessToast: "Плащането е потвърдено. Актуализираме достъпа.",
+    rewardedAdGateTitle: "Премиум видео",
+    rewardedAdGateMessage:
+      "Гледайте кратка реклама, за да отключите това видео веднъж безплатно днес, или се абонирайте за неограничен достъп.",
+    rewardedAdGateWatch: "Гледай реклама за отключване",
+    rewardedAdGateRemaining:
+      "Всяко премиум видео може да се отключи с една реклама веднъж дневно.",
+    rewardedAdGateNoMore:
+      "Вече отключихте това видео днес. Върнете се утре или се абонирайте за пълен достъп.",
+    rewardedAdGateSubscribe: "Премиум абонамент",
+    adLoading: "Зареждане на реклама…",
+    adSponsored: "Реклама",
     
     // Zodiac Signs
     Aries: "Овен",
@@ -1855,6 +2327,53 @@ export const langObj = {
     updateYourInformationToReceiveTheMostAccurateAnalyses:
       "Aktualizujte své informace, aby jste obdrželi nejpřesnější analýzy",
     update: "Aktualizovat",
+    contactSupportCta: "Kontaktovat podporu",
+    purchaseSupportTitle: "Podpora nákupů",
+    purchaseSupportIntro:
+      "Pokud máte problémy s nákupy, vyplňte prosím formulář níže.",
+    settingsSupportButton: "Contact support",
+    settingsSupportModalTitle: "App support",
+    settingsSupportModalIntro:
+      "Describe your issue (account, app, premium, astrology, or purchases). We will reply by email.",
+    purchaseSupportNameField: "Jméno",
+    purchaseSupportPhoneField: "Telefon",
+    purchaseSupportProductField: "Dotčený produkt",
+    purchaseSupportProductPlaceholder: "Vyberte produkt",
+    purchaseSupportTransactionIdField: "ID transakce Stripe",
+    purchaseSupportAnalysisIdField: "ID analýzy",
+    purchaseSupportErrorRefField: "Kód chyby / referenční kód",
+    purchaseSupportIssueDescriptionField: "Popis problému",
+    purchaseSupportIssueDescriptionPlaceholder:
+      "Popište, co se stalo a co jste očekávali.",
+    purchaseSupportGdprConsent:
+      "Souhlasím s tím, aby byla moje data použita ke zpracování této žádosti o podporu.",
+    purchaseSupportSubmit: "Odeslat",
+    purchaseSupportSending: "Odesílání...",
+    purchaseSupportCancel: "Zrušit",
+    purchaseSupportEmailRequired:
+      "Zadejte e-mailovou adresu, abychom mohli odpovědět.",
+    purchaseSupportEmailInvalid: "Zadejte platnou e-mailovou adresu.",
+    purchaseSupportDescriptionRequired:
+      "Před odesláním popište problém.",
+    purchaseSupportDescriptionTooShort:
+      "Popis musí obsahovat alespoň 10 znaků.",
+    purchaseSupportGdprRequired:
+      "Pro odeslání žádosti musíte souhlasit se zpracováním GDPR.",
+    purchaseSupportSuccessTitle: "Žádost odeslána",
+    purchaseSupportSuccessMessage:
+      "Vaše žádost byla úspěšně odeslána. Referenční kód:",
+    purchaseSupportFailureTitle: "Žádost nebyla odeslána",
+    purchaseSupportFailureMessage:
+      "Nepodařilo se nám žádost odeslat. Napište prosím ručně na webdynamicx@gmail.com.",
+    purchaseSupportProductNatal: "Nativní astrogram",
+    purchaseSupportProductOtherNatal:
+      "Nativní astrogram pro jinou osobu",
+    purchaseSupportProductSynastryPersonal: "Osobní synastrie",
+    purchaseSupportProductSynastryOthers:
+      "Synastrie pro další dvě osoby",
+    purchaseSupportProductDailyHoroscope: "Denní horoskop",
+    purchaseSupportProductPremiumVideoSubscription: "Premium video subscription",
+    purchaseSupportProductOther: "Jiné",
 
     astrology: "Astrologie",
     yourAstrogram: "Tvůj Astrogram",
@@ -2032,8 +2551,16 @@ export const langObj = {
     premiumPaywallMessage: "Toto video je dostupné pouze pro předplatitele.",
     premiumPaywallCta: "Předplatit",
     premiumPaywallClose: "Teď ne",
+    premiumPricePerMonth: "/měsíc",
+    premiumBenefitNewVideos: "Nová videa přidávána pravidelně",
+    premiumBenefitAllAccess: "Přístup ke všemu video obsahu",
+    premiumBenefitNoAds: "Bez reklam",
+    premiumAuthRequiredTitle: "Vyžadováno přihlášení",
+    premiumAuthRequiredMessage: "Pro předplacení a přístup k prémiovému obsahu se musíte přihlásit.",
+    premiumAuthSignIn: "Přihlásit se",
     rewardedUnlockCta: "Podívej se na reklamu pro odemknutí",
     videoPlayerBack: "Zpět",
+    videoPlaybackLanguage: "Jazyk přehrávání",
     videoUnavailableTitle: "Video není k dispozici",
     videoUnavailableMessage: "Nepodařilo se načíst video.",
     videoRetry: "Zkusit znovu",
@@ -2057,6 +2584,19 @@ export const langObj = {
     videoFavoritesEmptyTitle: "Žádné oblíbené",
     videoFavoritesEmptyMessage: "Zatím nemáš uložená videa.",
     videoFavoritesRetry: "Obnovit",
+    checkoutAccessCheckingToast: "Ověřování přístupu...",
+    checkoutSuccessToast: "Platba potvrzena. Aktualizujeme přístup.",
+    rewardedAdGateTitle: "Prémiové video",
+    rewardedAdGateMessage:
+      "Pusťte si krátkou reklamu a dnes jednou zdarma odemkněte toto video, nebo si předplaťte neomezený přístup.",
+    rewardedAdGateWatch: "Přehrát reklamu pro odemčení",
+    rewardedAdGateRemaining:
+      "Každé prémiové video lze odemknout jednou denně pomocí reklamy.",
+    rewardedAdGateNoMore:
+      "Toto video jste dnes už odemkli. Zkuste to zítra nebo si předplaťte plný přístup.",
+    rewardedAdGateSubscribe: "Prémiové předplatné",
+    adLoading: "Načítání reklamy…",
+    adSponsored: "Reklama",
     
     // Zodiac Signs
     Aries: "Beran",
@@ -2150,6 +2690,53 @@ export const langObj = {
     updateYourInformationToReceiveTheMostAccurateAnalyses:
       "Aktualisieren Sie Ihre Informationen, um die genauesten Analysen zu erhalten",
     update: "Aktualisieren",
+    contactSupportCta: "Support kontaktieren",
+    purchaseSupportTitle: "Kauf-Support",
+    purchaseSupportIntro:
+      "Wenn du Probleme mit deinen Käufen hast, fülle bitte das folgende Formular aus.",
+    settingsSupportButton: "Contact support",
+    settingsSupportModalTitle: "App support",
+    settingsSupportModalIntro:
+      "Describe your issue (account, app, premium, astrology, or purchases). We will reply by email.",
+    purchaseSupportNameField: "Name",
+    purchaseSupportPhoneField: "Telefon",
+    purchaseSupportProductField: "Betroffenes Produkt",
+    purchaseSupportProductPlaceholder: "Produkt auswählen",
+    purchaseSupportTransactionIdField: "Stripe-Transaktions-ID",
+    purchaseSupportAnalysisIdField: "Analyse-ID",
+    purchaseSupportErrorRefField: "Fehlercode / Referenzcode",
+    purchaseSupportIssueDescriptionField: "Problembeschreibung",
+    purchaseSupportIssueDescriptionPlaceholder:
+      "Beschreibe, was passiert ist und was du erwartet hast.",
+    purchaseSupportGdprConsent:
+      "Ich stimme zu, dass meine Daten zur Bearbeitung dieser Supportanfrage verwendet werden dürfen.",
+    purchaseSupportSubmit: "Senden",
+    purchaseSupportSending: "Wird gesendet...",
+    purchaseSupportCancel: "Abbrechen",
+    purchaseSupportEmailRequired:
+      "Gib eine E-Mail-Adresse ein, damit wir antworten können.",
+    purchaseSupportEmailInvalid: "Gib eine gültige E-Mail-Adresse ein.",
+    purchaseSupportDescriptionRequired:
+      "Beschreibe das Problem vor dem Senden.",
+    purchaseSupportDescriptionTooShort:
+      "Die Beschreibung muss mindestens 10 Zeichen enthalten.",
+    purchaseSupportGdprRequired:
+      "Du musst der GDPR-Verarbeitung zustimmen, um die Anfrage zu senden.",
+    purchaseSupportSuccessTitle: "Anfrage gesendet",
+    purchaseSupportSuccessMessage:
+      "Deine Anfrage wurde erfolgreich gesendet. Referenzcode:",
+    purchaseSupportFailureTitle: "Anfrage nicht gesendet",
+    purchaseSupportFailureMessage:
+      "Wir konnten deine Anfrage nicht senden. Bitte schreibe manuell an webdynamicx@gmail.com.",
+    purchaseSupportProductNatal: "Geburts-Astrogramm",
+    purchaseSupportProductOtherNatal:
+      "Geburts-Astrogramm für eine andere Person",
+    purchaseSupportProductSynastryPersonal: "Persönliche Synastrie",
+    purchaseSupportProductSynastryOthers:
+      "Synastrie für zwei andere Personen",
+    purchaseSupportProductDailyHoroscope: "Tageshoroskop",
+    purchaseSupportProductPremiumVideoSubscription: "Premium video subscription",
+    purchaseSupportProductOther: "Andere",
 
     astrology: "Astrologie",
     yourAstrogram: "Dein Astrogramm",
@@ -2330,8 +2917,16 @@ export const langObj = {
     premiumPaywallMessage: "Dieses Video ist nur für Abonnenten verfügbar.",
     premiumPaywallCta: "Abonnieren",
     premiumPaywallClose: "Nicht jetzt",
+    premiumPricePerMonth: "/Monat",
+    premiumBenefitNewVideos: "Regelmäßig neue Videos",
+    premiumBenefitAllAccess: "Zugang zu allen Videoinhalten",
+    premiumBenefitNoAds: "Werbefrei",
+    premiumAuthRequiredTitle: "Anmeldung erforderlich",
+    premiumAuthRequiredMessage: "Du musst angemeldet sein, um ein Abo abzuschließen und auf Premium-Inhalte zuzugreifen.",
+    premiumAuthSignIn: "Anmelden",
     rewardedUnlockCta: "Werbung ansehen, um zu entsperren",
     videoPlayerBack: "Zurück",
+    videoPlaybackLanguage: "Wiedergabesprache",
     videoUnavailableTitle: "Video nicht verfügbar",
     videoUnavailableMessage: "Das Video konnte nicht geladen werden.",
     videoRetry: "Nochmals versuchen",
@@ -2355,6 +2950,19 @@ export const langObj = {
     videoFavoritesEmptyTitle: "Keine Favoriten",
     videoFavoritesEmptyMessage: "Du hast noch keine Videos gespeichert.",
     videoFavoritesRetry: "Aktualisieren",
+    checkoutAccessCheckingToast: "Zugriff wird geprüft...",
+    checkoutSuccessToast: "Zahlung bestätigt. Zugriff wird aktualisiert.",
+    rewardedAdGateTitle: "Premium-Video",
+    rewardedAdGateMessage:
+      "Sieh dir eine kurze Werbung an, um dieses Video heute einmal kostenlos freizuschalten, oder abonniere für unbegrenzten Zugang.",
+    rewardedAdGateWatch: "Werbung ansehen zum Freischalten",
+    rewardedAdGateRemaining:
+      "Jedes Premium-Video kann einmal pro Tag per Werbung freigeschaltet werden.",
+    rewardedAdGateNoMore:
+      "Du hast dieses Video heute bereits freigeschaltet. Komm morgen wieder oder abonniere für vollen Zugang.",
+    rewardedAdGateSubscribe: "Premium-Abo",
+    adLoading: "Werbung wird geladen…",
+    adSponsored: "Anzeige",
     
     // Zodiac Signs
     Aries: "Widder",
@@ -2448,6 +3056,54 @@ export const langObj = {
     updateYourInformationToReceiveTheMostAccurateAnalyses:
       "Ενημερώστε τις πληροφορίες σας για να λάβετε τις πιο ακριβείς αναλύσεις",
     update: "Ενημέρωση",
+    contactSupportCta: "Επικοινωνία με υποστήριξη",
+    purchaseSupportTitle: "Υποστήριξη αγορών",
+    purchaseSupportIntro:
+      "Αν έχετε προβλήματα με τις αγορές σας, συμπληρώστε την παρακάτω φόρμα.",
+    settingsSupportButton: "Contact support",
+    settingsSupportModalTitle: "App support",
+    settingsSupportModalIntro:
+      "Describe your issue (account, app, premium, astrology, or purchases). We will reply by email.",
+    purchaseSupportNameField: "Όνομα",
+    purchaseSupportPhoneField: "Τηλέφωνο",
+    purchaseSupportProductField: "Προϊόν που επηρεάζεται",
+    purchaseSupportProductPlaceholder: "Επιλέξτε προϊόν",
+    purchaseSupportTransactionIdField: "ID συναλλαγής Stripe",
+    purchaseSupportAnalysisIdField: "ID ανάλυσης",
+    purchaseSupportErrorRefField: "Κωδικός σφάλματος / κωδικός αναφοράς",
+    purchaseSupportIssueDescriptionField: "Περιγραφή προβλήματος",
+    purchaseSupportIssueDescriptionPlaceholder:
+      "Περιγράψτε τι συνέβη και τι περιμένατε.",
+    purchaseSupportGdprConsent:
+      "Συμφωνώ τα δεδομένα μου να χρησιμοποιηθούν για τη διαχείριση αυτού του αιτήματος υποστήριξης.",
+    purchaseSupportSubmit: "Αποστολή",
+    purchaseSupportSending: "Αποστολή...",
+    purchaseSupportCancel: "Ακύρωση",
+    purchaseSupportEmailRequired:
+      "Εισάγετε μια διεύθυνση email ώστε να μπορέσουμε να απαντήσουμε.",
+    purchaseSupportEmailInvalid:
+      "Εισάγετε μια έγκυρη διεύθυνση email.",
+    purchaseSupportDescriptionRequired:
+      "Περιγράψτε το πρόβλημα πριν από την αποστολή.",
+    purchaseSupportDescriptionTooShort:
+      "Η περιγραφή πρέπει να περιέχει τουλάχιστον 10 χαρακτήρες.",
+    purchaseSupportGdprRequired:
+      "Πρέπει να αποδεχτείτε την επεξεργασία GDPR για να στείλετε το αίτημα.",
+    purchaseSupportSuccessTitle: "Το αίτημα στάλθηκε",
+    purchaseSupportSuccessMessage:
+      "Το αίτημά σας στάλθηκε με επιτυχία. Κωδικός αναφοράς:",
+    purchaseSupportFailureTitle: "Το αίτημα δεν στάλθηκε",
+    purchaseSupportFailureMessage:
+      "Δεν μπορέσαμε να στείλουμε το αίτημά σας. Γράψτε χειροκίνητα στο webdynamicx@gmail.com.",
+    purchaseSupportProductNatal: "Γενέθλιο αστρογράφημα",
+    purchaseSupportProductOtherNatal:
+      "Γενέθλιο αστρογράφημα για άλλο άτομο",
+    purchaseSupportProductSynastryPersonal: "Προσωπική συναστρία",
+    purchaseSupportProductSynastryOthers:
+      "Συναστρία για άλλα δύο άτομα",
+    purchaseSupportProductDailyHoroscope: "Ημερήσιο ωροσκόπιο",
+    purchaseSupportProductPremiumVideoSubscription: "Premium video subscription",
+    purchaseSupportProductOther: "Άλλο",
 
     astrology: "Αστρολογία",
     yourAstrogram: "Το Αστρογράμμα σου",
@@ -2627,8 +3283,16 @@ export const langObj = {
     premiumPaywallMessage: "Αυτό το βίντεο είναι διαθέσιμο μόνο για συνδρομητές.",
     premiumPaywallCta: "Εγγραφή",
     premiumPaywallClose: "Όχι τώρα",
+    premiumPricePerMonth: "/μήνα",
+    premiumBenefitNewVideos: "Νέα βίντεο προστίθενται συχνά",
+    premiumBenefitAllAccess: "Πρόσβαση σε όλο το περιεχόμενο βίντεο",
+    premiumBenefitNoAds: "Χωρίς διαφημίσεις",
+    premiumAuthRequiredTitle: "Απαιτείται σύνδεση",
+    premiumAuthRequiredMessage: "Πρέπει να συνδεθείτε για να εγγραφείτε και να αποκτήσετε πρόσβαση στο premium περιεχόμενο.",
+    premiumAuthSignIn: "Σύνδεση",
     rewardedUnlockCta: "Δες μια διαφήμιση για ξεκλείδωμα",
     videoPlayerBack: "Πίσω",
+    videoPlaybackLanguage: "Γλώσσα αναπαραγωγής",
     videoUnavailableTitle: "Το βίντεο δεν είναι διαθέσιμο",
     videoUnavailableMessage: "Δεν μπορέσαμε να φορτώσουμε το βίντεο.",
     videoRetry: "Δοκιμάστε ξανά",
@@ -2652,6 +3316,19 @@ export const langObj = {
     videoFavoritesEmptyTitle: "Χωρίς αγαπημένα",
     videoFavoritesEmptyMessage: "Δεν έχεις αποθηκεύσει ακόμα βίντεο.",
     videoFavoritesRetry: "Ανανέωση",
+    checkoutAccessCheckingToast: "Έλεγχος πρόσβασης...",
+    checkoutSuccessToast: "Η πληρωμή επιβεβαιώθηκε. Ενημερώνουμε την πρόσβαση.",
+    rewardedAdGateTitle: "Premium βίντεο",
+    rewardedAdGateMessage:
+      "Δείτε μια σύντομη διαφήμιση για να ξεκλειδώσετε σήμερα δωρεάν αυτό το βίντεο μία φορά, ή εγγραφείτε για απεριόριστη πρόσβαση.",
+    rewardedAdGateWatch: "Δείτε διαφήμιση για ξεκλείδωμα",
+    rewardedAdGateRemaining:
+      "Κάθε premium βίντεο ξεκλειδώνεται με μία διαφήμιση μία φορά την ημέρα.",
+    rewardedAdGateNoMore:
+      "Έχετε ήδη ξεκλειδώσει αυτό το βίντεο σήμερα. Επιστρέψτε αύριο ή εγγραφείτε για πλήρη πρόσβαση.",
+    rewardedAdGateSubscribe: "Συνδρομή premium",
+    adLoading: "Φόρτωση διαφήμισης…",
+    adSponsored: "Διαφήμιση",
     
     // Zodiac Signs
     Aries: "Κριός",
@@ -2745,6 +3422,53 @@ export const langObj = {
     updateYourInformationToReceiveTheMostAccurateAnalyses:
       "Mettez à jour vos informations pour recevoir les analyses les plus précises",
     update: "Mettre à jour",
+    contactSupportCta: "Contacter le support",
+    purchaseSupportTitle: "Support achats",
+    purchaseSupportIntro:
+      "Si vous avez des problèmes avec vos achats, remplissez le formulaire ci-dessous.",
+    settingsSupportButton: "Contact support",
+    settingsSupportModalTitle: "App support",
+    settingsSupportModalIntro:
+      "Describe your issue (account, app, premium, astrology, or purchases). We will reply by email.",
+    purchaseSupportNameField: "Nom",
+    purchaseSupportPhoneField: "Téléphone",
+    purchaseSupportProductField: "Produit concerné",
+    purchaseSupportProductPlaceholder: "Sélectionnez un produit",
+    purchaseSupportTransactionIdField: "ID de transaction Stripe",
+    purchaseSupportAnalysisIdField: "ID d'analyse",
+    purchaseSupportErrorRefField: "Code d'erreur / code de référence",
+    purchaseSupportIssueDescriptionField: "Description du problème",
+    purchaseSupportIssueDescriptionPlaceholder:
+      "Décrivez ce qui s'est passé et ce que vous attendiez.",
+    purchaseSupportGdprConsent:
+      "J'accepte que mes données soient utilisées pour traiter cette demande de support.",
+    purchaseSupportSubmit: "Envoyer",
+    purchaseSupportSending: "Envoi...",
+    purchaseSupportCancel: "Annuler",
+    purchaseSupportEmailRequired:
+      "Saisissez une adresse email afin que nous puissions répondre.",
+    purchaseSupportEmailInvalid: "Saisissez une adresse email valide.",
+    purchaseSupportDescriptionRequired:
+      "Décrivez le problème avant l'envoi.",
+    purchaseSupportDescriptionTooShort:
+      "La description doit contenir au moins 10 caractères.",
+    purchaseSupportGdprRequired:
+      "Vous devez accepter le traitement GDPR pour envoyer la demande.",
+    purchaseSupportSuccessTitle: "Demande envoyée",
+    purchaseSupportSuccessMessage:
+      "Votre demande a été envoyée avec succès. Code de référence :",
+    purchaseSupportFailureTitle: "Demande non envoyée",
+    purchaseSupportFailureMessage:
+      "Nous n'avons pas pu envoyer votre demande. Écrivez manuellement à webdynamicx@gmail.com.",
+    purchaseSupportProductNatal: "Astrogramme natal",
+    purchaseSupportProductOtherNatal:
+      "Astrogramme natal pour une autre personne",
+    purchaseSupportProductSynastryPersonal: "Synastrie personnelle",
+    purchaseSupportProductSynastryOthers:
+      "Synastrie pour deux autres personnes",
+    purchaseSupportProductDailyHoroscope: "Horoscope quotidien",
+    purchaseSupportProductPremiumVideoSubscription: "Premium video subscription",
+    purchaseSupportProductOther: "Autre",
 
     astrology: "Astrologie",
     yourAstrogram: "Votre Astrogramme",
@@ -2923,8 +3647,16 @@ export const langObj = {
     premiumPaywallMessage: "Cette vidéo est disponible uniquement pour les abonnés.",
     premiumPaywallCta: "S’abonner",
     premiumPaywallClose: "Pas maintenant",
+    premiumPricePerMonth: "/mois",
+    premiumBenefitNewVideos: "Nouvelles vidéos ajoutées régulièrement",
+    premiumBenefitAllAccess: "Accès à tout le contenu vidéo",
+    premiumBenefitNoAds: "Sans publicité",
+    premiumAuthRequiredTitle: "Connexion requise",
+    premiumAuthRequiredMessage: "Vous devez être connecté pour vous abonner et accéder au contenu premium.",
+    premiumAuthSignIn: "Se connecter",
     rewardedUnlockCta: "Regardez une publicité pour déverrouiller",
     videoPlayerBack: "Retour",
+    videoPlaybackLanguage: "Langue de lecture",
     videoUnavailableTitle: "Vidéo indisponible",
     videoUnavailableMessage: "Impossible de charger la vidéo.",
     videoRetry: "Réessayer",
@@ -2948,6 +3680,19 @@ export const langObj = {
     videoFavoritesEmptyTitle: "Aucun favori",
     videoFavoritesEmptyMessage: "Vous n'avez pas encore enregistré de vidéos.",
     videoFavoritesRetry: "Actualiser",
+    checkoutAccessCheckingToast: "Vérification de l'accès...",
+    checkoutSuccessToast: "Paiement confirmé. Mise à jour de l'accès.",
+    rewardedAdGateTitle: "Vidéo premium",
+    rewardedAdGateMessage:
+      "Regardez une courte publicité pour déverrouiller cette vidéo une fois gratuitement aujourd'hui, ou abonnez-vous pour un accès illimité.",
+    rewardedAdGateWatch: "Voir la pub pour déverrouiller",
+    rewardedAdGateRemaining:
+      "Chaque vidéo premium peut être déverrouillée avec une pub une fois par jour.",
+    rewardedAdGateNoMore:
+      "Vous avez déjà déverrouillé cette vidéo aujourd'hui. Revenez demain ou abonnez-vous pour un accès complet.",
+    rewardedAdGateSubscribe: "Abonnement premium",
+    adLoading: "Chargement de la publicité…",
+    adSponsored: "Publicité",
     
     // Zodiac Signs
     Aries: "Bélier",
@@ -3040,6 +3785,53 @@ export const langObj = {
     updateYourInformationToReceiveTheMostAccurateAnalyses:
       "सबसे सटीक विश्लेषण प्राप्त करने के लिए अपनी जानकारी अपडेट करें",
     update: "अपडेट करें",
+    contactSupportCta: "सपोर्ट से संपर्क करें",
+    purchaseSupportTitle: "खरीद सहायता",
+    purchaseSupportIntro:
+      "अगर आपकी खरीद से जुड़ी कोई समस्या है, तो नीचे दिया गया फ़ॉर्म भरें।",
+    settingsSupportButton: "Contact support",
+    settingsSupportModalTitle: "App support",
+    settingsSupportModalIntro:
+      "Describe your issue (account, app, premium, astrology, or purchases). We will reply by email.",
+    purchaseSupportNameField: "नाम",
+    purchaseSupportPhoneField: "फ़ोन",
+    purchaseSupportProductField: "प्रभावित उत्पाद",
+    purchaseSupportProductPlaceholder: "उत्पाद चुनें",
+    purchaseSupportTransactionIdField: "Stripe ट्रांज़ैक्शन आईडी",
+    purchaseSupportAnalysisIdField: "Analysis ID",
+    purchaseSupportErrorRefField: "एरर कोड / रेफ़रेंस कोड",
+    purchaseSupportIssueDescriptionField: "समस्या का विवरण",
+    purchaseSupportIssueDescriptionPlaceholder:
+      "बताएं क्या हुआ और आप क्या अपेक्षा कर रहे थे।",
+    purchaseSupportGdprConsent:
+      "मैं सहमत हूं कि इस सहायता अनुरोध को संभालने के लिए मेरे डेटा का उपयोग किया जा सकता है।",
+    purchaseSupportSubmit: "भेजें",
+    purchaseSupportSending: "भेजा जा रहा है...",
+    purchaseSupportCancel: "रद्द करें",
+    purchaseSupportEmailRequired:
+      "कृपया ईमेल पता दर्ज करें ताकि हम जवाब दे सकें।",
+    purchaseSupportEmailInvalid: "कृपया मान्य ईमेल पता दर्ज करें।",
+    purchaseSupportDescriptionRequired:
+      "भेजने से पहले समस्या का विवरण लिखें।",
+    purchaseSupportDescriptionTooShort:
+      "विवरण में कम से कम 10 अक्षर होने चाहिए।",
+    purchaseSupportGdprRequired:
+      "अनुरोध भेजने के लिए आपको GDPR प्रोसेसिंग स्वीकार करनी होगी।",
+    purchaseSupportSuccessTitle: "अनुरोध भेज दिया गया",
+    purchaseSupportSuccessMessage:
+      "आपका अनुरोध सफलतापूर्वक भेज दिया गया। रेफ़रेंस कोड:",
+    purchaseSupportFailureTitle: "अनुरोध नहीं भेजा गया",
+    purchaseSupportFailureMessage:
+      "हम आपका अनुरोध नहीं भेज सके। कृपया webdynamicx@gmail.com पर मैन्युअली लिखें।",
+    purchaseSupportProductNatal: "नैटल एस्ट्रोग्राम",
+    purchaseSupportProductOtherNatal:
+      "किसी अन्य व्यक्ति के लिए नैटल एस्ट्रोग्राम",
+    purchaseSupportProductSynastryPersonal: "पर्सनल सिनैस्ट्री",
+    purchaseSupportProductSynastryOthers:
+      "अन्य दो लोगों के लिए सिनैस्ट्री",
+    purchaseSupportProductDailyHoroscope: "दैनिक राशिफल",
+    purchaseSupportProductPremiumVideoSubscription: "Premium video subscription",
+    purchaseSupportProductOther: "अन्य",
 
     astrology: "ज्योतिष",
     yourAstrogram: "आपका एस्ट्रोग्राम",
@@ -3214,8 +4006,16 @@ export const langObj = {
     premiumPaywallMessage: "यह वीडियो केवल सब्सक्राइबर के लिए उपलब्ध है।",
     premiumPaywallCta: "सब्सक्राइब करें",
     premiumPaywallClose: "अभी नहीं",
+    premiumPricePerMonth: "/महीना",
+    premiumBenefitNewVideos: "नए वीडियो नियमित रूप से जोड़े जाते हैं",
+    premiumBenefitAllAccess: "सभी वीडियो सामग्री तक पहुंच",
+    premiumBenefitNoAds: "विज्ञापन-मुक्त अनुभव",
+    premiumAuthRequiredTitle: "प्रमाणीकरण आवश्यक",
+    premiumAuthRequiredMessage: "सब्सक्राइब करने और प्रीमियम सामग्री तक पहुंचने के लिए आपको साइन इन करना होगा।",
+    premiumAuthSignIn: "साइन इन करें",
     rewardedUnlockCta: "अनलॉक करने के लिए विज्ञापन देखें",
     videoPlayerBack: "वापस",
+    videoPlaybackLanguage: "प्लेबैक भाषा",
     videoUnavailableTitle: "वीडियो उपलब्ध नहीं है",
     videoUnavailableMessage: "हम वीडियो लोड नहीं कर सके।",
     videoRetry: "फिर से कोशिश करें",
@@ -3239,6 +4039,19 @@ export const langObj = {
     videoFavoritesEmptyTitle: "कोई पसंदीदा नहीं",
     videoFavoritesEmptyMessage: "आपने अभी तक कोई वीडियो सेव नहीं किया है।",
     videoFavoritesRetry: "रीफ्रेश",
+    checkoutAccessCheckingToast: "पहुँच जाँची जा रही है...",
+    checkoutSuccessToast: "भुगतान की पुष्टि हो गई। पहुँच अपडेट की जा रही है।",
+    rewardedAdGateTitle: "प्रीमियम वीडियो",
+    rewardedAdGateMessage:
+      "आज इस वीडियो को एक बार मुफ्त में खोलने के लिए एक छोटा विज्ञापन देखें, या असीमित पहुँच के लिए सदस्यता लें।",
+    rewardedAdGateWatch: "अनलॉक करने के लिए विज्ञापन देखें",
+    rewardedAdGateRemaining:
+      "हर प्रीमियम वीडियो को दिन में एक बार विज्ञापन से अनलॉक किया जा सकता है।",
+    rewardedAdGateNoMore:
+      "आपने आज यह वीडियो पहले ही अनलॉक कर लिया है। कल फिर आएं या पूरी पहुँच के लिए सदस्यता लें।",
+    rewardedAdGateSubscribe: "प्रीमियम सदस्यता",
+    adLoading: "विज्ञापन लोड हो रहा है…",
+    adSponsored: "विज्ञापन",
   },
   id: {
     slowLoading: "Memuat lambat..",
@@ -3304,6 +4117,53 @@ export const langObj = {
     updateYourInformationToReceiveTheMostAccurateAnalyses:
       "Perbarui informasi Anda untuk menerima analisis paling akurat",
     update: "Perbarui",
+    contactSupportCta: "Hubungi dukungan",
+    purchaseSupportTitle: "Dukungan pembelian",
+    purchaseSupportIntro:
+      "Jika Anda mengalami masalah dengan pembelian Anda, isi formulir di bawah ini.",
+    settingsSupportButton: "Contact support",
+    settingsSupportModalTitle: "App support",
+    settingsSupportModalIntro:
+      "Describe your issue (account, app, premium, astrology, or purchases). We will reply by email.",
+    purchaseSupportNameField: "Nama",
+    purchaseSupportPhoneField: "Telepon",
+    purchaseSupportProductField: "Produk terdampak",
+    purchaseSupportProductPlaceholder: "Pilih produk",
+    purchaseSupportTransactionIdField: "ID transaksi Stripe",
+    purchaseSupportAnalysisIdField: "ID analisis",
+    purchaseSupportErrorRefField: "Kode error / kode referensi",
+    purchaseSupportIssueDescriptionField: "Deskripsi masalah",
+    purchaseSupportIssueDescriptionPlaceholder:
+      "Jelaskan apa yang terjadi dan apa yang Anda harapkan.",
+    purchaseSupportGdprConsent:
+      "Saya setuju data saya dapat digunakan untuk menangani permintaan dukungan ini.",
+    purchaseSupportSubmit: "Kirim",
+    purchaseSupportSending: "Mengirim...",
+    purchaseSupportCancel: "Batal",
+    purchaseSupportEmailRequired:
+      "Masukkan alamat email agar kami dapat membalas.",
+    purchaseSupportEmailInvalid: "Masukkan alamat email yang valid.",
+    purchaseSupportDescriptionRequired:
+      "Jelaskan masalah sebelum mengirim.",
+    purchaseSupportDescriptionTooShort:
+      "Deskripsi harus berisi setidaknya 10 karakter.",
+    purchaseSupportGdprRequired:
+      "Anda harus menyetujui pemrosesan GDPR untuk mengirim permintaan.",
+    purchaseSupportSuccessTitle: "Permintaan terkirim",
+    purchaseSupportSuccessMessage:
+      "Permintaan Anda berhasil dikirim. Kode referensi:",
+    purchaseSupportFailureTitle: "Permintaan tidak terkirim",
+    purchaseSupportFailureMessage:
+      "Kami tidak dapat mengirim permintaan Anda. Silakan kirim email manual ke webdynamicx@gmail.com.",
+    purchaseSupportProductNatal: "Astrogram natal",
+    purchaseSupportProductOtherNatal:
+      "Astrogram natal untuk orang lain",
+    purchaseSupportProductSynastryPersonal: "Sinastri pribadi",
+    purchaseSupportProductSynastryOthers:
+      "Sinastri untuk dua orang lain",
+    purchaseSupportProductDailyHoroscope: "Horoskop harian",
+    purchaseSupportProductPremiumVideoSubscription: "Premium video subscription",
+    purchaseSupportProductOther: "Lainnya",
 
     astrology: "Astrologi",
     yourAstrogram: "Astrogram Anda",
@@ -3480,8 +4340,16 @@ export const langObj = {
     premiumPaywallMessage: "Video ini hanya tersedia untuk pelanggan.",
     premiumPaywallCta: "Berlangganan",
     premiumPaywallClose: "Nanti saja",
+    premiumPricePerMonth: "/bulan",
+    premiumBenefitNewVideos: "Video baru ditambahkan secara rutin",
+    premiumBenefitAllAccess: "Akses ke semua konten video",
+    premiumBenefitNoAds: "Tanpa iklan",
+    premiumAuthRequiredTitle: "Diperlukan login",
+    premiumAuthRequiredMessage: "Anda harus masuk untuk berlangganan dan mengakses konten premium.",
+    premiumAuthSignIn: "Masuk",
     rewardedUnlockCta: "Tonton iklan untuk membuka kunci",
     videoPlayerBack: "Kembali",
+    videoPlaybackLanguage: "Bahasa pemutaran",
     videoUnavailableTitle: "Video tidak tersedia",
     videoUnavailableMessage: "Kami tidak dapat memuat video.",
     videoRetry: "Coba lagi",
@@ -3505,6 +4373,19 @@ export const langObj = {
     videoFavoritesEmptyTitle: "Tidak ada favorit",
     videoFavoritesEmptyMessage: "Kamu belum menyimpan video.",
     videoFavoritesRetry: "Muat ulang",
+    checkoutAccessCheckingToast: "Memverifikasi akses...",
+    checkoutSuccessToast: "Pembayaran dikonfirmasi. Memperbarui akses.",
+    rewardedAdGateTitle: "Video premium",
+    rewardedAdGateMessage:
+      "Tonton iklan singkat untuk membuka video ini sekali gratis hari ini, atau berlangganan untuk akses tanpa batas.",
+    rewardedAdGateWatch: "Tonton iklan untuk membuka",
+    rewardedAdGateRemaining:
+      "Setiap video premium dapat dibuka dengan satu iklan per hari.",
+    rewardedAdGateNoMore:
+      "Anda sudah membuka video ini hari ini. Coba lagi besok atau berlangganan untuk akses penuh.",
+    rewardedAdGateSubscribe: "Akses premium",
+    adLoading: "Memuat iklan…",
+    adSponsored: "Iklan",
   },
   sk: {
     slowLoading: "Pomalé načítanie..",
@@ -3570,6 +4451,53 @@ export const langObj = {
     updateYourInformationToReceiveTheMostAccurateAnalyses:
       "Aktualizujte svoje údaje, aby ste získali najpresnejšie analýzy",
     update: "Aktualizovať",
+    contactSupportCta: "Kontaktovať podporu",
+    purchaseSupportTitle: "Podpora nákupov",
+    purchaseSupportIntro:
+      "Ak máte problémy s nákupmi, vyplňte formulár nižšie.",
+    settingsSupportButton: "Contact support",
+    settingsSupportModalTitle: "App support",
+    settingsSupportModalIntro:
+      "Describe your issue (account, app, premium, astrology, or purchases). We will reply by email.",
+    purchaseSupportNameField: "Meno",
+    purchaseSupportPhoneField: "Telefón",
+    purchaseSupportProductField: "Dotknutý produkt",
+    purchaseSupportProductPlaceholder: "Vyberte produkt",
+    purchaseSupportTransactionIdField: "ID Stripe transakcie",
+    purchaseSupportAnalysisIdField: "ID analýzy",
+    purchaseSupportErrorRefField: "Kód chyby / referenčný kód",
+    purchaseSupportIssueDescriptionField: "Popis problému",
+    purchaseSupportIssueDescriptionPlaceholder:
+      "Opíšte, čo sa stalo a čo ste očakávali.",
+    purchaseSupportGdprConsent:
+      "Súhlasím s tým, aby moje údaje boli použité na spracovanie tejto žiadosti o podporu.",
+    purchaseSupportSubmit: "Odoslať",
+    purchaseSupportSending: "Odosiela sa...",
+    purchaseSupportCancel: "Zrušiť",
+    purchaseSupportEmailRequired:
+      "Zadajte e-mailovú adresu, aby sme mohli odpovedať.",
+    purchaseSupportEmailInvalid: "Zadajte platnú e-mailovú adresu.",
+    purchaseSupportDescriptionRequired:
+      "Pred odoslaním opíšte problém.",
+    purchaseSupportDescriptionTooShort:
+      "Popis musí obsahovať aspoň 10 znakov.",
+    purchaseSupportGdprRequired:
+      "Na odoslanie žiadosti musíte súhlasiť so spracovaním GDPR.",
+    purchaseSupportSuccessTitle: "Žiadosť odoslaná",
+    purchaseSupportSuccessMessage:
+      "Vaša žiadosť bola úspešne odoslaná. Referenčný kód:",
+    purchaseSupportFailureTitle: "Žiadosť nebola odoslaná",
+    purchaseSupportFailureMessage:
+      "Nepodarilo sa nám odoslať vašu žiadosť. Napíšte prosím ručne na webdynamicx@gmail.com.",
+    purchaseSupportProductNatal: "Natálny astrogram",
+    purchaseSupportProductOtherNatal:
+      "Natálny astrogram pre inú osobu",
+    purchaseSupportProductSynastryPersonal: "Osobná synastria",
+    purchaseSupportProductSynastryOthers:
+      "Synastria pre ďalšie dve osoby",
+    purchaseSupportProductDailyHoroscope: "Denný horoskop",
+    purchaseSupportProductPremiumVideoSubscription: "Premium video subscription",
+    purchaseSupportProductOther: "Iné",
 
     astrology: "Astrológia",
     yourAstrogram: "Tvoj Astrogram",
@@ -3744,8 +4672,16 @@ export const langObj = {
     premiumPaywallMessage: "Toto video je dostupné iba pre predplatiteľov.",
     premiumPaywallCta: "Predplatiť",
     premiumPaywallClose: "Teraz nie",
+    premiumPricePerMonth: "/mesiac",
+    premiumBenefitNewVideos: "Nové videá pridávané pravidelne",
+    premiumBenefitAllAccess: "Prístup ku všetkému video obsahu",
+    premiumBenefitNoAds: "Bez reklám",
+    premiumAuthRequiredTitle: "Vyžaduje sa prihlásenie",
+    premiumAuthRequiredMessage: "Na predplatenie a prístup k prémiovému obsahu sa musíte prihlásiť.",
+    premiumAuthSignIn: "Prihlásiť sa",
     rewardedUnlockCta: "Pozri si reklamu na odomknutie",
     videoPlayerBack: "Späť",
+    videoPlaybackLanguage: "Jazyk prehrávania",
     videoUnavailableTitle: "Video nie je dostupné",
     videoUnavailableMessage: "Nepodarilo sa načítať video.",
     videoRetry: "Skúsiť znova",
@@ -3769,6 +4705,19 @@ export const langObj = {
     videoFavoritesEmptyTitle: "Žiadne obľúbené",
     videoFavoritesEmptyMessage: "Zatiaľ nemáš uložené videá.",
     videoFavoritesRetry: "Obnoviť",
+    checkoutAccessCheckingToast: "Overuje sa prístup...",
+    checkoutSuccessToast: "Platba potvrdená. Aktualizujeme prístup.",
+    rewardedAdGateTitle: "Prémiové video",
+    rewardedAdGateMessage:
+      "Pozrite si krátku reklamu a dnes jednorazovo odomknite toto video zadarmo, alebo sa predplaťte na neobmedzený prístup.",
+    rewardedAdGateWatch: "Prehrať reklamu na odomknutie",
+    rewardedAdGateRemaining:
+      "Každé prémiové video sa dá odomknúť jednou reklamou raz denne.",
+    rewardedAdGateNoMore:
+      "Toto video ste dnes už odomkli. Skúste zajtra alebo sa predplaťte na plný prístup.",
+    rewardedAdGateSubscribe: "Prémiové predplatné",
+    adLoading: "Načítanie reklamy…",
+    adSponsored: "Reklama",
   },
   ru: {
     slowLoading: "Медленная загрузка..",
@@ -3834,6 +4783,54 @@ export const langObj = {
     updateYourInformationToReceiveTheMostAccurateAnalyses:
       "Обновите вашу информацию, чтобы получить самые точные анализы",
     update: "Обновить",
+    contactSupportCta: "Связаться с поддержкой",
+    purchaseSupportTitle: "Поддержка покупок",
+    purchaseSupportIntro:
+      "Если у вас возникли проблемы с покупками, заполните форму ниже.",
+    settingsSupportButton: "Contact support",
+    settingsSupportModalTitle: "App support",
+    settingsSupportModalIntro:
+      "Describe your issue (account, app, premium, astrology, or purchases). We will reply by email.",
+    purchaseSupportNameField: "Имя",
+    purchaseSupportPhoneField: "Телефон",
+    purchaseSupportProductField: "Затронутый продукт",
+    purchaseSupportProductPlaceholder: "Выберите продукт",
+    purchaseSupportTransactionIdField: "ID транзакции Stripe",
+    purchaseSupportAnalysisIdField: "ID анализа",
+    purchaseSupportErrorRefField: "Код ошибки / код ссылки",
+    purchaseSupportIssueDescriptionField: "Описание проблемы",
+    purchaseSupportIssueDescriptionPlaceholder:
+      "Опишите, что произошло и что вы ожидали.",
+    purchaseSupportGdprConsent:
+      "Я согласен(а), что мои данные могут быть использованы для обработки этого запроса в поддержку.",
+    purchaseSupportSubmit: "Отправить",
+    purchaseSupportSending: "Отправка...",
+    purchaseSupportCancel: "Отмена",
+    purchaseSupportEmailRequired:
+      "Введите адрес электронной почты, чтобы мы могли ответить.",
+    purchaseSupportEmailInvalid:
+      "Введите действительный адрес электронной почты.",
+    purchaseSupportDescriptionRequired:
+      "Опишите проблему перед отправкой.",
+    purchaseSupportDescriptionTooShort:
+      "Описание должно содержать не менее 10 символов.",
+    purchaseSupportGdprRequired:
+      "Чтобы отправить запрос, необходимо принять обработку GDPR.",
+    purchaseSupportSuccessTitle: "Запрос отправлен",
+    purchaseSupportSuccessMessage:
+      "Ваш запрос успешно отправлен. Код ссылки:",
+    purchaseSupportFailureTitle: "Запрос не отправлен",
+    purchaseSupportFailureMessage:
+      "Мы не смогли отправить ваш запрос. Пожалуйста, напишите вручную на webdynamicx@gmail.com.",
+    purchaseSupportProductNatal: "Натальная астрограмма",
+    purchaseSupportProductOtherNatal:
+      "Натальная астрограмма для другого человека",
+    purchaseSupportProductSynastryPersonal: "Личная синастрия",
+    purchaseSupportProductSynastryOthers:
+      "Синастрия для двух других людей",
+    purchaseSupportProductDailyHoroscope: "Ежедневный гороскоп",
+    purchaseSupportProductPremiumVideoSubscription: "Premium video subscription",
+    purchaseSupportProductOther: "Другое",
 
     astrology: "Астрология",
     yourAstrogram: "Ваша астрограмма",
@@ -4008,8 +5005,16 @@ export const langObj = {
     premiumPaywallMessage: "Это видео доступно только подписчикам.",
     premiumPaywallCta: "Подписаться",
     premiumPaywallClose: "Не сейчас",
+    premiumPricePerMonth: "/месяц",
+    premiumBenefitNewVideos: "Новые видео добавляются регулярно",
+    premiumBenefitAllAccess: "Доступ ко всему видеоконтенту",
+    premiumBenefitNoAds: "Без рекламы",
+    premiumAuthRequiredTitle: "Требуется авторизация",
+    premiumAuthRequiredMessage: "Вы должны войти в систему, чтобы оформить подписку и получить доступ к премиум-контенту.",
+    premiumAuthSignIn: "Войти",
     rewardedUnlockCta: "Посмотрите рекламу, чтобы разблокировать",
     videoPlayerBack: "Назад",
+    videoPlaybackLanguage: "Язык воспроизведения",
     videoUnavailableTitle: "Видео недоступно",
     videoUnavailableMessage: "Не удалось загрузить видео.",
     videoRetry: "Повторить",
@@ -4033,6 +5038,19 @@ export const langObj = {
     videoFavoritesEmptyTitle: "Нет избранного",
     videoFavoritesEmptyMessage: "Вы еще не сохранили видео.",
     videoFavoritesRetry: "Обновить",
+    checkoutAccessCheckingToast: "Проверка доступа...",
+    checkoutSuccessToast: "Оплата подтверждена. Обновляем доступ.",
+    rewardedAdGateTitle: "Премиум видео",
+    rewardedAdGateMessage:
+      "Посмотрите короткую рекламу, чтобы один раз бесплатно открыть это видео сегодня, или оформите подписку для неограниченного доступа.",
+    rewardedAdGateWatch: "Смотреть рекламу для разблокировки",
+    rewardedAdGateRemaining:
+      "Каждое премиум-видео можно разблокировать рекламой один раз в день.",
+    rewardedAdGateNoMore:
+      "Вы уже разблокировали это видео сегодня. Загляните завтра или оформите подписку для полного доступа.",
+    rewardedAdGateSubscribe: "Премиум подписка",
+    adLoading: "Загрузка рекламы…",
+    adSponsored: "Реклама",
   },
   tr: {
     slowLoading: "Yavaş yükleniyor..",
@@ -4097,6 +5115,53 @@ export const langObj = {
     updateYourInformationToReceiveTheMostAccurateAnalyses:
       "En doğru analizleri almak için bilgilerinizi güncelleyin",
     update: "Güncelle",
+    contactSupportCta: "Destek ile iletişime geç",
+    purchaseSupportTitle: "Satın alma desteği",
+    purchaseSupportIntro:
+      "Satın alımlarınızla ilgili sorun yaşıyorsanız aşağıdaki formu doldurun.",
+    settingsSupportButton: "Contact support",
+    settingsSupportModalTitle: "App support",
+    settingsSupportModalIntro:
+      "Describe your issue (account, app, premium, astrology, or purchases). We will reply by email.",
+    purchaseSupportNameField: "Ad",
+    purchaseSupportPhoneField: "Telefon",
+    purchaseSupportProductField: "Etkilenen ürün",
+    purchaseSupportProductPlaceholder: "Bir ürün seçin",
+    purchaseSupportTransactionIdField: "Stripe işlem kimliği",
+    purchaseSupportAnalysisIdField: "Analiz kimliği",
+    purchaseSupportErrorRefField: "Hata kodu / referans kodu",
+    purchaseSupportIssueDescriptionField: "Sorun açıklaması",
+    purchaseSupportIssueDescriptionPlaceholder:
+      "Ne olduğunu ve ne beklediğinizi açıklayın.",
+    purchaseSupportGdprConsent:
+      "Bu destek talebinin işlenmesi için verilerimin kullanılmasını kabul ediyorum.",
+    purchaseSupportSubmit: "Gönder",
+    purchaseSupportSending: "Gönderiliyor...",
+    purchaseSupportCancel: "İptal",
+    purchaseSupportEmailRequired:
+      "Yanıt verebilmemiz için bir e-posta adresi girin.",
+    purchaseSupportEmailInvalid: "Geçerli bir e-posta adresi girin.",
+    purchaseSupportDescriptionRequired:
+      "Göndermeden önce sorunu açıklayın.",
+    purchaseSupportDescriptionTooShort:
+      "Açıklama en az 10 karakter içermelidir.",
+    purchaseSupportGdprRequired:
+      "Talebi göndermek için GDPR işlemesini kabul etmelisiniz.",
+    purchaseSupportSuccessTitle: "Talep gönderildi",
+    purchaseSupportSuccessMessage:
+      "Talebiniz başarıyla gönderildi. Referans kodu:",
+    purchaseSupportFailureTitle: "Talep gönderilemedi",
+    purchaseSupportFailureMessage:
+      "Talebinizi gönderemedik. Lütfen webdynamicx@gmail.com adresine manuel olarak yazın.",
+    purchaseSupportProductNatal: "Natal astrogram",
+    purchaseSupportProductOtherNatal:
+      "Başka bir kişi için natal astrogram",
+    purchaseSupportProductSynastryPersonal: "Kişisel sinastri",
+    purchaseSupportProductSynastryOthers:
+      "Diğer iki kişi için sinastri",
+    purchaseSupportProductDailyHoroscope: "Günlük burç yorumu",
+    purchaseSupportProductPremiumVideoSubscription: "Premium video subscription",
+    purchaseSupportProductOther: "Diğer",
 
     astrology: "Astroloji",
     yourAstrogram: "Astrogramınız",
@@ -4243,6 +5308,7 @@ export const langObj = {
     magicCategory: "Büyü",
     blogCategory: "Blog",
     sessionsCategory: "Kişiselleştirilmiş Oturum",
+    astroSectionTitle: "Doğum Haritası, Burç Yorumu ve Sinastri",
     onboardingIntroTitle: "Otkryj Tarot by AI",
     onboardingIntroSubtitle: "Poznaj świat duchowy dzięki sztucznej inteligencji.",
     onboardingPersonalizedTitle: "Spersonalizowane odczyty",
@@ -4272,8 +5338,16 @@ export const langObj = {
     premiumPaywallMessage: "Bu video yalnızca aboneler için kullanılabilir.",
     premiumPaywallCta: "Abone ol",
     premiumPaywallClose: "Şimdi değil",
+    premiumPricePerMonth: "/ay",
+    premiumBenefitNewVideos: "Düzenli olarak yeni videolar ekleniyor",
+    premiumBenefitAllAccess: "Tüm video içeriklerine erişim",
+    premiumBenefitNoAds: "Reklamsız deneyim",
+    premiumAuthRequiredTitle: "Giriş gerekli",
+    premiumAuthRequiredMessage: "Abone olmak ve premium içeriğe erişmek için giriş yapmalısınız.",
+    premiumAuthSignIn: "Giriş yap",
     rewardedUnlockCta: "Kilidi açmak için reklam izleyin",
     videoPlayerBack: "Geri",
+    videoPlaybackLanguage: "Oynatma dili",
     videoUnavailableTitle: "Video kullanılamıyor",
     videoUnavailableMessage: "Videoyu yükleyemedik.",
     videoRetry: "Tekrar dene",
@@ -4297,5 +5371,18 @@ export const langObj = {
     videoFavoritesEmptyTitle: "Favori yok",
     videoFavoritesEmptyMessage: "Henüz video kaydetmediniz.",
     videoFavoritesRetry: "Yenile",
+    checkoutAccessCheckingToast: "Erişim doğrulanıyor...",
+    checkoutSuccessToast: "Ödeme onaylandı. Erişim güncelleniyor.",
+    rewardedAdGateTitle: "Premium video",
+    rewardedAdGateMessage:
+      "Bu videoyu bugün bir kez ücretsiz açmak için kısa bir reklam izleyin veya sınırsız erişim için abone olun.",
+    rewardedAdGateWatch: "Kilidi açmak için reklam izle",
+    rewardedAdGateRemaining:
+      "Her premium video günde bir kez reklam izleyerek açılabilir.",
+    rewardedAdGateNoMore:
+      "Bu videoyu bugün zaten açtınız. Yarın tekrar deneyin veya tam erişim için abone olun.",
+    rewardedAdGateSubscribe: "Premium abonelik",
+    adLoading: "Reklam yükleniyor…",
+    adSponsored: "Reklam",
   },
 };

@@ -1,11 +1,5 @@
 import {
   collection,
-  doc,
-  getDoc,
-  getDocFromServer,
-  getDocs,
-  getDocsFromServer,
-  onSnapshot,
   orderBy,
   query,
   where,
@@ -14,8 +8,16 @@ import type { Unsubscribe } from "firebase/firestore";
 import { db } from "../../../../firebase";
 import type { Video } from "../types/video";
 import type { VideoCategory } from "../types/videoCategory";
-import { getDocPreferCache } from "../../../utils/firestoreCache";
 import { logWarn } from "../../../utils/Logger";
+import i18n from "../../../../i18n";
+import {
+  trackedGetDocsFromServer,
+} from "../../../utils/firestoreReadTelemetry";
+import {
+  getPremiumVideoDetail,
+  getPremiumVideoLibrary,
+  type PremiumVideoDetailResponse,
+} from "./premiumVideoApi";
 
 const COLLECTION_NAME = "videosVideoModule";
 const CATEGORY_COLLECTION_NAME = "videoCategories";
@@ -58,16 +60,14 @@ const isVideoVisible = (video: Video, nowMs = Date.now()): boolean => {
   return publishMs <= nowMs;
 };
 
-const mapVideos = (docs: Awaited<ReturnType<typeof getDocs>>["docs"]): Video[] => {
+const mapVideos = (docs: any[]): Video[] => {
   return docs.map((docSnap) => ({
     ...(docSnap.data() as Omit<Video, "id">),
     id: docSnap.id,
   }));
 };
 
-const mapCategories = (
-  docs: Awaited<ReturnType<typeof getDocs>>["docs"]
-): VideoCategory[] => {
+const mapCategories = (docs: any[]): VideoCategory[] => {
   return docs.map((docSnap) => ({
     ...(docSnap.data() as Omit<VideoCategory, "id">),
     id: docSnap.id,
@@ -87,33 +87,69 @@ const buildPrimaryQuery = () =>
 const buildFallbackQuery = () =>
   query(collection(db, COLLECTION_NAME), where("isPublished", "==", true));
 
+const getCurrentLocale = (): string => i18n.locale?.split("-")[0] ?? "ro";
+
+const logFirestoreFallback = (
+  stage: "api_failed" | "primary_query_failed" | "secondary_query_failed" | "primary_query_used" | "secondary_query_used",
+  details?: Record<string, unknown>
+) => {
+  logWarn("[VideoLibrary] Firestore fallback event", {
+    stage,
+    locale: getCurrentLocale(),
+    ...details,
+  });
+};
+
 export const getPublishedVideos = async (): Promise<Video[]> => {
   try {
-    const snapshot = await getDocsFromServer(buildPrimaryQuery());
-    if (!snapshot.empty) {
+    const response = await getPremiumVideoLibrary(getCurrentLocale());
+    return response.videos;
+  } catch (error) {
+    logFirestoreFallback("api_failed", {
+      reason: "premium_api_error",
+      error,
+    });
+  }
+
+  // Fallback only keeps the old public Firestore behavior available when the API is unreachable.
+  try {
+    const fallbackSnapshot = await trackedGetDocsFromServer(buildPrimaryQuery());
+    if (!fallbackSnapshot.empty) {
       const nowMs = Date.now();
-      return sortVideosNewestFirst(
-        mapVideos(snapshot.docs).filter((video) =>
-          isVideoVisible(video, nowMs)
-        )
+      const visibleVideos = sortVideosNewestFirst(
+        mapVideos(fallbackSnapshot.docs).filter((video) => isVideoVisible(video, nowMs))
       );
+      logFirestoreFallback("primary_query_used", {
+        docsCount: fallbackSnapshot.size,
+        visibleCount: visibleVideos.length,
+      });
+      return visibleVideos;
     }
   } catch (error) {
-    logWarn("[VideoLibrary] Primary query failed, falling back.", error);
+    logFirestoreFallback("primary_query_failed", {
+      reason: "primary_query_error",
+      error,
+    });
   }
 
   try {
-    const fallbackSnapshot = await getDocsFromServer(buildFallbackQuery());
+    const fallbackSnapshot = await trackedGetDocsFromServer(buildFallbackQuery());
     if (!fallbackSnapshot.empty) {
       const nowMs = Date.now();
-      return sortVideosNewestFirst(
-        mapVideos(fallbackSnapshot.docs).filter((video) =>
-          isVideoVisible(video, nowMs)
-        )
+      const visibleVideos = sortVideosNewestFirst(
+        mapVideos(fallbackSnapshot.docs).filter((video) => isVideoVisible(video, nowMs))
       );
+      logFirestoreFallback("secondary_query_used", {
+        docsCount: fallbackSnapshot.size,
+        visibleCount: visibleVideos.length,
+      });
+      return visibleVideos;
     }
   } catch (error) {
-    logWarn("[VideoLibrary] Fallback query failed.", error);
+    logFirestoreFallback("secondary_query_failed", {
+      reason: "secondary_query_error",
+      error,
+    });
   }
 
   return [];
@@ -121,7 +157,7 @@ export const getPublishedVideos = async (): Promise<Video[]> => {
 
 export const getVideoCategories = async (): Promise<VideoCategory[]> => {
   try {
-    const snapshot = await getDocsFromServer(buildCategoriesQuery());
+    const snapshot = await trackedGetDocsFromServer(buildCategoriesQuery());
     if (!snapshot.empty) {
       return mapCategories(snapshot.docs);
     }
@@ -130,7 +166,7 @@ export const getVideoCategories = async (): Promise<VideoCategory[]> => {
   }
 
   try {
-    const fallbackSnapshot = await getDocsFromServer(
+    const fallbackSnapshot = await trackedGetDocsFromServer(
       collection(db, CATEGORY_COLLECTION_NAME) as any
     );
     if (!fallbackSnapshot.empty) {
@@ -147,74 +183,59 @@ export const subscribePublishedVideos = (
   onUpdate: (videos: Video[]) => void,
   onError?: (error: unknown) => void
 ): Unsubscribe => {
-  let primaryUnsubscribe: Unsubscribe | null = null;
-  let fallbackUnsubscribe: Unsubscribe | null = null;
-
-  const attachFallback = () => {
-    if (fallbackUnsubscribe) {
-      return;
-    }
-
-    fallbackUnsubscribe = onSnapshot(
-      buildFallbackQuery(),
-      (snapshot) => {
-        const nowMs = Date.now();
-        onUpdate(
-          sortVideosNewestFirst(
-            mapVideos(snapshot.docs).filter((video) =>
-              isVideoVisible(video, nowMs)
-            )
-          )
-        );
-      },
-      (error) => {
-        onError?.(error);
+  let active = true;
+  const load = async () => {
+    try {
+      const videos = await getPublishedVideos();
+      if (active) {
+        onUpdate(videos);
       }
-    );
+    } catch (error) {
+      onError?.(error);
+    }
   };
 
-  primaryUnsubscribe = onSnapshot(
-    buildPrimaryQuery(),
-    (snapshot) => {
-      const nowMs = Date.now();
-      onUpdate(
-        sortVideosNewestFirst(
-          mapVideos(snapshot.docs).filter((video) =>
-            isVideoVisible(video, nowMs)
-          )
-        )
-      );
-    },
-    (error) => {
-      onError?.(error);
-      attachFallback();
-    }
-  );
-
+  void load();
+  const interval = setInterval(load, 60000);
   return () => {
-    primaryUnsubscribe?.();
-    fallbackUnsubscribe?.();
+    active = false;
+    clearInterval(interval);
   };
 };
 
-export const getVideoById = async (videoId: string): Promise<Video | null> => {
+export const getVideoById = async (
+  videoId: string,
+  locale?: string | null
+): Promise<Video | null> => {
   if (!videoId) {
     return null;
   }
 
-  const ref = doc(db, COLLECTION_NAME, videoId);
-  const snap = await getDocFromServer(ref);
-  if (!snap.exists()) {
-    return null;
-  }
+  const resolvedLocale =
+    typeof locale === "string" && locale.trim() ? locale : getCurrentLocale();
 
-  const data = snap.data() as Omit<Video, "id">;
-  if (!data.isPublished) {
+  try {
+    const response = await getPremiumVideoDetail(videoId, resolvedLocale);
+    return response?.video || null;
+  } catch (error) {
+    logWarn("[VideoLibrary] Premium detail API failed.", error);
     return null;
   }
-  if (!isVideoVisible({ id: snap.id, ...data })) {
-    return null;
-  }
+};
 
-  return { id: snap.id, ...data };
+/** Full detail payload (video + availableLocales) for a given playback locale — mirrors web `/videouri/[id]?locale=`. */
+export const fetchVideoLibraryDetail = async (
+  videoId: string,
+  locale: string
+): Promise<PremiumVideoDetailResponse | null> => {
+  const id = typeof videoId === "string" ? videoId.trim() : "";
+  if (!id) {
+    return null;
+  }
+  try {
+    return await getPremiumVideoDetail(id, locale);
+  } catch (error) {
+    logWarn("[VideoLibrary] Premium detail API failed.", error);
+    return null;
+  }
 };

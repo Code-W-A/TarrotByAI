@@ -1,10 +1,11 @@
 import type { Timestamp } from "firebase/firestore";
 
-export type VideoPlatform = "vimeo" | "youtube";
+export type VideoPlatform = "bunny" | "vimeo" | "youtube";
 
 export type VideoLocaleFields = {
   title: string;
   description?: string;
+  videoUrl?: string;
 };
 
 export type VideoLocales = Record<string, VideoLocaleFields>;
@@ -25,6 +26,9 @@ export interface VideoDoc {
   order?: number | null;
   durationSeconds?: number | null;
   locales?: VideoLocales;
+  canPlay?: boolean;
+  embedSrc?: string | null;
+  lockedReason?: "premium_required" | "source_invalid" | string | null;
 }
 
 export interface Video extends VideoDoc {

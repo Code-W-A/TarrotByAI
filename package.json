@@ -7,6 +7,13 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
+    "version:expo:bump": "node scripts/bump-expo-version.js",
+    "version:expo:check": "node scripts/bump-expo-version.js --dry-run",
+    "build:production:android": "eas build --platform android --profile production",
+    "build:production:ios": "eas build --platform ios --profile production",
+    "release:production": "npm run version:expo:bump && eas build --platform all --profile production",
+    "release:production:android": "npm run version:expo:bump && eas build --platform android --profile production",
+    "release:production:ios": "npm run version:expo:bump && eas build --platform ios --profile production",
     "postinstall": "node scripts/patch-expo-localization.js",
     "eas-build-post-install": "node scripts/patch-expo-localization.js"
   },

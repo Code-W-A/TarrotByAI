@@ -7,6 +7,8 @@ const loc = getLocales();
 
 const i18n = new I18n(langObj);
 
+i18n.defaultLocale = "en";
+i18n.enableFallback = true;
 i18n.locale = loc[0].languageCode;
 
 export default i18n;

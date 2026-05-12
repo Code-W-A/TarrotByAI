@@ -1,7 +1,7 @@
-import React, { Fragment, useState, useEffect } from "react";
+import React, { Fragment, useState, useEffect, useCallback } from "react";
 import { ScrollView, TouchableOpacity } from "react-native";
 import { GeneralProps } from "../interfaces/generalProps";
-import { Route, useIsFocused } from "@react-navigation/native";
+import { Route, useIsFocused, useFocusEffect } from "@react-navigation/native";
 import { NavBarPatient } from "../common/commonComponents";
 import { MainContainer } from "../components/commonViews";
 import { SegmentControl } from "../components/segmentControl";
@@ -33,6 +33,14 @@ import { getClinicInfo } from "../actions/clinicActions";
 import { getPatientInfo } from "../actions/patientActions";
 import BasicInfoPatient from "./profileSettings/basicInfoPatient";
 import CustomLoader from "../components/customLoader";
+import { useAuth } from "../context/AuthContext";
+import { fetchPremiumPublicConfig } from "../features/video-library/services/premiumVideoApi";
+import {
+  getPremiumSubscriptionUiState,
+} from "../features/video-library/utils/premiumSubscriptionUi";
+import { hasPremiumAccess } from "../features/video-library/utils/premiumAccess";
+import { PremiumSubscriptionProfileSection } from "./profileSettings/PremiumSubscriptionProfileSection";
+import i18n from "../../i18n";
 
 interface Props extends GeneralProps {
   route: Route<string, object | undefined>;
@@ -73,6 +81,49 @@ const ProfileSettingsPatient: React.FC<Props> = ({
 
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
+  const { userData, currentUser, refreshUserDataFromServer } = useAuth() as {
+    userData?: unknown;
+    currentUser?: unknown;
+    refreshUserDataFromServer?: () => Promise<unknown>;
+  };
+  const [subscriptionSystemEnabled, setSubscriptionSystemEnabled] = useState<
+    boolean | null
+  >(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
+      (async () => {
+        try {
+          const cfg = await fetchPremiumPublicConfig();
+          if (active) {
+            setSubscriptionSystemEnabled(cfg.subscriptionSystemEnabled === true);
+          }
+        } catch {
+          if (active) {
+            setSubscriptionSystemEnabled(null);
+          }
+        }
+        try {
+          await refreshUserDataFromServer?.();
+        } catch {
+          /* ignore */
+        }
+      })();
+      return () => {
+        active = false;
+      };
+    }, [refreshUserDataFromServer])
+  );
+
+  const localeTag = i18n.locale?.split("-")[0] ?? "ro";
+  const showPremiumSection =
+    subscriptionSystemEnabled === true ||
+    subscriptionSystemEnabled === null ||
+    hasPremiumAccess(userData);
+  const premiumSubUi = showPremiumSection
+    ? getPremiumSubscriptionUiState(userData, localeTag)
+    : null;
 
   const handleGetData = async () => {
     const response = await retrieveClinicData();
@@ -163,6 +214,12 @@ const ProfileSettingsPatient: React.FC<Props> = ({
               }}
             /> */}
           </ScrollView>
+          {premiumSubUi ? (
+            <PremiumSubscriptionProfileSection
+              ui={premiumSubUi}
+              currentUser={currentUser}
+            />
+          ) : null}
           {selectedTab == "Basic Info" ? (
             <BasicInfoPatient
               dataInfo={basicInfoData}

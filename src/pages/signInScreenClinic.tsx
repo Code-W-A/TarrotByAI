@@ -83,7 +83,8 @@ import { authentication, db } from "../../firebase";
 import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
 import { makeRedirectUri } from "expo-auth-session";
-import * as AppleAuthentication from 'expo-apple-authentication';
+import * as AppleAuthentication from "expo-apple-authentication";
+import * as Crypto from "expo-crypto";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -121,13 +122,39 @@ import SnackBar from "../components/SnackBar";
 import { doc, setDoc } from "firebase/firestore";
 import { getDocPreferCache } from "../utils/firestoreCache";
 import Icon from "react-native-vector-icons/FontAwesome";
-import { useNavBarVisibility } from '../context/NavbarVisibilityContext';
+import { useNavBarVisibility } from "../context/NavbarVisibilityContext";
 
 interface Props extends GeneralProps {
   route: Route<string, object | undefined>;
 }
 
-const deviceWidth = Dimensions.get('window').width;
+const deviceWidth = Dimensions.get("window").width;
+
+const getAppleAuthAlertMessage = (error: unknown) => {
+  const code =
+    typeof error === "object" && error !== null && "code" in error
+      ? String((error as { code?: unknown }).code ?? "")
+      : "";
+  const message =
+    typeof error === "object" && error !== null && "message" in error
+      ? String((error as { message?: unknown }).message ?? "")
+      : "";
+  const lowerMessage = message.toLowerCase();
+
+  if (code === "ERR_REQUEST_CANCELED") {
+    return "Autentificarea cu Apple a fost anulată.";
+  }
+
+  if (
+    code === "ERR_REQUEST_UNKNOWN" ||
+    lowerMessage.includes("unknown reason") ||
+    lowerMessage.includes("authorization attempt failed")
+  ) {
+    return "Autentificarea cu Apple a eșuat din cauza configurării iOS. Verificați capability-ul Sign In with Apple, conectați un Apple ID pe device și reconstruiți aplicația iOS.";
+  }
+
+  return "Autentificarea cu Apple a eșuat. Vă rugăm să încercați din nou.";
+};
 
 const SignInScreenClinic: React.FC<Props> = ({
   navigation,
@@ -317,24 +344,51 @@ const SignInScreenClinic: React.FC<Props> = ({
 
   const handleAppleSignIn = async () => {
     try {
+      const isAvailable = await AppleAuthentication.isAvailableAsync();
+      if (!isAvailable) {
+        Alert.alert(
+          "Eroare",
+          "Apple Sign In nu este disponibil pe acest dispozitiv."
+        );
+        return;
+      }
+
+      const rawNonce =
+        typeof Crypto.randomUUID === "function"
+          ? Crypto.randomUUID()
+          : `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+      const hashedNonce = await Crypto.digestStringAsync(
+        Crypto.CryptoDigestAlgorithm.SHA256,
+        rawNonce
+      );
+
       // Start Apple authentication flow
       const appleCredential = await AppleAuthentication.signInAsync({
         requestedScopes: [
           AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
           AppleAuthentication.AppleAuthenticationScope.EMAIL,
         ],
+        nonce: hashedNonce,
       });
 
+      if (!appleCredential.identityToken) {
+        throw new Error("Apple identity token is missing");
+      }
+
       // Create Firebase credential using Apple token
-      const provider = new OAuthProvider('apple.com');
+      const provider = new OAuthProvider("apple.com");
       const firebaseCredential = provider.credential({
         idToken: appleCredential.identityToken,
+        rawNonce,
       });
 
       // Authenticate user in Firebase
-      const userCredential = await signInWithCredential(authentication, firebaseCredential);
+      const userCredential = await signInWithCredential(
+        authentication,
+        firebaseCredential
+      );
       const user = userCredential.user;
-      console.log('User authenticated with Apple:', user);
+      console.log("User authenticated with Apple:", user);
 
       // Create or update user document in Firestore
       const collectionId = "Users";
@@ -363,8 +417,17 @@ const SignInScreenClinic: React.FC<Props> = ({
       setIsNavBarVisible(true);
       navigation.replace(screenName.ClinicDashBoard);
     } catch (error) {
-      console.error('Error with Apple authentication:', error);
-      Alert.alert("Eroare", "Autentificarea cu Apple a eșuat. Vă rugăm să încercați din nou.");
+      const appleError = error as { code?: string; message?: string };
+      console.error("Error with Apple authentication:", {
+        code: appleError?.code,
+        message: appleError?.message,
+      });
+
+      if (appleError?.code === "ERR_REQUEST_CANCELED") {
+        return;
+      }
+
+      Alert.alert("Eroare", getAppleAuthAlertMessage(error));
     }
   };
 

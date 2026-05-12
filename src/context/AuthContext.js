@@ -1,7 +1,16 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { authentication } from "../../firebase";
-import { handleGetUserInfo } from "../utils/handleFirebaseQuery";
+import { handleGetUserInfo, handleGetUserInfoFromServer } from "../utils/handleFirebaseQuery";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { setAppOpenSuppressedForSubscriber } from "../utils/adsUtils";
+import { hasPremiumAccess } from "../features/video-library/utils/premiumAccess";
 
 const AuthContext = createContext();
 
@@ -15,22 +24,45 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [isGuestUser, setIsGuestUser] = useState(false); // Inițializat ca false
 
+  const refreshUserData = useCallback(async () => {
+    try {
+      const userDataFromFirestore = await handleGetUserInfo();
+      setUserData(userDataFromFirestore);
+      return userDataFromFirestore;
+    } catch (error) {
+      console.error("Failed to refresh user data:", error);
+      return null;
+    }
+  }, []);
+
+  const refreshUserDataFromServer = useCallback(async () => {
+    try {
+      const userDataFromFirestore = await handleGetUserInfoFromServer();
+      if (userDataFromFirestore) {
+        setUserData(userDataFromFirestore);
+      }
+      return userDataFromFirestore;
+    } catch (error) {
+      console.error("Failed to refresh user data from server:", error);
+      return null;
+    }
+  }, []);
+
   // Funcția pentru a seta utilizatorul ca guest user
-  const setAsGuestUser = async (isGuest) => {
+  const setAsGuestUser = useCallback(async (isGuest) => {
     try {
       await AsyncStorage.setItem("isGuestUser", isGuest ? "true" : "false");
       setIsGuestUser(isGuest);
     } catch (e) {
       console.error("Failed to update isGuestUser in AsyncStorage:", e);
     }
-  };
+  }, []);
 
   useEffect(() => {
     const unsubscribe = authentication.onAuthStateChanged(async (user) => {
       if (user) {
         try {
-          const userDataFromFirestore = await handleGetUserInfo();
-          setUserData(userDataFromFirestore);
+          await refreshUserData();
         } catch (error) {
           console.error("Failed to fetch user data:", error);
         }
@@ -51,17 +83,38 @@ export const AuthProvider = ({ children }) => {
     });
 
     return unsubscribe;
-  }, []);
+  }, [refreshUserData]);
 
-  const value = {
-    currentUser,
-    userData,
-    loading,
-    isGuestUser, // Includeți isGuestUser în context
-    setAsGuestUser, // Expuși funcția prin context
-    setUserData,
-    setCurrentUser,
-  };
+  useEffect(() => {
+    if (!currentUser) {
+      setAppOpenSuppressedForSubscriber(false);
+      return;
+    }
+    setAppOpenSuppressedForSubscriber(hasPremiumAccess(userData));
+  }, [currentUser, userData]);
+
+  const value = useMemo(
+    () => ({
+      currentUser,
+      userData,
+      loading,
+      isGuestUser,
+      setAsGuestUser,
+      refreshUserData,
+      refreshUserDataFromServer,
+      setUserData,
+      setCurrentUser,
+    }),
+    [
+      currentUser,
+      userData,
+      loading,
+      isGuestUser,
+      setAsGuestUser,
+      refreshUserData,
+      refreshUserDataFromServer,
+    ]
+  );
 
   return (
     <AuthContext.Provider value={value}>

@@ -1,10 +1,11 @@
-import { collection, getDocs } from "firebase/firestore";
+import { collection } from "firebase/firestore";
 import { db } from "../../firebase";
+import { trackedGetDocs } from "./firestoreReadTelemetry";
 
 export const checkIfBooked = async (daySelected, item, AllDoctorInfo) => {
   let isAppMade = false;
   //   Query a reference to a subcollection
-  const querySnapshot = await getDocs(
+  const querySnapshot = await trackedGetDocs(
     collection(
       db,
       "Doctors",

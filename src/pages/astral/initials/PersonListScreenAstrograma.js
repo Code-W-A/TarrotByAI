@@ -32,8 +32,13 @@ import { useLanguage } from "../../../context/LanguageContext";
 import FloatingActionButtonAstrograma from "../../../components/Astral/components/FloatingActionButtonAstrograma";
 
 import {
+  applyEntitlementsToAnalyses,
   backupAnalizeAstrogramaNatalaOthersToFirestore,
   backupAnalizeAstrogramaNatalaPersonalaToFirestore,
+  refreshLocalAnalysisAccessFromEntitlements,
+  loadLocalAstrogramaAnalyses,
+  mergeAnalysesById,
+  retrievePurchaseEntitlementsByContact,
   retrieveAnalizeAstrogramaNatalaOthersByPhone,
   retrieveAnalizeAstrogramaNatalaPersonalaByPhone,
 } from "../../../utils/backupAnalysisUtils";
@@ -62,21 +67,45 @@ const PersonListScreenAstrograma = ({ navigation }) => {
   // 2. Se recuperează backup-urile din Firestore (filtrate după telefonul utilizatorului)
   // 3. Se actualizează state-ul cu datele preluate din Firestore
   const synchronizeData = async () => {
+    let localPersonalDocs = [];
+    let localOthersDocs = [];
+
     try {
       setIsLoading(true);
+      await refreshLocalAnalysisAccessFromEntitlements();
+      const localAnalyses = await loadLocalAstrogramaAnalyses();
+      localPersonalDocs = localAnalyses.personalDocs;
+      localOthersDocs = localAnalyses.othersDocs;
+      setPersons(localPersonalDocs);
+      setAsyncPersons(localOthersDocs);
+
       // Apelăm separat backup-urile:
       await backupAnalizeAstrogramaNatalaPersonalaToFirestore();
       await backupAnalizeAstrogramaNatalaOthersToFirestore();
       console.log("✅ Backup-ul s-a efectuat.");
 
       // Recuperează datele din Firestore:
-      const personalDocs =
-        await retrieveAnalizeAstrogramaNatalaPersonalaByPhone();
-      const othersDocs = await retrieveAnalizeAstrogramaNatalaOthersByPhone();
-      setPersons(Array.isArray(personalDocs) ? personalDocs : [personalDocs]);
-      setAsyncPersons(Array.isArray(othersDocs) ? othersDocs : [othersDocs]);
+      const [personalDocs, othersDocs, entitlements] = await Promise.all([
+        retrieveAnalizeAstrogramaNatalaPersonalaByPhone(),
+        retrieveAnalizeAstrogramaNatalaOthersByPhone(),
+        retrievePurchaseEntitlementsByContact(),
+      ]);
+
+      const mergedPersonalDocs = applyEntitlementsToAnalyses(
+        mergeAnalysesById(personalDocs, localPersonalDocs),
+        entitlements
+      );
+      const mergedOthersDocs = applyEntitlementsToAnalyses(
+        mergeAnalysesById(othersDocs, localOthersDocs),
+        entitlements
+      );
+
+      setPersons(mergedPersonalDocs);
+      setAsyncPersons(mergedOthersDocs);
     } catch (error) {
       console.error("Eroare la sincronizarea datelor:", error);
+      setPersons(localPersonalDocs);
+      setAsyncPersons(localOthersDocs);
     } finally {
       setIsLoading(false);
     }

@@ -50,12 +50,21 @@ import store from "./Store";
 import * as Font from "expo-font";
 import { NumberProvider } from "./src/context/NumberContext";
 import { StripeProvider } from "@stripe/stripe-react-native";
-import { usePushNotifications } from "./src/hooks/usePushNotifications";
-import { handleQueryToken, handleUploadFirestore } from "./src/utils/firestoreUtils";
+import {
+  PushNotificationsProvider,
+  usePushNotifications,
+} from "./src/context/PushNotificationsContext";
+import { upsertUserTokenMetadata } from "./src/utils/firestoreUtils";
 import { useAppTrackingTransparency } from "./src/hooks/useAppTrackingTransparency";
 import { initializeTrackingServices } from "./src/utils/trackingUtils";
 import { AdsProvider, useAdsContext } from "./src/context/AdsContext";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import {
+  flushReadTelemetry,
+  initializeFirestoreReadTelemetry,
+  setCurrentTelemetryScreen,
+  setCurrentTelemetryUser,
+} from "./src/utils/firestoreReadTelemetry";
 
 const App = () => {
   const [notification, setNotification] = useState(false);
@@ -72,6 +81,29 @@ const App = () => {
   const AppContent = () => {
     const { setAdsConfig, isAdsReady } = useAdsContext();
     const { language } = useLanguage();
+    const { currentUser, isGuestUser } = useAuth();
+    const navigationRef = useRef<any>(null);
+
+    useEffect(() => {
+      initializeFirestoreReadTelemetry();
+    }, []);
+
+    useEffect(() => {
+      setCurrentTelemetryUser(currentUser?.uid || "", {
+        isGuestUser,
+      });
+    }, [currentUser?.uid, isGuestUser]);
+
+    useEffect(() => {
+      return () => {
+        void flushReadTelemetry("app-unmount", { ignoreEnabled: true });
+      };
+    }, []);
+
+    const syncTelemetryScreen = () => {
+      const currentRoute = navigationRef.current?.getCurrentRoute?.();
+      setCurrentTelemetryScreen(currentRoute?.name || "unknown");
+    };
     
     // Handle ATT permission status changes - DOAR O DATĂ
     useEffect(() => {
@@ -92,41 +124,44 @@ const App = () => {
     // IMPORTANT: token upload should run INSIDE NavigationContainer to avoid useNavigation error
     const PushTokenUploader = () => {
       const { expoPushToken } = usePushNotifications();
+      const tokenData = expoPushToken?.data;
       useEffect(() => {
         const uploadToken = async () => {
           try {
-            if (expoPushToken && expoPushToken.data) {
-              const exists = await handleQueryToken("userTokens", expoPushToken.data);
-              if (!exists) {
-                const timestamp = Date.now().toString(36);
-                const randomPart = Math.random().toString(36).substring(2, 8);
-                const uniqueId = timestamp + randomPart;
-                await handleUploadFirestore(
-                  {
-                    token: expoPushToken.data,
-                    language,
-                    isIos: Platform.OS === "ios",
-                    projectId: Constants.expoConfig?.extra?.eas.projectId,
-                  },
-                  `userTokens/${uniqueId}`
-                );
-                console.log("Uploaded expo push token at startup to userTokens");
-              }
+            if (!tokenData) return;
+            const result = await upsertUserTokenMetadata(tokenData, {
+              language,
+              isIos: Platform.OS === "ios",
+              projectId: Constants.expoConfig?.extra?.eas.projectId,
+              source: "App.tsx:PushTokenUploader",
+            });
+            if (
+              result &&
+              !result.skipped &&
+              (result.updated > 0 || result.created > 0)
+            ) {
+              console.log("Synced expo push token at startup to userTokens", result);
             }
           } catch (e) {
             console.error("Failed to upload expo push token at startup", e);
           }
         };
         uploadToken();
-      }, [expoPushToken, language]);
+      }, [tokenData, language]);
       return null;
     };
     
     return (
-      <NavigationContainer>
-        <StatusBar style="light" />
-        <PushTokenUploader />
-        <RootNavigation />
+      <NavigationContainer
+        ref={navigationRef}
+        onReady={syncTelemetryScreen}
+        onStateChange={syncTelemetryScreen}
+      >
+        <PushNotificationsProvider>
+          <StatusBar style="light" />
+          <PushTokenUploader />
+          <RootNavigation />
+        </PushNotificationsProvider>
       </NavigationContainer>
     );
   };

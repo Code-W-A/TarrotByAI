@@ -6,6 +6,7 @@ import i18n from "../../i18n";
 
 export const createPaymentIntentTest = "createPaymentIntent"
 export const sendPdfEmail = "sendPdfEmail"
+export const sendPurchaseSupportEmail = "sendPurchaseSupportEmail"
 export const capturePaymentIntentTest = "capturePaymentIntent"
 export const createInvoiceAfterPaymentTest = "createInvoiceAfterPayment"
 

@@ -111,4 +111,7 @@ export const screenName = {
   VideoLibrary: "VideoLibrary",
   VideoPlayer: "VideoPlayer",
   VideoFavorites: "VideoFavorites",
+  VideoPremiumSubscription: "VideoPremiumSubscription",
+  AdminPdfGate: "AdminPdfGate",
+  AdminPdfGenerator: "AdminPdfGenerator",
 };

@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   View,
   Image,
@@ -7,10 +7,12 @@ import {
   Alert,
   ImageBackground,
   KeyboardAvoidingView,
+  AppState,
 } from "react-native";
 import { Button, SocialMediaLogin } from "../components/commonButton";
 import { GeneralProps } from "../interfaces/generalProps";
-import { Route, useRoute } from "@react-navigation/native";
+import { Route, useFocusEffect, useRoute } from "@react-navigation/native";
+import * as WebBrowser from "expo-web-browser";
 import { screenName } from "../utils/screenName";
 import {
   H6fontBoldPrimary,
@@ -81,7 +83,25 @@ import {
   userLocation,
 } from "../utils/firestoreUtils";
 import { useAuth } from "../context/AuthContext";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { usePushNotifications } from "../hooks/usePushNotifications";
+import {
+  getAuthEmailForAdminCheck,
+  isAdminEmail,
+} from "../features/adminPdf/adminAccess";
+import {
+  createPremiumBillingPortalSession,
+  fetchPremiumPublicConfig,
+  PremiumVideoApiError,
+} from "../features/video-library/services/premiumVideoApi";
+import { hasPremiumAccess } from "../features/video-library/utils/premiumAccess";
+import { getPremiumSubscriptionUiState } from "../features/video-library/utils/premiumSubscriptionUi";
+import PurchaseSupportModal from "../components/Astral/components/PurchaseSupportModal";
+
+const tr = (key: string, def: string) => {
+  const v = String(i18n.translate(key));
+  return v && v !== key ? v : def;
+};
 
 interface Props extends GeneralProps {
   route: Route<string, object | undefined>;
@@ -113,7 +133,16 @@ const TarrotSettings: React.FC<Props> = ({ navigation }): JSX.Element => {
   const lastNameValue = watch(formKeys.lastName);
 
   const route = useRoute();
-  const { setAsGuestUser, isGuestUser, userData, setUserData } = useAuth();
+  const { currentUser, setAsGuestUser, isGuestUser, userData, setUserData, refreshUserDataFromServer } =
+    useAuth() as {
+      currentUser: unknown;
+      setAsGuestUser: (v: boolean) => Promise<unknown>;
+      isGuestUser: boolean;
+      userData: Record<string, unknown> | null;
+      setUserData: (v: unknown) => void;
+      refreshUserDataFromServer?: () => Promise<unknown>;
+    };
+  const adminTapTimestampsRef = useRef<number[]>([]);
   const [currentPassword, setCurrentPassword] = useState("");
   const [registerType, setRegisterType] = useState("email");
   const [isLoading, setIsLoading] = useState(false);
@@ -122,6 +151,115 @@ const TarrotSettings: React.FC<Props> = ({ navigation }): JSX.Element => {
   const [showSnackBar, setShowSnackback] = useState(false);
   const [snackMessage, setSnackMessage] = useState("");
   const { isGranted, openNotificationSettings } = usePushNotifications();
+  const insets = useSafeAreaInsets();
+  const [subscriptionSystemEnabled, setSubscriptionSystemEnabled] = useState<
+    boolean | null
+  >(null);
+  const [premiumPortalLoading, setPremiumPortalLoading] = useState(false);
+  const [supportModalVisible, setSupportModalVisible] = useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
+      (async () => {
+        try {
+          const cfg = await fetchPremiumPublicConfig();
+          if (active) {
+            setSubscriptionSystemEnabled(cfg.subscriptionSystemEnabled === true);
+          }
+        } catch {
+          if (active) {
+            setSubscriptionSystemEnabled(null);
+          }
+        }
+        try {
+          await refreshUserDataFromServer?.();
+        } catch {
+          /* ignore */
+        }
+      })();
+      return () => {
+        active = false;
+      };
+    }, [refreshUserDataFromServer])
+  );
+
+  useEffect(() => {
+    const sub = AppState.addEventListener("change", (next) => {
+      if (next === "active") {
+        void refreshUserDataFromServer?.();
+      }
+    });
+    return () => sub.remove();
+  }, [refreshUserDataFromServer]);
+
+  const localeTag = i18n.locale?.split("-")[0] ?? "ro";
+  const showPremiumSection =
+    subscriptionSystemEnabled === true ||
+    subscriptionSystemEnabled === null ||
+    hasPremiumAccess(userData);
+  const premiumSubUi =
+    showPremiumSection && userData
+      ? getPremiumSubscriptionUiState(userData, localeTag)
+      : null;
+  const showPremiumManagementBlock =
+    !isGuestUser && Boolean(currentUser) && Boolean(userData) && premiumSubUi != null;
+
+  const openPremiumPortalFlow = async (flow: "default" | "cancel") => {
+    if (!currentUser) return;
+    setPremiumPortalLoading(true);
+    try {
+      const { url } = await createPremiumBillingPortalSession(
+        flow,
+        currentUser as any
+      );
+      if (!url) {
+        throw new Error("Missing portal URL");
+      }
+      await WebBrowser.openBrowserAsync(url);
+      await refreshUserDataFromServer?.();
+    } catch (e) {
+      const msg =
+        e instanceof PremiumVideoApiError
+          ? e.message
+          : e instanceof Error
+            ? e.message
+            : "Could not open billing portal.";
+      Alert.alert(
+        String(i18n.translate("premiumManageErrorTitle")),
+        msg
+      );
+    } finally {
+      setPremiumPortalLoading(false);
+    }
+  };
+
+  const adminEmail = useMemo(
+    () => getAuthEmailForAdminCheck(currentUser?.email, userData?.email),
+    [currentUser?.email, userData?.email]
+  );
+  const showFloatingAdminButton = useMemo(
+    () => isAdminEmail(adminEmail),
+    [adminEmail]
+  );
+
+  const handleFloatingAdminTap = () => {
+    if (!showFloatingAdminButton) {
+      return;
+    }
+
+    const now = Date.now();
+    const recentTaps = adminTapTimestampsRef.current.filter(
+      (timestamp) => now - timestamp <= 1000
+    );
+    recentTaps.push(now);
+    adminTapTimestampsRef.current = recentTaps;
+
+    if (recentTaps.length >= 3) {
+      adminTapTimestampsRef.current = [];
+      navigation.navigate(screenName.AdminPdfGate as any);
+    }
+  };
 
   let pwd = watch("password");
   const auth = authentication;
@@ -357,18 +495,28 @@ const TarrotSettings: React.FC<Props> = ({ navigation }): JSX.Element => {
                               txtColor={colors.white}
                             />
                           )}
+                          <Button
+                            disabled={false}
+                            funCallback={() => setSupportModalVisible(true)}
+                            borderWidth={0.2}
+                            bgColor={colors.gold}
+                            label={String(i18n.translate("settingsSupportButton"))}
+                            borderColor={colors.white}
+                            success={true}
+                            style={{ marginTop: 16, width: "100%" }}
+                            txtColor={colors.white}
+                          />
                         </View>
                       </View>
                     </View>
                   </>
                 ) : (
-                  <>
+                  <View style={{ flex: 1, width: "100%" }}>
                     <View
                       style={{
-                        display: "flex",
-                        justifyContent: "center",
+                        paddingVertical: 16,
                         alignItems: "center",
-                        height: "30%",
+                        flexShrink: 0,
                       }}
                     >
                       <H6fontBoldWhite>
@@ -376,7 +524,18 @@ const TarrotSettings: React.FC<Props> = ({ navigation }): JSX.Element => {
                       </H6fontBoldWhite>
                     </View>
 
-                    <ScrollView style={{ height: "70%" }}>
+                    <ScrollView
+                      style={{ flex: 1 }}
+                      contentContainerStyle={[
+                        styles.settingsScrollContent,
+                        {
+                          paddingBottom:
+                            24 + insets.bottom + 90,
+                        },
+                      ]}
+                      keyboardShouldPersistTaps="handled"
+                      showsVerticalScrollIndicator={false}
+                    >
                       <View
                         style={{
                           display: "flex",
@@ -553,18 +712,8 @@ const TarrotSettings: React.FC<Props> = ({ navigation }): JSX.Element => {
                             />
                           )}
                       </View>
-                      <View
-                        style={{
-                          width: "100%",
-                          alignSelf: "center",
-
-                          flex: 1,
-                          justifyContent: "center",
-                          alignItems: "center",
-                          maxHeight: "10%",
-                          marginTop: "30%",
-                        }}
-                      >
+                      <CommonLineView />
+                      <View style={styles.settingsActions}>
                         <Button
                           disabled={false}
                           funCallback={handleSubmit(onsubmit)}
@@ -621,6 +770,222 @@ const TarrotSettings: React.FC<Props> = ({ navigation }): JSX.Element => {
                             txtColor={colors.white}
                           />
                         )}
+                        <Button
+                          disabled={false}
+                          funCallback={() => setSupportModalVisible(true)}
+                          borderWidth={0.2}
+                          bgColor={colors.gold}
+                          label={String(i18n.translate("settingsSupportButton"))}
+                          borderColor={colors.white}
+                          success={true}
+                          style={{ marginTop: 16, width: "100%" }}
+                          txtColor={colors.white}
+                        />
+                        {showPremiumManagementBlock && premiumSubUi ? (
+                          <>
+                            {premiumSubUi.scheduledCancelBanner ? (
+                              <>
+                                <H6fontBoldPrimary
+                                  style={{
+                                    textAlign: "center",
+                                    marginTop: 16,
+                                    marginBottom: 8,
+                                  }}
+                                >
+                                  {tr(
+                                    "settingsPremiumScheduledCancelTitle",
+                                    ""
+                                  )}
+                                </H6fontBoldPrimary>
+                                <H7fontMediumPrimary
+                                  style={{
+                                    textAlign: "center",
+                                    marginBottom: 16,
+                                  }}
+                                >
+                                  {String(
+                                    i18n.translate(
+                                      "settingsPremiumScheduledCancelBody",
+                                      {
+                                        date:
+                                          premiumSubUi.periodEndFormatted ||
+                                          "—",
+                                      }
+                                    )
+                                  )}
+                                </H7fontMediumPrimary>
+                              </>
+                            ) : null}
+                            {premiumSubUi.canceledWithResidualAccess &&
+                            !premiumSubUi.scheduledCancelBanner ? (
+                              <H7fontMediumPrimary
+                                style={{
+                                  textAlign: "center",
+                                  marginTop: 16,
+                                  marginBottom: 16,
+                                }}
+                              >
+                                {String(
+                                  i18n.translate(
+                                    "settingsPremiumCanceledAccessUntil",
+                                    {
+                                      date:
+                                        premiumSubUi.periodEndFormatted ||
+                                        "—",
+                                    }
+                                  )
+                                )}
+                              </H7fontMediumPrimary>
+                            ) : null}
+                            {premiumSubUi.premiumNow &&
+                            !premiumSubUi.showRenewHint &&
+                            !premiumSubUi.scheduledCancelBanner &&
+                            !premiumSubUi.canceledWithResidualAccess ? (
+                              <H7fontMediumPrimary
+                                style={{
+                                  textAlign: "center",
+                                  marginTop: 16,
+                                  marginBottom: 16,
+                                }}
+                              >
+                                {String(
+                                  i18n.translate("settingsPremiumActiveUntil", {
+                                    date:
+                                      premiumSubUi.periodEndFormatted || "—",
+                                  })
+                                )}
+                              </H7fontMediumPrimary>
+                            ) : null}
+                            {premiumSubUi.showRenewHint ? (
+                              <H7fontMediumPrimary
+                                style={{
+                                  textAlign: "center",
+                                  marginTop: 16,
+                                  marginBottom: 12,
+                                }}
+                              >
+                                {tr(
+                                  "settingsPremiumRenewHint",
+                                  "You don't have an active premium subscription."
+                                )}
+                              </H7fontMediumPrimary>
+                            ) : null}
+                            {premiumSubUi.showRenewHint ? (
+                              <Button
+                                disabled={false}
+                                funCallback={() => {
+                                  navigation.navigate(
+                                    screenName.VideoPremiumSubscription as any
+                                  );
+                                }}
+                                borderWidth={0.2}
+                                bgColor={colors.gold}
+                                label={tr(
+                                  "settingsPremiumRenewCta",
+                                  "Subscribe again"
+                                )}
+                                borderColor={colors.white}
+                                success={true}
+                                style={{ marginTop: 8, width: "100%" }}
+                                txtColor={colors.white}
+                              />
+                            ) : null}
+                            {premiumSubUi.scheduledCancelBanner ? (
+                              <>
+                                <Button
+                                  disabled={premiumPortalLoading}
+                                  funCallback={() => {
+                                    void openPremiumPortalFlow("default");
+                                  }}
+                                  borderWidth={0.2}
+                                  bgColor={colors.gold}
+                                  label={tr(
+                                    "settingsPremiumReactivateCta",
+                                    "Reactivate subscription"
+                                  )}
+                                  borderColor={colors.white}
+                                  success={true}
+                                  style={{ marginTop: 8, width: "100%" }}
+                                  txtColor={colors.white}
+                                />
+                                <Button
+                                  disabled={premiumPortalLoading}
+                                  funCallback={() => {
+                                    void openPremiumPortalFlow("default");
+                                  }}
+                                  borderWidth={0.2}
+                                  bgColor={colors.primary3}
+                                  label={tr(
+                                    "settingsPremiumOpenBillingPortal",
+                                    "Open Stripe billing portal"
+                                  )}
+                                  borderColor={colors.white}
+                                  success={true}
+                                  style={{ marginTop: 16, width: "100%" }}
+                                  txtColor={colors.white}
+                                />
+                              </>
+                            ) : null}
+                            {premiumSubUi.canceledWithResidualAccess &&
+                            !premiumSubUi.scheduledCancelBanner ? (
+                              <Button
+                                disabled={premiumPortalLoading}
+                                funCallback={() => {
+                                  void openPremiumPortalFlow("default");
+                                }}
+                                borderWidth={0.2}
+                                bgColor={colors.gold}
+                                label={tr(
+                                  "settingsPremiumOpenBillingPortal",
+                                  "Open Stripe billing portal"
+                                )}
+                                borderColor={colors.white}
+                                success={true}
+                                style={{ marginTop: 8, width: "100%" }}
+                                txtColor={colors.white}
+                              />
+                            ) : null}
+                            {premiumSubUi.showCancelButton ? (
+                              <Button
+                                disabled={premiumPortalLoading}
+                                funCallback={() => {
+                                  void openPremiumPortalFlow("cancel");
+                                }}
+                                borderWidth={0.2}
+                                bgColor={colors.primary3}
+                                label={tr(
+                                  "premiumCancelSubscription",
+                                  "Cancel subscription"
+                                )}
+                                borderColor={colors.white}
+                                success={true}
+                                style={{ marginTop: 16, width: "100%" }}
+                                txtColor={colors.white}
+                              />
+                            ) : null}
+                            {!premiumSubUi.showRenewHint &&
+                            !premiumSubUi.scheduledCancelBanner &&
+                            !premiumSubUi.canceledWithResidualAccess &&
+                            !premiumSubUi.showCancelButton ? (
+                              <Button
+                                disabled={premiumPortalLoading}
+                                funCallback={() => {
+                                  void openPremiumPortalFlow("default");
+                                }}
+                                borderWidth={0.2}
+                                bgColor={colors.gold}
+                                label={tr(
+                                  "settingsPremiumOpenBillingPortal",
+                                  "Open Stripe billing portal"
+                                )}
+                                borderColor={colors.white}
+                                success={true}
+                                style={{ marginTop: 16, width: "100%" }}
+                                txtColor={colors.white}
+                              />
+                            ) : null}
+                          </>
+                        ) : null}
                         <View>
                           <View style={styles.infoTextViewStyle}>
                             <TouchableOpacity
@@ -671,7 +1036,7 @@ const TarrotSettings: React.FC<Props> = ({ navigation }): JSX.Element => {
                         </View>
                       </View>
                     </ScrollView>
-                  </>
+                  </View>
                 )}
               </View>
             </KeyboardAvoidingView>
@@ -687,6 +1052,16 @@ const TarrotSettings: React.FC<Props> = ({ navigation }): JSX.Element => {
               setCurrentPassword={setCurrentPassword}
               handleSubmit={handleDelete}
             />
+            <PurchaseSupportModal
+              visible={supportModalVisible}
+              onDismiss={() => setSupportModalVisible(false)}
+              defaultProductCode="other"
+              language={localeTag}
+              supportScreenName="TarrotSettings"
+              supportSourceSection="settings_app_support"
+              titleTranslationKey="settingsSupportModalTitle"
+              introTranslationKey="settingsSupportModalIntro"
+            />
             {showSnackBar && (
               <SnackBar
                 showSnackBar={showSnackBar}
@@ -695,6 +1070,15 @@ const TarrotSettings: React.FC<Props> = ({ navigation }): JSX.Element => {
                 bottom={"13%"}
               />
             )}
+            {showFloatingAdminButton ? (
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={handleFloatingAdminTap}
+                style={styles.floatingAdminButton}
+              >
+                <MaterialIcons name="settings" size={22} color="#FFD700" />
+              </TouchableOpacity>
+            ) : null}
           </ImageBackground>
         </MainContainer>
       </Fragment>
@@ -715,6 +1099,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 15,
     justifyContent: "center",
+  },
+  settingsScrollContent: {
+    flexGrow: 1,
+  },
+  settingsActions: {
+    width: "100%",
+    alignSelf: "center",
+    paddingTop: 24,
+    alignItems: "center",
   },
   infoTextViewStyle: {
     paddingTop: 10,
@@ -798,5 +1191,19 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: 'LoraBold',
     letterSpacing: 0.1,
+  },
+  floatingAdminButton: {
+    position: "absolute",
+    top: 14,
+    right: 14,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: "#FFD700",
+    backgroundColor: "rgba(0, 0, 0, 0.45)",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 1000,
   },
 });

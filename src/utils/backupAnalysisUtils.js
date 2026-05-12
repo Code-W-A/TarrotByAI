@@ -6,9 +6,7 @@ import {
   setDoc,
   arrayUnion,
   arrayRemove,
-  getDoc,
   addDoc,
-  getDocs,
   deleteDoc,
   writeBatch,
   where,
@@ -16,11 +14,322 @@ import {
   collectionGroup,
   startAt,
 } from "firebase/firestore";
+import { getFunctions, httpsCallable } from "firebase/functions";
 import { authentication, db } from "../../firebase";
+import { trackedGetDocs } from "./firestoreReadTelemetry";
 
 // ------ BACKUP ANALIZE ----
 import AsyncStorage from "@react-native-async-storage/async-storage";
 // ------------- BACKUP ANALIZE ASTROGRAME ------------
+
+const ENTITLED_STATUSES = new Set([
+  "succeeded",
+  "captured",
+  "paid",
+  "verified",
+  "legacy_imported",
+]);
+const ENTITLEMENT_REFRESH_COOLDOWN_MS = 15000;
+let lastEntitlementRefreshAt = 0;
+let lastEntitlementRefreshResult = {
+  entitlements: [],
+  changedKeys: [],
+};
+
+const asAnalysisArray = (value) => {
+  if (!value) {
+    return [];
+  }
+
+  if (Array.isArray(value)) {
+    return value.filter((item) => item && typeof item === "object");
+  }
+
+  return typeof value === "object" ? [value] : [];
+};
+
+const loadStoredJson = async (key) => {
+  try {
+    const rawValue = await AsyncStorage.getItem(key);
+    return rawValue ? JSON.parse(rawValue) : null;
+  } catch (error) {
+    console.error(`Error parsing AsyncStorage key ${key}:`, error);
+    return null;
+  }
+};
+
+const saveStoredJsonIfChanged = async (key, previousValue, nextValue) => {
+  try {
+    const previousSerialized = JSON.stringify(previousValue ?? null);
+    const nextSerialized = JSON.stringify(nextValue ?? null);
+
+    if (previousSerialized === nextSerialized) {
+      return false;
+    }
+
+    await AsyncStorage.setItem(key, nextSerialized);
+    return true;
+  } catch (error) {
+    console.error(`Error writing AsyncStorage key ${key}:`, error);
+    return false;
+  }
+};
+
+export const loadLocalAstrogramaAnalyses = async () => {
+  const userData = await loadStoredJson("userData");
+  const personsDataAstrograma = await loadStoredJson("personsDataAstrograma");
+
+  return {
+    personalDocs: asAnalysisArray(userData),
+    othersDocs: asAnalysisArray(personsDataAstrograma),
+  };
+};
+
+export const loadLocalSinastrieAnalyses = async () => {
+  const personsData = await loadStoredJson("personsData");
+  const personsDataOthers = await loadStoredJson("personsDataOthers");
+
+  return {
+    onePersonDocs: asAnalysisArray(personsData),
+    othersDocs: asAnalysisArray(personsDataOthers),
+  };
+};
+
+const resolveEntitlementLookupContact = async () => {
+  const userDetails = await loadStoredJson("userDetails");
+  const authUser = authentication?.currentUser || null;
+
+  return {
+    phone: userDetails?.phone || authUser?.phoneNumber || "",
+    email: userDetails?.email || authUser?.email || "",
+  };
+};
+
+export const retrievePurchaseEntitlementsByContact = async () => {
+  const { phone, email } = await resolveEntitlementLookupContact();
+
+  if (!phone && !email) {
+    console.log(
+      "[ENTITLEMENTS] Skip lookup because both phone and email are missing."
+    );
+    return [];
+  }
+
+  try {
+    const functions = getFunctions();
+    const getPurchaseEntitlements = httpsCallable(
+      functions,
+      "getPurchaseEntitlementsByContact"
+    );
+    const response = await getPurchaseEntitlements({ phone, email });
+    console.log("[ENTITLEMENTS] Retrieved entitlements by contact", {
+      hasPhone: Boolean(phone),
+      hasEmail: Boolean(email),
+      count: asAnalysisArray(response?.data?.entitlements).length,
+    });
+    return asAnalysisArray(response?.data?.entitlements);
+  } catch (error) {
+    console.error("Error retrieving purchase entitlements:", error);
+    return [];
+  }
+};
+
+export const mergeAnalysesById = (...sources) => {
+  const mergedById = new Map();
+
+  sources.forEach((source) => {
+    asAnalysisArray(source).forEach((item) => {
+      const analysisId = item?.id || item?.originalId;
+      if (!analysisId) {
+        return;
+      }
+
+      const existing = mergedById.get(analysisId) || {};
+      mergedById.set(analysisId, {
+        ...existing,
+        ...item,
+        id: analysisId,
+      });
+    });
+  });
+
+  return Array.from(mergedById.values());
+};
+
+const buildEntitlementMap = (entitlements) => {
+  const entitledByAnalysisId = new Map();
+
+  asAnalysisArray(entitlements).forEach((entitlement) => {
+    const analysisId =
+      entitlement?.analysis?.analysisId ||
+      entitlement?.analysisId ||
+      entitlement?.metadata?.analysisId;
+    const normalizedStatus = String(entitlement?.status || "").toLowerCase();
+
+    if (analysisId && ENTITLED_STATUSES.has(normalizedStatus)) {
+      entitledByAnalysisId.set(String(analysisId), entitlement);
+    }
+  });
+
+  return entitledByAnalysisId;
+};
+
+const applyEntitlementToAnalysisItem = (analysis, entitledByAnalysisId) => {
+  if (!analysis || typeof analysis !== "object") {
+    return analysis;
+  }
+
+  const entitlement = entitledByAnalysisId.get(String(analysis?.id || ""));
+  if (!entitlement) {
+    return analysis;
+  }
+
+  return {
+    ...analysis,
+    isPaid: true,
+    entitlementStatus: entitlement.status || "succeeded",
+    entitlementTransactionId: entitlement.transactionId || "",
+  };
+};
+
+export const applyEntitlementsToAnalyses = (analyses, entitlements) => {
+  const entitledByAnalysisId = buildEntitlementMap(entitlements);
+
+  return asAnalysisArray(analyses).map((analysis) => {
+    return applyEntitlementToAnalysisItem(analysis, entitledByAnalysisId);
+  });
+};
+
+const applyEntitlementsToStoredValue = (storedValue, entitlements) => {
+  const entitledByAnalysisId = buildEntitlementMap(entitlements);
+
+  if (Array.isArray(storedValue)) {
+    return storedValue.map((analysis) =>
+      applyEntitlementToAnalysisItem(analysis, entitledByAnalysisId)
+    );
+  }
+
+  if (storedValue && typeof storedValue === "object") {
+    return applyEntitlementToAnalysisItem(storedValue, entitledByAnalysisId);
+  }
+
+  return storedValue;
+};
+
+export const refreshLocalAnalysisAccessFromEntitlements = async (
+  options = {}
+) => {
+  try {
+    const forceRefresh = options?.force === true;
+    const now = Date.now();
+
+    if (
+      !forceRefresh &&
+      lastEntitlementRefreshAt &&
+      now - lastEntitlementRefreshAt < ENTITLEMENT_REFRESH_COOLDOWN_MS
+    ) {
+      console.log("[ENTITLEMENTS] Using cached local refresh result", {
+        ageMs: now - lastEntitlementRefreshAt,
+      });
+      return lastEntitlementRefreshResult;
+    }
+
+    const entitlements = await retrievePurchaseEntitlementsByContact();
+    if (!entitlements.length) {
+      console.log(
+        "[ENTITLEMENTS] No entitlements found. Local purchase flags remain unchanged."
+      );
+      lastEntitlementRefreshAt = now;
+      lastEntitlementRefreshResult = {
+        entitlements: [],
+        changedKeys: [],
+      };
+      return lastEntitlementRefreshResult;
+    }
+
+    const storageKeys = [
+      "userData",
+      "personsDataAstrograma",
+      "personsData",
+      "personsDataOthers",
+    ];
+
+    const storedEntries = await Promise.all(
+      storageKeys.map(async (key) => ({
+        key,
+        value: await loadStoredJson(key),
+      }))
+    );
+
+    const changedKeys = [];
+
+    for (const entry of storedEntries) {
+      const nextValue = applyEntitlementsToStoredValue(entry.value, entitlements);
+      const changed = await saveStoredJsonIfChanged(
+        entry.key,
+        entry.value,
+        nextValue
+      );
+
+      if (changed) {
+        changedKeys.push(entry.key);
+      }
+    }
+
+    console.log("[ENTITLEMENTS] Local analysis access refresh finished", {
+      entitlementCount: entitlements.length,
+      changedKeys,
+    });
+
+    lastEntitlementRefreshAt = now;
+    lastEntitlementRefreshResult = {
+      entitlements,
+      changedKeys,
+    };
+    return lastEntitlementRefreshResult;
+  } catch (error) {
+    console.error(
+      "[ENTITLEMENTS] Failed to refresh local analysis access from entitlements:",
+      error
+    );
+    return {
+      entitlements: [],
+      changedKeys: [],
+    };
+  }
+};
+
+export const findMatchingAnalysis = (analyses, referenceAnalysis) => {
+  const normalizedAnalyses = asAnalysisArray(analyses);
+  if (!normalizedAnalyses.length || !referenceAnalysis) {
+    return null;
+  }
+
+  const referenceId = String(
+    referenceAnalysis?.id || referenceAnalysis?.originalId || ""
+  );
+  if (referenceId) {
+    const byId = normalizedAnalyses.find(
+      (analysis) =>
+        String(analysis?.id || analysis?.originalId || "") === referenceId
+    );
+    if (byId) {
+      return byId;
+    }
+  }
+
+  const referenceFullName = String(referenceAnalysis?.full_name || "").trim();
+  if (referenceFullName) {
+    const byFullName = normalizedAnalyses.find(
+      (analysis) => String(analysis?.full_name || "").trim() === referenceFullName
+    );
+    if (byFullName) {
+      return byFullName;
+    }
+  }
+
+  return null;
+};
 
 /* Backup pentru analiza personală (userData) */
 export const backupAnalizeAstrogramaNatalaPersonalaToFirestore = async () => {
@@ -58,7 +367,7 @@ export const backupAnalizeAstrogramaNatalaPersonalaToFirestore = async () => {
       console.log(
         "🔍 [Personala] Executăm query pentru backup-urile existente..."
       );
-      const personalSnapshotAll = await getDocs(personalQueryAll);
+      const personalSnapshotAll = await trackedGetDocs(personalQueryAll);
 
       let backupExistsForCurrent = false;
       // Ștergem documentele vechi care nu au originalId egal cu noul parsedUserData.id
@@ -112,7 +421,7 @@ export const backupAnalizeAstrogramaNatalaPersonalaToFirestore = async () => {
           personalCollectionRef,
           where("originalId", "==", parsedUserData.id)
         );
-        const personalSnapshot = await getDocs(personalQuery);
+        const personalSnapshot = await trackedGetDocs(personalQuery);
         const existingDoc = personalSnapshot.docs[0];
         const firestoreData = existingDoc.data();
         console.log("ℹ️ [Personala] Backup existent găsit:", firestoreData);
@@ -188,7 +497,7 @@ export const backupAnalizeAstrogramaNatalaOthersToFirestore = async () => {
           othersCollectionRef,
           where("originalId", "==", analysis.id)
         );
-        const othersSnapshot = await getDocs(othersQuery);
+        const othersSnapshot = await trackedGetDocs(othersQuery);
         console.log(
           `📄 [Others] Pentru analiza cu id ${analysis.id}, s-au găsit: ${othersSnapshot.docs.length} documente.`
         );
@@ -356,7 +665,7 @@ export const retrieveAnalizeAstrogramaNatalaPersonalaByPhone = async () => {
       where("phone", "==", phone)
     );
     console.log("🔍 [Retrieval Personala] Executăm query...");
-    const personalSnapshot = await getDocs(personalQuery);
+    const personalSnapshot = await trackedGetDocs(personalQuery);
     const personalDocs = personalSnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
@@ -396,7 +705,7 @@ export const retrieveAnalizeAstrogramaNatalaOthersByPhone = async () => {
     const othersCollectionRef = collection(db, "analizeAstrogramaNatalaOthers");
     const othersQuery = query(othersCollectionRef, where("phone", "==", phone));
     console.log("🔍 [Retrieval Others] Executăm query...");
-    const othersSnapshot = await getDocs(othersQuery);
+    const othersSnapshot = await trackedGetDocs(othersQuery);
     const othersDocs = othersSnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
@@ -451,7 +760,7 @@ export const backupAnalizeSinastrieOnePersonToFirestore = async () => {
           onePersonCollectionRef,
           where("originalId", "==", person.id)
         );
-        const snapshot = await getDocs(q);
+        const snapshot = await trackedGetDocs(q);
         if (snapshot.empty) {
           console.log(
             `🆕 [Sinastrie One] Nu există backup pentru persoana cu id ${person.id}. Se creează backup.`
@@ -549,7 +858,7 @@ export const backupAnalizeSinastrieOthersToFirestore = async () => {
           othersCollectionRef,
           where("originalId", "==", analysis.id)
         );
-        const snapshot = await getDocs(q);
+        const snapshot = await trackedGetDocs(q);
         if (snapshot.empty) {
           console.log(
             `🆕 [Sinastrie Others] Nu există backup pentru analiza cu id ${analysis.id}. Se creează backup.`
@@ -636,7 +945,7 @@ export const retrieveAnalizeSinastrieOnePersonByPhone = async () => {
     const collectionRef = collection(db, "analizeSinastrieOnePerson");
     const q = query(collectionRef, where("phone", "==", phone));
     console.log("🔍 [Retrieval Sinastrie One] Executăm query...");
-    const snapshot = await getDocs(q);
+    const snapshot = await trackedGetDocs(q);
     const docs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     console.log("✅ [Retrieval Sinastrie One] Documente găsite:", docs);
     return docs;
@@ -672,7 +981,7 @@ export const retrieveAnalizeSinastrieOthersByPhone = async () => {
     const collectionRef = collection(db, "analizeSinastrieOthers");
     const q = query(collectionRef, where("phone", "==", phone));
     console.log("🔍 [Retrieval Sinastrie Others] Executăm query...");
-    const snapshot = await getDocs(q);
+    const snapshot = await trackedGetDocs(q);
     const docs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     console.log("✅ [Retrieval Sinastrie Others] Documente găsite:", docs);
     return docs;

@@ -56,6 +56,7 @@ import i18n from "../../../../i18n";
 import { useLanguage } from "../../../context/LanguageContext";
 import { capitalizeFirstLetter } from "../../../utils/stringUtils";
 import { fetchSinastrieData } from "../../../utils/AstralUtils/fetchSinastrieDate";
+import { mergeAnalysisWithPreservedMeta } from "../../../utils/analysisIdentityUtils";
 import { TextInput } from "react-native";
 import DayPickerModal from '../../../components/DayPickerModal';
 import MonthPickerModal from '../../../components/MonthPickerModal';
@@ -405,6 +406,10 @@ function NewPersonAstrograma({ navigation, route }) {
     try {
       const personsD = await AsyncStorage.getItem("personsDataAstrograma");
       const parsedDataPersons = personsD ? JSON.parse(personsD) : [];
+      const existingPersonData =
+        isEditMode && route.params?.editIndex !== undefined
+          ? parsedDataPersons[route.params.editIndex]
+          : route.params?.personData || null;
 
       setIsLoading(true);
       const birthDate = moment(selectedDate, "DD-MM-YYYY");
@@ -438,38 +443,46 @@ function NewPersonAstrograma({ navigation, route }) {
       const formattedDate = currentDate.toISOString().split("T")[0];
       const generateUniqueId = () =>
         "_" + Math.random().toString(36).substr(2, 9);
-      const userData = {
-        type: "othersAstrograma",
-        id: generateUniqueId(), // Adaugă un ID unic
-        full_name: name,
-        day,
-        month,
-        year,
-        hour: birthTime.hour(),
-        min: birthTime.minute(),
-        sec: birthTime.second(),
-        selectedDate,
-        selectedTime,
-        gender,
-        place,
-        adress,
-        localitate,
-        tara,
-        lat,
-        long,
-        // tzone: timezoneOffset + 1,
-        tzone: timezoneOffset,
-        // timeZoneData.data.timeZoneId === "Europe/Bucharest"
-        //   ? timezoneOffset + 1
-        //   : timezoneOffset,
-        // tzone: timezone,
-        actualLanguage: "en",
-        actualLanguageAstrograma: "en",
-        actualLanguageSinastrie: "en",
-        zodiacSign,
-        zodiacSignFristUpperCase,
-        dataHoroscop: formattedDate,
-      };
+      const generatedId = generateUniqueId();
+      const userData = mergeAnalysisWithPreservedMeta(
+        {
+          type: "othersAstrograma",
+          id: generatedId, // Adaugă un ID unic doar pentru creare
+          full_name: name,
+          day,
+          month,
+          year,
+          hour: birthTime.hour(),
+          min: birthTime.minute(),
+          sec: birthTime.second(),
+          selectedDate,
+          selectedTime,
+          gender,
+          place,
+          adress,
+          localitate,
+          tara,
+          lat,
+          long,
+          // tzone: timezoneOffset + 1,
+          tzone: timezoneOffset,
+          // timeZoneData.data.timeZoneId === "Europe/Bucharest"
+          //   ? timezoneOffset + 1
+          //   : timezoneOffset,
+          // tzone: timezone,
+          actualLanguage: "en",
+          actualLanguageAstrograma: "en",
+          actualLanguageSinastrie: "en",
+          zodiacSign,
+          zodiacSignFristUpperCase,
+          dataHoroscop: formattedDate,
+        },
+        existingPersonData,
+        {
+          id: generatedId,
+          type: "othersAstrograma",
+        }
+      );
 
       // const urls = {
       //   natalWheelChart:

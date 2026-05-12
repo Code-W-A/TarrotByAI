@@ -2,7 +2,13 @@ import { LinearGradient } from "expo-linear-gradient";
 import { ImageBackground } from "react-native";
 
 import React, { useEffect, useState } from "react";
-import { Platform, SafeAreaView, StyleSheet, View } from "react-native";
+import {
+  Platform,
+  SafeAreaView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import {
   Button,
   Caption,
@@ -58,6 +64,7 @@ import Scorpio from "../../../svgs/zodiac/Scorpio";
 import Taurus from "../../../svgs/zodiac/Taurus";
 import Virgo from "../../../svgs/zodiac/Virgo";
 import ZodiacComponent from "../../../components/Astral/components/ZodiacComponent";
+import PurchaseSupportModal from "../../../components/Astral/components/PurchaseSupportModal";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const SubHeading = () => {
@@ -99,6 +106,7 @@ function PersonsScreen({ navigation }) {
 
   const [loaded, setLoaded] = useState(false);
   const [userD, setUserD] = useState({});
+  const [supportModalVisible, setSupportModalVisible] = useState(false);
   const route = useNavigation();
 
   // ADS COMPLETELY REMOVED - useEffect commented out
@@ -184,7 +192,7 @@ function PersonsScreen({ navigation }) {
           <Surface
             style={[
               styles.surfaceLeft,
-              { backgroundColor: "transparent", height: 140 },
+              { backgroundColor: "transparent", height: 180 },
             ]}
           >
             <View
@@ -223,6 +231,14 @@ function PersonsScreen({ navigation }) {
                   >
                     {i18n.translate("update")}
                   </Button>
+                  <TouchableOpacity
+                    style={styles.supportLinkButton}
+                    onPress={() => setSupportModalVisible(true)}
+                  >
+                    <Text style={styles.supportLinkText}>
+                      {i18n.translate("contactSupportCta")}
+                    </Text>
+                  </TouchableOpacity>
                 </View>
               </View>
               <View style={{ flex: 0.6 }} />
@@ -273,6 +289,12 @@ function PersonsScreen({ navigation }) {
           </Surface>
           <View style={{ height: 20 }} />
         </ScrollViewFadeFirst>
+        <PurchaseSupportModal
+          visible={supportModalVisible}
+          onDismiss={() => setSupportModalVisible(false)}
+          defaultProductCode="natal_astrogram"
+          language={userD?.actualLanguage || i18n.locale || "ro"}
+        />
       </SafeAreaView>
     </ImageBackground>
   );
@@ -323,6 +345,16 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 25,
     flex: 1,
     flexDirection: "row",
+  },
+  supportLinkButton: {
+    marginTop: 8,
+    alignSelf: "flex-start",
+  },
+  supportLinkText: {
+    fontSize: 13,
+    color: "#FFE8A3",
+    textDecorationLine: "underline",
+    fontWeight: "600",
   },
 });
 

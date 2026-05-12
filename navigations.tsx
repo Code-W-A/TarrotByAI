@@ -81,8 +81,6 @@ import NavBarBottom from "./src/components/Navbar";
 import { StyleSheet, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import TarrotSettings from "./src/pages/TarrotSettings";
-import { authentication } from "./firebase";
-import { onAuthStateChanged } from "firebase/auth";
 import HistoryTarrot from "./src/pages/HistoryTarrot";
 import LanguageSelectScreen from "./src/pages/LangueageSelect";
 import { useAuth } from "./src/context/AuthContext";
@@ -104,6 +102,7 @@ import SavedNews from "./src/pages/blog/SavedNews";
 import VideoLibraryScreen from "./src/features/video-library/screens/VideoLibraryScreen";
 import VideoPlayerScreen from "./src/features/video-library/screens/VideoPlayerScreen";
 import VideoFavoritesScreen from "./src/features/video-library/screens/VideoFavoritesScreen";
+import VideoPremiumSubscriptionScreen from "./src/features/video-library/screens/VideoPremiumSubscriptionScreen";
 import { CourseListScreen } from "./src/features/courses/screens/CourseListScreen";
 import { CourseDetailScreen } from "./src/features/courses/screens/CourseDetailScreen";
 import { PurchasedCoursesScreen } from "./src/features/courses/screens/PurchasedCoursesScreen";
@@ -132,6 +131,8 @@ import WebViewConsultatiiScreen from "./src/pages/doctors/WebViewConsultatiiScre
 import TarotMaineScreen from "./src/pages/doctors/TarotMainScreen";
 import NorocMainScreen from "./src/pages/doctors/NorocMainScreen";
 import MesajeMagiceMainScreen from "./src/pages/doctors/MesajeMagiceMainScreen";
+import AdminPdfGateScreen from "./src/pages/admin/AdminPdfGateScreen";
+import AdminPdfGeneratorScreen from "./src/pages/admin/AdminPdfGeneratorScreen";
 // import BirthDateScreen from "./src/pages/astral/initials/birth-date.screen";
 // import RelationshipScreen from "./src/pages/astral/initials/relationship.screen";
 // import SexScreen from "./src/pages/astral/initials/sex.screen";
@@ -145,27 +146,13 @@ interface NavigationProps {
 }
 
 const HomeNavigation = (props: NavigationProps) => {
-  const { currentUser, isGuestUser, setCurrentUser } = useAuth();
-  const [isUser, setIsUser] = useState(false);
+  const { currentUser, isGuestUser } = useAuth();
   const { isNavBarVisible } = useNavBarVisibility();
-  onAuthStateChanged(authentication, (user) => {
-    if (user) {
-      // User is signed in, you can use the 'user' object to get user information
-      // console.log("User is authenticated:", user);
-      setIsUser(true);
-      setCurrentUser(user);
-    } else {
-      // No user is signed in.
-      setIsUser(false);
-      console.log("User is not authenticated");
-    }
-  });
-  const handleCheckUserDetails = async () => {
-    const storedUserData = await AsyncStorage.getItem("userDetails");
-  };
-  useEffect(() => {
-    handleCheckUserDetails();
-  }, []);
+
+  // Use currentUser from AuthContext directly - it already manages auth state
+  // No need for separate onAuthStateChanged listener here (AuthContext handles it)
+  const isUser = Boolean(currentUser);
+
   return (
     <LinearGradient
       colors={["#000000", "#434343"]} // Înlocuiește cu culorile gradientului tău
@@ -213,10 +200,24 @@ const HomeNavigation = (props: NavigationProps) => {
         <Stack.Screen name={screenName.luckyColor} component={LuckyColor} />
         <Stack.Screen name={screenName.luckyNumber} component={LuckyNumber} />
 
+        <Stack.Screen
+          name={screenName.SettingsPage}
+          component={SettingsPage}
+        />
         <Stack.Screen name={"TarrotSettings"} component={TarrotSettings} />
         <Stack.Screen name={"TarotMaineScreen"} component={TarotMaineScreen} />
         <Stack.Screen name={"NorocMaineScreen"} component={NorocMainScreen} />
         <Stack.Screen name={"MesajeMagiceMainScreen"} component={MesajeMagiceMainScreen} />
+        <Stack.Screen
+          name={screenName.AdminPdfGate}
+          component={AdminPdfGateScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name={screenName.AdminPdfGenerator}
+          component={AdminPdfGeneratorScreen}
+          options={{ headerShown: false }}
+        />
         <Stack.Screen name={"News"} component={News} />
         <Stack.Screen name={"SavedNews"} component={SavedNews} />
         <Stack.Screen
@@ -230,6 +231,11 @@ const HomeNavigation = (props: NavigationProps) => {
         <Stack.Screen
           name={screenName.VideoPlayer}
           component={VideoPlayerScreen}
+        />
+        <Stack.Screen
+          name={screenName.VideoPremiumSubscription}
+          component={VideoPremiumSubscriptionScreen}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="CoursesList"

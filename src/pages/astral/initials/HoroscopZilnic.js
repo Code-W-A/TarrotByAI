@@ -109,6 +109,12 @@ const ProgressItemStyles = StyleSheet.create({
  * @constructor
  */
 const { width } = Dimensions.get("window");
+const normalizeLanguageCode = (lang) =>
+  String(lang || "")
+    .trim()
+    .toLowerCase()
+    .split("-")[0];
+
 function HoroscopZilnic({ navigation }) {
   const { language, changeLanguage, userData } = useLanguage();
   const {
@@ -295,10 +301,13 @@ function HoroscopZilnic({ navigation }) {
       }
       console.log("data....here", language);
       console.log("data....here", userData.actualLanguage);
-      if (language !== userData.actualLanguage) {
+      const targetLang = normalizeLanguageCode(language);
+      const sourceLang = normalizeLanguageCode(userData.actualLanguage);
+      if (targetLang && targetLang !== sourceLang) {
         setIsLoading(true);
-        console.log("language is not in userData....", language);
-        userData.actualLanguage = language;
+        console.log("language is not in userData....", targetLang);
+        const language = targetLang;
+        userData.actualLanguage = sourceLang || userData.actualLanguage || "auto";
 
         // DAILY TRANSLATIONS
         let dEmotions = await handleToTranslate(
@@ -610,6 +619,7 @@ function HoroscopZilnic({ navigation }) {
         userData.horoscopeResultsYearly.data.yearly_horoscope.luck[5] =
           yTipsCouples;
 
+        userData.actualLanguage = targetLang;
         await AsyncStorage.setItem("userData", JSON.stringify(userData));
       }
 

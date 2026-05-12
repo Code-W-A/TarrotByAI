@@ -4,6 +4,7 @@ import { WebView } from "react-native-webview";
 
 import type { SafeCourse } from "../../../types/courses";
 import { courseT } from "../courseI18n";
+import { IOS_COURSES_FREE_MODE_ENABLED } from "../iosCoursesFreeMode";
 
 interface CourseCardProps {
   course: SafeCourse;
@@ -39,6 +40,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course, locale, onPress 
   }, [course.previewVimeoId]);
 
   const useVimeoPreview = course.hasVimeoPreview && !course.hasCustomThumbnail && !!previewUrl;
+  const shouldShowPrice = !IOS_COURSES_FREE_MODE_ENABLED;
   const t = (key: Parameters<typeof courseT>[1]) => courseT(locale, key);
 
   return (
@@ -79,8 +81,10 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course, locale, onPress 
           {course.description || t("noDescription")}
         </Text>
 
-        <View style={styles.footer}>
-          <Text style={styles.priceText}>{formatPrice(course.price, course.currency, locale)}</Text>
+        <View style={[styles.footer, !shouldShowPrice ? styles.footerNoPrice : null]}>
+          {shouldShowPrice ? (
+            <Text style={styles.priceText}>{formatPrice(course.price, course.currency, locale)}</Text>
+          ) : null}
           <View style={styles.openButton}>
             <Text style={styles.openButtonText}>{t("open")}</Text>
           </View>
@@ -159,6 +163,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+  },
+  footerNoPrice: {
+    justifyContent: "flex-end",
   },
   priceText: {
     fontSize: 14,

@@ -19,6 +19,7 @@ import type { SafeCourse } from "../../../types/courses";
 import { CourseCard } from "../components/CourseCard";
 import { CourseCardSkeleton } from "../components/CourseSkeletons";
 import { courseT } from "../courseI18n";
+import { IOS_COURSES_FREE_MODE_ENABLED } from "../iosCoursesFreeMode";
 import { useCourses } from "../useCourses";
 
 const ROUTE_COURSE_DETAIL = "CoursesDetail";
@@ -34,6 +35,9 @@ export const CourseListScreen: React.FC = () => {
   const { language } = useLanguage() as { language: string };
   const { currentUser } = useAuth() as { currentUser?: { getIdToken?: () => Promise<string> } };
   const t = (key: Parameters<typeof courseT>[1]) => courseT(language, key);
+  const coursesSubtitleKey: Parameters<typeof courseT>[1] = IOS_COURSES_FREE_MODE_ENABLED
+    ? "coursesSubtitleIosFree"
+    : "coursesSubtitle";
 
   const getAuthToken = useCallback(async () => {
     if (!currentUser?.getIdToken) {
@@ -122,14 +126,16 @@ export const CourseListScreen: React.FC = () => {
           <View style={styles.heroContainer}>
             <Text style={styles.heroTitle}>{t("coursesTitle")}</Text>
             <Text style={styles.heroSubtitle}>
-              {t("coursesSubtitle")}
+              {t(coursesSubtitleKey)}
             </Text>
-            <TouchableOpacity
-              style={styles.purchasedCta}
-              onPress={() => navigation.navigate(ROUTE_COURSES_PURCHASED)}
-            >
-              <Text style={styles.purchasedCtaText}>{t("purchasedCourses")}</Text>
-            </TouchableOpacity>
+            {!IOS_COURSES_FREE_MODE_ENABLED ? (
+              <TouchableOpacity
+                style={styles.purchasedCta}
+                onPress={() => navigation.navigate(ROUTE_COURSES_PURCHASED)}
+              >
+                <Text style={styles.purchasedCtaText}>{t("purchasedCourses")}</Text>
+              </TouchableOpacity>
+            ) : null}
 
             {listError ? (
               <View style={styles.errorBanner}>

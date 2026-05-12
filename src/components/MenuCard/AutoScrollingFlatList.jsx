@@ -5,12 +5,12 @@ import LongCard from "./LongCard";
 import i18n from "../../../i18n";
 import { useNavigationState } from "../../context/NavigationContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { trackedGetDocs } from "../../utils/firestoreReadTelemetry";
 import {
   getFirestore,
   collection,
   query,
   where,
-  getDocs,
 } from "firebase/firestore";
 import { checkUserDataCompleteness } from "../../utils/userDataUtils";
 
@@ -70,7 +70,7 @@ const AutoScrollingFlatList = ({ interstitialAdLoaded, interstitial }) => {
           collection(getFirestore(), "analysisBought"),
           where("phone", "==", parsedUserDetails?.phone)
         );
-        const querySnapshot = await getDocs(phoneQuery);
+        const querySnapshot = await trackedGetDocs(phoneQuery);
         console.log("Firestore querySnapshot:", querySnapshot);
         let navigateToLearn = false;
 

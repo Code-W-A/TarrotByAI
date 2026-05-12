@@ -9,6 +9,51 @@ import {
   spiritualitate,
 } from "../constant";
 
+const TRANSLATE_TIMEOUT_MS = 12000;
+const TRANSIENT_HTTP_STATUSES = new Set([408, 429, 500, 502, 503, 504]);
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const normalizeLanguageCode = (lang) =>
+  String(lang || "")
+    .trim()
+    .toLowerCase()
+    .split("-")[0];
+
+const normalizeTranslateRequestOptions = (requestOptions = {}) => {
+  const timeoutMs = Number(requestOptions?.timeoutMs);
+  const maxAttempts = Number(requestOptions?.maxAttempts);
+  return {
+    timeoutMs:
+      Number.isFinite(timeoutMs) && timeoutMs > 0 ?
+        timeoutMs :
+        TRANSLATE_TIMEOUT_MS,
+    maxAttempts:
+      Number.isFinite(maxAttempts) && maxAttempts >= 1 ?
+        Math.floor(maxAttempts) :
+        2,
+  };
+};
+
+const fetchWithTimeout = async (url, options, timeoutMs = TRANSLATE_TIMEOUT_MS) =>
+  new Promise((resolve, reject) => {
+    const timeoutId = setTimeout(() => {
+      const timeoutError = new Error(`Translation request timeout after ${timeoutMs}ms`);
+      timeoutError.code = "ETIMEDOUT";
+      reject(timeoutError);
+    }, timeoutMs);
+
+    fetch(url, options)
+      .then((response) => {
+        clearTimeout(timeoutId);
+        resolve(response);
+      })
+      .catch((error) => {
+        clearTimeout(timeoutId);
+        reject(error);
+      });
+  });
+
 export const fetchChatResponse = async (userInput) => {
   const url = "https://chat-gpt26.p.rapidapi.com/";
   const options = {
@@ -129,13 +174,13 @@ export function prepareAstroData(userData) {
 }
 
 // HANDLE TRANSLATE
-const handleTranslate = async (text, target, actualLanguage) => {
+const handleTranslate = async (text, target, actualLanguage, requestOptions = {}) => {
   try {
-    const res = await gTranslateFetch(text, target, actualLanguage);
+    const res = await gTranslateFetch(text, target, actualLanguage, requestOptions);
     return res;
   } catch (err) {
     console.error("Error on translate.....:", err);
-    // Handle error (e.g., show error message to user)
+    return typeof text === "string" ? text : String(text ?? "");
   }
 };
 
@@ -152,8 +197,23 @@ const categories = {
   spiritualitateCategory: {},
 };
 
-export const handleToTranslate = async (textRoValue, l, actualLanguage) => {
-  const translation = await handleTranslate(textRoValue, l, actualLanguage);
+export const handleToTranslate = async (
+  textRoValue,
+  l,
+  actualLanguage,
+  requestOptions = {}
+) => {
+  const targetLanguage = normalizeLanguageCode(l);
+  const sourceLanguage = normalizeLanguageCode(actualLanguage);
+  if (targetLanguage && sourceLanguage && targetLanguage === sourceLanguage) {
+    return textRoValue;
+  }
+  const translation = await handleTranslate(
+    textRoValue,
+    l,
+    actualLanguage,
+    requestOptions
+  );
   return translation;
 };
 
@@ -223,7 +283,23 @@ export const handleToTranslate = async (textRoValue, l, actualLanguage) => {
 //   }
 // };
 
-export const gTranslateFallbackFetch = async (text, target) => {
+export const gTranslateFallbackFetch = async (
+  text,
+  target,
+  sourceLanguage,
+  requestOptions = {}
+) => {
+  const targetLanguage = normalizeLanguageCode(target);
+  const source = normalizeLanguageCode(sourceLanguage);
+  const safeText = typeof text === "string" ? text : String(text ?? "");
+  const { timeoutMs } = normalizeTranslateRequestOptions(requestOptions);
+  if (!targetLanguage) {
+    return safeText;
+  }
+  if (source && source === targetLanguage) {
+    return safeText;
+  }
+
   const fallbackUrl = "https://ai-translate.p.rapidapi.com/translate";
 
   try {
@@ -235,13 +311,17 @@ export const gTranslateFallbackFetch = async (text, target) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        texts: [text],
-        tl: target,
-        sl: "auto",
+        texts: [safeText],
+        tl: targetLanguage,
+        sl: source || "auto",
       }),
     };
 
-    const fallbackResponse = await fetch(fallbackUrl, fallbackOptions);
+    const fallbackResponse = await fetchWithTimeout(
+      fallbackUrl,
+      fallbackOptions,
+      timeoutMs
+    );
 
     if (!fallbackResponse.ok) {
       throw new Error(
@@ -262,42 +342,92 @@ export const gTranslateFallbackFetch = async (text, target) => {
       "Eroare la API-ul fallback:",
       fallbackError.message || fallbackError
     );
-    return text; // Fallback final: textul original
+    return safeText; // Fallback final: textul original
   }
 };
 
-export const gTranslateFetch = async (text, targetLanguage) => {
+export const gTranslateFetch = async (
+  text,
+  targetLanguage,
+  sourceLanguage,
+  requestOptions = {}
+) => {
+  const target = normalizeLanguageCode(targetLanguage);
+  const source = normalizeLanguageCode(sourceLanguage);
+  const safeText = typeof text === "string" ? text : String(text ?? "");
+  const { timeoutMs, maxAttempts } = normalizeTranslateRequestOptions(
+    requestOptions
+  );
+
+  if (!safeText || !target) {
+    return safeText;
+  }
+  if (source && source === target) {
+    return safeText;
+  }
+
   // URL-ul pentru API-ul RapidAPI Google Translate
   const url =
     "https://google-translate113.p.rapidapi.com/api/v1/translator/text";
 
-  const options = {
-    method: "POST",
-    headers: {
-      "x-rapidapi-key": "fdb30fac7dmshee22c632d48569ap1d9819jsna577a39fffd6",
-      "x-rapidapi-host": "google-translate113.p.rapidapi.com",
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from: "auto", // Detectează automat limba sursă
-      to: targetLanguage, // Limba țintă
-      text: text, // Textul care trebuie tradus
-    }),
-  };
+  let lastError = null;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const options = {
+      method: "POST",
+      headers: {
+        "x-rapidapi-key": "fdb30fac7dmshee22c632d48569ap1d9819jsna577a39fffd6",
+        "x-rapidapi-host": "google-translate113.p.rapidapi.com",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: source || "auto",
+        to: target,
+        text: safeText,
+      }),
+    };
 
-  try {
-    const response = await fetch(url, options);
-    if (!response.ok) {
-      throw new Error(`Eroare API: ${response.status}`);
+    try {
+      const response = await fetchWithTimeout(url, options, timeoutMs);
+      if (!response.ok) {
+        const error = new Error(`Eroare API: ${response.status}`);
+        error.status = response.status;
+        throw error;
+      }
+      const data = await response.json();
+      if (!data || !data.trans) {
+        throw new Error("Format răspuns neașteptat de la RapidAPI");
+      }
+      return data.trans;
+    } catch (error) {
+      lastError = error;
+      const shouldRetry =
+        attempt < maxAttempts &&
+        (error?.code === "ETIMEDOUT" ||
+          TRANSIENT_HTTP_STATUSES.has(error?.status));
+      if (shouldRetry) {
+        await sleep(250);
+        continue;
+      }
+      break;
     }
-    const data = await response.json();
-    if (!data || !data.trans) {
-      throw new Error("Format răspuns neașteptat de la RapidAPI");
-    }
-    return data.trans;
-  } catch (error) {
-    return text;
   }
+
+  const fallbackText = await gTranslateFallbackFetch(
+    safeText,
+    target,
+    source,
+    requestOptions
+  );
+  if (fallbackText !== safeText) {
+    return fallbackText;
+  }
+
+  console.warn("[translate] primary+fallback failed, returning original text", {
+    target,
+    source: source || "auto",
+    error: lastError?.message || String(lastError || "unknown"),
+  });
+  return safeText;
 };
 
 // export const gTranslateFetch = async (text, target) => {

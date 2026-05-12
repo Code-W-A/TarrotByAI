@@ -4,6 +4,7 @@ export type CourseTextKey =
   | "back"
   | "coursesTitle"
   | "coursesSubtitle"
+  | "coursesSubtitleIosFree"
   | "purchasedCourses"
   | "loadingCourses"
   | "loadCoursesErrorTitle"
@@ -89,6 +90,15 @@ export type CourseTextKey =
   | "billingState"
   | "billingPostalCode"
   | "billingCountry"
+  | "billingSelectCountry"
+  | "billingSelectCounty"
+  | "billingSelectLocality"
+  | "billingLocalityPickCountyFirst"
+  | "billingBucharestSectorHint"
+  | "billingInvalidBucharestSector"
+  | "billingAddressOptionsError"
+  | "billingLoadingAddressOptions"
+  | "billingRetry"
   | "billingCompanyName"
   | "billingCompanyVat"
   | "billingCompanyReg"
@@ -131,6 +141,7 @@ const EN_TRANSLATIONS: CourseTranslations = {
   back: "Back",
   coursesTitle: "Courses",
   coursesSubtitle: "Explore premium video courses and learn at your own pace.",
+  coursesSubtitleIosFree: "Explore video courses available in the app and learn at your own pace.",
   purchasedCourses: "Purchased courses",
   loadingCourses: "Loading courses...",
   loadCoursesErrorTitle: "Could not load courses",
@@ -204,6 +215,13 @@ const EN_TRANSLATIONS: CourseTranslations = {
   checkoutSuccessToast: "Payment confirmed. Access is updating.",
   checkoutCanceledToast: "Checkout canceled.",
   checkoutErrorToast: "Checkout failed",
+  checkoutSuccessTitle: "Payment successful!",
+  checkoutSuccessMessage: "Thank you for your subscription! Your premium access is now active.",
+  checkoutActivatedMessage: "Premium access activated! Enjoy your videos.",
+  checkoutActivatingMessage: "Your premium access is being processed. It should be ready within a few minutes.",
+  checkoutActivatingAccess: "Activating access...",
+  checkoutWatchVideo: "Watch the video",
+  checkoutGoToVideos: "Go to videos",
   closeToast: "Close",
   checkoutBillingTitle: "Billing details",
   checkoutBillingSubtitle: "Complete all invoice fields to continue checkout.",
@@ -219,6 +237,15 @@ const EN_TRANSLATIONS: CourseTranslations = {
   billingState: "State / County",
   billingPostalCode: "Postal code",
   billingCountry: "Country",
+  billingSelectCountry: "Select country",
+  billingSelectCounty: "Select county",
+  billingSelectLocality: "Locality",
+  billingLocalityPickCountyFirst: "Select a county first",
+  billingBucharestSectorHint: "For Bucharest, choose Sector 1–6.",
+  billingInvalidBucharestSector: "For Bucharest, locality must be Sector 1–6.",
+  billingAddressOptionsError: "Could not load address lists. Check your connection.",
+  billingLoadingAddressOptions: "Loading counties and localities…",
+  billingRetry: "Retry",
   billingCompanyName: "Company name",
   billingCompanyVat: "VAT code",
   billingCompanyReg: "Registration no.",
@@ -263,6 +290,8 @@ const RO_TRANSLATIONS: Partial<CourseTranslations> = {
   coursesTitle: "Cursuri",
   coursesSubtitle:
     "Explorează cursuri video premium și învață în ritmul tău.",
+  coursesSubtitleIosFree:
+    "Explorează cursurile video disponibile în aplicație și învață în ritmul tău.",
   purchasedCourses: "Cursuri cumpărate",
   loadingCourses: "Se încarcă cursurile...",
   loadCoursesErrorTitle: "Nu am putut încărca cursurile",
@@ -336,6 +365,13 @@ const RO_TRANSLATIONS: Partial<CourseTranslations> = {
   checkoutSuccessToast: "Plata a fost confirmată. Actualizăm accesul.",
   checkoutCanceledToast: "Checkout anulat.",
   checkoutErrorToast: "Checkout eșuat",
+  checkoutSuccessTitle: "Plată reușită!",
+  checkoutSuccessMessage: "Mulțumim pentru abonament! Accesul tău premium este acum activ.",
+  checkoutActivatedMessage: "Acces premium activat! Bucură-te de videoclipuri.",
+  checkoutActivatingMessage: "Accesul premium se procesează. Ar trebui să fie gata în câteva minute.",
+  checkoutActivatingAccess: "Se activează accesul...",
+  checkoutWatchVideo: "Vizionează videoul",
+  checkoutGoToVideos: "Mergi la videoclipuri",
   closeToast: "Închide",
   checkoutBillingTitle: "Date de facturare",
   checkoutBillingSubtitle: "Completează toate câmpurile facturii ca să continui checkout-ul.",
@@ -351,6 +387,16 @@ const RO_TRANSLATIONS: Partial<CourseTranslations> = {
   billingState: "Județ / Regiune",
   billingPostalCode: "Cod poștal",
   billingCountry: "Țară",
+  billingSelectCountry: "Selectează țara",
+  billingSelectCounty: "Selectează județul",
+  billingSelectLocality: "Localitate",
+  billingLocalityPickCountyFirst: "Selectează mai întâi județul",
+  billingBucharestSectorHint: "Pentru București, alege Sector 1–6.",
+  billingInvalidBucharestSector: "Pentru București, localitatea trebuie să fie Sector 1–6.",
+  billingAddressOptionsError:
+    "Nu am putut încărca listele de adrese. Verifică conexiunea.",
+  billingLoadingAddressOptions: "Se încarcă județele și localitățile…",
+  billingRetry: "Reîncearcă",
   billingCompanyName: "Nume companie",
   billingCompanyVat: "Cod TVA",
   billingCompanyReg: "Nr. înregistrare",

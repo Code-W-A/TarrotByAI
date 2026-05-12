@@ -86,6 +86,20 @@ import { capturePaymentIntentTest, createPaymentIntentTest, sendPdfEmail } from 
 // Oblio invoice via Firebase Functions (no Next.js)
 import ViewShot from "react-native-view-shot";
 import ShareScreenshot from '../../../components/common/ShareScreenshot';
+import { useAnalysisBackNavigation } from "../../../hooks/useAnalysisBackNavigation";
+import {
+  applyAstrogramaTranslationPatch,
+  buildAnalysisCacheKey,
+  extractAstrogramaTranslationPatch,
+  getCachedTranslationPatch,
+  setCachedTranslationPatch,
+} from "../../../utils/analysisTranslationCache";
+import { refreshLocalAnalysisAccessFromEntitlements } from "../../../utils/backupAnalysisUtils";
+import {
+  appendPurchaseSupportMessage,
+  getLocalizedSupportCopy,
+  showLocalizedSupportErrorAlert,
+} from "../../../utils/supportErrorReporter";
 
 // const LuckyNumber = ({ number }) => {
 //   return (
@@ -98,6 +112,13 @@ import ShareScreenshot from '../../../components/common/ShareScreenshot';
 // };
 
 export const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const TRANSLATION_ITEM_DELAY_MS = 120;
+const TRANSLATION_SECTION_DELAY_MS = 250;
+const normalizeLanguageCode = (lang) =>
+  String(lang || "")
+    .trim()
+    .toLowerCase()
+    .split("-")[0];
 
 const zodiacSigns = {
   Aries: { color: "blue", top: "20%", right: "79%" },
@@ -172,6 +193,7 @@ const logNatal = (msg, payload) => {
  * @constructor
  */
 function AstrogramaNatala({ navigation, route }) {
+  useAnalysisBackNavigation(navigation, "PersonsListAstrograma");
   const dataIndex = daily.findIndex(
     (item) =>
       item.day.split("-")[2].toString() === new Date().getDate().toString()
@@ -245,20 +267,62 @@ function AstrogramaNatala({ navigation, route }) {
     "Aceasta este interpretarea completă a astrogramei tale. Include toate detaliile despre aspectele astrologice, case și planete relevante."
   );
 
+  const getValidSectionEntries = (sections, sectionName) =>
+    Object.keys(sections || {}).reduce((entries, key) => {
+      const data = sections?.[key]?.data;
+      if (!data || typeof data !== "object") {
+        console.warn("[AstrogramaNatala] skipped invalid section", {
+          sectionName,
+          key,
+        });
+        return entries;
+      }
+
+      entries.push({ key, data });
+      return entries;
+    }, []);
+
+  const getSafeSignTitle = (planetData) =>
+    planetData?.title ||
+    (planetData?.planet_name && planetData?.sign_name
+      ? `${planetData.planet_name} is in ${planetData.sign_name}`
+      : "General Sign Report");
+
+  const getSafeHouseTitle = (houseData) =>
+    houseData?.title ||
+    (houseData?.planet_name && houseData?.house
+      ? `${houseData.planet_name} is in the ${houseData.house}th house`
+      : "General House Report");
+
   const generatePDFContent = () => {
     const natalWheelChart = userD.natalData?.data?.svg; // Obține SVG-ul natal wheel
+    const signEntries = getValidSectionEntries(
+      userD?.generalSignTextData,
+      "generalSignTextData"
+    );
+    const houseEntries = getValidSectionEntries(
+      userD?.generalHouseTextData,
+      "generalHouseTextData"
+    );
     // Funcție de generare a secțiunilor bazată pe `userD.generalSignTextData`
     const generateSignSections = () => {
-      return Object.keys(userD.generalSignTextData)
-        .map((key) => {
-          const planetData = userD.generalSignTextData[key].data; // Accesăm obiectul "data"
+      if (!signEntries.length) {
+        return `
+          <p style="color: #333;">
+            General sign report is not available right now.
+          </p>
+        `;
+      }
+
+      return signEntries
+        .map(({ key, data: planetData }) => {
           return `
-            <div style="margin-bottom: 20px;">
+            <div key="${key}" style="margin-bottom: 20px;">
               <h3 style="color: #4CAF50; margin-top: 20px;">
-                ${planetData.planet_name} is in ${planetData.sign_name}
+                ${getSafeSignTitle(planetData)}
               </h3>
               <p style="color: #333;">
-                ${planetData.report}
+                ${planetData.report || ""}
               </p>
             </div>
           `;
@@ -268,16 +332,23 @@ function AstrogramaNatala({ navigation, route }) {
 
     // Funcție de generare a secțiunilor bazată pe `userD.generalHouseTextData`
     const generateHouseSections = () => {
-      return Object.keys(userD.generalHouseTextData)
-        .map((key) => {
-          const houseData = userD.generalHouseTextData[key].data; // Accesăm obiectul "data"
+      if (!houseEntries.length) {
+        return `
+          <p style="color: #333;">
+            General house report is not available right now.
+          </p>
+        `;
+      }
+
+      return houseEntries
+        .map(({ key, data: houseData }) => {
           return `
-            <div style="margin-bottom: 20px;">
+            <div key="${key}" style="margin-bottom: 20px;">
               <h3 style="color: #4CAF50;; margin-top: 20px;">
-                ${houseData.planet_name} is in the ${houseData.house}th house
+                ${getSafeHouseTitle(houseData)}
               </h3>
               <p style="color: #333;">
-                ${houseData.report}
+                ${houseData.report || ""}
               </p>
             </div>
           `;
@@ -427,8 +498,13 @@ function AstrogramaNatala({ navigation, route }) {
       );
       // Iterăm prin toate cheile din generalSignTextData
       const translatedData = [];
-      for (const key of Object.keys(userData.generalSignTextData)) {
-          const planetData = userData.generalSignTextData[key].data;
+      for (const {
+        key,
+        data: planetData,
+      } of getValidSectionEntries(
+        userData.generalSignTextData,
+        "generalSignTextData"
+      )) {
 
           // Traducem  și raportul
           const translatedReport = await handleToTranslate(
@@ -438,7 +514,7 @@ function AstrogramaNatala({ navigation, route }) {
           );
 
           // Traducem și titlul dinamic (ex: "Sun is in Aquarius")
-          const originalTitle = `${planetData.planet_name} is in ${planetData.sign_name}`;
+          const originalTitle = getSafeSignTitle(planetData);
           const translatedTitle = await handleToTranslate(
             originalTitle,
             language,
@@ -456,7 +532,7 @@ function AstrogramaNatala({ navigation, route }) {
           });
 
           // Pauză scurtă între traduceri pentru a evita throttling
-          await delay(350);
+          await delay(TRANSLATION_ITEM_DELAY_MS);
       }
 
       // Actualizăm userData cu datele traduse
@@ -484,8 +560,13 @@ function AstrogramaNatala({ navigation, route }) {
       
       // Iterăm prin toate cheile din generalHouseTextData
       const translatedData = [];
-      for (const key of Object.keys(userData.generalHouseTextData)) {
-          const houseData = userData.generalHouseTextData[key].data;
+      for (const {
+        key,
+        data: houseData,
+      } of getValidSectionEntries(
+        userData.generalHouseTextData,
+        "generalHouseTextData"
+      )) {
 
           // Traducem raportul
 
@@ -496,7 +577,7 @@ function AstrogramaNatala({ navigation, route }) {
           );
 
           // Traducem și titlul dinamic pentru case (ex: "Sun is in the 12th house")
-          const originalTitle = `${houseData.planet_name} is in the ${houseData.house}th house`;
+          const originalTitle = getSafeHouseTitle(houseData);
           const translatedTitle = await handleToTranslate(
             originalTitle,
             language,
@@ -514,7 +595,7 @@ function AstrogramaNatala({ navigation, route }) {
           });
 
           // Pauză scurtă între traduceri pentru a evita throttling
-          await delay(350);
+          await delay(TRANSLATION_ITEM_DELAY_MS);
       }
 
       // Actualizăm userData cu datele traduse
@@ -539,6 +620,7 @@ function AstrogramaNatala({ navigation, route }) {
   const handleNatalChart = async () => {
     try {
       setIsLoading(true);
+      await refreshLocalAnalysisAccessFromEntitlements();
 
       // Preluăm datele din AsyncStorage
       const userDataJson = await AsyncStorage.getItem("userData");
@@ -552,89 +634,146 @@ function AstrogramaNatala({ navigation, route }) {
         return;
       }
 
+      setIsPaid(Boolean(userData?.isPaid || paidIs));
+
       logNatal("start", { language, actualLanguageAstrograma: userData.actualLanguageAstrograma, isPaid });
 
       // Verificăm dacă traducerea este necesară
-      if (language !== userData.actualLanguageAstrograma) {
-        const targetLang = (language || "").split("-")[0];
-        logNatal("translate_needed", { from: userData.actualLanguageAstrograma, to: targetLang });
+      const targetLang = normalizeLanguageCode(language);
+      const sourceLang = normalizeLanguageCode(userData.actualLanguageAstrograma);
+      if (targetLang && targetLang !== sourceLang) {
+        logNatal("translate_needed", { from: sourceLang || userData.actualLanguageAstrograma, to: targetLang });
 
-        let translationFailed = false; // Flag pentru a urmări dacă traducerea a eșuat
-        let translatedUserData = JSON.parse(JSON.stringify(userData)); // Copie profundă a datelor
+        const analysisCacheKey = buildAnalysisCacheKey("astrograma_personal", {
+          id: userData?.id || "",
+          full_name: userData?.full_name || "",
+          day: userData?.day || "",
+          month: userData?.month || "",
+          year: userData?.year || "",
+          selectedTime: userData?.selectedTime || "",
+          place: userData?.place || "",
+          lat: userData?.lat || "",
+          lon: userData?.lon || "",
+        });
 
-        try {
-          translatedUserData.actualLanguageAstrograma = targetLang;
-
-          // Traducerea datelor despre ascendent
-          const ascBeforeText = translatedUserData.ascendantData?.data?.result;
-          let ascTranslated = await handleToTranslate(
-            translatedUserData.ascendantData.data.result,
-            targetLang,
-            userData.actualLanguageAstrograma
+        const cachedPatch = await getCachedTranslationPatch(
+          analysisCacheKey,
+          targetLang
+        );
+        let usedCache = false;
+        if (cachedPatch) {
+          const cachedUserData = applyAstrogramaTranslationPatch(
+            userData,
+            cachedPatch
           );
-          // Dacă textul tradus este identic cu originalul (posibil fallback), încearcă fallback API
-          if (
-            typeof ascTranslated === "string" &&
-            typeof ascBeforeText === "string" &&
-            ascTranslated.trim() === ascBeforeText.trim()
-          ) {
+          if (cachedUserData) {
+            logNatal("cache_hit", { to: targetLang, full_name: cachedUserData.full_name });
+            setUserD(cachedUserData);
+            await AsyncStorage.setItem("userData", JSON.stringify(cachedUserData));
+            userData = cachedUserData;
+            usedCache = true;
+          }
+        }
+        if (!usedCache) {
+          logNatal("cache_miss_retranslate", {
+            to: targetLang,
+            full_name: userData?.full_name,
+          });
+          let translationFailed = false; // Flag pentru a urmări dacă traducerea a eșuat
+          let translatedUserData = JSON.parse(JSON.stringify(userData)); // Copie profundă a datelor
+
+          try {
+            // Traducerea datelor despre ascendent
+            const ascBeforeText = translatedUserData.ascendantData?.data?.result;
+            let ascTranslated = await handleToTranslate(
+              translatedUserData.ascendantData.data.result,
+              targetLang,
+              sourceLang || userData.actualLanguageAstrograma
+            );
+            // Dacă textul tradus este identic cu originalul (posibil fallback), încearcă fallback API
+            if (
+              typeof ascTranslated === "string" &&
+              typeof ascBeforeText === "string" &&
+              ascTranslated.trim() === ascBeforeText.trim()
+            ) {
+              try {
+                const fb = await gTranslateFallbackFetch(ascBeforeText, targetLang);
+                if (typeof fb === "string" && fb.trim().length > 0) {
+                  ascTranslated = fb;
+                }
+              } catch {}
+            }
+            translatedUserData.ascendantData.data.result = ascTranslated;
+            logNatal("ascendant_translated", { before: preview(ascBeforeText), after: preview(translatedUserData.ascendantData?.data?.result) });
+            await delay(TRANSLATION_SECTION_DELAY_MS); // Mic delay pentru stabilitate
+
+            // Traducerea datelor despre planete
+            await translateGeneralSignTextData(translatedUserData, targetLang);
             try {
-              const fb = await gTranslateFallbackFetch(ascBeforeText, targetLang);
-              if (typeof fb === "string" && fb.trim().length > 0) {
-                ascTranslated = fb;
+              const firstKey = Object.keys(translatedUserData.generalSignTextData || {})[0];
+              if (firstKey) {
+                const d = translatedUserData.generalSignTextData[firstKey].data;
+                logNatal("planets_sample", { key: firstKey, title: preview(d.title), report: preview(d.report) });
               }
             } catch {}
+            await delay(TRANSLATION_SECTION_DELAY_MS);
+
+            // Traducerea caselor astrologice
+            await translateGeneralHouseTextData(translatedUserData, targetLang);
+            try {
+              const firstKeyH = Object.keys(translatedUserData.generalHouseTextData || {})[0];
+              if (firstKeyH) {
+                const d = translatedUserData.generalHouseTextData[firstKeyH].data;
+                logNatal("houses_sample", { key: firstKeyH, title: preview(d.title), report: preview(d.report) });
+              }
+            } catch {}
+            await delay(TRANSLATION_SECTION_DELAY_MS);
+
+            translatedUserData.actualLanguageAstrograma = targetLang;
+            logNatal("translate_done", { full_name: translatedUserData.full_name });
+
+            const translationPatch = extractAstrogramaTranslationPatch(
+              translatedUserData,
+              targetLang
+            );
+            await setCachedTranslationPatch(
+              analysisCacheKey,
+              targetLang,
+              translationPatch
+            );
+            logNatal("cache_saved", {
+              to: targetLang,
+              full_name: translatedUserData?.full_name,
+            });
+
+            // Aplicăm imediat în UI pentru a evita lag din AsyncStorage
+            setUserD(translatedUserData);
+
+            // Salvăm datele traduse în AsyncStorage
+            await AsyncStorage.setItem(
+              "userData",
+              JSON.stringify(translatedUserData)
+            );
+
+            // Preluăm din nou datele traduse pentru a forța re-renderizarea
+            const updatedUserDataJson = await AsyncStorage.getItem("userData");
+            userData = updatedUserDataJson
+              ? JSON.parse(updatedUserDataJson)
+              : null;
+          } catch (error) {
+            console.error("Eroare în procesul de traducere:", error);
+            translationFailed = true;
           }
-          translatedUserData.ascendantData.data.result = ascTranslated;
-          logNatal("ascendant_translated", { before: preview(ascBeforeText), after: preview(translatedUserData.ascendantData?.data?.result) });
-          await delay(2000); // Mic delay pentru stabilitate
 
-          // Traducerea datelor despre planete
-          await translateGeneralSignTextData(translatedUserData, targetLang);
-          try {
-            const firstKey = Object.keys(translatedUserData.generalSignTextData || {})[0];
-            if (firstKey) {
-              const d = translatedUserData.generalSignTextData[firstKey].data;
-              logNatal("planets_sample", { key: firstKey, title: preview(d.title), report: preview(d.report) });
-            }
-          } catch {}
-          await delay(2000);
-
-          // Traducerea caselor astrologice
-          await translateGeneralHouseTextData(translatedUserData, targetLang);
-          try {
-            const firstKeyH = Object.keys(translatedUserData.generalHouseTextData || {})[0];
-            if (firstKeyH) {
-              const d = translatedUserData.generalHouseTextData[firstKeyH].data;
-              logNatal("houses_sample", { key: firstKeyH, title: preview(d.title), report: preview(d.report) });
-            }
-          } catch {}
-          await delay(2000);
-
-          logNatal("translate_done", { full_name: translatedUserData.full_name });
-
-          // Aplicăm imediat în UI pentru a evita lag din AsyncStorage
-          setUserD(translatedUserData);
-
-          // Salvăm datele traduse în AsyncStorage
-          await AsyncStorage.setItem(
-            "userData",
-            JSON.stringify(translatedUserData)
-          );
-
-          // Preluăm din nou datele traduse pentru a forța re-renderizarea
-          const updatedUserDataJson = await AsyncStorage.getItem("userData");
-          userData = updatedUserDataJson
-            ? JSON.parse(updatedUserDataJson)
-            : null;
-        } catch (error) {
-          console.error("Eroare în procesul de traducere:", error);
-          translationFailed = true;
+          if (translationFailed) {
+            console.log("Traducerea a eșuat. Se păstrează datele originale.");
+          }
         }
-
-        if (translationFailed) {
-          console.log("Traducerea a eșuat. Se păstrează datele originale.");
-        }
+      } else {
+        logNatal("translate_skipped_same_language", {
+          lang: targetLang || sourceLang || userData?.actualLanguageAstrograma,
+          full_name: userData?.full_name,
+        });
       }
 
       // Aplicăm noile date și forțăm reîncărcarea
@@ -711,41 +850,90 @@ function AstrogramaNatala({ navigation, route }) {
     language,
     "SinastrieRelatieOthers"
   );
+  const supportCopy = getLocalizedSupportCopy(language);
 
-  const handlePayment = async () => {
+  const handlePayment = async (purchaseDetails = null) => {
     const runId = `pay_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
     const pfx = `[PAYMENT][AstrogramaNatala][${runId}]`;
     const pLog = (...args) => console.log(pfx, ...args);
     const pErr = (...args) => console.error(pfx, ...args);
+    let transactionId = "";
+    const resolvedFirstName = purchaseDetails?.firstName || firstName;
+    const resolvedLastName = purchaseDetails?.lastName || lastName;
+    const resolvedEmail = purchaseDetails?.email || email;
+    const resolvedPhone = purchaseDetails?.phone || phone;
+    const resolvedLine1 = purchaseDetails?.line1 || line1;
+    const resolvedCity = purchaseDetails?.city || city;
+    const resolvedStateCounty = purchaseDetails?.state || stateCounty;
+    const resolvedPostalCode = purchaseDetails?.postalCode || postalCode;
+    const resolvedCountry = purchaseDetails?.country || country;
+    const resolvedCouponAllowed =
+      typeof purchaseDetails?.coupon?.allowed === "boolean" ?
+        Boolean(purchaseDetails.coupon.allowed) :
+        Boolean(couponAllowed);
+    const resolvedCouponCode = resolvedCouponAllowed ?
+      purchaseDetails?.coupon?.code || couponCode :
+      "";
+    const resolvedCouponPercent = resolvedCouponAllowed ?
+      Number(
+          purchaseDetails?.coupon?.percent ??
+          couponPercent ??
+          0,
+      ) :
+      0;
+    const legalAcceptance = purchaseDetails?.legalAcceptance || null;
     try {
       pLog("start handlePayment");
-      pLog("address fields", { line1, city, stateCounty, postalCode, country });
-      if (!line1 || !city || !stateCounty || !postalCode || !country) {
+      pLog("address fields", {
+        line1: resolvedLine1,
+        city: resolvedCity,
+        stateCounty: resolvedStateCounty,
+        postalCode: resolvedPostalCode,
+        country: resolvedCountry,
+      });
+      if (!resolvedLine1 || !resolvedCity || !resolvedStateCounty || !resolvedPostalCode || !resolvedCountry) {
         Alert.alert("Eroare", "Te rugăm să completezi toate câmpurile de adresă.");
         return;
       }
   
       setIsLoadingBuy(true);
       const functions = getFunctions();
+      const purchaseContext = {
+        analysisId: userD?.id || "",
+        analysisType: userD?.type || "personalAstrograma",
+        ownerUid: userData?.owner_uid || "",
+      };
   
       // 1) Creează PaymentIntent cu capture_method: "manual"
       const createPaymentIntentFn = httpsCallable(functions, createPaymentIntentTest);
       pLog("calling createPaymentIntent", {
         productCode: "astrogama_natala",
         currency: "eur",
-        couponCode: couponAllowed ? couponCode : "",
+        couponCode: resolvedCouponAllowed ? resolvedCouponCode : "",
       });
       const resp = await createPaymentIntentFn({
         currency: "eur",
-        firstName,
-        lastName,
-        email,
-        phone,
+        firstName: resolvedFirstName,
+        lastName: resolvedLastName,
+        email: resolvedEmail,
+        phone: resolvedPhone,
         productCode: "astrogama_natala",
-        couponCode: couponAllowed ? couponCode : "",
+        couponCode: resolvedCouponAllowed ? resolvedCouponCode : "",
+        termsVersion: legalAcceptance?.termsVersion || "",
+        privacyVersion: legalAcceptance?.privacyVersion || "",
+        digitalContentWaiverAccepted: Boolean(
+          legalAcceptance?.digitalContentWaiverAccepted
+        ),
+        legalAcceptedAt: legalAcceptance?.legalAcceptedAt || "",
+        immediateExecutionAcceptedAt:
+          legalAcceptance?.immediateExecutionAcceptedAt || "",
+        withdrawalWaiverAcceptedAt:
+          legalAcceptance?.withdrawalWaiverAcceptedAt || "",
+        ...purchaseContext,
       });
       pLog("createPaymentIntent response", resp?.data);
-      const { clientSecret, transactionId } = resp.data;
+      const { clientSecret, transactionId: createdTransactionId } = resp.data;
+      transactionId = String(createdTransactionId || "");
       if (!clientSecret || !transactionId) {
         throw new Error("Lipsesc datele PaymentIntent. Verifică serverul.");
       }
@@ -765,7 +953,25 @@ function AstrogramaNatala({ navigation, route }) {
       });
       if (initError) {
         pErr("initPaymentSheet error", initError);
-        Alert.alert("Eroare", initError.message);
+        showLocalizedSupportErrorAlert({
+          language,
+          screenName: "AstrogramaNatala",
+          error: initError,
+          publicMessage: supportCopy.paymentInitPublicMessage,
+          technicalMessage: initError?.message || "initPaymentSheet failed",
+          transactionId,
+          productCode: "astrogama_natala",
+          analysisId: purchaseContext.analysisId,
+          analysisType: purchaseContext.analysisType,
+          contactEmail: resolvedEmail,
+          contactPhone: resolvedPhone,
+          fullName:
+            userD?.full_name ||
+            `${resolvedFirstName} ${resolvedLastName}`.trim(),
+          extraContext: {
+            phase: "initPaymentSheet",
+          },
+        });
         return;
       }
       pLog("paymentSheet initialized");
@@ -775,7 +981,29 @@ function AstrogramaNatala({ navigation, route }) {
       const { error: presentError } = await presentPaymentSheet();
       if (presentError) {
         pErr("presentPaymentSheet error", presentError);
-        Alert.alert("Eroare", presentError.message);
+        if (String(presentError?.code || "").toLowerCase() === "canceled") {
+          pLog("presentPaymentSheet canceled by user");
+          return;
+        }
+        showLocalizedSupportErrorAlert({
+          language,
+          screenName: "AstrogramaNatala",
+          error: presentError,
+          publicMessage: supportCopy.paymentFlowPublicMessage,
+          technicalMessage: presentError?.message || "presentPaymentSheet failed",
+          transactionId,
+          productCode: "astrogama_natala",
+          analysisId: purchaseContext.analysisId,
+          analysisType: purchaseContext.analysisType,
+          contactEmail: resolvedEmail,
+          contactPhone: resolvedPhone,
+          fullName:
+            userD?.full_name ||
+            `${resolvedFirstName} ${resolvedLastName}`.trim(),
+          extraContext: {
+            phase: "presentPaymentSheet",
+          },
+        });
         return;
       }
       pLog("paymentSheet presented OK (authorized)");
@@ -789,7 +1017,7 @@ function AstrogramaNatala({ navigation, route }) {
       pLog("calling sendPdfEmail");
       const sendPdfEmailFn = httpsCallable(functions, sendPdfEmail);
       const emailResponse = await sendPdfEmailFn({
-        email: email, // sau userD.email, după caz
+        email: resolvedEmail, // sau userD.email, după caz
         pdfHtml: pdfHtmlContent,
         fullName: userD.full_name, // folosește numele real al utilizatorului
       });
@@ -804,7 +1032,15 @@ function AstrogramaNatala({ navigation, route }) {
         // 6) Capturează plata
         pLog("capturing PaymentIntent", { transactionId });
         const capturePaymentFn = httpsCallable(functions, capturePaymentIntentTest);
-        const captureResp = await capturePaymentFn({ transactionId });
+        const captureResp = await capturePaymentFn({
+          transactionId,
+          productCode: "astrogama_natala",
+          firstName: resolvedFirstName,
+          lastName: resolvedLastName,
+          email: resolvedEmail,
+          phone: resolvedPhone,
+          ...purchaseContext,
+        });
         if (captureResp.data && captureResp.data.captured) {
           pLog("payment captured OK");
           // 7) Actualizează starea și salvează în AsyncStorage
@@ -820,36 +1056,57 @@ function AstrogramaNatala({ navigation, route }) {
           const invoiceResp = await createOblioInvoiceFn({
             transactionId,
             productCode: "astrogama_natala",
+            ...purchaseContext,
             customer: {
-            firstName,
-            lastName,
-            email,
-            phone,
+            firstName: resolvedFirstName,
+            lastName: resolvedLastName,
+            email: resolvedEmail,
+            phone: resolvedPhone,
             address: {
-              line1,
-              city,
-              state: stateCounty,
-              postal_code: postalCode,
-              country,
+              line1: resolvedLine1,
+              city: resolvedCity,
+              state: resolvedStateCounty,
+              postal_code: resolvedPostalCode,
+              country: resolvedCountry,
             },
             },
             coupon: {
-              couponAllowed: Boolean(couponAllowed),
-              couponCode: couponAllowed ? couponCode : "",
-              discountPercent: couponAllowed ? Number(couponPercent) : 0,
+              couponAllowed: resolvedCouponAllowed,
+              couponCode: resolvedCouponAllowed ? resolvedCouponCode : "",
+              discountPercent: resolvedCouponAllowed ? resolvedCouponPercent : 0,
             },
           });
           pLog("Firebase Oblio invoice response", invoiceResp?.data);
-          Alert.alert(achizitieCompleta1, achizitieCompleta2);
+          Alert.alert(
+            achizitieCompleta1,
+            appendPurchaseSupportMessage(achizitieCompleta2, language)
+          );
         } else {
           throw new Error("Capturarea plății a eșuat.");
         }
       } else {
         // Dacă emailul nu a fost trimis, nu capturează plata
-        Alert.alert(
-          "Eroare",
-          "Email-ul cu PDF nu a putut fi trimis. Plata nu va fi finalizată. Te rugăm să reîncerci. Contact webdynamicx@gmail.com"
-        );
+        showLocalizedSupportErrorAlert({
+          language,
+          screenName: "AstrogramaNatala",
+          publicMessage: supportCopy.pdfEmailFailedPublicMessage,
+          technicalMessage:
+            emailResponse?.data?.message || "sendPdfEmail returned success=false",
+          error: emailResponse?.data || null,
+          transactionId,
+          productCode: "astrogama_natala",
+          analysisId: purchaseContext.analysisId,
+          analysisType: purchaseContext.analysisType,
+          contactEmail: resolvedEmail,
+          contactPhone: resolvedPhone,
+          fullName:
+            userD?.full_name ||
+            `${resolvedFirstName} ${resolvedLastName}`.trim(),
+          extraContext: {
+            phase: "sendPdfEmail",
+            emailSuccess: Boolean(emailResponse?.data?.success),
+          },
+        });
         // Opțional, poți apela o funcție backend pentru a anula PaymentIntent
       }
     } catch (error) {
@@ -857,10 +1114,25 @@ function AstrogramaNatala({ navigation, route }) {
       const msg =
         (error && typeof error === "object" && error.message ? String(error.message) : "") ||
         "Nu s-a putut procesa plata sau factura.";
-      Alert.alert(
-        "Eroare",
-        `${msg}\n\nDacă ți-a fost luată suma, trimite acest ID la suport: ${String(transactionId || "")}`.trim()
-      );
+      showLocalizedSupportErrorAlert({
+        language,
+        screenName: "AstrogramaNatala",
+        error,
+        publicMessage: supportCopy.paymentFlowPublicMessage,
+        technicalMessage: msg,
+        transactionId,
+        productCode: "astrogama_natala",
+        analysisId: userD?.id || "",
+        analysisType: userD?.type || "personalAstrograma",
+        contactEmail: resolvedEmail,
+        contactPhone: resolvedPhone,
+        fullName:
+          userD?.full_name || `${resolvedFirstName} ${resolvedLastName}`.trim(),
+        extraContext: {
+          phase: "handlePaymentCatch",
+        },
+        showTransactionRetryWarning: Boolean(transactionId),
+      });
     } finally {
       setIsLoadingBuy(false);
       pLog("done (isLoadingBuy=false)");
@@ -1185,18 +1457,19 @@ function AstrogramaNatala({ navigation, route }) {
                         {/* <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 18, marginTop: '7%' }]}>
                           {signReportText}
                         </Text> */}
-                        {Object.keys(userD.generalSignTextData).map((key) => {
-                          const planetData =
-                            userD.generalSignTextData[key].data; // Accesăm obiectul "data"
+                        {getValidSectionEntries(
+                          userD?.generalSignTextData,
+                          "generalSignTextData"
+                        ).map(({ key, data: planetData }) => {
                           return (
                             <View key={key} style={{ marginBottom: 20 }}>
                               {/* Titlul planetă + semn zodiacal */}
                               <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 20, marginTop: '7%' }]}> 
-                                {planetData.title || `${planetData.planet_name} is in ${planetData.sign_name}`}
+                                {getSafeSignTitle(planetData)}
                               </Text>
                               {/* Text descriptiv */}
                               <Text style={[styles.textDescription, textStyles.goldenText, {color:"#bfa76a"}]}>
-                                {planetData.report}
+                                {planetData.report || ""}
                               </Text>
                             </View>
                           );
@@ -1208,18 +1481,19 @@ function AstrogramaNatala({ navigation, route }) {
                         <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 18, marginTop: '7%' }]}>
                           {houseReportText}
                         </Text>
-                        {Object.keys(userD.generalHouseTextData).map((key) => {
-                          const houseData =
-                            userD.generalHouseTextData[key].data; // Accesăm obiectul "data"
+                        {getValidSectionEntries(
+                          userD?.generalHouseTextData,
+                          "generalHouseTextData"
+                        ).map(({ key, data: houseData }) => {
                           return (
                             <View key={key} style={{ marginBottom: 20 }}>
                               {/* Titlul planetă + casă astrologică */}
                               <Text style={[styles.textTitles, textStyles.goldenTextBold, { fontSize: 16, marginTop: '7%' }]}> 
-                                {houseData.title || `${houseData.planet_name} is in the ${houseData.house}th house`}
+                                {getSafeHouseTitle(houseData)}
                               </Text>
                               {/* Text descriptiv */}
                               <Text style={[styles.textDescription, textStyles.goldenText, {color:"#bfa76a"}]}>
-                                {houseData.report}
+                                {houseData.report || ""}
                               </Text>
                             </View>
                           );
@@ -1272,12 +1546,12 @@ function AstrogramaNatala({ navigation, route }) {
         setCouponPercent={setCouponPercent}
         couponAllowed={couponAllowed}
         setCouponAllowed={setCouponAllowed}
-        onConfirm={async () => {
+        onConfirm={async (updatedUserDetails) => {
           setIsLoadingBuy(true);
           setModalVisible(false);
 
           try {
-            await handlePayment(); // Apelează funcția `handlePayment`
+            await handlePayment(updatedUserDetails);
           } catch (error) {
             console.error("Eroare la procesarea plății:", error);
             Alert.alert(

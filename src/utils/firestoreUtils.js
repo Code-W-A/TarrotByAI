@@ -14,9 +14,11 @@ import {
   collectionGroup,
   startAt,
 } from "firebase/firestore";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { authentication, db } from "../../firebase";
 import { handleDeleteAccount } from "./authUtils";
 import { getDocPreferCache, getDocsPreferCache } from "./firestoreCache";
+import { trackedGetDocs } from "./firestoreReadTelemetry";
 
 const auth = authentication;
 export const userLocation = `Users/${
@@ -99,6 +101,234 @@ export const handleQueryToken = async (location, token) => {
   console.log(exists ? "Tokenul a fost găsit." : "Tokenul nu a fost găsit.");
 
   return exists; // Returnează true dacă tokenul există, altfel false
+};
+
+const normalizeUserTokenLanguage = (language) => {
+  if (typeof language !== "string") {
+    return "";
+  }
+
+  const normalized = language.trim().toLowerCase();
+  if (!normalized) {
+    return "";
+  }
+
+  return normalized.split(/[-_]/)[0];
+};
+
+const USER_LANGUAGE_STORAGE_KEY = "@userLanguage";
+
+/**
+ * Limba salvată în app (AsyncStorage), folosită pentru userTokens / push.
+ * Fallback `ro` dacă nu există încă preferință (primul deschidere înainte de onboarding complet).
+ */
+export const resolveStoredAppLanguageCode = async () => {
+  try {
+    const raw = await AsyncStorage.getItem(USER_LANGUAGE_STORAGE_KEY);
+    if (typeof raw === "string" && raw.trim()) {
+      return normalizeUserTokenLanguage(raw);
+    }
+  } catch (_e) {
+    // ignore
+  }
+  return "ro";
+};
+
+/**
+ * După ce există token Expo: aliniază userTokens.language cu limba din stocare.
+ * Acoperă cazul „a ales limba înainte să aibă token”.
+ */
+export const syncPushTokenMetadataWithStoredLanguage = async (
+  token,
+  { isIos, projectId, source } = {}
+) => {
+  const normalizedToken =
+    typeof token === "string" ? token.trim() : token?.data?.trim?.() || "";
+  if (!normalizedToken) {
+    return { skipped: true, reason: "no_token" };
+  }
+  const language = await resolveStoredAppLanguageCode();
+  if (!language) {
+    return { skipped: true, reason: "no_language" };
+  }
+  const payload = {
+    language,
+    source: source || "syncPushTokenMetadataWithStoredLanguage",
+  };
+  if (typeof isIos === "boolean") {
+    payload.isIos = isIos;
+  }
+  if (typeof projectId === "string" && projectId.trim()) {
+    payload.projectId = projectId.trim();
+  }
+  return upsertUserTokenMetadata(normalizedToken, payload);
+};
+
+/**
+ * Ține `Users.actualLanguage` / `language` aliniate cu limba UI (pentru sync server la token nou).
+ */
+export const syncUserProfileAppLanguageForNotifications = async (
+  langCode,
+  source = "syncUserProfileAppLanguageForNotifications"
+) => {
+  if (!auth.currentUser?.uid) {
+    return { skipped: true, reason: "no_user" };
+  }
+  const normalized = normalizeUserTokenLanguage(langCode);
+  if (!normalized) {
+    return { skipped: true, reason: "no_lang" };
+  }
+  try {
+    await updateDoc(doc(db, "Users", auth.currentUser.uid), {
+      actualLanguage: normalized,
+      language: normalized,
+    });
+  } catch (err) {
+    console.log("[syncUserProfileAppLanguageForNotifications]", source, err);
+  }
+  return { ok: true, normalized };
+};
+
+const hashUserTokenForLog = (value) => {
+  let hash = 5381;
+  const normalizedValue = String(value || "");
+  for (let index = 0; index < normalizedValue.length; index += 1) {
+    hash = (hash * 33) ^ normalizedValue.charCodeAt(index);
+  }
+  return Math.abs(hash >>> 0).toString(36);
+};
+
+// Throttle rapid calls - only allow one call per token per 30 seconds
+const tokenMetadataLastCall = new Map();
+const TOKEN_METADATA_COOLDOWN_MS = 30000;
+
+export const upsertUserTokenMetadata = async (
+  token,
+  { language, isIos, projectId, source } = {}
+) => {
+  const normalizedToken =
+    typeof token === "string" ? token.trim() : token?.data?.trim?.() || "";
+  const tokenFingerprint = normalizedToken
+    ? `${hashUserTokenForLog(normalizedToken)}:${normalizedToken.length}`
+    : "";
+
+  if (!normalizedToken) {
+    console.log("[upsertUserTokenMetadata] skip - missing token", {
+      source: source || null,
+    });
+    return { created: 0, updated: 0, skipped: true };
+  }
+
+  // Throttle: skip if called within cooldown period
+  const lastCallTime = tokenMetadataLastCall.get(normalizedToken);
+  const now = Date.now();
+  if (lastCallTime && now - lastCallTime < TOKEN_METADATA_COOLDOWN_MS) {
+    return { created: 0, updated: 0, skipped: true };
+  }
+  tokenMetadataLastCall.set(normalizedToken, now);
+
+  const payload = {};
+  const normalizedLanguage = normalizeUserTokenLanguage(language);
+
+  if (normalizedLanguage) {
+    payload.language = normalizedLanguage;
+  }
+
+  if (typeof isIos === "boolean") {
+    payload.isIos = isIos;
+  }
+
+  if (typeof projectId === "string" && projectId.trim()) {
+    payload.projectId = projectId.trim();
+  }
+
+  if (Object.keys(payload).length === 0) {
+    console.log("[upsertUserTokenMetadata] skip - no metadata fields provided", {
+      source: source || null,
+      tokenFingerprint,
+    });
+    return { created: 0, updated: 0, skipped: true };
+  }
+
+  const userTokensRef = collection(db, "userTokens");
+  const existing = await trackedGetDocs(
+    query(userTokensRef, where("token", "==", normalizedToken))
+  );
+
+  if (!existing.empty) {
+    const updates = [];
+    const appliedFields = new Set();
+
+    existing.docs.forEach((docSnap) => {
+      const current = docSnap.data() || {};
+      const nextUpdate = {};
+
+      if (
+        payload.language &&
+        normalizeUserTokenLanguage(current.language) !== payload.language
+      ) {
+        nextUpdate.language = payload.language;
+      }
+
+      if (typeof payload.isIos === "boolean" && current.isIos !== payload.isIos) {
+        nextUpdate.isIos = payload.isIos;
+      }
+
+      if (
+        payload.projectId &&
+        String(current.projectId || "").trim() !== payload.projectId
+      ) {
+        nextUpdate.projectId = payload.projectId;
+      }
+      if (current.disabled === true) {
+        nextUpdate.disabled = false;
+      }
+      nextUpdate.lastSeenAt = serverTimestamp();
+      nextUpdate.lastErrorCode = null;
+      nextUpdate.disabledAt = null;
+
+      if (Object.keys(nextUpdate).length === 0) {
+        return;
+      }
+
+      Object.keys(nextUpdate).forEach((key) => appliedFields.add(key));
+      updates.push(updateDoc(docSnap.ref, nextUpdate));
+    });
+
+    if (updates.length === 0) {
+      return { created: 0, updated: 0, skipped: true };
+    }
+
+    await Promise.all(updates);
+
+    console.log("[upsertUserTokenMetadata] updated userTokens docs", {
+      source: source || null,
+      tokenFingerprint,
+      matches: existing.size,
+      updated: updates.length,
+      fields: Array.from(appliedFields.values()),
+    });
+
+    return { created: 0, updated: updates.length, skipped: false };
+  }
+
+  const createdRef = await addDoc(userTokensRef, {
+    token: normalizedToken,
+    disabled: false,
+    disabledAt: null,
+    lastErrorCode: null,
+    lastSeenAt: serverTimestamp(),
+    ...payload,
+  });
+
+  console.log("[upsertUserTokenMetadata] created userTokens doc", {
+    source: source || null,
+    tokenFingerprint,
+    docId: createdRef.id,
+    fields: Object.keys(payload),
+  });
+
+  return { created: 1, updated: 0, skipped: false };
 };
 
 //ADD A DOCUMENT IN THE SUBCOLLECTION
