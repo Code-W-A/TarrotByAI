@@ -283,8 +283,6 @@ PODS:
     - ExpoModulesCore
   - ExpoSplashScreen (0.29.24):
     - ExpoModulesCore
-  - ExpoTrackingTransparency (5.1.1):
-    - ExpoModulesCore
   - ExpoWebBrowser (14.0.2):
     - ExpoModulesCore
   - EXUpdatesInterface (1.0.0):
@@ -2147,7 +2145,6 @@ DEPENDENCIES:
   - ExpoSharing (from `../node_modules/expo-sharing/ios`)
   - ExpoSMS (from `../node_modules/expo-sms/ios`)
   - ExpoSplashScreen (from `../node_modules/expo-splash-screen/ios`)
-  - ExpoTrackingTransparency (from `../node_modules/expo-tracking-transparency/ios`)
   - ExpoWebBrowser (from `../node_modules/expo-web-browser/ios`)
   - EXUpdatesInterface (from `../node_modules/expo-updates-interface/ios`)
   - FBLazyVector (from `../node_modules/react-native/Libraries/FBLazyVector`)
@@ -2311,8 +2308,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-sms/ios"
   ExpoSplashScreen:
     :path: "../node_modules/expo-splash-screen/ios"
-  ExpoTrackingTransparency:
-    :path: "../node_modules/expo-tracking-transparency/ios"
   ExpoWebBrowser:
     :path: "../node_modules/expo-web-browser/ios"
   EXUpdatesInterface:
@@ -2506,7 +2501,6 @@ SPEC CHECKSUMS:
   ExpoSharing: 849a5ce9985c22598c16ec027e32969be8062e8e
   ExpoSMS: 9cd812ab438c5c1d86bddaa7749387c762e43b92
   ExpoSplashScreen: 399ee9f85b6c8a61b965e13a1ecff8384db591c2
-  ExpoTrackingTransparency: dbd02eaa51cd9983ed746866a66e2eeb3a0f151f
   ExpoWebBrowser: a212e6b480d8857d3e441fba51e0c968333803b3
   EXUpdatesInterface: 7c977640bdd8b85833c19e3959ba46145c5719db
   FBLazyVector: 1bf99bb46c6af9a2712592e707347315f23947aa

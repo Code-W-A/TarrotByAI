@@ -21,7 +21,6 @@ import {
   H2fontBoldPrimary,
   H6fontRegularPrimary,
 } from "../components/commonText";
-import ConsentModal from "../components/ImageConsentModal/ImageConsentModal";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Video } from 'expo-av';
 
@@ -110,7 +109,6 @@ const Slide = ({ item, isActive }) => {
 
 const OnboardingScreen = ({ navigation }) => {
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
-  const [visible, setVisible] = useState(false);
   const ref = useRef();
   const insets = useSafeAreaInsets();
 
@@ -135,30 +133,6 @@ const OnboardingScreen = ({ navigation }) => {
     ref?.current.scrollToOffset({ offset });
     setCurrentSlideIndex(lastSlideIndex);
   };
-
-  const checkConsent = async () => {
-    try {
-      const hasConsented = await AsyncStorage.getItem("hasConsented");
-      if (hasConsented === null) {
-        setVisible(true);
-      }
-    } catch (error) {
-      console.log("Error reading consent status", error);
-    }
-  };
-
-  const hideModalAndSetConsent = async () => {
-    try {
-      await AsyncStorage.setItem("hasConsented", "true");
-      setVisible(false);
-    } catch (error) {
-      console.log("Error saving consent status", error);
-    }
-  };
-
-  useEffect(() => {
-    checkConsent();
-  }, []);
 
   const Footer = () => (
     <View style={[styles.footerCurveWrapper, { paddingBottom: insets.bottom }]}>
@@ -212,12 +186,6 @@ const OnboardingScreen = ({ navigation }) => {
       
       {/* Content overlay fără SafeAreaView pentru a permite video să acopere totul */}
       <View style={[styles.contentOverlay, { paddingTop: insets.top }]}>
-      {visible ? (
-        <ConsentModal
-          hideModalAndSetConsent={hideModalAndSetConsent}
-          visible={visible}
-        />
-      ) : (
         <>
           <FlatList
             ref={ref}
@@ -235,7 +203,6 @@ const OnboardingScreen = ({ navigation }) => {
           />
           <Footer />
         </>
-      )}
       </View>
     </View>
   );

@@ -63,7 +63,7 @@ const VideoLibraryScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const { userData, refreshUserDataFromServer } = useAuth() as { 
     userData?: unknown;
-    refreshUserDataFromServer?: () => Promise<unknown>;
+    refreshUserDataFromServer?: (options?: { force?: boolean }) => Promise<unknown>;
   };
   const isPremiumUser = hasPremiumAccess(userData);
   const { adsConfig } = useAdsContext();
@@ -273,7 +273,7 @@ const VideoLibraryScreen: React.FC = () => {
     if (video.isPremium && !isPremiumUser && video.canPlay !== true && refreshUserDataFromServer) {
       try {
         setPremiumCheckInProgress(true);
-        const fresh = await refreshUserDataFromServer();
+        const fresh = await refreshUserDataFromServer({ force: true });
         if (fresh && hasPremiumAccess(fresh)) {
           effectiveIsPremiumUser = true;
         }

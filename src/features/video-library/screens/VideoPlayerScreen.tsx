@@ -58,8 +58,8 @@ const VideoPlayerScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const { setIsNavBarVisible } = useNavBarVisibility();
   const { userData, refreshUserDataFromServer } = useAuth() as { 
-    userData?: unknown; 
-    refreshUserDataFromServer?: () => Promise<unknown>;
+    userData?: unknown;
+    refreshUserDataFromServer?: (options?: { force?: boolean }) => Promise<unknown>;
   };
   const [refreshedUserData, setRefreshedUserData] = useState<unknown>(null);
   const { adsConfig } = useAdsContext();
@@ -288,7 +288,7 @@ const VideoPlayerScreen: React.FC = () => {
         
         logDebug("[VideoPlayer] Premium video but no access - refreshing user data from server");
         try {
-          const freshData = await refreshUserDataFromServer();
+          const freshData = await refreshUserDataFromServer({ force: true });
           if (active && freshData) {
             setRefreshedUserData(freshData);
             logDebug("[VideoPlayer] Refreshed user data from server", { 

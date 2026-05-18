@@ -19,7 +19,7 @@
     <key>CFBundlePackageType</key>
     <string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
     <key>CFBundleShortVersionString</key>
-    <string>2.1.6</string>
+    <string>2.2.4</string>
     <key>CFBundleSignature</key>
     <string>????</string>
     <key>CFBundleURLTypes</key>
@@ -39,7 +39,7 @@
       </dict>
     </array>
     <key>CFBundleVersion</key>
-    <string>1</string>
+    <string>64</string>
     <key>GADApplicationIdentifier</key>
     <string>ca-app-pub-9577714849380446~1181241188</string>
     <key>GADDelayAppMeasurementInit</key>
@@ -56,23 +56,21 @@
       <true/>
     </dict>
     <key>NSCameraUsageDescription</key>
-    <string>Allow $(PRODUCT_NAME) to access your camera</string>
+    <string>Cristina Zurba uses the camera only when you choose to take a photo for tarot readings or profile-related features.</string>
     <key>NSFaceIDUsageDescription</key>
     <string>Allow $(PRODUCT_NAME) to access your Face ID biometric data.</string>
     <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-    <string>Allow $(PRODUCT_NAME) to access your location</string>
+    <string>Cristina Zurba uses your location to show nearby consultants and location-based results when you choose to use those features.</string>
     <key>NSLocationAlwaysUsageDescription</key>
-    <string>Allow $(PRODUCT_NAME) to access your location</string>
+    <string>Cristina Zurba uses your location to show nearby consultants and location-based results when you choose to use those features.</string>
     <key>NSLocationWhenInUseUsageDescription</key>
-    <string>Allow $(PRODUCT_NAME) to access your location</string>
+    <string>Cristina Zurba uses your location while the app is open to show nearby consultants and location-based results.</string>
     <key>NSMicrophoneUsageDescription</key>
-    <string>Allow $(PRODUCT_NAME) to access your microphone</string>
+    <string>Cristina Zurba uses the microphone only when you start an audio or video consultation that needs your voice.</string>
     <key>NSPhotoLibraryAddUsageDescription</key>
-    <string>Allow $(PRODUCT_NAME) to save photos</string>
+    <string>Cristina Zurba saves images to your photo library only when you choose to save generated affirmations, quotes, or reading results.</string>
     <key>NSPhotoLibraryUsageDescription</key>
-    <string>Allow $(PRODUCT_NAME) to access your photos</string>
-    <key>NSUserTrackingUsageDescription</key>
-    <string>Allow this app to collect app-related data that can be used for tracking you or your device.</string>
+    <string>Cristina Zurba uses selected photos only when you choose an image for tarot readings or profile-related features.</string>
     <key>UILaunchStoryboardName</key>
     <string>SplashScreen</string>
     <key>UIRequiredDeviceCapabilities</key>

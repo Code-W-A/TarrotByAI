@@ -5,6 +5,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  Text,
   ImageBackground,
   KeyboardAvoidingView,
   AppState,
@@ -13,6 +14,7 @@ import { Button, SocialMediaLogin } from "../components/commonButton";
 import { GeneralProps } from "../interfaces/generalProps";
 import { Route, useFocusEffect, useRoute } from "@react-navigation/native";
 import * as WebBrowser from "expo-web-browser";
+import * as Notifications from "expo-notifications";
 import { screenName } from "../utils/screenName";
 import {
   H6fontBoldPrimary,
@@ -102,6 +104,8 @@ const tr = (key: string, def: string) => {
   const v = String(i18n.translate(key));
   return v && v !== key ? v : def;
 };
+const NOTIFICATION_REMINDER_LAST_SEEN_KEY = "pushNotifReminderLastSeenAt";
+const NOTIFICATION_REMINDER_COOLDOWN_MS = 72 * 60 * 60 * 1000;
 
 interface Props extends GeneralProps {
   route: Route<string, object | undefined>;
@@ -150,7 +154,9 @@ const TarrotSettings: React.FC<Props> = ({ navigation }): JSX.Element => {
   const [modalVisibleDelete, setModalVisibleDelete] = useState(false);
   const [showSnackBar, setShowSnackback] = useState(false);
   const [snackMessage, setSnackMessage] = useState("");
-  const { isGranted, openNotificationSettings } = usePushNotifications();
+  const { isGranted, openNotificationSettings, requestNotificationPermission } =
+    usePushNotifications();
+  const [showNotificationReminder, setShowNotificationReminder] = useState(false);
   const insets = useSafeAreaInsets();
   const [subscriptionSystemEnabled, setSubscriptionSystemEnabled] = useState<
     boolean | null
@@ -192,6 +198,69 @@ const TarrotSettings: React.FC<Props> = ({ navigation }): JSX.Element => {
     });
     return () => sub.remove();
   }, [refreshUserDataFromServer]);
+
+  useEffect(() => {
+    let active = true;
+
+    const syncNotificationReminderVisibility = async () => {
+      if (isGranted) {
+        if (active) {
+          setShowNotificationReminder(false);
+        }
+        return;
+      }
+
+      try {
+        const raw = await AsyncStorage.getItem(NOTIFICATION_REMINDER_LAST_SEEN_KEY);
+        const lastShownAt = raw ? Number(raw) : 0;
+        const now = Date.now();
+        const shouldShow =
+          !lastShownAt ||
+          Number.isNaN(lastShownAt) ||
+          now - lastShownAt >= NOTIFICATION_REMINDER_COOLDOWN_MS;
+
+        if (shouldShow) {
+          await AsyncStorage.setItem(
+            NOTIFICATION_REMINDER_LAST_SEEN_KEY,
+            String(now)
+          );
+        }
+
+        if (active) {
+          setShowNotificationReminder(shouldShow);
+        }
+      } catch {
+        if (active) {
+          setShowNotificationReminder(true);
+        }
+      }
+    };
+
+    void syncNotificationReminderVisibility();
+    return () => {
+      active = false;
+    };
+  }, [isGranted]);
+
+  const handleActivateNotifications = useCallback(async () => {
+    try {
+      const granted = await requestNotificationPermission?.();
+      if (granted) {
+        setShowNotificationReminder(false);
+        return;
+      }
+      const { status } = await Notifications.getPermissionsAsync();
+      if (status === "denied") {
+        openNotificationSettings?.();
+      }
+    } catch {
+      openNotificationSettings?.();
+    }
+  }, [openNotificationSettings, requestNotificationPermission]);
+
+  const handleNotificationSettingsPress = useCallback(() => {
+    openNotificationSettings?.();
+  }, [openNotificationSettings]);
 
   const localeTag = i18n.locale?.split("-")[0] ?? "ro";
   const showPremiumSection =
@@ -466,15 +535,29 @@ const TarrotSettings: React.FC<Props> = ({ navigation }): JSX.Element => {
                             txtColor={colors.white}
                             style={{ marginTop: 16, width: "100%" }}
                           />
+                          {!isGranted && showNotificationReminder ? (
+                            <View style={styles.notificationReminderCard}>
+                              <Text style={styles.notificationReminderTitle}>
+                                {tr("notificationsReminderTitle", "Enable notifications")}
+                              </Text>
+                              <Text style={styles.notificationReminderText}>
+                                {tr(
+                                  "notificationsReminderBody",
+                                  "Turn on notifications to receive updates and reminders on time."
+                                )}
+                              </Text>
+                            </View>
+                          ) : null}
                           {!isGranted ? (
                             <Button
                               disabled={false}
-                              funCallback={() => {
-                                openNotificationSettings();
-                              }}
+                              funCallback={handleActivateNotifications}
                               borderWidth={0.2}
                               bgColor={colors.gold}
-                              label={"Activate notifications"}
+                              label={tr(
+                                "notificationsActivateCta",
+                                "Activate notifications"
+                              )}
                               borderColor={colors.white}
                               success={true}
                               style={{ marginTop: 16, width: "100%" }}
@@ -483,12 +566,13 @@ const TarrotSettings: React.FC<Props> = ({ navigation }): JSX.Element => {
                           ) : (
                             <Button
                               disabled={false}
-                              funCallback={() => {
-                                openNotificationSettings();
-                              }}
+                              funCallback={handleNotificationSettingsPress}
                               borderWidth={0.2}
                               bgColor={colors.gold}
-                              label={"Stop notifications"}
+                              label={tr(
+                                "notificationsDisableCta",
+                                "Stop notifications"
+                              )}
                               borderColor={colors.white}
                               success={true}
                               style={{ marginTop: 16, width: "100%" }}
@@ -740,16 +824,30 @@ const TarrotSettings: React.FC<Props> = ({ navigation }): JSX.Element => {
                           txtColor={colors.white}
                           style={{ marginTop: 16, width: "100%" }}
                         />
+                        {!isGranted && showNotificationReminder ? (
+                          <View style={styles.notificationReminderCard}>
+                            <Text style={styles.notificationReminderTitle}>
+                              {tr("notificationsReminderTitle", "Enable notifications")}
+                            </Text>
+                            <Text style={styles.notificationReminderText}>
+                              {tr(
+                                "notificationsReminderBody",
+                                "Turn on notifications to receive updates and reminders on time."
+                              )}
+                            </Text>
+                          </View>
+                        ) : null}
 
                         {!isGranted ? (
                           <Button
                             disabled={false}
-                            funCallback={() => {
-                              openNotificationSettings();
-                            }}
+                            funCallback={handleActivateNotifications}
                             borderWidth={0.2}
                             bgColor={colors.gold}
-                            label={"Activate notifications"}
+                            label={tr(
+                              "notificationsActivateCta",
+                              "Activate notifications"
+                            )}
                             borderColor={colors.white}
                             success={true}
                             style={{ marginTop: 16, width: "100%" }}
@@ -758,12 +856,13 @@ const TarrotSettings: React.FC<Props> = ({ navigation }): JSX.Element => {
                         ) : (
                           <Button
                             disabled={false}
-                            funCallback={() => {
-                              openNotificationSettings();
-                            }}
+                            funCallback={handleNotificationSettingsPress}
                             borderWidth={0.2}
                             bgColor={colors.gold}
-                            label={"Stop notifications"}
+                            label={tr(
+                              "notificationsDisableCta",
+                              "Stop notifications"
+                            )}
                             borderColor={colors.white}
                             success={true}
                             style={{ marginTop: 16, width: "100%" }}
@@ -1108,6 +1207,29 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     paddingTop: 24,
     alignItems: "center",
+  },
+  notificationReminderCard: {
+    width: "100%",
+    marginTop: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "rgba(191, 167, 106, 0.4)",
+    backgroundColor: "rgba(191, 167, 106, 0.12)",
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  notificationReminderTitle: {
+    textAlign: "center",
+    marginBottom: 6,
+    color: colors.primary3,
+    fontWeight: "700",
+    fontSize: 14,
+  },
+  notificationReminderText: {
+    textAlign: "center",
+    lineHeight: 18,
+    color: colors.primary3,
+    fontSize: 13,
   },
   infoTextViewStyle: {
     paddingTop: 10,

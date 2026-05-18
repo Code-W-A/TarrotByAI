@@ -4,6 +4,7 @@ import {
   query,
   where,
 } from "firebase/firestore";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { Unsubscribe } from "firebase/firestore";
 import { db } from "../../../../firebase";
 import type { Video } from "../types/video";
@@ -21,19 +22,87 @@ import {
 
 const COLLECTION_NAME = "videosVideoModule";
 const CATEGORY_COLLECTION_NAME = "videoCategories";
+const VIDEO_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
+const CATEGORY_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+const VIDEO_CACHE_KEY_PREFIX = "videoLibrary:publishedVideos";
+const CATEGORY_CACHE_KEY = "videoLibrary:categories";
+
+type CacheEntry<T> = {
+  data: T;
+  fresh: boolean;
+};
+
+const getTimestampMs = (value: any): number | null => {
+  if (typeof value === "number") {
+    return value;
+  }
+
+  if (typeof value?.toMillis === "function") {
+    return value.toMillis();
+  }
+
+  if (typeof value?._seconds === "number") {
+    return value._seconds * 1000;
+  }
+
+  if (typeof value?.seconds === "number") {
+    return value.seconds * 1000;
+  }
+
+  if (typeof value === "string") {
+    const parsed = Date.parse(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  return null;
+};
+
+const readCache = async <T,>(key: string, ttlMs: number): Promise<CacheEntry<T> | null> => {
+  try {
+    const raw = await AsyncStorage.getItem(key);
+    if (!raw) return null;
+
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed.timestamp !== "number" || parsed.data === undefined) {
+      return null;
+    }
+
+    return {
+      data: parsed.data as T,
+      fresh: Date.now() - parsed.timestamp <= ttlMs,
+    };
+  } catch (error) {
+    logWarn("[VideoLibrary] Failed to read local cache.", { key, error });
+    return null;
+  }
+};
+
+const writeCache = async <T,>(key: string, data: T): Promise<void> => {
+  try {
+    await AsyncStorage.setItem(
+      key,
+      JSON.stringify({
+        timestamp: Date.now(),
+        data,
+      })
+    );
+  } catch (error) {
+    logWarn("[VideoLibrary] Failed to write local cache.", { key, error });
+  }
+};
 
 const getVideoSortTimestamp = (video: Video): number => {
-  const publishMs = video.publishAt?.toMillis?.();
+  const publishMs = getTimestampMs(video.publishAt);
   if (typeof publishMs === "number") {
     return publishMs;
   }
 
-  const createdMs = video.createdAt?.toMillis?.();
+  const createdMs = getTimestampMs(video.createdAt);
   if (typeof createdMs === "number") {
     return createdMs;
   }
 
-  const updatedMs = video.updatedAt?.toMillis?.();
+  const updatedMs = getTimestampMs(video.updatedAt);
   if (typeof updatedMs === "number") {
     return updatedMs;
   }
@@ -53,7 +122,7 @@ const isVideoVisible = (video: Video, nowMs = Date.now()): boolean => {
   if (!video.publishAt) {
     return true;
   }
-  const publishMs = video.publishAt?.toMillis?.();
+  const publishMs = getTimestampMs(video.publishAt);
   if (!publishMs) {
     return true;
   }
@@ -101,14 +170,23 @@ const logFirestoreFallback = (
 };
 
 export const getPublishedVideos = async (): Promise<Video[]> => {
+  const locale = getCurrentLocale();
+  const cacheKey = `${VIDEO_CACHE_KEY_PREFIX}:${locale}`;
+  let cachedVideos = await readCache<Video[]>(cacheKey, VIDEO_CACHE_TTL_MS);
+
   try {
-    const response = await getPremiumVideoLibrary(getCurrentLocale());
+    const response = await getPremiumVideoLibrary(locale);
+    await writeCache(cacheKey, response.videos);
     return response.videos;
   } catch (error) {
     logFirestoreFallback("api_failed", {
       reason: "premium_api_error",
       error,
     });
+  }
+
+  if (cachedVideos?.fresh) {
+    return sortVideosNewestFirst(cachedVideos.data);
   }
 
   // Fallback only keeps the old public Firestore behavior available when the API is unreachable.
@@ -123,6 +201,7 @@ export const getPublishedVideos = async (): Promise<Video[]> => {
         docsCount: fallbackSnapshot.size,
         visibleCount: visibleVideos.length,
       });
+      await writeCache(cacheKey, visibleVideos);
       return visibleVideos;
     }
   } catch (error) {
@@ -143,6 +222,7 @@ export const getPublishedVideos = async (): Promise<Video[]> => {
         docsCount: fallbackSnapshot.size,
         visibleCount: visibleVideos.length,
       });
+      await writeCache(cacheKey, visibleVideos);
       return visibleVideos;
     }
   } catch (error) {
@@ -152,14 +232,25 @@ export const getPublishedVideos = async (): Promise<Video[]> => {
     });
   }
 
+  if (cachedVideos?.data?.length) {
+    return sortVideosNewestFirst(cachedVideos.data);
+  }
+
   return [];
 };
 
 export const getVideoCategories = async (): Promise<VideoCategory[]> => {
+  const cachedCategories = await readCache<VideoCategory[]>(CATEGORY_CACHE_KEY, CATEGORY_CACHE_TTL_MS);
+  if (cachedCategories?.fresh) {
+    return cachedCategories.data;
+  }
+
   try {
     const snapshot = await trackedGetDocsFromServer(buildCategoriesQuery());
     if (!snapshot.empty) {
-      return mapCategories(snapshot.docs);
+      const categories = mapCategories(snapshot.docs);
+      await writeCache(CATEGORY_CACHE_KEY, categories);
+      return categories;
     }
   } catch (error) {
     logWarn("[VideoLibrary] Categories query failed, falling back.", error);
@@ -170,10 +261,16 @@ export const getVideoCategories = async (): Promise<VideoCategory[]> => {
       collection(db, CATEGORY_COLLECTION_NAME) as any
     );
     if (!fallbackSnapshot.empty) {
-      return mapCategories(fallbackSnapshot.docs);
+      const categories = mapCategories(fallbackSnapshot.docs);
+      await writeCache(CATEGORY_CACHE_KEY, categories);
+      return categories;
     }
   } catch (error) {
     logWarn("[VideoLibrary] Categories fallback failed.", error);
+  }
+
+  if (cachedCategories?.data?.length) {
+    return cachedCategories.data;
   }
 
   return [];
@@ -196,10 +293,8 @@ export const subscribePublishedVideos = (
   };
 
   void load();
-  const interval = setInterval(load, 60000);
   return () => {
     active = false;
-    clearInterval(interval);
   };
 };
 

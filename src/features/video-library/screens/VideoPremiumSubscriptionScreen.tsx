@@ -487,7 +487,7 @@ const VideoPremiumSubscriptionScreen: React.FC = () => {
       });
 
       if (sheet.premiumActive) {
-        await refreshUserDataFromServer?.();
+        await refreshUserDataFromServer?.({ force: true });
         setSuccessMessage(
           translate("checkoutSuccessToast", "Payment confirmed. Access is updating.")
         );
@@ -575,7 +575,7 @@ const VideoPremiumSubscriptionScreen: React.FC = () => {
       // Stripe auto-activates the subscription once the invoice PaymentIntent
       // is paid; we just poll our backend to mirror premium access into Firestore.
       const active = await pollPremiumActivation(confirmParams);
-      await refreshUserDataFromServer?.();
+      await refreshUserDataFromServer?.({ force: true });
       setActivating(false);
 
       if (active) {
@@ -675,7 +675,7 @@ const VideoPremiumSubscriptionScreen: React.FC = () => {
     const handleGoToVideos = async () => {
       // Make sure the library screen sees fresh premium status as soon as it re-focuses.
       try {
-        await refreshUserDataFromServer?.();
+        await refreshUserDataFromServer?.({ force: true });
       } catch {
         /* non-blocking */
       }
@@ -685,7 +685,7 @@ const VideoPremiumSubscriptionScreen: React.FC = () => {
     const handleWatchVideo = async () => {
       // Refresh entitlements right before navigating so the player gets non-premium=false immediately.
       try {
-        await refreshUserDataFromServer?.();
+        await refreshUserDataFromServer?.({ force: true });
       } catch {
         /* non-blocking */
       }
@@ -806,6 +806,12 @@ const VideoPremiumSubscriptionScreen: React.FC = () => {
             <View style={styles.hero}>
               <Ionicons name="star" size={28} color="#bfa76a" />
               <Text style={styles.title}>{title}</Text>
+              <View style={styles.priceRow}>
+                <Text style={styles.priceAmount}>5€</Text>
+                <Text style={styles.pricePeriod}>
+                  {translate("premiumPricePerMonth", "/month")}
+                </Text>
+              </View>
               <Text style={styles.subtitle}>
                 {translate(
                   "premiumPaywallMessage",
@@ -986,6 +992,24 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "800",
     textAlign: "center",
+  },
+  priceRow: {
+    flexDirection: "row",
+    alignItems: "baseline",
+    justifyContent: "center",
+    marginTop: 6,
+  },
+  priceAmount: {
+    fontSize: 30,
+    fontWeight: "800",
+    color: "#bfa76a",
+    letterSpacing: -1,
+  },
+  pricePeriod: {
+    marginLeft: 4,
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#8b7355",
   },
   subtitle: {
     marginTop: 8,

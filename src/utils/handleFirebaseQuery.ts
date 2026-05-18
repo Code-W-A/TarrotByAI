@@ -1,4 +1,4 @@
-import { collection, query, where, getDocsFromServer } from "firebase/firestore";
+import { collection, query, where, getDocsFromServer, limit } from "firebase/firestore";
 import { authentication, db } from "../../firebase";
 import { getDocsPreferCache } from "./firestoreCache";
 
@@ -8,7 +8,8 @@ export const handleGetUserInfo = async () => {
   try {
     const q = query(
       collection(db, "Users"),
-      where("owner_uid", "==", auth.currentUser.uid)
+      where("owner_uid", "==", auth.currentUser.uid),
+      limit(1)
     );
 
     const querySnapshot = await getDocsPreferCache(q);
@@ -31,7 +32,8 @@ export const handleGetUserInfoFromServer = async () => {
     }
     const q = query(
       collection(db, "Users"),
-      where("owner_uid", "==", auth.currentUser.uid)
+      where("owner_uid", "==", auth.currentUser.uid),
+      limit(1)
     );
 
     const querySnapshot = await getDocsFromServer(q);

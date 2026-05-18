@@ -93,8 +93,6 @@ import {
   setTemporaryPatientClinicReview,
   setTemporaryPatientReview,
 } from "../actions/patientActions";
-import { registerForPushNotificationsAsync } from "../utils/Notification/registerPushNotification";
-import { uploadExpoPushToken, uploadGuestExpoToken } from "../utils/UploadFirebaseData";
 import { retrieveTypeOfUser } from "../utils/getFirebaseData";
 import { handleSignOutFromSignIn } from "../utils/handleSignOut";
 import { handleLoginAsGuest } from "../utils/loginAsGuestHelper";
@@ -155,16 +153,12 @@ const SignInScreenPatient: React.FC<Props> = ({
 
   const onsubmit = async (detaila) => {
     setIsLoading(true);
-    // const expoPushToken =  await handleGetExpoPushNotificationToken()
-    const expoToken = await registerForPushNotificationsAsync();
-    console.log("expoPushToken...", expoToken);
     signInWithEmailAndPassword(auth, detaila.email, detaila.password)
       .then(async (userCredentials) => {
         console.log("userCredentials...", userCredentials.user.uid);
         const userType = await retrieveTypeOfUser(userCredentials.user.uid);
 
         console.log("userType...", userType);
-        uploadExpoPushToken(expoToken);
         // console.log("userCredentials...", userCredentials)
         if (userType != "isPatient") {
           throw {
@@ -284,11 +278,6 @@ const SignInScreenPatient: React.FC<Props> = ({
                 transparent={true}
                 funCallback={() =>
                   handleLoginAsGuest(false).then(async (guestDetails) => {
-                    try {
-                      const expoToken = await registerForPushNotificationsAsync();
-                      const lang = (i18n.locale || "en").split("-")[0];
-                      await uploadGuestExpoToken(expoToken, lang, Platform.OS === 'ios');
-                    } catch {}
                     dispatch(getGuestLoginDetails()).then(() => {
                       dispatch(getPatientInfo(guestDetails)).then(() => {
                         navigation.navigate(

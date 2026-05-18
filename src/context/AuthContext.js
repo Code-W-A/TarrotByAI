@@ -4,6 +4,7 @@ import React, {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { authentication } from "../../firebase";
@@ -13,6 +14,7 @@ import { setAppOpenSuppressedForSubscriber } from "../utils/adsUtils";
 import { hasPremiumAccess } from "../features/video-library/utils/premiumAccess";
 
 const AuthContext = createContext();
+const SERVER_USER_REFRESH_THROTTLE_MS = 10 * 60 * 1000;
 
 export const useAuth = () => {
   return useContext(AuthContext);
@@ -23,6 +25,7 @@ export const AuthProvider = ({ children }) => {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isGuestUser, setIsGuestUser] = useState(false); // Inițializat ca false
+  const lastServerRefreshRef = useRef({ uid: null, timestamp: 0 });
 
   const refreshUserData = useCallback(async () => {
     try {
@@ -35,18 +38,36 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  const refreshUserDataFromServer = useCallback(async () => {
+  const refreshUserDataFromServer = useCallback(async (options = {}) => {
+    const force = options === true || options?.force === true;
+    const uid = currentUser?.uid || authentication.currentUser?.uid || null;
+    const now = Date.now();
+    const lastRefresh = lastServerRefreshRef.current;
+
+    if (
+      !force &&
+      uid &&
+      userData &&
+      lastRefresh.uid === uid &&
+      now - lastRefresh.timestamp < SERVER_USER_REFRESH_THROTTLE_MS
+    ) {
+      return userData;
+    }
+
     try {
+      if (uid) {
+        lastServerRefreshRef.current = { uid, timestamp: now };
+      }
       const userDataFromFirestore = await handleGetUserInfoFromServer();
       if (userDataFromFirestore) {
         setUserData(userDataFromFirestore);
       }
-      return userDataFromFirestore;
+      return userDataFromFirestore || userData || null;
     } catch (error) {
       console.error("Failed to refresh user data from server:", error);
       return null;
     }
-  }, []);
+  }, [currentUser?.uid, userData]);
 
   // Funcția pentru a seta utilizatorul ca guest user
   const setAsGuestUser = useCallback(async (isGuest) => {

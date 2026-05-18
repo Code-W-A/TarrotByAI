@@ -20,7 +20,7 @@ const ConsentModal = ({ hideModalAndSetConsent, visible }) => {
             <View style={styles.titleContainer}>
               <Text style={styles.title}>Consentiment pentru imagini</Text>
               <Text style={styles.subTitle}>
-                Cristina Zurba - Tarot colectează și procesează imagini pentru a oferi experiențe personalizate de tarot. Acceptând, ești de acord cu utilizarea imaginilor tale pentru interpretări mai precise și o experiență îmbunătățită.
+                Cristina Zurba - Tarot proceseaza imaginile pe care alegi sa le furnizezi doar pentru functiile din aplicatie, cum ar fi interpretari sau profil. Acest consimtamant nu este pentru urmarire publicitara sau tracking intre aplicatii.
               </Text>
             </View>
             <View style={styles.actionContainer}>

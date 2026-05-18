@@ -66,6 +66,13 @@ export const RewardedAdGate: React.FC<Props> = ({
             {videoTitle}
           </Text>
 
+          <View style={styles.priceRow}>
+            <Text style={styles.priceAmount}>5€</Text>
+            <Text style={styles.pricePeriod}>
+              {i18n.translate("premiumPricePerMonth")}
+            </Text>
+          </View>
+
           <Text style={styles.message}>
             {remaining > 0
               ? i18n.translate(
@@ -112,6 +119,13 @@ export const RewardedAdGate: React.FC<Props> = ({
               )}
             </Text>
           )}
+
+          <Text style={styles.subscribePitch}>
+            {i18n.translate(
+              "rewardedAdGateSubscribePitch",
+              "Go Premium to remove ads and unlock all premium videos."
+            )}
+          </Text>
 
           <TouchableOpacity style={styles.subscribeButton} onPress={onSubscribe}>
             <Ionicons name="star" size={18} color={colors.gold} style={styles.buttonIcon} />
@@ -178,11 +192,29 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 16,
   },
-  message: {
+  priceRow: {
+    flexDirection: "row",
+    alignItems: "baseline",
+    justifyContent: "center",
+    marginBottom: 16,
+  },
+  priceAmount: {
+    fontSize: 22,
+    fontWeight: "800",
+    color: colors.gold,
+    letterSpacing: -0.4,
+  },
+  pricePeriod: {
+    marginLeft: 4,
     fontSize: 14,
+    fontWeight: "600",
+    color: "#8b7355",
+  },
+  message: {
+    fontSize: 15,
     color: "#8b7355",
     textAlign: "center",
-    lineHeight: 20,
+    lineHeight: 22,
     marginBottom: 24,
   },
   watchButton: {
@@ -206,16 +238,25 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   remainingText: {
-    fontSize: 12,
+    fontSize: 13,
     color: "#8b7355",
     textAlign: "center",
+    lineHeight: 18,
     marginBottom: 16,
   },
   noMoreText: {
-    fontSize: 13,
+    fontSize: 14,
     color: "#d94f45",
     textAlign: "center",
     marginBottom: 16,
+    fontWeight: "600",
+  },
+  subscribePitch: {
+    fontSize: 14,
+    color: "#5d4e37",
+    textAlign: "center",
+    lineHeight: 20,
+    marginBottom: 10,
     fontWeight: "600",
   },
   subscribeButton: {

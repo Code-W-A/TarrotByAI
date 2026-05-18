@@ -55,9 +55,8 @@ import {
   usePushNotifications,
 } from "./src/context/PushNotificationsContext";
 import { upsertUserTokenMetadata } from "./src/utils/firestoreUtils";
-import { useAppTrackingTransparency } from "./src/hooks/useAppTrackingTransparency";
-import { initializeTrackingServices } from "./src/utils/trackingUtils";
 import { AdsProvider, useAdsContext } from "./src/context/AdsContext";
+import { initializeAds } from "./src/utils/adsUtils";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import {
   flushReadTelemetry,
@@ -73,9 +72,6 @@ const App = () => {
 
   const notificationListener = useRef(null);
   const responseListener = useRef(null);
-
-  // App Tracking Transparency hook
-  const { status: attStatus, hasPermission: hasTrackingPermission, requestPermission: requestATTPermission } = useAppTrackingTransparency();
   
   // We'll use this inside the AdsProvider to get access to setAdsConfig
   const AppContent = () => {
@@ -105,21 +101,19 @@ const App = () => {
       setCurrentTelemetryScreen(currentRoute?.name || "unknown");
     };
     
-    // Handle ATT permission status changes - DOAR O DATĂ
+    // Initialize ads without ATT. iOS ad requests remain non-personalized.
     useEffect(() => {
-      if (attStatus && languageLoaded && fontsLoaded && !isAdsReady) {
-        console.log("ATT Status changed:", attStatus);
-        
-        // Initialize tracking services based on permission - DOAR O DATĂ
-        initializeTrackingServices(hasTrackingPermission, setAdsConfig)
-          .then((services) => {
-            console.log("Tracking services initialized:", services.isPersonalized ? "Personalized" : "Non-personalized");
+      if (languageLoaded && fontsLoaded && !isAdsReady) {
+        initializeAds(false)
+          .then((config) => {
+            setAdsConfig(config);
+            console.log("Ads initialized: Non-personalized");
           })
           .catch((error) => {
-            console.error("Failed to initialize tracking services:", error);
+            console.error("Failed to initialize ads:", error);
           });
       }
-    }, [attStatus, languageLoaded, fontsLoaded, isAdsReady]); // Removed hasTrackingPermission and setAdsConfig to prevent loop
+    }, [languageLoaded, fontsLoaded, isAdsReady, setAdsConfig]);
     
     // IMPORTANT: token upload should run INSIDE NavigationContainer to avoid useNavigation error
     const PushTokenUploader = () => {
@@ -200,13 +194,6 @@ const App = () => {
 
     loadLanguage();
     // handleRequestLocationPermission();
-    
-    // Request ATT permission after a short delay to ensure app is fully loaded
-    const timer = setTimeout(() => {
-      requestATTPermission();
-    }, 2000);
-
-    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {

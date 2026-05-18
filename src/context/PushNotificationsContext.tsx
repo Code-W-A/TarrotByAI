@@ -7,17 +7,16 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { Alert, AppState, Linking, Platform } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { AppState, Linking, Platform } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
 import Constants from "expo-constants";
+import { doc, updateDoc } from "firebase/firestore";
+import { authentication, db } from "../../firebase";
 import { screenName } from "../utils/screenName";
 import { getVideoById } from "../features/video-library/services/videoLibrary.service";
 import { syncPushTokenMetadataWithStoredLanguage } from "../utils/firestoreUtils";
-
-const PROMPT_SUPPRESSED_KEY = "pushNotifPromptSuppressed";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -36,6 +35,7 @@ export interface PushNotificationState {
   registerForPushNotificationsAsync?: () => Promise<
     Notifications.ExpoPushToken | undefined
   >;
+  requestNotificationPermission?: () => Promise<boolean>;
   isGranted?: boolean;
   openNotificationSettings?: () => void;
 }
@@ -72,31 +72,30 @@ export const PushNotificationsProvider: React.FC<{
     Notifications.Notification | undefined
   >();
   const [isGranted, setIsGranted] = useState(false);
-
-  const isPromptVisibleRef = useRef(false);
-  const hasSuppressedPromptRef = useRef(false);
-  const sessionAlertShownRef = useRef(false);
+  const expoPushTokenRef = useRef<Notifications.ExpoPushToken | undefined>(
+    undefined
+  );
+  const lastResolvedTokenDataRef = useRef("");
+  const lastSyncedUserExpoTokenRef = useRef<string>("");
   const notificationListener = useRef<Notifications.Subscription | null>(null);
   const responseListener = useRef<Notifications.Subscription | null>(null);
   const appStateRef = useRef(AppState.currentState);
 
-  const loadPromptSuppression = useCallback(async () => {
-    try {
-      const suppressed = await AsyncStorage.getItem(PROMPT_SUPPRESSED_KEY);
-      hasSuppressedPromptRef.current = suppressed === "true";
-    } catch {
-      /* ignore */
-    }
-  }, []);
-
-  const setPromptSuppressed = useCallback(async () => {
-    hasSuppressedPromptRef.current = true;
-    try {
-      await AsyncStorage.setItem(PROMPT_SUPPRESSED_KEY, "true");
-    } catch {
-      /* ignore */
-    }
-  }, []);
+  const setExpoPushTokenAndTrack = useCallback(
+    (
+      value: React.SetStateAction<Notifications.ExpoPushToken | undefined>
+    ) => {
+      setExpoPushToken((prev) => {
+        const next = typeof value === "function" ? value(prev) : value;
+        expoPushTokenRef.current = next;
+        if (next?.data) {
+          lastResolvedTokenDataRef.current = next.data;
+        }
+        return next;
+      });
+    },
+    []
+  );
 
   const openNotificationSettings = useCallback(() => {
     if (Platform.OS === "ios") {
@@ -108,9 +107,57 @@ export const PushNotificationsProvider: React.FC<{
     }
   }, []);
 
+  const syncUserExpoTokenIfNeeded = useCallback(async (tokenData: string) => {
+    const uid = authentication.currentUser?.uid;
+    if (!uid || !tokenData) {
+      return;
+    }
+
+    if (lastSyncedUserExpoTokenRef.current === tokenData) {
+      return;
+    }
+
+    try {
+      await updateDoc(doc(db, "Users", uid), {
+        expoToken: tokenData,
+      });
+      lastSyncedUserExpoTokenRef.current = tokenData;
+    } catch (error) {
+      console.warn("[PushNotifications] failed to sync Users.expoToken", error);
+    }
+  }, []);
+
+  const resolveTokenForGrantedPermission =
+    useCallback(async (): Promise<Notifications.ExpoPushToken | undefined> => {
+      if (
+        expoPushTokenRef.current?.data &&
+        expoPushTokenRef.current.data === lastResolvedTokenDataRef.current
+      ) {
+        return expoPushTokenRef.current;
+      }
+
+      try {
+        const token = await Notifications.getExpoPushTokenAsync({
+          projectId: getExpoProjectId(),
+        });
+        setExpoPushTokenAndTrack(token);
+        if (token?.data) {
+          await syncPushTokenMetadataWithStoredLanguage(token.data, {
+            isIos: Platform.OS === "ios",
+            projectId: getExpoProjectId(),
+            source: "PushNotificationsProvider",
+          });
+          await syncUserExpoTokenIfNeeded(token.data);
+        }
+        return token;
+      } catch (e) {
+        console.warn("[PushNotifications] getExpoPushTokenAsync failed", e);
+        return undefined;
+      }
+    }, [syncUserExpoTokenIfNeeded]);
+
   const registerForPushNotificationsAsync =
     useCallback(async (): Promise<Notifications.ExpoPushToken | undefined> => {
-      await loadPromptSuppression();
       await ensureAndroidDefaultChannel();
 
       if (!Device.isDevice) {
@@ -132,71 +179,29 @@ export const PushNotificationsProvider: React.FC<{
       }
 
       setIsGranted(true);
-      const token = await Notifications.getExpoPushTokenAsync({
-        projectId: getExpoProjectId(),
-      });
-      setExpoPushToken(token);
-      return token;
-    }, [loadPromptSuppression]);
+      return resolveTokenForGrantedPermission();
+    }, [resolveTokenForGrantedPermission]);
+
+  const requestNotificationPermission = useCallback(async (): Promise<boolean> => {
+    const token = await registerForPushNotificationsAsync();
+    return Boolean(token?.data);
+  }, [registerForPushNotificationsAsync]);
 
   useEffect(() => {
     let cancelled = false;
 
-    const showPermissionAlertOnce = () => {
-      if (
-        isPromptVisibleRef.current ||
-        hasSuppressedPromptRef.current ||
-        sessionAlertShownRef.current
-      ) {
-        return;
-      }
-      sessionAlertShownRef.current = true;
-      isPromptVisibleRef.current = true;
-      Alert.alert(
-        "Notifications are stopped",
-        "Do you want to activate notifications?",
-        [
-          {
-            text: "No",
-            onPress: () => {
-              setPromptSuppressed();
-              isPromptVisibleRef.current = false;
-            },
-            style: "cancel",
-          },
-          {
-            text: "Activate",
-            onPress: () => {
-              openNotificationSettings();
-              isPromptVisibleRef.current = false;
-            },
-          },
-        ]
-      );
-    };
-
     const runInitialRegister = async () => {
-      await loadPromptSuppression();
       await ensureAndroidDefaultChannel();
 
       if (!Device.isDevice) {
         return;
       }
 
-      const { status: existingStatus } =
-        await Notifications.getPermissionsAsync();
-      let finalStatus = existingStatus;
-
-      if (finalStatus === "undetermined") {
-        const { status } = await Notifications.requestPermissionsAsync();
-        finalStatus = status;
-      }
-
-      if (finalStatus !== "granted") {
+      const { status } = await Notifications.getPermissionsAsync();
+      if (status !== "granted") {
         if (!cancelled) {
           setIsGranted(false);
         }
-        showPermissionAlertOnce();
         return;
       }
 
@@ -204,22 +209,9 @@ export const PushNotificationsProvider: React.FC<{
         setIsGranted(true);
       }
 
-      try {
-        const token = await Notifications.getExpoPushTokenAsync({
-          projectId: getExpoProjectId(),
-        });
-        if (!cancelled) {
-          setExpoPushToken(token);
-        }
-        if (token?.data) {
-          syncPushTokenMetadataWithStoredLanguage(token.data, {
-            isIos: Platform.OS === "ios",
-            projectId: getExpoProjectId(),
-            source: "PushNotificationsProvider.initialRegister",
-          }).catch(() => {});
-        }
-      } catch (e) {
-        console.warn("[PushNotifications] getExpoPushTokenAsync failed", e);
+      const token = await resolveTokenForGrantedPermission();
+      if (!cancelled && token) {
+        setExpoPushToken(token);
       }
     };
 
@@ -306,20 +298,9 @@ export const PushNotificationsProvider: React.FC<{
           const { status } = await Notifications.getPermissionsAsync();
           if (status === "granted") {
             setIsGranted(true);
-            try {
-              const token = await Notifications.getExpoPushTokenAsync({
-                projectId: getExpoProjectId(),
-              });
+            const token = await resolveTokenForGrantedPermission();
+            if (token) {
               setExpoPushToken(token);
-              if (token?.data) {
-                syncPushTokenMetadataWithStoredLanguage(token.data, {
-                  isIos: Platform.OS === "ios",
-                  projectId: getExpoProjectId(),
-                  source: "PushNotificationsProvider.appStateActive",
-                }).catch(() => {});
-              }
-            } catch {
-              /* ignore */
             }
           } else {
             setIsGranted(false);
@@ -342,25 +323,26 @@ export const PushNotificationsProvider: React.FC<{
       sub.remove();
     };
   }, [
-    loadPromptSuppression,
     navigation,
-    openNotificationSettings,
-    setPromptSuppressed,
+    resolveTokenForGrantedPermission,
   ]);
 
   const value = useMemo(
     () => ({
       expoPushToken,
-      setExpoPushToken,
+      setExpoPushToken: setExpoPushTokenAndTrack,
       notification,
       registerForPushNotificationsAsync,
+      requestNotificationPermission,
       isGranted,
       openNotificationSettings,
     }),
     [
       expoPushToken,
+      setExpoPushTokenAndTrack,
       notification,
       registerForPushNotificationsAsync,
+      requestNotificationPermission,
       isGranted,
       openNotificationSettings,
     ]

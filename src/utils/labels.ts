@@ -68,6 +68,11 @@ export const langObj = {
     purchaseSupportIntro:
       "If you have problems with your purchases, fill in the form below.",
     settingsSupportButton: "Contact support",
+    notificationsReminderTitle: "Enable notifications",
+    notificationsReminderBody:
+      "Turn on notifications to receive updates and reminders on time.",
+    notificationsActivateCta: "Activate notifications",
+    notificationsDisableCta: "Stop notifications",
     settingsSupportModalTitle: "App support",
     settingsSupportModalIntro:
       "Describe your issue (account, app, premium, astrology, or purchases). We will reply by email.",
@@ -375,6 +380,8 @@ export const langObj = {
     rewardedAdGateNoMore:
       "Come back anytime with an ad to watch again, or subscribe for full access.",
     rewardedAdGateSubscribe: "Get premium access",
+    rewardedAdGateSubscribePitch:
+      "Go Premium to remove ads and unlock all premium videos.",
     adLoading: "Loading ad…",
     adSponsored: "Ad",
     profilePremiumSubscriptionTitle: "Premium subscription",
@@ -465,6 +472,11 @@ export const langObj = {
     purchaseSupportIntro:
       "Dacă ai probleme cu achizițiile, completează formularul de mai jos.",
     settingsSupportButton: "Contactează suportul",
+    notificationsReminderTitle: "Activează notificările",
+    notificationsReminderBody:
+      "Pornește notificările ca să primești la timp noutăți și mementouri.",
+    notificationsActivateCta: "Activează notificările",
+    notificationsDisableCta: "Oprește notificările",
     settingsSupportModalTitle: "Suport aplicație",
     settingsSupportModalIntro:
       "Descrie problema (cont, aplicație, premium, astrologie sau achiziții). Îți răspundem pe email.",
@@ -569,6 +581,8 @@ export const langObj = {
     rewardedAdGateNoMore:
       "Poți urmări din nou reclama când vrei să vezi videoclipul, sau abonează-te pentru acces complet.",
     rewardedAdGateSubscribe: "Abonament premium",
+    rewardedAdGateSubscribePitch:
+      "Treci la Premium ca să scapi de reclame și să ai acces la toate videoclipurile premium.",
     adLoading: "Se încarcă reclama…",
     adSponsored: "Reclamă",
     profilePremiumSubscriptionTitle: "Abonament premium",
@@ -871,6 +885,11 @@ export const langObj = {
     purchaseSupportIntro:
       "Si tienes problemas con tus compras, completa el siguiente formulario.",
     settingsSupportButton: "Contact support",
+    notificationsReminderTitle: "Enable notifications",
+    notificationsReminderBody:
+      "Turn on notifications to receive updates and reminders on time.",
+    notificationsActivateCta: "Activate notifications",
+    notificationsDisableCta: "Stop notifications",
     settingsSupportModalTitle: "App support",
     settingsSupportModalIntro:
       "Describe your issue (account, app, premium, astrology, or purchases). We will reply by email.",
@@ -1170,6 +1189,8 @@ export const langObj = {
     rewardedAdGateNoMore:
       "Ya desbloqueaste este video hoy. Vuelve mañana o suscríbete para acceso completo.",
     rewardedAdGateSubscribe: "Obtener acceso premium",
+    rewardedAdGateSubscribePitch:
+      "Hazte Premium para quitar los anuncios y acceder a todos los videos premium.",
     adLoading: "Cargando anuncio…",
     adSponsored: "Anuncio",
   },
@@ -1242,6 +1263,11 @@ export const langObj = {
     purchaseSupportIntro:
       "Se hai problemi con i tuoi acquisti, compila il modulo qui sotto.",
     settingsSupportButton: "Contact support",
+    notificationsReminderTitle: "Enable notifications",
+    notificationsReminderBody:
+      "Turn on notifications to receive updates and reminders on time.",
+    notificationsActivateCta: "Activate notifications",
+    notificationsDisableCta: "Stop notifications",
     settingsSupportModalTitle: "App support",
     settingsSupportModalIntro:
       "Describe your issue (account, app, premium, astrology, or purchases). We will reply by email.",
@@ -1507,6 +1533,8 @@ export const langObj = {
     rewardedAdGateNoMore:
       "Hai già sbloccato questo video oggi. Riprova domani o abbonati per l'accesso completo.",
     rewardedAdGateSubscribe: "Abbonamento premium",
+    rewardedAdGateSubscribePitch:
+      "Passa a Premium per rimuovere gli annunci e avere accesso a tutti i video premium.",
     adLoading: "Caricamento annuncio…",
     adSponsored: "Pubblicità",
     
@@ -1607,6 +1635,11 @@ export const langObj = {
     purchaseSupportIntro:
       "Jeśli masz problemy z zakupami, wypełnij poniższy formularz.",
     settingsSupportButton: "Contact support",
+    notificationsReminderTitle: "Enable notifications",
+    notificationsReminderBody:
+      "Turn on notifications to receive updates and reminders on time.",
+    notificationsActivateCta: "Activate notifications",
+    notificationsDisableCta: "Stop notifications",
     settingsSupportModalTitle: "App support",
     settingsSupportModalIntro:
       "Describe your issue (account, app, premium, astrology, or purchases). We will reply by email.",
@@ -1871,6 +1904,8 @@ export const langObj = {
     rewardedAdGateNoMore:
       "Odblokowałeś już ten film dziś. Wróć jutro lub wykup subskrypcję, by mieć pełny dostęp.",
     rewardedAdGateSubscribe: "Subskrypcja premium",
+    rewardedAdGateSubscribePitch:
+      "Przejdź na Premium, aby pozbyć się reklam i uzyskać dostęp do wszystkich filmów premium.",
     adLoading: "Ładowanie reklamy…",
     adSponsored: "Reklama",
     
@@ -1971,6 +2006,11 @@ export const langObj = {
     purchaseSupportIntro:
       "Ако имате проблеми с покупките си, попълнете формуляра по-долу.",
     settingsSupportButton: "Contact support",
+    notificationsReminderTitle: "Enable notifications",
+    notificationsReminderBody:
+      "Turn on notifications to receive updates and reminders on time.",
+    notificationsActivateCta: "Activate notifications",
+    notificationsDisableCta: "Stop notifications",
     settingsSupportModalTitle: "App support",
     settingsSupportModalIntro:
       "Describe your issue (account, app, premium, astrology, or purchases). We will reply by email.",
@@ -2233,6 +2273,8 @@ export const langObj = {
     rewardedAdGateNoMore:
       "Вече отключихте това видео днес. Върнете се утре или се абонирайте за пълен достъп.",
     rewardedAdGateSubscribe: "Премиум абонамент",
+    rewardedAdGateSubscribePitch:
+      "Премини на Premium, за да махнеш рекламите и да имаш достъп до всички премиум видеа.",
     adLoading: "Зареждане на реклама…",
     adSponsored: "Реклама",
     
@@ -2332,6 +2374,11 @@ export const langObj = {
     purchaseSupportIntro:
       "Pokud máte problémy s nákupy, vyplňte prosím formulář níže.",
     settingsSupportButton: "Contact support",
+    notificationsReminderTitle: "Enable notifications",
+    notificationsReminderBody:
+      "Turn on notifications to receive updates and reminders on time.",
+    notificationsActivateCta: "Activate notifications",
+    notificationsDisableCta: "Stop notifications",
     settingsSupportModalTitle: "App support",
     settingsSupportModalIntro:
       "Describe your issue (account, app, premium, astrology, or purchases). We will reply by email.",
@@ -2595,6 +2642,8 @@ export const langObj = {
     rewardedAdGateNoMore:
       "Toto video jste dnes už odemkli. Zkuste to zítra nebo si předplaťte plný přístup.",
     rewardedAdGateSubscribe: "Prémiové předplatné",
+    rewardedAdGateSubscribePitch:
+      "Přejděte na Premium bez reklam a získejte přístup ke všem prémiovým videím.",
     adLoading: "Načítání reklamy…",
     adSponsored: "Reklama",
     
@@ -2695,6 +2744,11 @@ export const langObj = {
     purchaseSupportIntro:
       "Wenn du Probleme mit deinen Käufen hast, fülle bitte das folgende Formular aus.",
     settingsSupportButton: "Contact support",
+    notificationsReminderTitle: "Enable notifications",
+    notificationsReminderBody:
+      "Turn on notifications to receive updates and reminders on time.",
+    notificationsActivateCta: "Activate notifications",
+    notificationsDisableCta: "Stop notifications",
     settingsSupportModalTitle: "App support",
     settingsSupportModalIntro:
       "Describe your issue (account, app, premium, astrology, or purchases). We will reply by email.",
@@ -2961,6 +3015,8 @@ export const langObj = {
     rewardedAdGateNoMore:
       "Du hast dieses Video heute bereits freigeschaltet. Komm morgen wieder oder abonniere für vollen Zugang.",
     rewardedAdGateSubscribe: "Premium-Abo",
+    rewardedAdGateSubscribePitch:
+      "Werde Premium, um Werbung zu entfernen und alle Premium-Videos freizuschalten.",
     adLoading: "Werbung wird geladen…",
     adSponsored: "Anzeige",
     
@@ -3061,6 +3117,11 @@ export const langObj = {
     purchaseSupportIntro:
       "Αν έχετε προβλήματα με τις αγορές σας, συμπληρώστε την παρακάτω φόρμα.",
     settingsSupportButton: "Contact support",
+    notificationsReminderTitle: "Enable notifications",
+    notificationsReminderBody:
+      "Turn on notifications to receive updates and reminders on time.",
+    notificationsActivateCta: "Activate notifications",
+    notificationsDisableCta: "Stop notifications",
     settingsSupportModalTitle: "App support",
     settingsSupportModalIntro:
       "Describe your issue (account, app, premium, astrology, or purchases). We will reply by email.",
@@ -3327,6 +3388,8 @@ export const langObj = {
     rewardedAdGateNoMore:
       "Έχετε ήδη ξεκλειδώσει αυτό το βίντεο σήμερα. Επιστρέψτε αύριο ή εγγραφείτε για πλήρη πρόσβαση.",
     rewardedAdGateSubscribe: "Συνδρομή premium",
+    rewardedAdGateSubscribePitch:
+      "Γίνε Premium για να αφαιρέσεις τις διαφημίσεις και να έχεις πρόσβαση σε όλα τα premium βίντεο.",
     adLoading: "Φόρτωση διαφήμισης…",
     adSponsored: "Διαφήμιση",
     
@@ -3427,6 +3490,11 @@ export const langObj = {
     purchaseSupportIntro:
       "Si vous avez des problèmes avec vos achats, remplissez le formulaire ci-dessous.",
     settingsSupportButton: "Contact support",
+    notificationsReminderTitle: "Enable notifications",
+    notificationsReminderBody:
+      "Turn on notifications to receive updates and reminders on time.",
+    notificationsActivateCta: "Activate notifications",
+    notificationsDisableCta: "Stop notifications",
     settingsSupportModalTitle: "App support",
     settingsSupportModalIntro:
       "Describe your issue (account, app, premium, astrology, or purchases). We will reply by email.",
@@ -3691,6 +3759,8 @@ export const langObj = {
     rewardedAdGateNoMore:
       "Vous avez déjà déverrouillé cette vidéo aujourd'hui. Revenez demain ou abonnez-vous pour un accès complet.",
     rewardedAdGateSubscribe: "Abonnement premium",
+    rewardedAdGateSubscribePitch:
+      "Passez à Premium pour supprimer les pubs et accéder à toutes les vidéos premium.",
     adLoading: "Chargement de la publicité…",
     adSponsored: "Publicité",
     
@@ -3790,6 +3860,11 @@ export const langObj = {
     purchaseSupportIntro:
       "अगर आपकी खरीद से जुड़ी कोई समस्या है, तो नीचे दिया गया फ़ॉर्म भरें।",
     settingsSupportButton: "Contact support",
+    notificationsReminderTitle: "Enable notifications",
+    notificationsReminderBody:
+      "Turn on notifications to receive updates and reminders on time.",
+    notificationsActivateCta: "Activate notifications",
+    notificationsDisableCta: "Stop notifications",
     settingsSupportModalTitle: "App support",
     settingsSupportModalIntro:
       "Describe your issue (account, app, premium, astrology, or purchases). We will reply by email.",
@@ -4050,6 +4125,8 @@ export const langObj = {
     rewardedAdGateNoMore:
       "आपने आज यह वीडियो पहले ही अनलॉक कर लिया है। कल फिर आएं या पूरी पहुँच के लिए सदस्यता लें।",
     rewardedAdGateSubscribe: "प्रीमियम सदस्यता",
+    rewardedAdGateSubscribePitch:
+      "प्रीमियम लें ताकि विज्ञापन हटें और सभी प्रीमियम वीडियो अनलॉक हों।",
     adLoading: "विज्ञापन लोड हो रहा है…",
     adSponsored: "विज्ञापन",
   },
@@ -4122,6 +4199,11 @@ export const langObj = {
     purchaseSupportIntro:
       "Jika Anda mengalami masalah dengan pembelian Anda, isi formulir di bawah ini.",
     settingsSupportButton: "Contact support",
+    notificationsReminderTitle: "Enable notifications",
+    notificationsReminderBody:
+      "Turn on notifications to receive updates and reminders on time.",
+    notificationsActivateCta: "Activate notifications",
+    notificationsDisableCta: "Stop notifications",
     settingsSupportModalTitle: "App support",
     settingsSupportModalIntro:
       "Describe your issue (account, app, premium, astrology, or purchases). We will reply by email.",
@@ -4384,6 +4466,8 @@ export const langObj = {
     rewardedAdGateNoMore:
       "Anda sudah membuka video ini hari ini. Coba lagi besok atau berlangganan untuk akses penuh.",
     rewardedAdGateSubscribe: "Akses premium",
+    rewardedAdGateSubscribePitch:
+      "Upgrade ke Premium untuk menghapus iklan dan membuka semua video premium.",
     adLoading: "Memuat iklan…",
     adSponsored: "Iklan",
   },
@@ -4456,6 +4540,11 @@ export const langObj = {
     purchaseSupportIntro:
       "Ak máte problémy s nákupmi, vyplňte formulár nižšie.",
     settingsSupportButton: "Contact support",
+    notificationsReminderTitle: "Enable notifications",
+    notificationsReminderBody:
+      "Turn on notifications to receive updates and reminders on time.",
+    notificationsActivateCta: "Activate notifications",
+    notificationsDisableCta: "Stop notifications",
     settingsSupportModalTitle: "App support",
     settingsSupportModalIntro:
       "Describe your issue (account, app, premium, astrology, or purchases). We will reply by email.",
@@ -4716,6 +4805,8 @@ export const langObj = {
     rewardedAdGateNoMore:
       "Toto video ste dnes už odomkli. Skúste zajtra alebo sa predplaťte na plný prístup.",
     rewardedAdGateSubscribe: "Prémiové predplatné",
+    rewardedAdGateSubscribePitch:
+      "Prejdite na Premium bez reklám a získajte prístup ku všetkým prémiovým videám.",
     adLoading: "Načítanie reklamy…",
     adSponsored: "Reklama",
   },
@@ -4788,6 +4879,11 @@ export const langObj = {
     purchaseSupportIntro:
       "Если у вас возникли проблемы с покупками, заполните форму ниже.",
     settingsSupportButton: "Contact support",
+    notificationsReminderTitle: "Enable notifications",
+    notificationsReminderBody:
+      "Turn on notifications to receive updates and reminders on time.",
+    notificationsActivateCta: "Activate notifications",
+    notificationsDisableCta: "Stop notifications",
     settingsSupportModalTitle: "App support",
     settingsSupportModalIntro:
       "Describe your issue (account, app, premium, astrology, or purchases). We will reply by email.",
@@ -5049,6 +5145,8 @@ export const langObj = {
     rewardedAdGateNoMore:
       "Вы уже разблокировали это видео сегодня. Загляните завтра или оформите подписку для полного доступа.",
     rewardedAdGateSubscribe: "Премиум подписка",
+    rewardedAdGateSubscribePitch:
+      "Оформите Premium, чтобы убрать рекламу и получить доступ ко всем премиум‑видео.",
     adLoading: "Загрузка рекламы…",
     adSponsored: "Реклама",
   },
@@ -5120,6 +5218,11 @@ export const langObj = {
     purchaseSupportIntro:
       "Satın alımlarınızla ilgili sorun yaşıyorsanız aşağıdaki formu doldurun.",
     settingsSupportButton: "Contact support",
+    notificationsReminderTitle: "Enable notifications",
+    notificationsReminderBody:
+      "Turn on notifications to receive updates and reminders on time.",
+    notificationsActivateCta: "Activate notifications",
+    notificationsDisableCta: "Stop notifications",
     settingsSupportModalTitle: "App support",
     settingsSupportModalIntro:
       "Describe your issue (account, app, premium, astrology, or purchases). We will reply by email.",
@@ -5382,6 +5485,8 @@ export const langObj = {
     rewardedAdGateNoMore:
       "Bu videoyu bugün zaten açtınız. Yarın tekrar deneyin veya tam erişim için abone olun.",
     rewardedAdGateSubscribe: "Premium abonelik",
+    rewardedAdGateSubscribePitch:
+      "Premium’a geçerek reklamları kaldırın ve tüm premium videolara erişin.",
     adLoading: "Reklam yükleniyor…",
     adSponsored: "Reklam",
   },

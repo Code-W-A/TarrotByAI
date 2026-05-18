@@ -3,12 +3,58 @@ import firebase from "firebase/app";
 
 import { getData } from "../utils/realtimeUtils";
 import { handleUploadFirestoreSubcollection } from "../utils/firestoreUtils";
-import { trackedGetDoc } from "../utils/firestoreReadTelemetry";
-import { authentication, db } from "../../firebase";
-import { doc } from "firebase/firestore";
+import { authentication } from "../../firebase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ApiDataContext = createContext();
+const DATA_CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+
+const readDatasetCache = async (storageKey) => {
+  const cachedData = await AsyncStorage.getItem(storageKey);
+  if (!cachedData) {
+    return { exists: false, isFresh: false, data: null };
+  }
+
+  try {
+    const parsed = JSON.parse(cachedData);
+
+    if (Array.isArray(parsed)) {
+      await AsyncStorage.setItem(
+        storageKey,
+        JSON.stringify({ data: parsed, cachedAt: Date.now() })
+      );
+      return { exists: true, isFresh: true, data: parsed };
+    }
+
+    if (parsed && Array.isArray(parsed.data)) {
+      const cachedAt = Number(parsed.cachedAt);
+      if (!Number.isFinite(cachedAt) || cachedAt <= 0) {
+        await AsyncStorage.setItem(
+          storageKey,
+          JSON.stringify({ data: parsed.data, cachedAt: Date.now() })
+        );
+        return { exists: true, isFresh: true, data: parsed.data };
+      }
+
+      return {
+        exists: true,
+        isFresh: Date.now() - cachedAt < DATA_CACHE_TTL_MS,
+        data: parsed.data,
+      };
+    }
+  } catch (error) {
+    console.log("[ApiData] Failed to parse cached dataset:", storageKey, error);
+  }
+
+  return { exists: false, isFresh: false, data: null };
+};
+
+const writeDatasetCache = async (storageKey, data) => {
+  await AsyncStorage.setItem(
+    storageKey,
+    JSON.stringify({ data, cachedAt: Date.now() })
+  );
+};
 
 export const useApiData = () => useContext(ApiDataContext);
 
@@ -191,89 +237,36 @@ export const ApiDataProvider = ({ children }) => {
     try {
       setLoading(true);
 
-      // Actualizează sau obține contorul de accesări
-      const updateAccessCount = async () => {
-        try {
-          const value = await AsyncStorage.getItem("accessCount");
-          let accessCount = parseInt(value);
-
-          if (isNaN(accessCount)) {
-            accessCount = 0;
-          }
-
-          accessCount += 1;
-          await AsyncStorage.setItem("accessCount", accessCount.toString());
-
-          return accessCount;
-        } catch (error) {
-          console.error("Error accessing AsyncStorage", error);
-          return 0;
-        }
-      };
-
-      const shouldUpdateData = async () => {
-        console.log("[RefreshConfig] shouldUpdateData called");
-        const accessCount = await updateAccessCount();
-        console.log("[RefreshConfig] accessCount updated to:", accessCount);
-
-        // Read refresh modulo from Firestore config
-        let refreshModulo = 25; // safe default
-        try {
-          const configRef = doc(db, "AppConfig", "DataRefresh");
-          const configPath = "AppConfig/DataRefresh";
-          console.log(`[RefreshConfig] Reading config from ${configPath}`);
-          const snapshot = await trackedGetDoc(configRef);
-          if (snapshot.exists()) {
-            const data = snapshot.data() || {};
-            console.log("[RefreshConfig] Snapshot exists. Data:", data);
-            const rawCandidate =
-              data.refreshModulo ?? data.accessModulo ?? data.updateEveryNAccesses;
-            console.log("[RefreshConfig] Raw candidate value:", rawCandidate);
-            const candidate = parseInt(rawCandidate);
-            if (Number.isFinite(candidate) && candidate > 0) {
-              refreshModulo = candidate;
-              console.log(
-                `[RefreshConfig] Using Firestore refreshModulo: ${refreshModulo}`
-              );
-            } else {
-              console.log(
-                `[RefreshConfig] Candidate invalid or <=0. Using default: ${refreshModulo}`
-              );
-            }
-          } else {
-            console.log(
-              `[RefreshConfig] Config doc not found at ${configPath}. Using default: ${refreshModulo}`
-            );
-          }
-        } catch (e) {
-          console.log(
-            "[RefreshConfig] Failed to read refresh config from Firestore, using default.",
-            e
-          );
-        }
-
-        // If refreshModulo is 1, we refresh on every entry; otherwise use modulo logic
-        const shouldRefresh = accessCount % refreshModulo === 0;
-        console.log(
-          `[RefreshConfig] Decision: ${accessCount} % ${refreshModulo} === 0 -> ${shouldRefresh}`
-        );
-        return shouldRefresh;
-      };
-
-      const shouldRefreshData = await shouldUpdateData();
-
       const getDataOrFetch = async (category, key) => {
         const storageKey = `${category}-${key}`;
-        const cachedData = await AsyncStorage.getItem(storageKey);
+        const cached = await readDatasetCache(storageKey);
 
-        if (cachedData && !shouldRefreshData) {
-          console.log("Fetching from --------AsyncStorage--------");
-          return JSON.parse(cachedData); // Datele sunt în AsyncStorage
-        } else {
-          console.log("Fetching from !!!!!!!Firebase!!!!!!!!!!");
-          const data = await getData(category, key); // Datele sunt preluate de la Firebase
-          await AsyncStorage.setItem(storageKey, JSON.stringify(data));
+        if (cached.exists && cached.isFresh) {
+          console.log("[ApiData] Fetching from AsyncStorage cache:", storageKey);
+          return cached.data;
+        }
+
+        try {
+          console.log("[ApiData] Fetching from Firebase RTDB:", storageKey);
+          const data = await getData(category, key);
+          if (Array.isArray(data) && data.length > 0) {
+            await writeDatasetCache(storageKey, data);
+            return data;
+          }
+
+          if (cached.exists) {
+            console.log("[ApiData] Using stale AsyncStorage cache:", storageKey);
+            return cached.data;
+          }
+
           return data;
+        } catch (error) {
+          if (cached.exists) {
+            console.log("[ApiData] RTDB failed, using stale cache:", storageKey, error);
+            return cached.data;
+          }
+
+          throw error;
         }
       };
 
